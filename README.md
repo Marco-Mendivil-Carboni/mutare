@@ -1,4 +1,3 @@
-
 # mutare
 
 `mutare` (Latin for "to change") is a simple tool to simulate and analyze a stochastic agent-based model for adaptation in uncertain environments.
@@ -48,3 +47,4 @@ This project is licensed under the MIT License.
 ## Contact
 
 For questions or collaboration, reach out to marcomc@ucm.es or open an issue on GitHub.
+

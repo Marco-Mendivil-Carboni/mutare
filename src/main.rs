@@ -1,3 +1,67 @@
-fn main() {
-    println!("Hello, world!");
+mod data;
+mod engine;
+mod params;
+mod utils;
+
+use crate::engine::SimEng;
+use crate::params::Params;
+use anyhow::{Context, Result};
+use ron::ser::{PrettyConfig, to_string_pretty};
+use std::{env, fs, path::Path, time::Instant};
+
+fn count_entries<P: AsRef<Path>>(dir: P, regex: &str) -> Result<usize> {
+    let dir = dir.as_ref();
+    let regex = regex::Regex::new(regex)?;
+    let count = fs::read_dir(dir)
+        .with_context(|| format!("failed to read {:?}", dir))?
+        .filter_map(Result::ok)
+        .filter(|entry| {
+            entry
+                .file_name()
+                .to_str()
+                .is_some_and(|name| regex.is_match(name))
+        })
+        .count();
+    Ok(count)
+}
+
+fn main() -> Result<()> {
+    env_logger::Builder::new()
+        .format_timestamp_millis()
+        .filter_level(log::LevelFilter::Info)
+        .parse_default_env()
+        .init();
+
+    let args: Vec<_> = env::args().collect();
+
+    let name = &args[0];
+
+    log::info!("program name = {name}");
+
+    match count_entries(&args[1], "^Cargo.*$") {
+        Ok(count) => log::info!("count = {count}"),
+        Err(err) => log::error!("{:#}", err),
+    }
+
+    let par_str = fs::read_to_string("parameters.ron")?;
+    let par = Params::new(&par_str)
+        .context("failed to create parameters")
+        .unwrap_or_else(|err| {
+            log::error!("{:?}", err);
+            std::process::exit(1);
+        });
+
+    log::info!("par = {:#?}", par);
+
+    let par_str = to_string_pretty(&par, PrettyConfig::default())?;
+    fs::write("parameters.ron", par_str)?;
+
+    let mut sim_eng = SimEng::new(0, par)?;
+    sim_eng.generate_initial_condition()?;
+    let start = Instant::now();
+    sim_eng.run_simulation("frame.bin")?;
+    let duration = start.elapsed();
+    log::info!("Time elapsed: {:?}", duration);
+
+    Ok(())
 }
