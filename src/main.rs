@@ -5,8 +5,24 @@ mod params;
 use crate::engine::SimEng;
 use crate::params::Params;
 use anyhow::{Context, Result};
+use clap::Parser;
 use ron::ser::{PrettyConfig, to_string_pretty};
-use std::{env, fs, path::Path, time::Instant};
+use std::{
+    env, fs,
+    path::{Path, PathBuf},
+    time::Instant,
+};
+
+#[derive(Parser, Debug)]
+#[command(author, version, about)]
+struct Args {
+    sim_dir: PathBuf,
+
+    sim_idx: Option<usize>,
+
+    #[arg(short, long)]
+    analyze: bool,
+}
 
 fn count_entries<P: AsRef<Path>>(dir: P, regex: &str) -> Result<usize> {
     let dir = dir.as_ref();
@@ -30,6 +46,9 @@ fn main() -> Result<()> {
         .filter_level(log::LevelFilter::Info)
         .parse_default_env()
         .init();
+
+    let args_0 = Args::parse();
+    println!("{:?}", args_0);
 
     let args: Vec<_> = env::args().collect();
 
