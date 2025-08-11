@@ -14,12 +14,12 @@ Coming soon!
 ## Getting Started
 
 ### Installation
-<!-- 
+
 ```bash
 cargo install mutare
 ```
 
-Or clone the repository: -->
+Or clone the repository:
 
 ```bash
 git clone https://github.com/Marco-Mendivil-Carboni/mutare.git
