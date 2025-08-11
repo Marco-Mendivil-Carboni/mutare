@@ -14,8 +14,8 @@ use std::{
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SimEng {
-    data: SimData,
     par: Params,
+    data: SimData,
     rng: ChaCha12Rng,
 }
 
@@ -40,7 +40,7 @@ impl SimEng {
             n_agt_diff: 0,
         };
 
-        Ok(Self { data, par, rng })
+        Ok(Self { par, data, rng })
     }
 
     pub fn run_simulation<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {

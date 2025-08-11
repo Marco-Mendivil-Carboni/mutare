@@ -1,7 +1,6 @@
 mod data;
 mod engine;
 mod params;
-mod utils;
 
 use crate::engine::SimEng;
 use crate::params::Params;
