@@ -1,4 +1,3 @@
-use crate::utils::{check_num, check_vec};
 use anyhow::{Context, Result};
 use ndarray::Array1;
 use postcard::{from_bytes, to_allocvec};
@@ -12,10 +11,8 @@ pub struct AgtData {
 }
 
 impl AgtData {
-    pub fn new(phe: usize, prob_phe: Array1<f64>, n_phe: usize) -> Result<Self> {
-        check_num(phe, 0..n_phe).context("invalid phenotype")?;
-        check_vec(prob_phe.view(), n_phe, true).context("invalid phenotype probabilities")?;
-        Ok(Self { phe, prob_phe })
+    pub fn new(phe: usize, prob_phe: Array1<f64>) -> Self {
+        Self { phe, prob_phe }
     }
 
     pub fn phe(&self) -> usize {
@@ -35,14 +32,6 @@ pub struct SimData {
 }
 
 impl SimData {
-    pub fn new(env: usize, n_agt_init: usize) -> Self {
-        Self {
-            env,
-            agt_vec: Vec::with_capacity(n_agt_init),
-            n_agt_diff: 0,
-        }
-    }
-
     pub fn read_frame<R: Read>(reader: &mut R) -> Result<Self> {
         let mut len_bytes = [0u8; size_of::<u32>()];
         reader

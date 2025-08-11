@@ -20,32 +20,27 @@ pub struct SimEng {
 }
 
 impl SimEng {
-    pub fn new(env: usize, par: Params) -> Result<Self> {
-        Ok(Self {
-            data: SimData::new(env, par.n_agt_init),
-            par,
-            rng: ChaCha12Rng::try_from_os_rng()?,
-        })
-    }
+    pub fn generate_initial_condition(par: Params) -> Result<Self> {
+        let mut rng = ChaCha12Rng::try_from_os_rng()?;
 
-    pub fn generate_initial_condition(&mut self) -> Result<()> {
-        let env_dist = Uniform::new(0, self.par.n_env)?;
-        self.data.env = env_dist.sample(&mut self.rng);
+        let env_dist = Uniform::new(0, par.n_env)?;
+        let env = env_dist.sample(&mut rng);
 
-        self.data.agt_vec.clear();
-        self.data.agt_vec.reserve(self.par.n_agt_init);
-
-        let phe_dist = Uniform::new(0, self.par.n_phe)?;
-        for _ in 0..self.par.n_agt_init {
-            let phe = phe_dist.sample(&mut self.rng);
-            let prob_phe = Array1::from_elem(self.par.n_phe, 1.0 / self.par.n_phe as f64);
-            self.data.agt_vec.push(
-                AgtData::new(phe, prob_phe, self.par.n_phe)
-                    .context("failed to create new agent")?,
-            );
+        let mut agt_vec = Vec::with_capacity(par.n_agt_init);
+        let phe_dist = Uniform::new(0, par.n_phe)?;
+        for _ in 0..par.n_agt_init {
+            let phe = phe_dist.sample(&mut rng);
+            let prob_phe = Array1::from_elem(par.n_phe, 1.0 / par.n_phe as f64);
+            agt_vec.push(AgtData::new(phe, prob_phe));
         }
 
-        Ok(())
+        let data = SimData {
+            env,
+            agt_vec,
+            n_agt_diff: 0,
+        };
+
+        Ok(Self { data, par, rng })
     }
 
     pub fn run_simulation<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
@@ -158,10 +153,7 @@ impl SimEng {
             let mut prob_phe_new = prob_phe * rand_arr;
             prob_phe_new /= prob_phe_new.sum();
 
-            self.data.agt_vec.push(
-                AgtData::new(phe_new, prob_phe_new, self.par.n_phe)
-                    .context("failed to create new agent")?,
-            );
+            self.data.agt_vec.push(AgtData::new(phe_new, prob_phe_new));
 
             self.data.n_agt_diff += 1;
         }

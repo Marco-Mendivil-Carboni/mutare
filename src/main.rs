@@ -56,8 +56,7 @@ fn main() -> Result<()> {
     let par_str = to_string_pretty(&par, PrettyConfig::default())?;
     fs::write("parameters.ron", par_str)?;
 
-    let mut sim_eng = SimEng::new(0, par)?;
-    sim_eng.generate_initial_condition()?;
+    let mut sim_eng = SimEng::generate_initial_condition(par)?;
     let start = Instant::now();
     sim_eng.run_simulation("frame.bin")?;
     let duration = start.elapsed();
