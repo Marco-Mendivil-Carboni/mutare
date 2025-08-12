@@ -1,9 +1,11 @@
 mod data;
 mod engine;
 mod params;
+mod stats;
 
 use crate::engine::SimEng;
 use crate::params::Params;
+use crate::stats::OnlineStats;
 use anyhow::{Context, Result};
 use clap::Parser;
 use ron::ser::{PrettyConfig, to_string_pretty};
@@ -55,6 +57,11 @@ fn main() -> Result<()> {
     let name = &args[0];
 
     log::info!("program name = {name}");
+
+    let mut stats = OnlineStats::new();
+    stats.add(1.0);
+    stats.add(2.0);
+    log::info!("{} {}", stats.mean(), stats.sample_variance());
 
     match count_entries(&args[1], "^Cargo.*$") {
         Ok(count) => log::info!("count = {count}"),
