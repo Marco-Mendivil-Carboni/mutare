@@ -1,3 +1,4 @@
+mod analyst;
 mod data;
 mod engine;
 mod params;
