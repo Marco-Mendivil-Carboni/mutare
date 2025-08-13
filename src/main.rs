@@ -1,11 +1,11 @@
 mod analysis;
+mod config;
 mod engine;
 mod model;
-mod params;
 mod stats;
 
-use crate::engine::SimEng;
-use crate::params::Params;
+use crate::config::Config;
+use crate::engine::Engine;
 use crate::stats::OnlineStats;
 use anyhow::{Context, Result};
 use clap::Parser;
@@ -69,20 +69,20 @@ fn main() -> Result<()> {
         Err(err) => log::error!("{:#}", err),
     }
 
-    let par_str = fs::read_to_string("parameters.ron")?;
-    let par = Params::new(&par_str)
-        .context("failed to create parameters")
+    let cfg_str = fs::read_to_string("config.ron")?;
+    let cfg = Config::new(&cfg_str)
+        .context("failed to create config")
         .unwrap_or_else(|err| {
             log::error!("{:?}", err);
             std::process::exit(1);
         });
 
-    log::info!("par = {:#?}", par);
+    log::info!("cfg = {:#?}", cfg);
 
-    let par_str = to_string_pretty(&par, PrettyConfig::default())?;
-    fs::write("parameters.ron", par_str)?;
+    let cfg_str = to_string_pretty(&cfg, PrettyConfig::default())?;
+    fs::write("config.ron", cfg_str)?;
 
-    let mut sim_eng = SimEng::generate_initial_condition(par)?;
+    let mut sim_eng = Engine::generate_initial_condition(cfg)?;
     let start = Instant::now();
     sim_eng.run_simulation("frame.bin")?;
     let duration = start.elapsed();

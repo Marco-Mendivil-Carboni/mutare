@@ -49,8 +49,7 @@ impl State {
     }
 
     pub fn write_frame<W: Write>(&self, writer: &mut W) -> Result<()> {
-        let state_bytes =
-            to_allocvec(self).context("failed to serialize State value to bytes")?;
+        let state_bytes = to_allocvec(self).context("failed to serialize State value to bytes")?;
 
         let len = state_bytes.len() as u32;
 

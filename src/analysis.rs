@@ -140,14 +140,14 @@
 //     }
 // }
 
-// pub struct SimAna {
+// pub struct Analyzer {
 //     state: State,
 //     obs_ptr_vec: Vec<Box<dyn Obs>>,
 // }
 
-// impl SimAna {
-//     pub fn new(params: &serde_yaml::Value) -> Self {
-//         let state = State::new(params);
+// impl Analyzer {
+//     pub fn new(cfg: &serde_yaml::Value) -> Self {
+//         let state = State::new(cfg);
 //         let mut obs_ptr_vec: Vec<Box<dyn Obs>> = Vec::new();
 //         obs_ptr_vec.push(Box::new(ProbEnvObs::new(&state)));
 //         obs_ptr_vec.push(Box::new(AvgProbPheObs::new(&state)));
