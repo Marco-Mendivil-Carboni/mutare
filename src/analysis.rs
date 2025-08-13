@@ -4,12 +4,12 @@
 //     path::Path,
 // };
 
-// use crate::data::SimData;
+// use crate::model::State;
 // use crate::stats::{OnlineStats, TimeSeriesStats};
 // use anyhow::Result;
 
 // pub trait Obs {
-//     fn update(&mut self, sim_data: &SimData) -> Result<()>;
+//     fn update(&mut self, state: &State) -> Result<()>;
 //     fn write(&self, out: &mut dyn Write) -> Result<()>;
 // }
 
@@ -18,16 +18,16 @@
 // }
 
 // impl ProbEnvObs {
-//     pub fn new(sim_data: &SimData) -> Self {
+//     pub fn new(state: &State) -> Self {
 //         let mut stats_vec = Vec::new();
-//         stats_vec.resize_with(sim_data.mp.n_env, OnlineStats::default);
+//         stats_vec.resize_with(state.mp.n_env, OnlineStats::default);
 //         Self { stats_vec }
 //     }
 // }
 
 // impl Obs for ProbEnvObs {
-//     fn update(&mut self, sim_data: &SimData) -> Result<()> {
-//         let env = sim_data.env;
+//     fn update(&mut self, state: &State) -> Result<()> {
+//         let env = state.env;
 //         for (i_env, stats) in self.stats_vec.iter_mut().enumerate() {
 //             stats.add(if i_env == env { 1.0 } else { 0.0 });
 //         }
@@ -54,17 +54,17 @@
 // }
 
 // impl AvgProbPheObs {
-//     pub fn new(sim_data: &SimData) -> Self {
+//     pub fn new(state: &State) -> Self {
 //         let mut stats_vec = Vec::new();
-//         stats_vec.resize_with(sim_data.mp.n_phe, OnlineStats::default);
+//         stats_vec.resize_with(state.mp.n_phe, OnlineStats::default);
 //         Self { stats_vec }
 //     }
 // }
 
 // impl Obs for AvgProbPheObs {
-//     fn update(&mut self, sim_data: &SimData) -> Result<()> {
+//     fn update(&mut self, state: &State) -> Result<()> {
 //         let n_phe = self.stats_vec.len();
-//         let agt_vec = &sim_data.agt_vec;
+//         let agt_vec = &state.agt_vec;
 //         if agt_vec.is_empty() {
 //             return Ok(());
 //         }
@@ -111,8 +111,8 @@
 // }
 
 // impl Obs for NAgtDiffObs {
-//     fn update(&mut self, sim_data: &SimData) -> Result<()> {
-//         self.stats.add_value(sim_data.n_agt_diff);
+//     fn update(&mut self, state: &State) -> Result<()> {
+//         self.stats.add_value(state.n_agt_diff);
 //         Ok(())
 //     }
 
@@ -141,31 +141,31 @@
 // }
 
 // pub struct SimAna {
-//     sim_data: SimData,
+//     state: State,
 //     obs_ptr_vec: Vec<Box<dyn Obs>>,
 // }
 
 // impl SimAna {
 //     pub fn new(params: &serde_yaml::Value) -> Self {
-//         let sim_data = SimData::new(params);
+//         let state = State::new(params);
 //         let mut obs_ptr_vec: Vec<Box<dyn Obs>> = Vec::new();
-//         obs_ptr_vec.push(Box::new(ProbEnvObs::new(&sim_data)));
-//         obs_ptr_vec.push(Box::new(AvgProbPheObs::new(&sim_data)));
+//         obs_ptr_vec.push(Box::new(ProbEnvObs::new(&state)));
+//         obs_ptr_vec.push(Box::new(AvgProbPheObs::new(&state)));
 //         obs_ptr_vec.push(Box::new(NAgtDiffObs::new()));
 
 //         Self {
-//             sim_data,
+//             state,
 //             obs_ptr_vec,
 //         }
 //     }
 
 //     pub fn add_traj_file<P: AsRef<Path>>(&mut self, traj_path: P) -> Result<()> {
 //         let mut traj_file = File::open(traj_path.as_ref())?;
-//         for _ in 0..self.sim_data.saves_per_file {
-//             self.sim_data.read_frame(&mut traj_file)?;
+//         for _ in 0..self.state.saves_per_file {
+//             self.state.read_frame(&mut traj_file)?;
 
 //             for obs in &mut self.obs_ptr_vec {
-//                 obs.update(&self.sim_data)?;
+//                 obs.update(&self.state)?;
 //             }
 //         }
 //         Ok(())

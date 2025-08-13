@@ -1,6 +1,6 @@
-mod analyst;
-mod data;
+mod analysis;
 mod engine;
+mod model;
 mod params;
 mod stats;
 

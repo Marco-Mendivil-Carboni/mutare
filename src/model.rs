@@ -5,12 +5,12 @@ use serde::{Deserialize, Serialize};
 use std::io::{Read, Write};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct AgtData {
+pub struct Agent {
     phe: usize,
     prob_phe: Array1<f64>,
 }
 
-impl AgtData {
+impl Agent {
     pub fn new(phe: usize, prob_phe: Array1<f64>) -> Self {
         Self { phe, prob_phe }
     }
@@ -25,13 +25,13 @@ impl AgtData {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct SimData {
+pub struct State {
     pub env: usize,
-    pub agt_vec: Vec<AgtData>,
+    pub agt_vec: Vec<Agent>,
     pub n_agt_diff: i32,
 }
 
-impl SimData {
+impl State {
     pub fn read_frame<R: Read>(reader: &mut R) -> Result<Self> {
         let mut len_bytes = [0u8; size_of::<u32>()];
         reader
@@ -40,27 +40,27 @@ impl SimData {
 
         let len = u32::from_le_bytes(len_bytes);
 
-        let mut sim_data_bytes = vec![0u8; len as usize];
+        let mut state_bytes = vec![0u8; len as usize];
         reader
-            .read_exact(&mut sim_data_bytes)
-            .context("failed to read SimData bytes")?;
+            .read_exact(&mut state_bytes)
+            .context("failed to read State value bytes")?;
 
-        from_bytes(&sim_data_bytes).context("failed to deserialize SimData value from bytes")
+        from_bytes(&state_bytes).context("failed to deserialize State value from bytes")
     }
 
     pub fn write_frame<W: Write>(&self, writer: &mut W) -> Result<()> {
-        let sim_data_bytes =
-            to_allocvec(self).context("failed to serialize SimData value to bytes")?;
+        let state_bytes =
+            to_allocvec(self).context("failed to serialize State value to bytes")?;
 
-        let len = sim_data_bytes.len() as u32;
+        let len = state_bytes.len() as u32;
 
         writer
             .write_all(&len.to_le_bytes())
             .context("failed to write length prefix")?;
 
         writer
-            .write_all(&sim_data_bytes)
-            .context("failed to write SimData bytes")?;
+            .write_all(&state_bytes)
+            .context("failed to write State value bytes")?;
 
         Ok(())
     }

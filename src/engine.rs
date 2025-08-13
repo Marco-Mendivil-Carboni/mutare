@@ -1,4 +1,4 @@
-use crate::data::{AgtData, SimData};
+use crate::model::{Agent, State};
 use crate::params::Params;
 use anyhow::{Context, Result};
 use ndarray::Array1;
@@ -15,7 +15,7 @@ use std::{
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SimEng {
     par: Params,
-    data: SimData,
+    state: State,
     rng: ChaCha12Rng,
 }
 
@@ -31,16 +31,16 @@ impl SimEng {
         for _ in 0..par.n_agt_init {
             let phe = phe_dist.sample(&mut rng);
             let prob_phe = Array1::from_elem(par.n_phe, 1.0 / par.n_phe as f64);
-            agt_vec.push(AgtData::new(phe, prob_phe));
+            agt_vec.push(Agent::new(phe, prob_phe));
         }
 
-        let data = SimData {
+        let state = State {
             env,
             agt_vec,
             n_agt_diff: 0,
         };
 
-        Ok(Self { par, data, rng })
+        Ok(Self { par, state, rng })
     }
 
     pub fn run_simulation<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
@@ -67,7 +67,7 @@ impl SimEng {
                     .context("failed to perform step")?;
             }
 
-            self.data
+            self.state
                 .write_frame(&mut writer)
                 .context("failed to write frame")?;
 
@@ -94,7 +94,7 @@ impl SimEng {
         self.select_rep_and_dec(i_agt_rep, i_agt_dec)
             .context("failed to select replicating and deceased agents")?;
 
-        self.data.n_agt_diff = 0;
+        self.state.n_agt_diff = 0;
 
         self.replicate_agents(i_agt_rep)
             .context("failed to replicate agents")?;
@@ -107,8 +107,8 @@ impl SimEng {
     }
 
     fn update_environment(&mut self) -> Result<()> {
-        let env_dist = WeightedIndex::new(self.par.prob_env.row(self.data.env))?;
-        self.data.env = env_dist.sample(&mut self.rng);
+        let env_dist = WeightedIndex::new(self.par.prob_env.row(self.state.env))?;
+        self.state.env = env_dist.sample(&mut self.rng);
         Ok(())
     }
 
@@ -118,16 +118,16 @@ impl SimEng {
         i_agt_dec: &mut Vec<usize>,
     ) -> Result<()> {
         let mut rep_dist_vec = Vec::with_capacity(self.par.n_phe);
-        for &prob in self.par.prob_rep.row(self.data.env) {
+        for &prob in self.par.prob_rep.row(self.state.env) {
             rep_dist_vec.push(Bernoulli::new(prob)?);
         }
         let mut dec_dist_vec = Vec::with_capacity(self.par.n_phe);
-        for &prob in self.par.prob_dec.row(self.data.env) {
+        for &prob in self.par.prob_dec.row(self.state.env) {
             dec_dist_vec.push(Bernoulli::new(prob)?);
         }
         i_agt_rep.clear();
         i_agt_dec.clear();
-        for (i_agt, agt) in self.data.agt_vec.iter().enumerate() {
+        for (i_agt, agt) in self.state.agt_vec.iter().enumerate() {
             let phe = agt.phe();
             if rep_dist_vec[phe].sample(&mut self.rng) {
                 i_agt_rep.push(i_agt);
@@ -143,7 +143,7 @@ impl SimEng {
         let mut_dist = LogNormal::new(0.0, self.par.std_dev_mut)?;
 
         for &i_agt in i_agt_rep {
-            let prob_phe = self.data.agt_vec[i_agt].prob_phe();
+            let prob_phe = self.state.agt_vec[i_agt].prob_phe();
 
             let phe_dist = WeightedIndex::new(prob_phe)?;
             let phe_new = phe_dist.sample(&mut self.rng);
@@ -153,9 +153,9 @@ impl SimEng {
             let mut prob_phe_new = prob_phe * rand_arr;
             prob_phe_new /= prob_phe_new.sum();
 
-            self.data.agt_vec.push(AgtData::new(phe_new, prob_phe_new));
+            self.state.agt_vec.push(Agent::new(phe_new, prob_phe_new));
 
-            self.data.n_agt_diff += 1;
+            self.state.n_agt_diff += 1;
         }
         Ok(())
     }
@@ -163,13 +163,13 @@ impl SimEng {
     fn remove_deceased(&mut self, i_agt_dec: &mut Vec<usize>) {
         i_agt_dec.sort_by(|a, b| b.cmp(a));
         for &i_agt in i_agt_dec.iter() {
-            self.data.agt_vec.swap_remove(i_agt);
-            self.data.n_agt_diff -= 1;
+            self.state.agt_vec.swap_remove(i_agt);
+            self.state.n_agt_diff -= 1;
         }
     }
 
     fn remove_excess(&mut self, i_agt_all: &Vec<usize>) {
-        let n_agt = self.data.agt_vec.len();
+        let n_agt = self.state.agt_vec.len();
         if n_agt > self.par.n_agt_init {
             let excess = n_agt - self.par.n_agt_init;
             let mut i_agt_rm: Vec<_> = i_agt_all[..n_agt]
@@ -177,7 +177,7 @@ impl SimEng {
                 .collect();
             i_agt_rm.sort_by(|a, b| b.cmp(a));
             for &i_agt in i_agt_rm {
-                self.data.agt_vec.swap_remove(i_agt);
+                self.state.agt_vec.swap_remove(i_agt);
             }
         }
     }
