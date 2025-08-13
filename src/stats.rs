@@ -1,5 +1,7 @@
 pub use average::Moments4 as OnlineStats;
 
+pub struct TimeSeriesStats;
+
 fn mean(time_series: &[f64]) -> f64 {
     if time_series.is_empty() {
         return f64::NAN;
@@ -8,7 +10,8 @@ fn mean(time_series: &[f64]) -> f64 {
 }
 
 fn sample_variance(time_series: &[f64]) -> f64 {
-    if time_series.len() < 2 {
+    let n_vals = time_series.len();
+    if n_vals < 2 {
         return f64::NAN;
     }
     let mean = mean(time_series);
@@ -16,7 +19,7 @@ fn sample_variance(time_series: &[f64]) -> f64 {
         .iter()
         .map(|&val| (val - mean).powi(2))
         .sum::<f64>()
-        / (time_series.len() - 1) as f64
+        / (n_vals - 1) as f64
 }
 
 /// Compute the standard error of the mean (SEM) using the Flyvbjerg-Petersen blocking method
@@ -59,6 +62,20 @@ fn compute_sem(time_series: &[f64]) -> f64 {
 fn compute_i_therm(time_series: &[f64]) -> usize {
     let mut min_mse = f64::INFINITY;
     let mut i_therm = time_series.len() / 2;
+    // let n_vals = time_series.len();
+    // let min_n_vals = 16;
+    // let i_therms = [n_vals / 16, n_vals / 8, n_vals / 4, n_vals / 2];
+    // [n_vals / 16, n_vals / 8, n_vals / 4, n_vals / 2]
+    //     .iter()
+    //     .filter(|&&i_therm| n_vals - i_therm >= min_n_vals)
+    //     .map(|&i| {
+    //         let aux = &time_series[i..];
+    //         let mse = sample_variance(aux) / (aux.len() as f64);
+    //         (i, mse)
+    //     })
+    //     .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
+    //     .map(|(i_therm, _)| i_therm);
+    // returns Option<usize>
 
     for div in [2, 4, 8, 16, 32, 64].iter() {
         let i_therm_candidate = time_series.len() / div;

@@ -71,7 +71,7 @@ fn check_vec(vec: ArrayView1<f64>, exp_len: usize, prob_vec: bool) -> Result<()>
         bail!("vector must have only non-negative elements");
     }
     let sum = vec.sum();
-    let tol = 1e-6;
+    let tol = 1e-8;
     if (sum - 1.0).abs() > tol {
         bail!("vector must sum to 1.0 (tolerance: {tol}), but sums to {sum}");
     }
