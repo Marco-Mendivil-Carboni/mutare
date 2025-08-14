@@ -27,30 +27,60 @@ impl OnlineStats {
         self.mean
     }
 
-    pub fn sample_variance(&self) -> f64 {
+    pub fn var(&self) -> f64 {
         if self.n_vals > 1 {
             self.diff_2_sum / (self.n_vals as f64 - 1.0)
         } else {
             f64::NAN
         }
     }
+
+    pub fn report(&self) -> String {
+        format!("mean: {}, std_dev: {}", self.mean(), self.var().sqrt())
+    }
 }
 
-pub struct TimeSeriesStats;
+pub struct TimeSeriesStats {
+    time_series: Vec<f64>,
+}
 
-fn mean(time_series: &[f64]) -> f64 {
+impl TimeSeriesStats {
+    pub fn new() -> Self {
+        Self {
+            time_series: Vec::new(),
+        }
+    }
+
+    pub fn add(&mut self, val: f64) {
+        self.time_series.push(val);
+    }
+
+    pub fn report(&self) -> String {
+        let i_equil = compute_opt_i_equil(&self.time_series);
+        let equil_time_series = &self.time_series[i_equil..];
+        format!(
+            "mean: {}, std_dev: {}, sem: {}, is_equil: {}",
+            compute_mean(equil_time_series),
+            compute_var(equil_time_series).sqrt(),
+            compute_sem(equil_time_series),
+            i_equil != self.time_series.len() / 2
+        )
+    }
+}
+
+fn compute_mean(time_series: &[f64]) -> f64 {
     if time_series.is_empty() {
         return f64::NAN;
     }
     time_series.iter().sum::<f64>() / time_series.len() as f64
 }
 
-fn sample_variance(time_series: &[f64]) -> f64 {
+fn compute_var(time_series: &[f64]) -> f64 {
     let n_vals = time_series.len();
     if n_vals < 2 {
         return f64::NAN;
     }
-    let mean = mean(time_series);
+    let mean = compute_mean(time_series);
     time_series
         .iter()
         .map(|&val| (val - mean).powi(2))
@@ -66,7 +96,7 @@ fn compute_sem(time_series: &[f64]) -> f64 {
     let mut sem2_errs = Vec::new();
 
     while n_vals >= 2 {
-        let sem2_est = sample_variance(&blk_time_series) / n_vals as f64;
+        let sem2_est = compute_var(&blk_time_series) / n_vals as f64;
         let sem2_err = sem2_est * (2.0 / (n_vals as f64 - 1.0)).sqrt();
         sem2_ests.push(sem2_est);
         sem2_errs.push(sem2_err);
@@ -93,28 +123,28 @@ fn compute_sem(time_series: &[f64]) -> f64 {
     sem2_ests.last().copied().unwrap_or(f64::NAN).sqrt()
 }
 
-/// Compute the optimal thermalization index using the marginal standard error rule
-fn compute_opt_i_therm(time_series: &[f64]) -> usize {
+/// Compute the optimal equilibration index using the marginal standard error rule
+fn compute_opt_i_equil(time_series: &[f64]) -> usize {
     let mut min_mse = f64::INFINITY;
-    let mut opt_i_therm = time_series.len() / 2;
+    let mut opt_i_equil = time_series.len() / 2;
     let n_vals = time_series.len();
     let n_idxs = n_vals.ilog2() + 1;
-    let i_therms: Vec<_> = (0..n_idxs)
+    let i_equils: Vec<_> = (0..n_idxs)
         .map(|idx| n_vals / (2 as usize).pow(n_idxs - idx))
         .collect();
 
-    for i_therm in i_therms {
-        let aux_time_series = &time_series[i_therm..];
+    for i_equil in i_equils {
+        let aux_time_series = &time_series[i_equil..];
         let n_vals = aux_time_series.len();
 
-        let var = sample_variance(aux_time_series);
+        let var = compute_var(aux_time_series);
         let mse = var * (n_vals - 1) as f64 / n_vals.pow(2) as f64;
 
         if mse < min_mse {
             min_mse = mse;
-            opt_i_therm = i_therm;
+            opt_i_equil = i_equil;
         }
     }
 
-    opt_i_therm
+    opt_i_equil
 }

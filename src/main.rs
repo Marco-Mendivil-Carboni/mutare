@@ -62,7 +62,7 @@ fn main() -> Result<()> {
     let mut stats = OnlineStats::new();
     stats.add(1.0);
     stats.add(2.0);
-    log::info!("{} {}", stats.mean(), stats.sample_variance());
+    log::info!("{} {}", stats.mean(), stats.var());
 
     match count_entries(&args[1], "^Cargo.*$") {
         Ok(count) => log::info!("count = {count}"),

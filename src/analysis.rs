@@ -37,14 +37,8 @@ impl Obs for ProbEnvObs {
 
     fn write(&self, out: &mut dyn Write) -> Result<()> {
         writeln!(out, "#prob_env:")?;
-        writeln!(out, "#            mean        sqrt(var)")?;
         for stats in &self.stats_vec {
-            writeln!(
-                out,
-                " {:016.14} {:016.14}",
-                stats.mean(),
-                stats.sample_variance().sqrt()
-            )?;
+            writeln!(out, "{}", stats.report())?;
         }
         Ok(())
     }
@@ -86,14 +80,8 @@ impl Obs for AvgProbPheObs {
 
     fn write(&self, out: &mut dyn Write) -> Result<()> {
         writeln!(out, "#avg_prob_phe:")?;
-        writeln!(out, "#            mean        sqrt(var)")?;
         for stats in &self.stats_vec {
-            writeln!(
-                out,
-                " {:016.14} {:016.14}",
-                stats.mean(),
-                stats.sample_variance().sqrt()
-            )?;
+            writeln!(out, "{}", stats.report())?;
         }
         Ok(())
     }
@@ -106,20 +94,20 @@ pub struct NAgtDiffObs {
 impl NAgtDiffObs {
     pub fn new() -> Self {
         Self {
-            stats: TimeSeriesStats,
+            stats: TimeSeriesStats::new(),
         }
     }
 }
 
 impl Obs for NAgtDiffObs {
     fn update(&mut self, state: &State) -> Result<()> {
-        // self.stats.add(state.n_agt_diff);
+        self.stats.add(state.n_agt_diff as f64);
         Ok(())
     }
 
     fn write(&self, out: &mut dyn Write) -> Result<()> {
-        // self.stats.process();
-        //...
+        writeln!(out, "#n_agt_diff:")?;
+        writeln!(out, "{}", self.stats.report())?;
         Ok(())
     }
 }
