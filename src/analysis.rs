@@ -1,13 +1,12 @@
 use crate::config::Config;
-use std::{
-    fs::File,
-    io::{BufWriter, Read, Write},
-    path::Path,
-};
-
 use crate::model::State;
 use crate::stats::{OnlineStats, TimeSeriesStats};
 use anyhow::Result;
+use std::{
+    fs::File,
+    io::{BufWriter, Write},
+    path::Path,
+};
 
 pub trait Obs {
     fn update(&mut self, state: &State) -> Result<()>;
@@ -114,7 +113,6 @@ impl Obs for NAgtDiffObs {
 
 pub struct Analyzer {
     cfg: Config,
-    state: State,
     obs_ptr_vec: Vec<Box<dyn Obs>>,
 }
 
@@ -124,24 +122,15 @@ impl Analyzer {
         obs_ptr_vec.push(Box::new(ProbEnvObs::new(&cfg)));
         obs_ptr_vec.push(Box::new(AvgProbPheObs::new(&cfg)));
         obs_ptr_vec.push(Box::new(NAgtDiffObs::new()));
-        let state = State {
-            env: 0,
-            agt_vec: Vec::new(),
-            n_agt_diff: 0,
-        };
-        Self {
-            cfg,
-            state,
-            obs_ptr_vec,
-        }
+        Self { cfg, obs_ptr_vec }
     }
 
-    pub fn add_traj_file<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
+    pub fn add_file<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
         let mut reader = File::open(path.as_ref())?;
         for _ in 0..self.cfg.saves_per_file {
-            self.state = State::read_frame(&mut reader)?;
+            let state = State::read_frame(&mut reader)?;
             for obs in &mut self.obs_ptr_vec {
-                obs.update(&self.state)?;
+                obs.update(&state)?;
             }
         }
         Ok(())

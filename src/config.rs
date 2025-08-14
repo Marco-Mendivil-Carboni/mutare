@@ -3,7 +3,7 @@ use ndarray::{Array2, ArrayView1, ArrayView2};
 use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, ops::RangeBounds};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
     pub n_env: usize,
     pub n_phe: usize,
