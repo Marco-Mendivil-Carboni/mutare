@@ -32,8 +32,7 @@ fn compute_sem(time_series: &[f64]) -> f64 {
     let mut sem2_errs = Vec::new();
 
     while n_vals >= 2 {
-        let var = sample_variance(&blk_time_series);
-        let sem2_est = var / n_vals as f64;
+        let sem2_est = sample_variance(&blk_time_series) / n_vals as f64;
         let sem2_err = sem2_est * (2.0 / (n_vals as f64 - 1.0)).sqrt();
         sem2_ests.push(sem2_est);
         sem2_errs.push(sem2_err);
@@ -50,7 +49,7 @@ fn compute_sem(time_series: &[f64]) -> f64 {
             .iter()
             .zip(sem2_errs[idx..].iter())
             .map(|(s, e)| s - e)
-            .fold(f64::NAN, f64::max);
+            .fold(f64::NEG_INFINITY, f64::max);
 
         if sem2_est > max_low {
             return sem2_est.sqrt();
@@ -65,9 +64,9 @@ fn compute_opt_i_therm(time_series: &[f64]) -> usize {
     let mut min_mse = f64::INFINITY;
     let mut opt_i_therm = time_series.len() / 2;
     let n_vals = time_series.len();
-    let n_candidates = 8;
-    let i_therms: Vec<_> = (0..n_candidates)
-        .map(|i| n_vals / (2 as usize).pow(n_candidates - i))
+    let n_idxs = n_vals.ilog2() + 1;
+    let i_therms: Vec<_> = (0..n_idxs)
+        .map(|idx| n_vals / (2 as usize).pow(n_idxs - idx))
         .collect();
 
     for i_therm in i_therms {
@@ -75,8 +74,7 @@ fn compute_opt_i_therm(time_series: &[f64]) -> usize {
         let n_vals = aux_time_series.len();
 
         let var = sample_variance(aux_time_series);
-        let n_vals_f = n_vals as f64;
-        let mse = var * (n_vals_f - 1.0) / (n_vals_f * n_vals_f);
+        let mse = var * (n_vals - 1) as f64 / n_vals.pow(2) as f64;
 
         if mse < min_mse {
             min_mse = mse;
