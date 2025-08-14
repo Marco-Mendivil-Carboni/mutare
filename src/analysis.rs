@@ -21,7 +21,7 @@ pub struct ProbEnvObs {
 impl ProbEnvObs {
     pub fn new(cfg: &Config) -> Self {
         let mut stats_vec = Vec::new();
-        stats_vec.resize_with(cfg.n_env, OnlineStats::default);
+        stats_vec.resize_with(cfg.n_env, OnlineStats::new);
         Self { stats_vec }
     }
 }
@@ -57,7 +57,7 @@ pub struct AvgProbPheObs {
 impl AvgProbPheObs {
     pub fn new(cfg: &Config) -> Self {
         let mut stats_vec = Vec::new();
-        stats_vec.resize_with(cfg.n_phe, OnlineStats::default);
+        stats_vec.resize_with(cfg.n_phe, OnlineStats::new);
         Self { stats_vec }
     }
 }

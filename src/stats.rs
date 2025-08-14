@@ -1,6 +1,40 @@
-use core::f64;
+pub struct OnlineStats {
+    n_vals: usize,
+    mean: f64,
+    diff_2_sum: f64,
+}
 
-pub use average::Moments4 as OnlineStats;
+impl OnlineStats {
+    pub fn new() -> Self {
+        Self {
+            n_vals: 0,
+            mean: 0.0,
+            diff_2_sum: 0.0,
+        }
+    }
+
+    pub fn add(&mut self, new_val: f64) {
+        self.n_vals += 1;
+
+        let diff_a = new_val - self.mean;
+        self.mean += diff_a / self.n_vals as f64;
+
+        let diff_b = new_val - self.mean;
+        self.diff_2_sum += diff_a * diff_b;
+    }
+
+    pub fn mean(&self) -> f64 {
+        self.mean
+    }
+
+    pub fn sample_variance(&self) -> f64 {
+        if self.n_vals > 1 {
+            self.diff_2_sum / (self.n_vals as f64 - 1.0)
+        } else {
+            f64::NAN
+        }
+    }
+}
 
 pub struct TimeSeriesStats;
 
