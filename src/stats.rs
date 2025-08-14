@@ -1,3 +1,5 @@
+use core::f64;
+
 pub use average::Moments4 as OnlineStats;
 
 pub struct TimeSeriesStats;
@@ -24,73 +26,63 @@ fn sample_variance(time_series: &[f64]) -> f64 {
 
 /// Compute the standard error of the mean (SEM) using the Flyvbjerg-Petersen blocking method
 fn compute_sem(time_series: &[f64]) -> f64 {
-    if time_series.len() < 2 {
-        return f64::NAN;
-    }
-
     let mut blk_time_series = time_series.to_vec();
-    let mut sem_2;
-    let mut uppr_lim = f64::NAN;
+    let mut n_vals = blk_time_series.len();
+    let mut sem2_ests = Vec::new();
+    let mut sem2_errs = Vec::new();
 
-    loop {
+    while n_vals >= 2 {
         let var = sample_variance(&blk_time_series);
-        let n_vals = blk_time_series.len();
+        let sem2_est = var / n_vals as f64;
+        let sem2_err = sem2_est * (2.0 / (n_vals as f64 - 1.0)).sqrt();
+        sem2_ests.push(sem2_est);
+        sem2_errs.push(sem2_err);
 
-        sem_2 = var / n_vals as f64;
-
-        if uppr_lim.is_nan() || sem_2 > uppr_lim {
-            uppr_lim = sem_2 * (1.0 + (2.0 / (n_vals as f64 - 1.0)).sqrt());
-        } else {
-            break;
-        }
-
-        if n_vals < 4 {
-            break;
-        }
-
-        // blocking transformation: average pairs of adjacent values
         blk_time_series = blk_time_series
             .chunks_exact(2)
             .map(|pair| (pair[0] + pair[1]) / 2.0)
             .collect();
+        n_vals = blk_time_series.len();
     }
 
-    sem_2.sqrt()
-}
+    for (idx, &sem2_est) in sem2_ests.iter().enumerate() {
+        let max_low = sem2_ests[idx..]
+            .iter()
+            .zip(sem2_errs[idx..].iter())
+            .map(|(s, e)| s - e)
+            .fold(f64::NAN, f64::max);
 
-/// Compute the thermalization index using the marginal standard error rule
-fn compute_i_therm(time_series: &[f64]) -> usize {
-    let mut min_mse = f64::INFINITY;
-    let mut i_therm = time_series.len() / 2;
-    // let n_vals = time_series.len();
-    // let min_n_vals = 16;
-    // let i_therms = [n_vals / 16, n_vals / 8, n_vals / 4, n_vals / 2];
-    // [n_vals / 16, n_vals / 8, n_vals / 4, n_vals / 2]
-    //     .iter()
-    //     .filter(|&&i_therm| n_vals - i_therm >= min_n_vals)
-    //     .map(|&i| {
-    //         let aux = &time_series[i..];
-    //         let mse = sample_variance(aux) / (aux.len() as f64);
-    //         (i, mse)
-    //     })
-    //     .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
-    //     .map(|(i_therm, _)| i_therm);
-    // returns Option<usize>
-
-    for div in [2, 4, 8, 16, 32, 64].iter() {
-        let i_therm_candidate = time_series.len() / div;
-
-        let aux_time_series = &time_series[i_therm_candidate..];
-        let n_vals = aux_time_series.len();
-
-        let var = sample_variance(aux_time_series);
-        let mse = var * (n_vals as f64 - 1.0) / ((n_vals * n_vals) as f64);
-
-        if mse < min_mse {
-            min_mse = mse;
-            i_therm = i_therm_candidate;
+        if sem2_est > max_low {
+            return sem2_est.sqrt();
         }
     }
 
-    i_therm
+    sem2_ests.last().copied().unwrap_or(f64::NAN).sqrt()
+}
+
+/// Compute the optimal thermalization index using the marginal standard error rule
+fn compute_opt_i_therm(time_series: &[f64]) -> usize {
+    let mut min_mse = f64::INFINITY;
+    let mut opt_i_therm = time_series.len() / 2;
+    let n_vals = time_series.len();
+    let n_candidates = 8;
+    let i_therms: Vec<_> = (0..n_candidates)
+        .map(|i| n_vals / (2 as usize).pow(n_candidates - i))
+        .collect();
+
+    for i_therm in i_therms {
+        let aux_time_series = &time_series[i_therm..];
+        let n_vals = aux_time_series.len();
+
+        let var = sample_variance(aux_time_series);
+        let n_vals_f = n_vals as f64;
+        let mse = var * (n_vals_f - 1.0) / (n_vals_f * n_vals_f);
+
+        if mse < min_mse {
+            min_mse = mse;
+            opt_i_therm = i_therm;
+        }
+    }
+
+    opt_i_therm
 }
