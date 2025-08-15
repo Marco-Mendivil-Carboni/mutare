@@ -14,51 +14,51 @@ pub trait Obs {
     fn write(&self, writer: &mut dyn Write) -> Result<()>;
 }
 
-pub struct ProbEnvObs {
-    stats_vec: Vec<Accumulator>,
+pub struct ProbEnv {
+    acc_vec: Vec<Accumulator>,
 }
 
-impl ProbEnvObs {
+impl ProbEnv {
     pub fn new(cfg: &Config) -> Self {
-        let mut stats_vec = Vec::new();
-        stats_vec.resize_with(cfg.n_env, Accumulator::new);
-        Self { stats_vec }
+        let mut acc_vec = Vec::new();
+        acc_vec.resize_with(cfg.n_env, Accumulator::new);
+        Self { acc_vec }
     }
 }
 
-impl Obs for ProbEnvObs {
+impl Obs for ProbEnv {
     fn update(&mut self, state: &State) -> Result<()> {
         let env = state.env;
-        for (i_env, stats) in self.stats_vec.iter_mut().enumerate() {
-            stats.add(if i_env == env { 1.0 } else { 0.0 });
+        for (i_env, acc) in self.acc_vec.iter_mut().enumerate() {
+            acc.add(if i_env == env { 1.0 } else { 0.0 });
         }
         Ok(())
     }
 
     fn write(&self, writer: &mut dyn Write) -> Result<()> {
         writeln!(writer, "#prob_env:")?;
-        for stats in &self.stats_vec {
-            writeln!(writer, "{}", stats.report())?;
+        for acc in &self.acc_vec {
+            writeln!(writer, "{}", acc.report())?;
         }
         Ok(())
     }
 }
 
-pub struct AvgProbPheObs {
-    stats_vec: Vec<Accumulator>,
+pub struct AvgProbPhe {
+    acc_vec: Vec<Accumulator>,
 }
 
-impl AvgProbPheObs {
+impl AvgProbPhe {
     pub fn new(cfg: &Config) -> Self {
-        let mut stats_vec = Vec::new();
-        stats_vec.resize_with(cfg.n_phe, Accumulator::new);
-        Self { stats_vec }
+        let mut acc_vec = Vec::new();
+        acc_vec.resize_with(cfg.n_phe, Accumulator::new);
+        Self { acc_vec }
     }
 }
 
-impl Obs for AvgProbPheObs {
+impl Obs for AvgProbPhe {
     fn update(&mut self, state: &State) -> Result<()> {
-        let n_phe = self.stats_vec.len();
+        let n_phe = self.acc_vec.len();
         let agt_vec = &state.agt_vec;
         if agt_vec.is_empty() {
             return Ok(());
@@ -73,41 +73,41 @@ impl Obs for AvgProbPheObs {
         }
 
         for i_phe in 0..n_phe {
-            self.stats_vec[i_phe].add(prob_phe_sum[i_phe] / agt_vec.len() as f64);
+            self.acc_vec[i_phe].add(prob_phe_sum[i_phe] / agt_vec.len() as f64);
         }
         Ok(())
     }
 
     fn write(&self, writer: &mut dyn Write) -> Result<()> {
         writeln!(writer, "#avg_prob_phe:")?;
-        for stats in &self.stats_vec {
-            writeln!(writer, "{}", stats.report())?;
+        for acc in &self.acc_vec {
+            writeln!(writer, "{}", acc.report())?;
         }
         Ok(())
     }
 }
 
-pub struct NAgtDiffObs {
-    stats: TimeSeries,
+pub struct NAgtDiff {
+    time_series: TimeSeries,
 }
 
-impl NAgtDiffObs {
+impl NAgtDiff {
     pub fn new() -> Self {
         Self {
-            stats: TimeSeries::new(),
+            time_series: TimeSeries::new(),
         }
     }
 }
 
-impl Obs for NAgtDiffObs {
+impl Obs for NAgtDiff {
     fn update(&mut self, state: &State) -> Result<()> {
-        self.stats.add(state.n_agt_diff as f64);
+        self.time_series.push(state.n_agt_diff as f64);
         Ok(())
     }
 
     fn write(&self, writer: &mut dyn Write) -> Result<()> {
         writeln!(writer, "#n_agt_diff:")?;
-        writeln!(writer, "{}", self.stats.report())?;
+        writeln!(writer, "{}", self.time_series.report())?;
         Ok(())
     }
 }
@@ -120,9 +120,9 @@ pub struct Analyzer {
 impl Analyzer {
     pub fn new(cfg: Config) -> Self {
         let mut obs_ptr_vec: Vec<Box<dyn Obs>> = Vec::new();
-        obs_ptr_vec.push(Box::new(ProbEnvObs::new(&cfg)));
-        obs_ptr_vec.push(Box::new(AvgProbPheObs::new(&cfg)));
-        obs_ptr_vec.push(Box::new(NAgtDiffObs::new()));
+        obs_ptr_vec.push(Box::new(ProbEnv::new(&cfg)));
+        obs_ptr_vec.push(Box::new(AvgProbPhe::new(&cfg)));
+        obs_ptr_vec.push(Box::new(NAgtDiff::new()));
         Self { cfg, obs_ptr_vec }
     }
 

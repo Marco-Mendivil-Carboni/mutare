@@ -13,13 +13,13 @@ impl Accumulator {
         }
     }
 
-    pub fn add(&mut self, new_val: f64) {
+    pub fn add(&mut self, val: f64) {
         self.n_vals += 1;
 
-        let diff_a = new_val - self.mean;
+        let diff_a = val - self.mean;
         self.mean += diff_a / self.n_vals as f64;
 
-        let diff_b = new_val - self.mean;
+        let diff_b = val - self.mean;
         self.diff_2_sum += diff_a * diff_b;
     }
 
@@ -41,27 +41,27 @@ impl Accumulator {
 }
 
 pub struct TimeSeries {
-    values: Vec<f64>,
+    vals: Vec<f64>,
 }
 
 impl TimeSeries {
     pub fn new() -> Self {
-        Self { values: Vec::new() }
+        Self { vals: Vec::new() }
     }
 
-    pub fn add(&mut self, val: f64) {
-        self.values.push(val);
+    pub fn push(&mut self, val: f64) {
+        self.vals.push(val);
     }
 
     pub fn report(&self) -> String {
-        let i_equil = compute_opt_i_equil(&self.values);
-        let equil_values = &self.values[i_equil..];
+        let i_equil = compute_opt_i_equil(&self.vals);
+        let equil_vals = &self.vals[i_equil..];
         format!(
             "mean: {}, std_dev: {}, sem: {}, is_equil: {}",
-            compute_mean(equil_values),
-            compute_var(equil_values).sqrt(),
-            compute_sem(equil_values),
-            i_equil != self.values.len() / 2
+            compute_mean(equil_vals),
+            compute_var(equil_vals).sqrt(),
+            compute_sem(equil_vals),
+            i_equil != self.vals.len() / 2
         )
     }
 }
