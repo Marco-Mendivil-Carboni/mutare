@@ -9,7 +9,6 @@ use crate::config::Config;
 use crate::engine::Engine;
 use anyhow::{Context, Result};
 use clap::Parser;
-use ron::ser::{PrettyConfig, to_string_pretty};
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -56,7 +55,7 @@ fn main() -> Result<()> {
     //     Err(err) => log::error!("{:#}", err),
     // }
 
-    let cfg_str = fs::read_to_string("config.ron")?;
+    let cfg_str = fs::read_to_string("config.json")?;
     let cfg = Config::new(&cfg_str)
         .context("failed to create config")
         .unwrap_or_else(|err| {
@@ -66,8 +65,8 @@ fn main() -> Result<()> {
 
     log::info!("cfg = {:#?}", cfg);
 
-    let cfg_str = to_string_pretty(&cfg, PrettyConfig::default())?;
-    fs::write("config.ron", cfg_str)?;
+    let cfg_str = serde_json::to_string_pretty(&cfg)?;
+    fs::write("config.json", cfg_str)?;
 
     let mut engine = Engine::generate_initial_condition(cfg.clone())?;
     let start = Instant::now();

@@ -22,8 +22,8 @@ pub struct Config {
 
 impl Config {
     pub fn new(cfg_str: &str) -> Result<Self> {
-        let cfg: Config =
-            ron::de::from_str(cfg_str).context("failed to deserialize Config value from string")?;
+        let cfg: Config = serde_json::from_str(cfg_str)
+            .context("failed to deserialize Config value from string")?;
 
         check_num(cfg.n_env, 1..100).context("invalid number of environments")?;
         check_num(cfg.n_phe, 1..100).context("invalid number of phenotypes")?;
