@@ -1,6 +1,6 @@
 use crate::config::Config;
 use crate::model::State;
-use crate::stats::{OnlineStats, TimeSeriesStats};
+use crate::stats::{Accumulator, TimeSeries};
 use anyhow::{Context, Result};
 use rmp_serde::decode;
 use std::{
@@ -15,13 +15,13 @@ pub trait Obs {
 }
 
 pub struct ProbEnvObs {
-    stats_vec: Vec<OnlineStats>,
+    stats_vec: Vec<Accumulator>,
 }
 
 impl ProbEnvObs {
     pub fn new(cfg: &Config) -> Self {
         let mut stats_vec = Vec::new();
-        stats_vec.resize_with(cfg.n_env, OnlineStats::new);
+        stats_vec.resize_with(cfg.n_env, Accumulator::new);
         Self { stats_vec }
     }
 }
@@ -45,13 +45,13 @@ impl Obs for ProbEnvObs {
 }
 
 pub struct AvgProbPheObs {
-    stats_vec: Vec<OnlineStats>,
+    stats_vec: Vec<Accumulator>,
 }
 
 impl AvgProbPheObs {
     pub fn new(cfg: &Config) -> Self {
         let mut stats_vec = Vec::new();
-        stats_vec.resize_with(cfg.n_phe, OnlineStats::new);
+        stats_vec.resize_with(cfg.n_phe, Accumulator::new);
         Self { stats_vec }
     }
 }
@@ -88,13 +88,13 @@ impl Obs for AvgProbPheObs {
 }
 
 pub struct NAgtDiffObs {
-    stats: TimeSeriesStats,
+    stats: TimeSeries,
 }
 
 impl NAgtDiffObs {
     pub fn new() -> Self {
         Self {
-            stats: TimeSeriesStats::new(),
+            stats: TimeSeries::new(),
         }
     }
 }

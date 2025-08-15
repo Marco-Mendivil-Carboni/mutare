@@ -1,10 +1,10 @@
-pub struct OnlineStats {
+pub struct Accumulator {
     n_vals: usize,
     mean: f64,
     diff_2_sum: f64,
 }
 
-impl OnlineStats {
+impl Accumulator {
     pub fn new() -> Self {
         Self {
             n_vals: 0,
@@ -40,30 +40,28 @@ impl OnlineStats {
     }
 }
 
-pub struct TimeSeriesStats {
-    time_series: Vec<f64>,
+pub struct TimeSeries {
+    values: Vec<f64>,
 }
 
-impl TimeSeriesStats {
+impl TimeSeries {
     pub fn new() -> Self {
-        Self {
-            time_series: Vec::new(),
-        }
+        Self { values: Vec::new() }
     }
 
     pub fn add(&mut self, val: f64) {
-        self.time_series.push(val);
+        self.values.push(val);
     }
 
     pub fn report(&self) -> String {
-        let i_equil = compute_opt_i_equil(&self.time_series);
-        let equil_time_series = &self.time_series[i_equil..];
+        let i_equil = compute_opt_i_equil(&self.values);
+        let equil_values = &self.values[i_equil..];
         format!(
             "mean: {}, std_dev: {}, sem: {}, is_equil: {}",
-            compute_mean(equil_time_series),
-            compute_var(equil_time_series).sqrt(),
-            compute_sem(equil_time_series),
-            i_equil != self.time_series.len() / 2
+            compute_mean(equil_values),
+            compute_var(equil_values).sqrt(),
+            compute_sem(equil_values),
+            i_equil != self.values.len() / 2
         )
     }
 }
