@@ -55,8 +55,7 @@ fn main() -> Result<()> {
     //     Err(err) => log::error!("{:#}", err),
     // }
 
-    let cfg_str = fs::read_to_string("config.json")?;
-    let cfg = Config::new(&cfg_str)
+    let cfg = Config::from_file("config.json")
         .context("failed to create config")
         .unwrap_or_else(|err| {
             log::error!("{:?}", err);

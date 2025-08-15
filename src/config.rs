@@ -1,7 +1,7 @@
 use anyhow::{Context, Result, bail};
 use ndarray::{Array2, ArrayView1, ArrayView2};
 use serde::{Deserialize, Serialize};
-use std::{fmt::Debug, ops::RangeBounds};
+use std::{fmt::Debug, fs::File, io::BufReader, ops::RangeBounds, path::Path};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Config {
@@ -21,9 +21,12 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(cfg_str: &str) -> Result<Self> {
-        let cfg: Config = serde_json::from_str(cfg_str)
-            .context("failed to deserialize Config value from string")?;
+    pub fn from_file<P: AsRef<Path>>(file: P) -> Result<Self> {
+        let file = file.as_ref();
+        let file = File::open(file).with_context(|| format!("failed to open {:?}", file))?;
+        let reader = BufReader::new(file);
+
+        let cfg: Config = serde_json::from_reader(reader).context("failed to read cfg")?;
 
         check_num(cfg.n_env, 1..100).context("invalid number of environments")?;
         check_num(cfg.n_phe, 1..100).context("invalid number of phenotypes")?;
