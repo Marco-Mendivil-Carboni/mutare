@@ -16,7 +16,7 @@ use std::{
 };
 
 #[derive(Debug, Parser)]
-#[command(author, version, about)]
+#[command(version, about)]
 struct Args {
     sim_dir: PathBuf,
     sim_idx: Option<usize>,
@@ -75,7 +75,7 @@ fn main() -> Result<()> {
 
     let mut analyzer = Analyzer::new(cfg.clone());
     analyzer.add_file("frame.bin")?;
-    analyzer.save_results("analysis.json")?;
+    analyzer.save_results("analysis.bin")?;
 
     Ok(())
 }

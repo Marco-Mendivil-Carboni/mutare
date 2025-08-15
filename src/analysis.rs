@@ -2,16 +2,16 @@ use crate::config::Config;
 use crate::model::State;
 use crate::stats::{Accumulator, TimeSeries};
 use anyhow::{Context, Result};
-use rmp_serde::decode;
+use rmp_serde::{decode, encode};
 use std::{
     fs::File,
-    io::{BufReader, BufWriter},
+    io::{BufReader, BufWriter, Write},
     path::Path,
 };
 
-pub trait Obs {
+pub trait Observable {
     fn update(&mut self, state: &State) -> Result<()>;
-    fn report(&self) -> serde_json::Value;
+    fn write(&self, writer: &mut dyn Write) -> Result<()>;
 }
 
 pub struct ProbEnv {
@@ -26,7 +26,7 @@ impl ProbEnv {
     }
 }
 
-impl Obs for ProbEnv {
+impl Observable for ProbEnv {
     fn update(&mut self, state: &State) -> Result<()> {
         let env = state.env;
         for (i_env, acc) in self.acc_vec.iter_mut().enumerate() {
@@ -35,9 +35,10 @@ impl Obs for ProbEnv {
         Ok(())
     }
 
-    fn report(&self) -> serde_json::Value {
+    fn write(&self, writer: &mut dyn Write) -> Result<()> {
         let reports: Vec<_> = self.acc_vec.iter().map(|acc| acc.report()).collect();
-        serde_json::json!({ "prob_env": reports })
+        encode::write_named(writer, &("prob_env", reports))?;
+        Ok(())
     }
 }
 
@@ -53,7 +54,7 @@ impl AvgProbPhe {
     }
 }
 
-impl Obs for AvgProbPhe {
+impl Observable for AvgProbPhe {
     fn update(&mut self, state: &State) -> Result<()> {
         let n_phe = self.acc_vec.len();
         let agt_vec = &state.agt_vec;
@@ -75,9 +76,10 @@ impl Obs for AvgProbPhe {
         Ok(())
     }
 
-    fn report(&self) -> serde_json::Value {
+    fn write(&self, writer: &mut dyn Write) -> Result<()> {
         let reports: Vec<_> = self.acc_vec.iter().map(|acc| acc.report()).collect();
-        serde_json::json!({ "avg_prob_phe": reports })
+        encode::write_named(writer, &("avg_prob_phe", reports))?;
+        Ok(())
     }
 }
 
@@ -93,26 +95,27 @@ impl NAgtDiff {
     }
 }
 
-impl Obs for NAgtDiff {
+impl Observable for NAgtDiff {
     fn update(&mut self, state: &State) -> Result<()> {
         self.time_series.push(state.n_agt_diff as f64);
         Ok(())
     }
 
-    fn report(&self) -> serde_json::Value {
+    fn write(&self, writer: &mut dyn Write) -> Result<()> {
         let report = self.time_series.report();
-        serde_json::json!({ "n_agt_diff": report })
+        encode::write_named(writer, &("n_agt_diff", report))?;
+        Ok(())
     }
 }
 
 pub struct Analyzer {
     cfg: Config,
-    obs_ptr_vec: Vec<Box<dyn Obs>>,
+    obs_ptr_vec: Vec<Box<dyn Observable>>,
 }
 
 impl Analyzer {
     pub fn new(cfg: Config) -> Self {
-        let mut obs_ptr_vec: Vec<Box<dyn Obs>> = Vec::new();
+        let mut obs_ptr_vec: Vec<Box<dyn Observable>> = Vec::new();
         obs_ptr_vec.push(Box::new(ProbEnv::new(&cfg)));
         obs_ptr_vec.push(Box::new(AvgProbPhe::new(&cfg)));
         obs_ptr_vec.push(Box::new(NAgtDiff::new()));
@@ -136,10 +139,12 @@ impl Analyzer {
     pub fn save_results<P: AsRef<Path>>(&self, file: P) -> Result<()> {
         let file = file.as_ref();
         let file = File::create(file).with_context(|| format!("failed to create {:?}", file))?;
-        let writer = BufWriter::new(file);
+        let mut writer = BufWriter::new(file);
 
-        let reports: Vec<_> = self.obs_ptr_vec.iter().map(|obs| obs.report()).collect();
-        serde_json::to_writer_pretty(writer, &reports)?;
+        for obs in &self.obs_ptr_vec {
+            obs.write(&mut writer)
+                .context("failed to write observable")?;
+        }
         Ok(())
     }
 }
