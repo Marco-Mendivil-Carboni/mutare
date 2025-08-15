@@ -15,7 +15,7 @@ use std::{
     time::Instant,
 };
 
-#[derive(Parser, Debug)]
+#[derive(Debug, Parser)]
 #[command(author, version, about)]
 struct Args {
     sim_dir: PathBuf,
@@ -75,7 +75,7 @@ fn main() -> Result<()> {
 
     let mut analyzer = Analyzer::new(cfg.clone());
     analyzer.add_file("frame.bin")?;
-    analyzer.write("analysis.dat")?;
+    analyzer.save_results("analysis.json")?;
 
     Ok(())
 }

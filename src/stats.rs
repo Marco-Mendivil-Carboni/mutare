@@ -1,7 +1,15 @@
+use serde::{Deserialize, Serialize};
+
 pub struct Accumulator {
     n_vals: usize,
     mean: f64,
     diff_2_sum: f64,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AccumulatorReport {
+    pub mean: f64,
+    pub std_dev: f64,
 }
 
 impl Accumulator {
@@ -23,25 +31,28 @@ impl Accumulator {
         self.diff_2_sum += diff_a * diff_b;
     }
 
-    pub fn mean(&self) -> f64 {
-        self.mean
-    }
-
-    pub fn var(&self) -> f64 {
-        if self.n_vals > 1 {
-            self.diff_2_sum / (self.n_vals as f64 - 1.0)
-        } else {
-            f64::NAN
+    pub fn report(&self) -> AccumulatorReport {
+        AccumulatorReport {
+            mean: self.mean,
+            std_dev: if self.n_vals > 1 {
+                (self.diff_2_sum / (self.n_vals as f64 - 1.0)).sqrt()
+            } else {
+                f64::NAN
+            },
         }
-    }
-
-    pub fn report(&self) -> String {
-        format!("mean: {}, std_dev: {}", self.mean(), self.var().sqrt())
     }
 }
 
 pub struct TimeSeries {
     vals: Vec<f64>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TimeSeriesReport {
+    pub mean: f64,
+    pub std_dev: f64,
+    pub sem: f64,
+    pub is_equil: bool,
 }
 
 impl TimeSeries {
@@ -53,16 +64,15 @@ impl TimeSeries {
         self.vals.push(val);
     }
 
-    pub fn report(&self) -> String {
+    pub fn report(&self) -> TimeSeriesReport {
         let i_equil = compute_opt_i_equil(&self.vals);
-        let equil_vals = &self.vals[i_equil..];
-        format!(
-            "mean: {}, std_dev: {}, sem: {}, is_equil: {}",
-            compute_mean(equil_vals),
-            compute_var(equil_vals).sqrt(),
-            compute_sem(equil_vals),
-            i_equil != self.vals.len() / 2
-        )
+        let equil_time_series = &self.vals[i_equil..];
+        TimeSeriesReport {
+            mean: compute_mean(equil_time_series),
+            std_dev: compute_var(equil_time_series).sqrt(),
+            sem: compute_sem(equil_time_series),
+            is_equil: i_equil != self.vals.len() / 2,
+        }
     }
 }
 

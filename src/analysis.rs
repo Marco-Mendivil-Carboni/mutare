@@ -5,13 +5,13 @@ use anyhow::{Context, Result};
 use rmp_serde::decode;
 use std::{
     fs::File,
-    io::{BufReader, BufWriter, Write},
+    io::{BufReader, BufWriter},
     path::Path,
 };
 
 pub trait Obs {
     fn update(&mut self, state: &State) -> Result<()>;
-    fn write(&self, writer: &mut dyn Write) -> Result<()>;
+    fn report(&self) -> serde_json::Value;
 }
 
 pub struct ProbEnv {
@@ -35,12 +35,9 @@ impl Obs for ProbEnv {
         Ok(())
     }
 
-    fn write(&self, writer: &mut dyn Write) -> Result<()> {
-        writeln!(writer, "#prob_env:")?;
-        for acc in &self.acc_vec {
-            writeln!(writer, "{}", acc.report())?;
-        }
-        Ok(())
+    fn report(&self) -> serde_json::Value {
+        let reports: Vec<_> = self.acc_vec.iter().map(|acc| acc.report()).collect();
+        serde_json::json!({ "prob_env": reports })
     }
 }
 
@@ -78,12 +75,9 @@ impl Obs for AvgProbPhe {
         Ok(())
     }
 
-    fn write(&self, writer: &mut dyn Write) -> Result<()> {
-        writeln!(writer, "#avg_prob_phe:")?;
-        for acc in &self.acc_vec {
-            writeln!(writer, "{}", acc.report())?;
-        }
-        Ok(())
+    fn report(&self) -> serde_json::Value {
+        let reports: Vec<_> = self.acc_vec.iter().map(|acc| acc.report()).collect();
+        serde_json::json!({ "avg_prob_phe": reports })
     }
 }
 
@@ -105,10 +99,9 @@ impl Obs for NAgtDiff {
         Ok(())
     }
 
-    fn write(&self, writer: &mut dyn Write) -> Result<()> {
-        writeln!(writer, "#n_agt_diff:")?;
-        writeln!(writer, "{}", self.time_series.report())?;
-        Ok(())
+    fn report(&self) -> serde_json::Value {
+        let report = self.time_series.report();
+        serde_json::json!({ "n_agt_diff": report })
     }
 }
 
@@ -140,16 +133,13 @@ impl Analyzer {
         Ok(())
     }
 
-    pub fn write<P: AsRef<Path>>(&self, file: P) -> Result<()> {
+    pub fn save_results<P: AsRef<Path>>(&self, file: P) -> Result<()> {
         let file = file.as_ref();
         let file = File::create(file).with_context(|| format!("failed to create {:?}", file))?;
-        let mut writer = BufWriter::new(file);
+        let writer = BufWriter::new(file);
 
-        for obs in &self.obs_ptr_vec {
-            obs.write(&mut writer)
-                .context("failed to write observable")?;
-            writeln!(writer)?;
-        }
+        let reports: Vec<_> = self.obs_ptr_vec.iter().map(|obs| obs.report()).collect();
+        serde_json::to_writer_pretty(writer, &reports)?;
         Ok(())
     }
 }
