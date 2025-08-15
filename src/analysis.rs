@@ -110,16 +110,16 @@ impl Observable for NAgtDiff {
 
 pub struct Analyzer {
     cfg: Config,
-    obs_ptr_vec: Vec<Box<dyn Observable>>,
+    obs_vec: Vec<Box<dyn Observable>>,
 }
 
 impl Analyzer {
     pub fn new(cfg: Config) -> Self {
-        let mut obs_ptr_vec: Vec<Box<dyn Observable>> = Vec::new();
-        obs_ptr_vec.push(Box::new(ProbEnv::new(&cfg)));
-        obs_ptr_vec.push(Box::new(AvgProbPhe::new(&cfg)));
-        obs_ptr_vec.push(Box::new(NAgtDiff::new()));
-        Self { cfg, obs_ptr_vec }
+        let mut obs_vec: Vec<Box<dyn Observable>> = Vec::new();
+        obs_vec.push(Box::new(ProbEnv::new(&cfg)));
+        obs_vec.push(Box::new(AvgProbPhe::new(&cfg)));
+        obs_vec.push(Box::new(NAgtDiff::new()));
+        Self { cfg, obs_vec }
     }
 
     pub fn add_file<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
@@ -129,7 +129,7 @@ impl Analyzer {
 
         for _ in 0..self.cfg.saves_per_file {
             let state = decode::from_read(&mut reader).context("failed to read state")?;
-            for obs in &mut self.obs_ptr_vec {
+            for obs in &mut self.obs_vec {
                 obs.update(&state).context("failed to update observable")?;
             }
         }
@@ -141,7 +141,7 @@ impl Analyzer {
         let file = File::create(file).with_context(|| format!("failed to create {:?}", file))?;
         let mut writer = BufWriter::new(file);
 
-        for obs in &self.obs_ptr_vec {
+        for obs in &self.obs_vec {
             obs.write(&mut writer)
                 .context("failed to write observable")?;
         }

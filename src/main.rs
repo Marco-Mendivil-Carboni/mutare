@@ -50,10 +50,10 @@ fn main() -> Result<()> {
     let args = Args::parse();
     println!("{:?}", args);
 
-    // match count_entries(&args[1], "^Cargo.*$") {
-    //     Ok(count) => log::info!("count = {count}"),
-    //     Err(err) => log::error!("{:#}", err),
-    // }
+    match count_entries(".", "^Cargo.*$") {
+        Ok(count) => log::info!("count = {count}"),
+        Err(err) => log::error!("{:#}", err),
+    }
 
     let cfg = Config::from_file("config.json")
         .context("failed to create config")
