@@ -1,16 +1,17 @@
 use crate::config::Config;
 use crate::model::State;
 use crate::stats::{OnlineStats, TimeSeriesStats};
-use anyhow::Result;
+use anyhow::{Context, Result};
+use rmp_serde::decode;
 use std::{
     fs::File,
-    io::{BufWriter, Write},
+    io::{BufReader, BufWriter, Write},
     path::Path,
 };
 
 pub trait Obs {
     fn update(&mut self, state: &State) -> Result<()>;
-    fn write(&self, out: &mut dyn Write) -> Result<()>;
+    fn write(&self, writer: &mut dyn Write) -> Result<()>;
 }
 
 pub struct ProbEnvObs {
@@ -34,10 +35,10 @@ impl Obs for ProbEnvObs {
         Ok(())
     }
 
-    fn write(&self, out: &mut dyn Write) -> Result<()> {
-        writeln!(out, "#prob_env:")?;
+    fn write(&self, writer: &mut dyn Write) -> Result<()> {
+        writeln!(writer, "#prob_env:")?;
         for stats in &self.stats_vec {
-            writeln!(out, "{}", stats.report())?;
+            writeln!(writer, "{}", stats.report())?;
         }
         Ok(())
     }
@@ -77,10 +78,10 @@ impl Obs for AvgProbPheObs {
         Ok(())
     }
 
-    fn write(&self, out: &mut dyn Write) -> Result<()> {
-        writeln!(out, "#avg_prob_phe:")?;
+    fn write(&self, writer: &mut dyn Write) -> Result<()> {
+        writeln!(writer, "#avg_prob_phe:")?;
         for stats in &self.stats_vec {
-            writeln!(out, "{}", stats.report())?;
+            writeln!(writer, "{}", stats.report())?;
         }
         Ok(())
     }
@@ -104,9 +105,9 @@ impl Obs for NAgtDiffObs {
         Ok(())
     }
 
-    fn write(&self, out: &mut dyn Write) -> Result<()> {
-        writeln!(out, "#n_agt_diff:")?;
-        writeln!(out, "{}", self.stats.report())?;
+    fn write(&self, writer: &mut dyn Write) -> Result<()> {
+        writeln!(writer, "#n_agt_diff:")?;
+        writeln!(writer, "{}", self.stats.report())?;
         Ok(())
     }
 }
@@ -125,10 +126,13 @@ impl Analyzer {
         Self { cfg, obs_ptr_vec }
     }
 
-    pub fn add_file<P: AsRef<Path>>(&mut self, path: P) -> Result<()> {
-        let mut reader = File::open(path.as_ref())?;
+    pub fn add_file<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
+        let file = file.as_ref();
+        let file = File::open(file).with_context(|| format!("failed to open {:?}", file))?;
+        let mut reader = BufReader::new(file);
+
         for _ in 0..self.cfg.saves_per_file {
-            let state = State::read_frame(&mut reader)?;
+            let state = decode::from_read(&mut reader)?;
             for obs in &mut self.obs_ptr_vec {
                 obs.update(&state)?;
             }
@@ -136,9 +140,11 @@ impl Analyzer {
         Ok(())
     }
 
-    pub fn write<P: AsRef<Path>>(&self, path: P) -> Result<()> {
-        let file = File::create(path)?;
+    pub fn write<P: AsRef<Path>>(&self, file: P) -> Result<()> {
+        let file = file.as_ref();
+        let file = File::create(file).with_context(|| format!("failed to create {:?}", file))?;
         let mut writer = BufWriter::new(file);
+
         for obs in &self.obs_ptr_vec {
             obs.write(&mut writer)?;
             writeln!(writer)?;

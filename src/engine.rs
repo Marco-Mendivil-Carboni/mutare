@@ -5,9 +5,10 @@ use ndarray::Array1;
 use rand::prelude::*;
 use rand_chacha::ChaCha12Rng;
 use rand_distr::{Bernoulli, LogNormal, Uniform, weighted::WeightedIndex};
+use rmp_serde::encode;
 use serde::{Deserialize, Serialize};
 use std::{
-    fs::OpenOptions,
+    fs::File,
     io::{BufWriter, Write},
     path::Path,
 };
@@ -45,13 +46,7 @@ impl Engine {
 
     pub fn run_simulation<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
         let file = file.as_ref();
-        let file = OpenOptions::new()
-            .write(true)
-            .create(true)
-            .truncate(true)
-            .open(file)
-            .with_context(|| format!("failed to open {:?}", file))?;
-
+        let file = File::create(file).with_context(|| format!("failed to create {:?}", file))?;
         let mut writer = BufWriter::new(file);
 
         let mut i_agt_rep = Vec::with_capacity(self.cfg.n_agt_init);
@@ -67,9 +62,7 @@ impl Engine {
                     .context("failed to perform step")?;
             }
 
-            self.state
-                .write_frame(&mut writer)
-                .context("failed to write frame")?;
+            encode::write(&mut writer, &self.state).context("failed to write frame")?;
 
             let progress = 100.0 * (i_save + 1) as f64 / self.cfg.saves_per_file as f64;
             log::info!("completed {:06.2}%", progress);
