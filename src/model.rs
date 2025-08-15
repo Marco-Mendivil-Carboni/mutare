@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Agent {
     phe: usize,
+
     prob_phe: Array1<f64>,
 }
 
@@ -24,6 +25,8 @@ impl Agent {
 #[derive(Debug, Serialize, Deserialize)]
 pub struct State {
     pub env: usize,
+
     pub agt_vec: Vec<Agent>,
+
     pub n_agt_diff: i32,
 }

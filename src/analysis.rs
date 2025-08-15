@@ -132,9 +132,9 @@ impl Analyzer {
         let mut reader = BufReader::new(file);
 
         for _ in 0..self.cfg.saves_per_file {
-            let state = decode::from_read(&mut reader)?;
+            let state = decode::from_read(&mut reader).context("failed to read state")?;
             for obs in &mut self.obs_ptr_vec {
-                obs.update(&state)?;
+                obs.update(&state).context("failed to update observable")?;
             }
         }
         Ok(())
@@ -146,7 +146,8 @@ impl Analyzer {
         let mut writer = BufWriter::new(file);
 
         for obs in &self.obs_ptr_vec {
-            obs.write(&mut writer)?;
+            obs.write(&mut writer)
+                .context("failed to write observable")?;
             writeln!(writer)?;
         }
         Ok(())

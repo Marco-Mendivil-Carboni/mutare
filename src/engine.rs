@@ -62,7 +62,7 @@ impl Engine {
                     .context("failed to perform step")?;
             }
 
-            encode::write(&mut writer, &self.state).context("failed to write frame")?;
+            encode::write(&mut writer, &self.state).context("failed to write state")?;
 
             let progress = 100.0 * (i_save + 1) as f64 / self.cfg.saves_per_file as f64;
             log::info!("completed {:06.2}%", progress);
