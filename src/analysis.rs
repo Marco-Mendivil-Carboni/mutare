@@ -2,6 +2,7 @@ use crate::config::Config;
 use crate::model::State;
 use crate::stats::{Accumulator, TimeSeries};
 use anyhow::{Context, Result};
+use ndarray::Array1;
 use rmp_serde::{decode, encode};
 use std::{
     fs::File,
@@ -10,7 +11,7 @@ use std::{
 };
 
 pub trait Observable {
-    fn update(&mut self, state: &State) -> Result<()>;
+    fn update(&mut self, state: &State);
     fn write(&self, writer: &mut dyn Write) -> Result<()>;
 }
 
@@ -27,12 +28,10 @@ impl ProbEnv {
 }
 
 impl Observable for ProbEnv {
-    fn update(&mut self, state: &State) -> Result<()> {
-        let env = state.env;
+    fn update(&mut self, state: &State) {
         for (i_env, acc) in self.acc_vec.iter_mut().enumerate() {
-            acc.add(if i_env == env { 1.0 } else { 0.0 });
+            acc.add(if i_env == state.env { 1.0 } else { 0.0 });
         }
-        Ok(())
     }
 
     fn write(&self, writer: &mut dyn Write) -> Result<()> {
@@ -55,25 +54,16 @@ impl AvgProbPhe {
 }
 
 impl Observable for AvgProbPhe {
-    fn update(&mut self, state: &State) -> Result<()> {
-        let n_phe = self.acc_vec.len();
-        let agt_vec = &state.agt_vec;
-        if agt_vec.is_empty() {
-            return Ok(());
+    fn update(&mut self, state: &State) {
+        let mut prob_phe_sum = Array1::from_elem(self.acc_vec.len(), 0.0);
+        for agt in &state.agt_vec {
+            prob_phe_sum += agt.prob_phe();
         }
+        prob_phe_sum /= state.agt_vec.len() as f64;
 
-        let mut prob_phe_sum = vec![0.0; n_phe];
-        for agt in agt_vec {
-            let prob_phe = agt.prob_phe();
-            for (i_phe, &val) in prob_phe.iter().enumerate() {
-                prob_phe_sum[i_phe] += val;
-            }
+        for i_phe in 0..self.acc_vec.len() {
+            self.acc_vec[i_phe].add(prob_phe_sum[i_phe]);
         }
-
-        for i_phe in 0..n_phe {
-            self.acc_vec[i_phe].add(prob_phe_sum[i_phe] / agt_vec.len() as f64);
-        }
-        Ok(())
     }
 
     fn write(&self, writer: &mut dyn Write) -> Result<()> {
@@ -96,9 +86,8 @@ impl NAgtDiff {
 }
 
 impl Observable for NAgtDiff {
-    fn update(&mut self, state: &State) -> Result<()> {
+    fn update(&mut self, state: &State) {
         self.time_series.push(state.n_agt_diff as f64);
-        Ok(())
     }
 
     fn write(&self, writer: &mut dyn Write) -> Result<()> {
@@ -130,7 +119,7 @@ impl Analyzer {
         for _ in 0..self.cfg.saves_per_file {
             let state = decode::from_read(&mut reader).context("failed to read state")?;
             for obs in &mut self.obs_vec {
-                obs.update(&state).context("failed to update observable")?;
+                obs.update(&state);
             }
         }
         Ok(())
