@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 pub struct Accumulator {
     n_vals: usize,
@@ -6,7 +6,7 @@ pub struct Accumulator {
     diff_2_sum: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct AccumulatorReport {
     pub mean: f64,
     pub std_dev: f64,
@@ -47,7 +47,7 @@ pub struct TimeSeries {
     vals: Vec<f64>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize)]
 pub struct TimeSeriesReport {
     pub mean: f64,
     pub std_dev: f64,

@@ -13,7 +13,7 @@ use std::{
     path::Path,
 };
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Engine {
     cfg: Config,
     state: State,

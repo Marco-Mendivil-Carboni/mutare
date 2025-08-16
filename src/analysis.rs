@@ -55,15 +55,16 @@ impl AvgProbPhe {
 
 impl Observable for AvgProbPhe {
     fn update(&mut self, state: &State) {
-        let mut prob_phe_sum = Array1::from_elem(self.acc_vec.len(), 0.0);
+        let mut avg_prob_phe = Array1::zeros(self.acc_vec.len());
         for agt in &state.agt_vec {
-            prob_phe_sum += agt.prob_phe();
+            avg_prob_phe += agt.prob_phe();
         }
-        prob_phe_sum /= state.agt_vec.len() as f64;
+        avg_prob_phe /= state.agt_vec.len() as f64;
 
-        for i_phe in 0..self.acc_vec.len() {
-            self.acc_vec[i_phe].add(prob_phe_sum[i_phe]);
-        }
+        self.acc_vec
+            .iter_mut()
+            .zip(avg_prob_phe.iter())
+            .for_each(|(acc, &val)| acc.add(val));
     }
 
     fn write(&self, writer: &mut dyn Write) -> Result<()> {
