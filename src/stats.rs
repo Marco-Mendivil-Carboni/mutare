@@ -1,5 +1,7 @@
 use serde::Serialize;
+use std::default::Default;
 
+#[derive(Clone, Default)]
 pub struct Accumulator {
     n_vals: usize,
     mean: f64,
@@ -13,14 +15,6 @@ pub struct AccumulatorReport {
 }
 
 impl Accumulator {
-    pub fn new() -> Self {
-        Self {
-            n_vals: 0,
-            mean: 0.0,
-            diff_2_sum: 0.0,
-        }
-    }
-
     pub fn add(&mut self, val: f64) {
         self.n_vals += 1;
 
@@ -43,6 +37,7 @@ impl Accumulator {
     }
 }
 
+#[derive(Clone, Default)]
 pub struct TimeSeries {
     vals: Vec<f64>,
 }
@@ -56,10 +51,6 @@ pub struct TimeSeriesReport {
 }
 
 impl TimeSeries {
-    pub fn new() -> Self {
-        Self { vals: Vec::new() }
-    }
-
     pub fn push(&mut self, val: f64) {
         self.vals.push(val);
     }

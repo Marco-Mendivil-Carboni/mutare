@@ -5,6 +5,7 @@ use anyhow::{Context, Result};
 use ndarray::Array1;
 use rmp_serde::{decode, encode};
 use std::{
+    default::Default,
     fs::File,
     io::{BufReader, BufWriter, Write},
     path::Path,
@@ -21,8 +22,7 @@ pub struct ProbEnv {
 
 impl ProbEnv {
     pub fn new(cfg: &Config) -> Self {
-        let mut acc_vec = Vec::new();
-        acc_vec.resize_with(cfg.n_env, Accumulator::new);
+        let acc_vec = vec![Accumulator::default(); cfg.n_env];
         Self { acc_vec }
     }
 }
@@ -47,8 +47,7 @@ pub struct AvgProbPhe {
 
 impl AvgProbPhe {
     pub fn new(cfg: &Config) -> Self {
-        let mut acc_vec = Vec::new();
-        acc_vec.resize_with(cfg.n_phe, Accumulator::new);
+        let acc_vec = vec![Accumulator::default(); cfg.n_phe];
         Self { acc_vec }
     }
 }
@@ -60,7 +59,6 @@ impl Observable for AvgProbPhe {
             avg_prob_phe += agt.prob_phe();
         }
         avg_prob_phe /= state.agt_vec.len() as f64;
-
         self.acc_vec
             .iter_mut()
             .zip(avg_prob_phe.iter())
@@ -74,16 +72,9 @@ impl Observable for AvgProbPhe {
     }
 }
 
+#[derive(Default)]
 pub struct NAgtDiff {
     time_series: TimeSeries,
-}
-
-impl NAgtDiff {
-    pub fn new() -> Self {
-        Self {
-            time_series: TimeSeries::new(),
-        }
-    }
 }
 
 impl Observable for NAgtDiff {
@@ -108,7 +99,7 @@ impl Analyzer {
         let mut obs_vec: Vec<Box<dyn Observable>> = Vec::new();
         obs_vec.push(Box::new(ProbEnv::new(&cfg)));
         obs_vec.push(Box::new(AvgProbPhe::new(&cfg)));
-        obs_vec.push(Box::new(NAgtDiff::new()));
+        obs_vec.push(Box::new(NAgtDiff::default()));
         Self { cfg, obs_vec }
     }
 
