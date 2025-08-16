@@ -5,11 +5,11 @@ use ndarray::Array1;
 use rand::prelude::*;
 use rand_chacha::ChaCha12Rng;
 use rand_distr::{Bernoulli, LogNormal, Uniform, weighted::WeightedIndex};
-use rmp_serde::encode;
+use rmp_serde::{decode, encode};
 use serde::{Deserialize, Serialize};
 use std::{
     fs::File,
-    io::{BufWriter, Write},
+    io::{BufReader, BufWriter, Write},
     path::Path,
 };
 
@@ -173,5 +173,21 @@ impl Engine {
                 self.state.agt_vec.swap_remove(i_agt);
             }
         }
+    }
+
+    pub fn save_checkpoint<P: AsRef<Path>>(&self, file: P) -> Result<()> {
+        let file = file.as_ref();
+        let file = File::create(file).with_context(|| format!("failed to create {:?}", file))?;
+        let mut writer = BufWriter::new(file);
+        encode::write(&mut writer, &self).context("failed to write checkpoint")?;
+        Ok(())
+    }
+
+    pub fn load_checkpoint<P: AsRef<Path>>(file: P) -> Result<Self> {
+        let file = file.as_ref();
+        let file = File::open(file).with_context(|| format!("failed to open {:?}", file))?;
+        let mut reader = BufReader::new(file);
+        let engine = decode::from_read(&mut reader).context("failed to read checkpoint")?;
+        Ok(engine)
     }
 }

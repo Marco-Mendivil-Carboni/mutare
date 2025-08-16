@@ -10,8 +10,8 @@ pub struct Accumulator {
 
 #[derive(Serialize)]
 pub struct AccumulatorReport {
-    pub mean: f64,
-    pub std_dev: f64,
+    mean: f64,
+    std_dev: f64,
 }
 
 impl Accumulator {
@@ -44,10 +44,10 @@ pub struct TimeSeries {
 
 #[derive(Serialize)]
 pub struct TimeSeriesReport {
-    pub mean: f64,
-    pub std_dev: f64,
-    pub sem: f64,
-    pub is_equil: bool,
+    mean: f64,
+    std_dev: f64,
+    sem: f64,
+    is_equil: bool,
 }
 
 impl TimeSeries {
@@ -58,6 +58,7 @@ impl TimeSeries {
     pub fn report(&self) -> TimeSeriesReport {
         let i_equil = compute_opt_i_equil(&self.vals);
         let equil_time_series = &self.vals[i_equil..];
+
         TimeSeriesReport {
             mean: compute_mean(equil_time_series),
             std_dev: compute_var(equil_time_series).sqrt(),
