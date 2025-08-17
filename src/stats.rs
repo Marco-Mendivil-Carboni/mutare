@@ -8,7 +8,7 @@ pub struct Report {
     #[serde(skip_serializing_if = "Option::is_none")]
     sem: Option<f64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    is_equil: Option<bool>,
+    is_eq: Option<bool>,
 }
 
 impl Default for Report {
@@ -17,7 +17,7 @@ impl Default for Report {
             mean: f64::NAN,
             std_dev: f64::NAN,
             sem: None,
-            is_equil: None,
+            is_eq: None,
         }
     }
 }
@@ -42,14 +42,14 @@ impl Accumulator {
 
     pub fn report(&self) -> Report {
         Report {
-            mean: if self.n_vals > 1 { self.mean } else { f64::NAN },
+            mean: if self.n_vals > 0 { self.mean } else { f64::NAN },
             std_dev: if self.n_vals > 1 {
                 (self.diff_2_sum / (self.n_vals as f64 - 1.0)).sqrt()
             } else {
                 f64::NAN
             },
             sem: None,
-            is_equil: None,
+            is_eq: None,
         }
     }
 }
@@ -69,14 +69,17 @@ impl TimeSeries {
             return Report::default();
         }
 
-        let i_equil = compute_opt_i_equil(&self.vals);
-        let equil_time_series = &self.vals[i_equil..];
+        let opt_eq_idx = compute_opt_eq_idx(&self.vals);
+        let eq_time_series = match opt_eq_idx {
+            Some(opt_eq_idx) => &self.vals[opt_eq_idx..],
+            None => &self.vals,
+        };
 
         Report {
-            mean: compute_mean(equil_time_series),
-            std_dev: compute_var(equil_time_series).sqrt(),
-            sem: Some(compute_sem(equil_time_series)),
-            is_equil: Some(i_equil != self.vals.len() / 2),
+            mean: compute_mean(eq_time_series),
+            std_dev: compute_var(eq_time_series).sqrt(),
+            sem: Some(compute_sem(eq_time_series)),
+            is_eq: Some(opt_eq_idx.is_some()),
         }
     }
 }
@@ -137,32 +140,37 @@ fn compute_sem(time_series: &[f64]) -> f64 {
 }
 
 /// Compute the optimal equilibration index using the marginal standard error rule
-fn compute_opt_i_equil(time_series: &[f64]) -> usize {
+fn compute_opt_eq_idx(time_series: &[f64]) -> Option<usize> {
     if time_series.is_empty() {
-        return 0;
+        return None;
     }
 
     let n_vals = time_series.len();
     let n_idxs = n_vals.ilog2() + 1;
-    let i_equils: Vec<_> = (0..n_idxs)
-        .map(|idx| n_vals / (2 as usize).pow(n_idxs - idx))
-        .collect();
+    let eq_idxs: Vec<_> = (0..n_idxs).map(|idx| n_vals >> (n_idxs - idx)).collect();
 
     let mut min_mse = f64::INFINITY;
-    let mut opt_i_equil = time_series.len() / 2;
+    let mut opt_eq_idx = None;
 
-    for i_equil in i_equils {
-        let aux_time_series = &time_series[i_equil..];
+    for &eq_idx in &eq_idxs {
+        let aux_time_series = &time_series[eq_idx..];
         let n_vals = aux_time_series.len();
 
+        if n_vals < 2 {
+            continue;
+        }
         let var = compute_var(aux_time_series);
         let mse = var * (n_vals - 1) as f64 / n_vals.pow(2) as f64;
 
         if mse < min_mse {
             min_mse = mse;
-            opt_i_equil = i_equil;
+            opt_eq_idx = Some(eq_idx);
         }
     }
 
-    opt_i_equil
+    if opt_eq_idx == eq_idxs.last().copied() {
+        return None;
+    } else {
+        return opt_eq_idx;
+    }
 }
