@@ -61,19 +61,6 @@ impl Manager {
         Ok(())
     }
 
-    fn trajectory_file(&self, sim_idx: usize, file_idx: usize) -> PathBuf {
-        self.sim_dir
-            .join(format!("trajectory-{sim_idx:04}-{file_idx:04}.bin"))
-    }
-
-    fn checkpoint_file(&self, sim_idx: usize) -> PathBuf {
-        self.sim_dir.join(format!("checkpoint-{sim_idx:04}.bin"))
-    }
-
-    fn results_file(&self, sim_idx: usize) -> PathBuf {
-        self.sim_dir.join(format!("results-{sim_idx:04}.bin"))
-    }
-
     fn count_entries(&self, regex: &str) -> Result<usize> {
         let regex = regex::Regex::new(regex)?;
         let count = fs::read_dir(&self.sim_dir)
@@ -87,5 +74,18 @@ impl Manager {
             })
             .count();
         Ok(count)
+    }
+
+    fn trajectory_file(&self, sim_idx: usize, file_idx: usize) -> PathBuf {
+        self.sim_dir
+            .join(format!("trajectory-{sim_idx:04}-{file_idx:04}.bin"))
+    }
+
+    fn checkpoint_file(&self, sim_idx: usize) -> PathBuf {
+        self.sim_dir.join(format!("checkpoint-{sim_idx:04}.bin"))
+    }
+
+    fn results_file(&self, sim_idx: usize) -> PathBuf {
+        self.sim_dir.join(format!("results-{sim_idx:04}.bin"))
     }
 }

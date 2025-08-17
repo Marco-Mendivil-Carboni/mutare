@@ -75,6 +75,26 @@ impl Engine {
         Ok(())
     }
 
+    pub fn save_checkpoint<P: AsRef<Path>>(&self, file: P) -> Result<()> {
+        let file = file.as_ref();
+        let file = File::create(file).with_context(|| format!("failed to create {:?}", file))?;
+        let mut writer = BufWriter::new(file);
+        encode::write(&mut writer, &self).context("failed to write checkpoint")?;
+        Ok(())
+    }
+
+    pub fn load_checkpoint<P: AsRef<Path>>(file: P) -> Result<Self> {
+        let file = file.as_ref();
+        let file = File::open(file).with_context(|| format!("failed to open {:?}", file))?;
+        let mut reader = BufReader::new(file);
+        let engine = decode::from_read(&mut reader).context("failed to read checkpoint")?;
+        Ok(engine)
+    }
+
+    pub fn cfg(&self) -> &Config {
+        &self.cfg
+    }
+
     fn perform_step(
         &mut self,
         i_agt_rep: &mut Vec<usize>,
@@ -173,25 +193,5 @@ impl Engine {
                 self.state.agt_vec.swap_remove(i_agt);
             }
         }
-    }
-
-    pub fn save_checkpoint<P: AsRef<Path>>(&self, file: P) -> Result<()> {
-        let file = file.as_ref();
-        let file = File::create(file).with_context(|| format!("failed to create {:?}", file))?;
-        let mut writer = BufWriter::new(file);
-        encode::write(&mut writer, &self).context("failed to write checkpoint")?;
-        Ok(())
-    }
-
-    pub fn load_checkpoint<P: AsRef<Path>>(file: P) -> Result<Self> {
-        let file = file.as_ref();
-        let file = File::open(file).with_context(|| format!("failed to open {:?}", file))?;
-        let mut reader = BufReader::new(file);
-        let engine = decode::from_read(&mut reader).context("failed to read checkpoint")?;
-        Ok(engine)
-    }
-
-    pub fn cfg(&self) -> &Config {
-        &self.cfg
     }
 }
