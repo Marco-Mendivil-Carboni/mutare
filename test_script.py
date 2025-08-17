@@ -1,7 +1,7 @@
 import msgpack
 import json
 
-file_path = "Simulations/analysis-000.bin"
+file_path = "Simulations/results-0000.bin"
 
 with open(file_path, "rb") as f:
     unpacker = msgpack.Unpacker(f, raw=False)

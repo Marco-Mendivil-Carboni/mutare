@@ -2,19 +2,12 @@ use crate::analysis::Analyzer;
 use crate::config::Config;
 use crate::engine::Engine;
 use anyhow::{Context, Result};
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
+use std::{fs, path::PathBuf};
 
 pub struct Manager {
     sim_dir: PathBuf,
     cfg: Config,
 }
-
-const CKPT_PRE: &str = "checkpoint";
-const TRAJ_PRE: &str = "trajectory";
-const ANA_PRE: &str = "analysis";
 
 impl Manager {
     pub fn new(sim_dir: PathBuf, cfg: Config) -> Self {
@@ -22,69 +15,68 @@ impl Manager {
     }
 
     pub fn run_simulation(&self, sim_idx: Option<usize>) -> Result<()> {
-        let new_sim = sim_idx.is_none();
-        let mut sim_idx = sim_idx.unwrap_or(0);
-
-        let file_idx;
-        let mut sim;
-
-        if new_sim {
-            sim_idx = count_entries(&self.sim_dir, &format!("^{CKPT_PRE}-.*$"))?;
-            file_idx = 0;
-            sim = Engine::generate_initial_condition(self.cfg.clone())?;
-        } else {
-            file_idx = count_entries(&self.sim_dir, &format!("^{TRAJ_PRE}-{sim_idx:03}.*$"))?;
-            sim =
-                Engine::load_checkpoint(self.sim_dir.join(format!("{CKPT_PRE}-{sim_idx:03}.bin")))?;
-        }
+        let (sim_idx, file_idx, mut sim) = match sim_idx {
+            None => {
+                let sim_idx = self.count_entries(&format!("^checkpoint-.*$"))?;
+                let sim = Engine::generate_initial_condition(self.cfg.clone())?;
+                (sim_idx, 0, sim)
+            }
+            Some(sim_idx) => {
+                let file_idx = self.count_entries(&format!("^trajectory-{sim_idx:04}.*$"))?;
+                let sim = Engine::load_checkpoint(self.checkpoint_file(sim_idx))?;
+                (sim_idx, file_idx, sim)
+            }
+        };
 
         log::info!("{} = {sim_idx:03}", stringify!(sim_idx));
         log::info!("{} = {file_idx:03}", stringify!(file_idx));
 
-        sim.run_simulation(
-            self.sim_dir
-                .join(format!("{TRAJ_PRE}-{sim_idx:03}-{file_idx:03}.bin")),
-        )?;
+        sim.run_simulation(self.trajectory_file(sim_idx, file_idx))?;
 
-        sim.save_checkpoint(self.sim_dir.join(format!("{CKPT_PRE}-{sim_idx:03}.bin")))?;
+        sim.save_checkpoint(self.checkpoint_file(sim_idx))?;
 
         Ok(())
     }
 
     pub fn run_analysis(&self) -> Result<()> {
-        let n_sim = count_entries(&self.sim_dir, &format!("^{CKPT_PRE}-.*$"))?;
-
+        let n_sim = self.count_entries(&format!("^checkpoint-.*$"))?;
         for sim_idx in 0..n_sim {
-            let n_files = count_entries(&self.sim_dir, &format!("^{TRAJ_PRE}-{sim_idx:03}-.*$"))?;
-
+            let n_files = self.count_entries(&format!("^trajectory-{sim_idx:04}-.*$"))?;
             let mut ana = Analyzer::new(self.cfg.clone());
-
             for file_idx in 0..n_files {
-                ana.add_file(
-                    self.sim_dir
-                        .join(format!("{TRAJ_PRE}-{sim_idx:03}-{file_idx:03}.bin")),
-                )?;
+                ana.add_file(self.trajectory_file(sim_idx, file_idx))?;
             }
-
-            ana.save_results(self.sim_dir.join(format!("{ANA_PRE}-{sim_idx:03}.bin")))?;
+            ana.save_results(self.results_file(sim_idx))?;
         }
 
         Ok(())
     }
-}
 
-fn count_entries<P: AsRef<Path>>(dir: P, regex: &str) -> Result<usize> {
-    let dir = dir.as_ref();
-    let regex = regex::Regex::new(regex)?;
-    let count = fs::read_dir(dir)
-        .with_context(|| format!("failed to read {:?}", dir))?
-        .filter_map(Result::ok)
-        .filter(|entry| {
-            entry
-                .file_name()
-                .to_str()
-                .is_some_and(|name| regex.is_match(name))
-        })
-        .count();
-    Ok(count)
+    fn trajectory_file(&self, sim_idx: usize, file_idx: usize) -> PathBuf {
+        self.sim_dir
+            .join(format!("trajectory-{sim_idx:04}-{file_idx:04}.bin"))
+    }
+
+    fn checkpoint_file(&self, sim_idx: usize) -> PathBuf {
+        self.sim_dir.join(format!("checkpoint-{sim_idx:04}.bin"))
+    }
+
+    fn results_file(&self, sim_idx: usize) -> PathBuf {
+        self.sim_dir.join(format!("results-{sim_idx:04}.bin"))
+    }
+
+    fn count_entries(&self, regex: &str) -> Result<usize> {
+        let regex = regex::Regex::new(regex)?;
+        let count = fs::read_dir(&self.sim_dir)
+            .with_context(|| format!("failed to read {:?}", self.sim_dir))?
+            .filter_map(Result::ok)
+            .filter(|entry| {
+                entry
+                    .file_name()
+                    .to_str()
+                    .is_some_and(|name| regex.is_match(name))
+            })
+            .count();
+        Ok(count)
+    }
 }
