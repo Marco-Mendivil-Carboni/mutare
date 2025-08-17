@@ -1,8 +1,11 @@
 use crate::analysis::Analyzer;
 use crate::config::Config;
 use crate::engine::Engine;
-use anyhow::{Context, Result};
-use std::{fs, path::PathBuf};
+use anyhow::{Context, Result, bail};
+use std::{
+    fs,
+    path::{Path, PathBuf},
+};
 
 pub struct Manager {
     sim_dir: PathBuf,
@@ -10,8 +13,11 @@ pub struct Manager {
 }
 
 impl Manager {
-    pub fn new(sim_dir: PathBuf, cfg: Config) -> Self {
-        Self { sim_dir, cfg }
+    pub fn new<P: AsRef<Path>>(sim_dir: P, cfg: Config) -> Self {
+        Self {
+            sim_dir: sim_dir.as_ref().to_path_buf(),
+            cfg,
+        }
     }
 
     pub fn run_simulation(&self, sim_idx: Option<usize>) -> Result<()> {
@@ -23,8 +29,10 @@ impl Manager {
             }
             Some(sim_idx) => {
                 let file_idx = self.count_entries(&format!("^trajectory-{sim_idx:04}.*$"))?;
-                let engine =
-                    Engine::load_checkpoint(self.checkpoint_file(sim_idx), self.cfg.clone())?;
+                let engine = Engine::load_checkpoint(self.checkpoint_file(sim_idx))?;
+                if engine.cfg() != &self.cfg {
+                    bail!("checkpoint cfg differs from the current cfg");
+                }
                 (sim_idx, file_idx, engine)
             }
         };

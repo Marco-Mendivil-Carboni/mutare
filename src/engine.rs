@@ -1,6 +1,6 @@
 use crate::config::Config;
 use crate::model::{Agent, State};
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result};
 use ndarray::Array1;
 use rand::prelude::*;
 use rand_chacha::ChaCha12Rng;
@@ -183,14 +183,15 @@ impl Engine {
         Ok(())
     }
 
-    pub fn load_checkpoint<P: AsRef<Path>>(file: P, cfg: Config) -> Result<Self> {
+    pub fn load_checkpoint<P: AsRef<Path>>(file: P) -> Result<Self> {
         let file = file.as_ref();
         let file = File::open(file).with_context(|| format!("failed to open {:?}", file))?;
         let mut reader = BufReader::new(file);
-        let engine: Engine = decode::from_read(&mut reader).context("failed to read checkpoint")?;
-        if engine.cfg != cfg {
-            bail!("checkpoint cfg differs from the provided cfg");
-        }
+        let engine = decode::from_read(&mut reader).context("failed to read checkpoint")?;
         Ok(engine)
+    }
+
+    pub fn cfg(&self) -> &Config {
+        &self.cfg
     }
 }
