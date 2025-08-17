@@ -3,7 +3,7 @@ use ndarray::{Array2, ArrayView1, ArrayView2};
 use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, fs::File, io::BufReader, ops::RangeBounds, path::Path};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Config {
     pub n_env: usize,
     pub n_phe: usize,

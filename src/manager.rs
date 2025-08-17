@@ -15,25 +15,26 @@ impl Manager {
     }
 
     pub fn run_simulation(&self, sim_idx: Option<usize>) -> Result<()> {
-        let (sim_idx, file_idx, mut sim) = match sim_idx {
+        let (sim_idx, file_idx, mut engine) = match sim_idx {
             None => {
                 let sim_idx = self.count_entries(&format!("^checkpoint-.*$"))?;
-                let sim = Engine::generate_initial_condition(self.cfg.clone())?;
-                (sim_idx, 0, sim)
+                let engine = Engine::generate_initial_condition(self.cfg.clone())?;
+                (sim_idx, 0, engine)
             }
             Some(sim_idx) => {
                 let file_idx = self.count_entries(&format!("^trajectory-{sim_idx:04}.*$"))?;
-                let sim = Engine::load_checkpoint(self.checkpoint_file(sim_idx))?;
-                (sim_idx, file_idx, sim)
+                let engine =
+                    Engine::load_checkpoint(self.checkpoint_file(sim_idx), self.cfg.clone())?;
+                (sim_idx, file_idx, engine)
             }
         };
 
         log::info!("{} = {sim_idx:03}", stringify!(sim_idx));
         log::info!("{} = {file_idx:03}", stringify!(file_idx));
 
-        sim.run_simulation(self.trajectory_file(sim_idx, file_idx))?;
+        engine.run_simulation(self.trajectory_file(sim_idx, file_idx))?;
 
-        sim.save_checkpoint(self.checkpoint_file(sim_idx))?;
+        engine.save_checkpoint(self.checkpoint_file(sim_idx))?;
 
         Ok(())
     }
@@ -42,11 +43,11 @@ impl Manager {
         let n_sim = self.count_entries(&format!("^checkpoint-.*$"))?;
         for sim_idx in 0..n_sim {
             let n_files = self.count_entries(&format!("^trajectory-{sim_idx:04}-.*$"))?;
-            let mut ana = Analyzer::new(self.cfg.clone());
+            let mut analyzer = Analyzer::new(self.cfg.clone());
             for file_idx in 0..n_files {
-                ana.add_file(self.trajectory_file(sim_idx, file_idx))?;
+                analyzer.add_file(self.trajectory_file(sim_idx, file_idx))?;
             }
-            ana.save_results(self.results_file(sim_idx))?;
+            analyzer.save_results(self.results_file(sim_idx))?;
         }
 
         Ok(())
