@@ -1,7 +1,7 @@
 use ndarray::Array1;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Agent {
     phe: usize,
 
@@ -22,7 +22,7 @@ impl Agent {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct State {
     pub env: usize,
 

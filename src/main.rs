@@ -28,7 +28,7 @@ fn main() -> Result<()> {
         .init();
 
     let args = Args::parse();
-    log::info!("{} = {args:#?}", stringify!(args));
+    log::info!("{args:#?}");
 
     let cfg = Config::from_file("config.json")
         .context("failed to create config")
@@ -36,7 +36,7 @@ fn main() -> Result<()> {
             log::error!("{:?}", err);
             std::process::exit(1);
         });
-    log::info!("{} = {cfg:#?}", stringify!(cfg));
+    log::info!("{cfg:#?}");
 
     let cfg_str = serde_json::to_string_pretty(&cfg)?;
     fs::write("config.json", cfg_str)?;

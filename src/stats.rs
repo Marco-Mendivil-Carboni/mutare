@@ -37,7 +37,7 @@ impl Accumulator {
     }
 }
 
-#[derive(Clone, Default)]
+#[derive(Default)]
 pub struct TimeSeries {
     vals: Vec<f64>,
 }
