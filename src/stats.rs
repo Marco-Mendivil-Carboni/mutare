@@ -84,6 +84,37 @@ impl TimeSeries {
     }
 }
 
+/// Compute the optimal equilibration index using the marginal standard error rule
+fn compute_opt_eq_idx(time_series: &[f64]) -> Option<usize> {
+    if time_series.is_empty() {
+        return None;
+    }
+
+    let n_vals = time_series.len();
+    let n_idxs = n_vals.ilog2() + 1;
+    let eq_idxs: Vec<_> = (0..n_idxs).map(|idx| n_vals >> (n_idxs - idx)).collect();
+    let opt_eq_idx = eq_idxs
+        .iter()
+        .filter_map(|&eq_idx| {
+            let aux_time_series = &time_series[eq_idx..];
+            let n_vals = aux_time_series.len();
+            if n_vals < 2 {
+                return None;
+            }
+            let var = compute_var(aux_time_series);
+            let mse = var * (n_vals - 1) as f64 / (n_vals * n_vals) as f64;
+            Some((eq_idx, mse))
+        })
+        .min_by(|(_, a), (_, b)| a.total_cmp(b))
+        .map(|(eq_idx, _)| eq_idx);
+
+    if opt_eq_idx == eq_idxs.last().copied() {
+        return None;
+    } else {
+        return opt_eq_idx;
+    }
+}
+
 fn compute_mean(time_series: &[f64]) -> f64 {
     if time_series.is_empty() {
         return f64::NAN;
@@ -138,35 +169,4 @@ fn compute_sem(time_series: &[f64]) -> f64 {
     }
 
     sem2_ests.last().copied().unwrap_or(f64::NAN).sqrt()
-}
-
-/// Compute the optimal equilibration index using the marginal standard error rule
-fn compute_opt_eq_idx(time_series: &[f64]) -> Option<usize> {
-    if time_series.is_empty() {
-        return None;
-    }
-
-    let n_vals = time_series.len();
-    let n_idxs = n_vals.ilog2() + 1;
-    let eq_idxs: Vec<_> = (0..n_idxs).map(|idx| n_vals >> (n_idxs - idx)).collect();
-    let opt_eq_idx = eq_idxs
-        .iter()
-        .filter_map(|&eq_idx| {
-            let aux_time_series = &time_series[eq_idx..];
-            let n_vals = aux_time_series.len();
-            if n_vals < 2 {
-                return None;
-            }
-            let var = compute_var(aux_time_series);
-            let mse = var * (n_vals - 1) as f64 / (n_vals * n_vals) as f64;
-            Some((eq_idx, mse))
-        })
-        .min_by(|(_, a), (_, b)| a.total_cmp(b))
-        .map(|(eq_idx, _)| eq_idx);
-
-    if opt_eq_idx == eq_idxs.last().copied() {
-        return None;
-    } else {
-        return opt_eq_idx;
-    }
 }
