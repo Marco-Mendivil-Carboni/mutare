@@ -109,7 +109,7 @@ impl Analyzer {
         let mut reader = BufReader::new(file);
 
         for _ in 0..self.cfg.saves_per_file {
-            let state = decode::from_read(&mut reader).context("failed to read state")?;
+            let state = decode::from_read(&mut reader).context("failed to deserialize state")?;
             for obs in &mut self.obs_vec {
                 obs.update(&state);
             }

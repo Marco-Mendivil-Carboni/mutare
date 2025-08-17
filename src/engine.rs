@@ -62,7 +62,7 @@ impl Engine {
                     .context("failed to perform step")?;
             }
 
-            encode::write(&mut writer, &self.state).context("failed to write state")?;
+            encode::write(&mut writer, &self.state).context("failed to serialize state")?;
 
             let progress = 100.0 * (i_save + 1) as f64 / self.cfg.saves_per_file as f64;
             log::info!("completed {:06.2}%", progress);
@@ -79,7 +79,7 @@ impl Engine {
         let file = file.as_ref();
         let file = File::create(file).with_context(|| format!("failed to create {:?}", file))?;
         let mut writer = BufWriter::new(file);
-        encode::write(&mut writer, &self).context("failed to write checkpoint")?;
+        encode::write(&mut writer, &self).context("failed to serialize engine")?;
         Ok(())
     }
 
@@ -87,7 +87,7 @@ impl Engine {
         let file = file.as_ref();
         let file = File::open(file).with_context(|| format!("failed to open {:?}", file))?;
         let mut reader = BufReader::new(file);
-        let engine = decode::from_read(&mut reader).context("failed to read checkpoint")?;
+        let engine = decode::from_read(&mut reader).context("failed to deserialize engine")?;
         Ok(engine)
     }
 
@@ -120,7 +120,7 @@ impl Engine {
     }
 
     fn update_environment(&mut self) -> Result<()> {
-        let env_dist = WeightedIndex::new(self.cfg.prob_env.row(self.state.env))?;
+        let env_dist = WeightedIndex::new(&self.cfg.prob_env[self.state.env])?;
         self.state.env = env_dist.sample(&mut self.rng);
         Ok(())
     }
@@ -131,11 +131,11 @@ impl Engine {
         i_agt_dec: &mut Vec<usize>,
     ) -> Result<()> {
         let mut rep_dist_vec = Vec::with_capacity(self.cfg.n_phe);
-        for &prob in self.cfg.prob_rep.row(self.state.env) {
+        for &prob in &self.cfg.prob_rep[self.state.env] {
             rep_dist_vec.push(Bernoulli::new(prob)?);
         }
         let mut dec_dist_vec = Vec::with_capacity(self.cfg.n_phe);
-        for &prob in self.cfg.prob_dec.row(self.state.env) {
+        for &prob in &self.cfg.prob_dec[self.state.env] {
             dec_dist_vec.push(Bernoulli::new(prob)?);
         }
         i_agt_rep.clear();

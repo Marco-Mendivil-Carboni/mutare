@@ -1,5 +1,6 @@
 use anyhow::{Context, Result, bail};
 use ndarray::{Array2, ArrayView1, ArrayView2};
+// use rmp_serde::decode;
 use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, fs::File, io::BufReader, ops::RangeBounds, path::Path};
 
@@ -8,9 +9,9 @@ pub struct Config {
     pub n_env: usize,
     pub n_phe: usize,
 
-    pub prob_env: Array2<f64>,
-    pub prob_rep: Array2<f64>,
-    pub prob_dec: Array2<f64>,
+    pub prob_env: Vec<Vec<f64>>,
+    pub prob_rep: Vec<Vec<f64>>,
+    pub prob_dec: Vec<Vec<f64>>,
 
     pub n_agt_init: usize,
 
@@ -26,26 +27,51 @@ impl Config {
         let file = File::open(file).with_context(|| format!("failed to open {:?}", file))?;
         let reader = BufReader::new(file);
 
-        let cfg: Config = serde_json::from_reader(reader).context("failed to read cfg")?;
+        let config: Config =
+            serde_json::from_reader(reader).context("failed to deserialize config")?;
+        // let config: Config = decode::from_read(reader).context("failed to deserialize config")?;
 
-        check_num(cfg.n_env, 1..100).context("invalid number of environments")?;
-        check_num(cfg.n_phe, 1..100).context("invalid number of phenotypes")?;
+        config.validate().context("failed to validate config")?;
 
-        check_mat(cfg.prob_env.view(), (cfg.n_env, cfg.n_env), true)
+        Ok(config)
+    }
+
+    fn validate(&self) -> Result<()> {
+        check_num(self.n_env, 1..100).context("invalid number of environments")?;
+        check_num(self.n_phe, 1..100).context("invalid number of phenotypes")?;
+
+        check_mat(self.prob_env_arr().view(), (self.n_env, self.n_env), true)
             .context("invalid environment probabilities")?;
-        check_mat(cfg.prob_rep.view(), (cfg.n_env, cfg.n_phe), false)
+        check_mat(self.prob_rep_arr().view(), (self.n_env, self.n_phe), false)
             .context("invalid replicating probabilities")?;
-        check_mat(cfg.prob_dec.view(), (cfg.n_env, cfg.n_phe), false)
+        check_mat(self.prob_dec_arr().view(), (self.n_env, self.n_phe), false)
             .context("invalid deceased probabilities")?;
 
-        check_num(cfg.n_agt_init, 1..100_000).context("invalid initial number of agents")?;
+        check_num(self.n_agt_init, 1..100_000).context("invalid initial number of agents")?;
+        check_num(self.std_dev_mut, 0.0..1.0).context("invalid mutation standard deviation")?;
+        check_num(self.steps_per_save, 1..10_000).context("invalid number of steps per save")?;
+        check_num(self.saves_per_file, 1..10_000).context("invalid number of saves per file")?;
 
-        check_num(cfg.std_dev_mut, 0.0..1.0).context("invalid mutation standard deviation")?;
+        Ok(())
+    }
 
-        check_num(cfg.steps_per_save, 1..10_000).context("invalid number of steps per save")?;
-        check_num(cfg.saves_per_file, 1..10_000).context("invalid number of saves per file")?;
+    fn vecvec_to_array2(vec: &Vec<Vec<f64>>) -> Array2<f64> {
+        let nrows = vec.len();
+        let ncols = vec[0].len();
+        let flat: Vec<f64> = vec.iter().flat_map(|row| row.iter().cloned()).collect();
+        Array2::from_shape_vec((nrows, ncols), flat).expect("All rows must have same length") // TEMPORARY
+    }
 
-        Ok(cfg)
+    pub fn prob_env_arr(&self) -> Array2<f64> {
+        Self::vecvec_to_array2(&self.prob_env) // TEMPORARY
+    }
+
+    pub fn prob_rep_arr(&self) -> Array2<f64> {
+        Self::vecvec_to_array2(&self.prob_rep) // TEMPORARY
+    }
+
+    pub fn prob_dec_arr(&self) -> Array2<f64> {
+        Self::vecvec_to_array2(&self.prob_dec) // TEMPORARY
     }
 }
 
