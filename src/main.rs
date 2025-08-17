@@ -9,7 +9,8 @@ use crate::config::Config;
 use crate::manager::Manager;
 use anyhow::{Context, Result};
 use clap::Parser;
-use std::{fs, path::PathBuf, time::Instant};
+use rmp_serde::encode;
+use std::{fs::File, io::BufWriter, path::PathBuf, time::Instant};
 
 #[derive(Debug, Parser)]
 #[command(version, about)]
@@ -38,8 +39,9 @@ fn main() -> Result<()> {
         });
     log::info!("{cfg:#?}");
 
-    let cfg_str = serde_json::to_string_pretty(&cfg)?;
-    fs::write("config.json", cfg_str)?;
+    let file = File::create("config.bin")?;
+    let mut writer = BufWriter::new(file);
+    encode::write(&mut writer, &cfg)?;
 
     let mgr = Manager::new(args.sim_dir.clone(), cfg);
 

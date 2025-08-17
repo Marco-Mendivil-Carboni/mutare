@@ -1,6 +1,5 @@
 use anyhow::{Context, Result, bail};
-use ndarray::{Array2, ArrayView1, ArrayView2};
-// use rmp_serde::decode;
+use rmp_serde::decode;
 use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, fs::File, io::BufReader, ops::RangeBounds, path::Path};
 
@@ -40,11 +39,11 @@ impl Config {
         check_num(self.n_env, 1..100).context("invalid number of environments")?;
         check_num(self.n_phe, 1..100).context("invalid number of phenotypes")?;
 
-        check_mat(self.prob_env_arr().view(), (self.n_env, self.n_env), true)
+        check_mat(&self.prob_env, (self.n_env, self.n_env), true)
             .context("invalid environment probabilities")?;
-        check_mat(self.prob_rep_arr().view(), (self.n_env, self.n_phe), false)
+        check_mat(&self.prob_rep, (self.n_env, self.n_phe), false)
             .context("invalid replicating probabilities")?;
-        check_mat(self.prob_dec_arr().view(), (self.n_env, self.n_phe), false)
+        check_mat(&self.prob_dec, (self.n_env, self.n_phe), false)
             .context("invalid deceased probabilities")?;
 
         check_num(self.n_agt_init, 1..100_000).context("invalid initial number of agents")?;
@@ -54,25 +53,6 @@ impl Config {
 
         Ok(())
     }
-
-    fn vecvec_to_array2(vec: &Vec<Vec<f64>>) -> Array2<f64> {
-        let nrows = vec.len();
-        let ncols = vec[0].len();
-        let flat: Vec<f64> = vec.iter().flat_map(|row| row.iter().cloned()).collect();
-        Array2::from_shape_vec((nrows, ncols), flat).expect("All rows must have same length") // TEMPORARY
-    }
-
-    pub fn prob_env_arr(&self) -> Array2<f64> {
-        Self::vecvec_to_array2(&self.prob_env) // TEMPORARY
-    }
-
-    pub fn prob_rep_arr(&self) -> Array2<f64> {
-        Self::vecvec_to_array2(&self.prob_rep) // TEMPORARY
-    }
-
-    pub fn prob_dec_arr(&self) -> Array2<f64> {
-        Self::vecvec_to_array2(&self.prob_dec) // TEMPORARY
-    }
 }
 
 fn check_num<T, R>(num: T, range: R) -> Result<()>
@@ -81,48 +61,48 @@ where
     R: RangeBounds<T> + Debug,
 {
     if !range.contains(&num) {
-        bail!("number must be in the range {:?}, but is {:?}", range, num);
+        bail!("number must be in the range {range:?}, but is {num:?}");
     }
-
     Ok(())
 }
 
-fn check_vec(vec: ArrayView1<f64>, exp_len: usize, prob_vec: bool) -> Result<()> {
+fn check_vec(vec: &[f64], exp_len: usize, prob_vec: bool) -> Result<()> {
     let len = vec.len();
     if len != exp_len {
         bail!("vector length must be {exp_len}, but is {len}");
     }
-
     if !prob_vec {
         return Ok(());
     }
     if vec.iter().any(|&ele| ele < 0.0) {
         bail!("vector must have only non-negative elements");
     }
-    let sum = vec.sum();
+    let sum = vec.iter().sum::<f64>();
     let tol = 1e-8;
     if (sum - 1.0).abs() > tol {
         bail!("vector must sum to 1.0 (tolerance: {tol}), but sums to {sum}");
     }
-
     Ok(())
 }
 
-fn check_mat(mat: ArrayView2<f64>, exp_dim: (usize, usize), trans_mat: bool) -> Result<()> {
-    let dim = mat.dim();
-    if dim != exp_dim {
-        bail!("matrix shape must be {:?}, but is {:?}", exp_dim, dim);
+fn check_mat(mat: &[Vec<f64>], exp_dim: (usize, usize), trans_mat: bool) -> Result<()> {
+    let exp_n_rows = exp_dim.0;
+    let exp_n_cols = exp_dim.1;
+    let n_rows = mat.len();
+    if n_rows != exp_n_rows {
+        bail!("matrix must have {exp_n_rows} rows, but has {n_rows}");
     }
-
+    for (i_row, row) in mat.iter().enumerate() {
+        check_vec(row, exp_n_cols, false).with_context(|| format!("invalid row {i_row}"))?;
+    }
     if !trans_mat {
         return Ok(());
     }
-    if dim.0 != dim.1 {
-        bail!("matrix is not square");
+    if exp_n_rows != exp_n_cols {
+        bail!("matrix must be square");
     }
-    for (i_row, row) in mat.outer_iter().enumerate() {
-        check_vec(row, dim.1, true).with_context(|| format!("invalid row {i_row}"))?;
+    for (i_row, row) in mat.iter().enumerate() {
+        check_vec(row, exp_n_cols, true).with_context(|| format!("invalid row {i_row}"))?;
     }
-
     Ok(())
 }
