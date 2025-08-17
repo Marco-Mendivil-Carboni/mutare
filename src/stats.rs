@@ -1,17 +1,32 @@
 use serde::Serialize;
 use std::default::Default;
 
+#[derive(Serialize)]
+pub struct Report {
+    mean: f64,
+    std_dev: f64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    sem: Option<f64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    is_equil: Option<bool>,
+}
+
+impl Default for Report {
+    fn default() -> Self {
+        Self {
+            mean: f64::NAN,
+            std_dev: f64::NAN,
+            sem: None,
+            is_equil: None,
+        }
+    }
+}
+
 #[derive(Clone, Default)]
 pub struct Accumulator {
     n_vals: usize,
     mean: f64,
     diff_2_sum: f64,
-}
-
-#[derive(Serialize)]
-pub struct AccumulatorReport {
-    mean: f64,
-    std_dev: f64,
 }
 
 impl Accumulator {
@@ -25,14 +40,16 @@ impl Accumulator {
         self.diff_2_sum += diff_a * diff_b;
     }
 
-    pub fn report(&self) -> AccumulatorReport {
-        AccumulatorReport {
-            mean: self.mean,
+    pub fn report(&self) -> Report {
+        Report {
+            mean: if self.n_vals > 1 { self.mean } else { f64::NAN },
             std_dev: if self.n_vals > 1 {
                 (self.diff_2_sum / (self.n_vals as f64 - 1.0)).sqrt()
             } else {
                 f64::NAN
             },
+            sem: None,
+            is_equil: None,
         }
     }
 }
@@ -42,28 +59,24 @@ pub struct TimeSeries {
     vals: Vec<f64>,
 }
 
-#[derive(Serialize)]
-pub struct TimeSeriesReport {
-    mean: f64,
-    std_dev: f64,
-    sem: f64,
-    is_equil: bool,
-}
-
 impl TimeSeries {
     pub fn push(&mut self, val: f64) {
         self.vals.push(val);
     }
 
-    pub fn report(&self) -> TimeSeriesReport {
+    pub fn report(&self) -> Report {
+        if self.vals.is_empty() {
+            return Report::default();
+        }
+
         let i_equil = compute_opt_i_equil(&self.vals);
         let equil_time_series = &self.vals[i_equil..];
 
-        TimeSeriesReport {
+        Report {
             mean: compute_mean(equil_time_series),
             std_dev: compute_var(equil_time_series).sqrt(),
-            sem: compute_sem(equil_time_series),
-            is_equil: i_equil != self.vals.len() / 2,
+            sem: Some(compute_sem(equil_time_series)),
+            is_equil: Some(i_equil != self.vals.len() / 2),
         }
     }
 }
@@ -125,13 +138,18 @@ fn compute_sem(time_series: &[f64]) -> f64 {
 
 /// Compute the optimal equilibration index using the marginal standard error rule
 fn compute_opt_i_equil(time_series: &[f64]) -> usize {
-    let mut min_mse = f64::INFINITY;
-    let mut opt_i_equil = time_series.len() / 2;
+    if time_series.is_empty() {
+        return 0;
+    }
+
     let n_vals = time_series.len();
     let n_idxs = n_vals.ilog2() + 1;
     let i_equils: Vec<_> = (0..n_idxs)
         .map(|idx| n_vals / (2 as usize).pow(n_idxs - idx))
         .collect();
+
+    let mut min_mse = f64::INFINITY;
+    let mut opt_i_equil = time_series.len() / 2;
 
     for i_equil in i_equils {
         let aux_time_series = &time_series[i_equil..];
