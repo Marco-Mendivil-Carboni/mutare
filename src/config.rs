@@ -26,9 +26,7 @@ impl Config {
         let file = File::open(file).with_context(|| format!("failed to open {:?}", file))?;
         let reader = BufReader::new(file);
 
-        let config: Config =
-            serde_json::from_reader(reader).context("failed to deserialize config")?;
-        // let config: Config = decode::from_read(reader).context("failed to deserialize config")?;
+        let config: Config = decode::from_read(reader).context("failed to deserialize config")?;
 
         config.validate().context("failed to validate config")?;
 
@@ -92,8 +90,8 @@ fn check_mat(mat: &[Vec<f64>], exp_dim: (usize, usize), trans_mat: bool) -> Resu
     if n_rows != exp_n_rows {
         bail!("matrix must have {exp_n_rows} rows, but has {n_rows}");
     }
-    for (i_row, row) in mat.iter().enumerate() {
-        check_vec(row, exp_n_cols, false).with_context(|| format!("invalid row {i_row}"))?;
+    if mat.iter().any(|row| row.len() != exp_n_cols) {
+        bail!("matrix must have {exp_n_cols} columns");
     }
     if !trans_mat {
         return Ok(());

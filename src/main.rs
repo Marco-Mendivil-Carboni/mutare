@@ -9,8 +9,7 @@ use crate::config::Config;
 use crate::manager::Manager;
 use anyhow::{Context, Result};
 use clap::Parser;
-use rmp_serde::encode;
-use std::{fs::File, io::BufWriter, path::PathBuf, time::Instant};
+use std::{path::PathBuf, time::Instant};
 
 #[derive(Debug, Parser)]
 #[command(version, about)]
@@ -31,17 +30,13 @@ fn main() -> Result<()> {
     let args = Args::parse();
     log::info!("{args:#?}");
 
-    let cfg = Config::from_file("config.json")
+    let cfg = Config::from_file("config.bin")
         .context("failed to create config")
         .unwrap_or_else(|err| {
             log::error!("{:?}", err);
             std::process::exit(1);
         });
     log::info!("{cfg:#?}");
-
-    let file = File::create("config.bin")?;
-    let mut writer = BufWriter::new(file);
-    encode::write(&mut writer, &cfg)?;
 
     let mgr = Manager::new(args.sim_dir.clone(), cfg);
 
