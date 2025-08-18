@@ -5,48 +5,64 @@ mod manager;
 mod model;
 mod stats;
 
-use crate::config::Config;
 use crate::manager::Manager;
 use anyhow::{Context, Result};
-use clap::Parser;
+use clap::{Parser, Subcommand};
 use std::{path::PathBuf, time::Instant};
 
 #[derive(Debug, Parser)]
 #[command(version, about)]
-struct Args {
-    sim_dir: PathBuf,
-    sim_idx: Option<usize>,
-    #[arg(short, long)]
-    analyze: bool,
+struct CLI {
+    #[command(subcommand)]
+    command: Commands,
 }
 
-fn main() -> Result<()> {
+#[derive(Debug, Subcommand)]
+enum Commands {
+    Run {
+        sim_dir: PathBuf,
+        instance_idx: Option<usize>,
+    },
+    Analyze {
+        sim_dir: PathBuf,
+    },
+}
+
+fn main() {
     env_logger::Builder::new()
         .format_timestamp_millis()
         .filter_level(log::LevelFilter::Info)
         .parse_default_env()
         .init();
 
-    let args = Args::parse();
+    if let Err(err) = run() {
+        log::error!("{err:?}");
+        std::process::exit(1);
+    }
+}
+
+fn run() -> Result<()> {
+    let args = CLI::parse();
     log::info!("{args:#?}");
 
-    let cfg = Config::from_file("config.bin")
-        .context("failed to create config")
-        .unwrap_or_else(|err| {
-            log::error!("{err:?}");
-            std::process::exit(1);
-        });
-    log::info!("{cfg:#?}");
+    match args.command {
+        Commands::Run {
+            sim_dir,
+            instance_idx,
+        } => {
+            let mgr = Manager::new(sim_dir).context("failed to create mgr")?;
 
-    let mgr = Manager::new(args.sim_dir.clone(), cfg);
+            let start = Instant::now();
+            mgr.run_simulation(instance_idx)?;
+            let duration = start.elapsed();
 
-    if args.analyze {
-        mgr.run_analysis()?;
-    } else {
-        let start = Instant::now();
-        mgr.run_simulation(args.sim_idx)?;
-        let duration = start.elapsed();
-        log::info!("elapsed time = {duration:?}");
+            log::info!("elapsed time = {duration:?}");
+        }
+        Commands::Analyze { sim_dir } => {
+            let mgr = Manager::new(sim_dir).context("failed to create mgr")?;
+
+            mgr.run_analysis()?;
+        }
     }
 
     Ok(())

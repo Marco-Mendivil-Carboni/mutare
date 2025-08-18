@@ -141,11 +141,10 @@ impl Engine {
         i_agt_dec.clear();
 
         for (i_agt, agt) in self.state.agt_vec.iter().enumerate() {
-            let phe = agt.phe();
-            if rep_dist_vec[phe].sample(&mut self.rng) {
+            if rep_dist_vec[agt.phe()].sample(&mut self.rng) {
                 i_agt_rep.push(i_agt);
             }
-            if dec_dist_vec[phe].sample(&mut self.rng) {
+            if dec_dist_vec[agt.phe()].sample(&mut self.rng) {
                 i_agt_dec.push(i_agt);
             }
         }

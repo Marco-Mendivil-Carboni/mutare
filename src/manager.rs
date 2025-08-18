@@ -13,11 +13,13 @@ pub struct Manager {
 }
 
 impl Manager {
-    pub fn new<P: AsRef<Path>>(sim_dir: P, cfg: Config) -> Self {
-        Self {
-            sim_dir: sim_dir.as_ref().to_path_buf(),
-            cfg,
-        }
+    pub fn new<P: AsRef<Path>>(sim_dir: P) -> Result<Self> {
+        let sim_dir = sim_dir.as_ref().to_path_buf();
+        let cfg = Config::from_file(sim_dir.join("config.bin")).context("failed to create cfg")?;
+
+        log::info!("{cfg:#?}");
+
+        Ok(Self { sim_dir, cfg })
     }
 
     pub fn run_simulation(&self, sim_idx: Option<usize>) -> Result<()> {
@@ -37,8 +39,10 @@ impl Manager {
             }
         };
 
-        log::info!("{} = {sim_idx:03}", stringify!(sim_idx));
-        log::info!("{} = {file_idx:03}", stringify!(file_idx));
+        log::info!(
+            "trajectory_file = {:?}",
+            self.trajectory_file(sim_idx, file_idx)
+        );
 
         engine.run_simulation(self.trajectory_file(sim_idx, file_idx))?;
 
