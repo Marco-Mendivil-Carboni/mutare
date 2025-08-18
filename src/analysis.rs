@@ -4,16 +4,18 @@ use crate::stats::{Accumulator, TimeSeries};
 use anyhow::{Context, Result};
 use ndarray::Array1;
 use rmp_serde::{decode, encode};
+use serde_value::{Value, to_value};
 use std::{
+    collections::HashMap,
     default::Default,
     fs::File,
-    io::{BufReader, BufWriter, Write},
+    io::{BufReader, BufWriter},
     path::Path,
 };
 
 pub trait Observable {
     fn update(&mut self, state: &State);
-    fn write(&self, writer: &mut dyn Write) -> Result<()>;
+    fn result(&self) -> Result<Value>;
 }
 
 pub struct ProbEnv {
@@ -34,10 +36,9 @@ impl Observable for ProbEnv {
         }
     }
 
-    fn write(&self, writer: &mut dyn Write) -> Result<()> {
+    fn result(&self) -> Result<Value> {
         let reports: Vec<_> = self.acc_vec.iter().map(|acc| acc.report()).collect();
-        encode::write_named(writer, &("prob_env", reports))?;
-        Ok(())
+        Ok(to_value(HashMap::from([("prob_env", reports)]))?)
     }
 }
 
@@ -65,10 +66,9 @@ impl Observable for AvgProbPhe {
             .for_each(|(acc, &val)| acc.add(val));
     }
 
-    fn write(&self, writer: &mut dyn Write) -> Result<()> {
+    fn result(&self) -> Result<Value> {
         let reports: Vec<_> = self.acc_vec.iter().map(|acc| acc.report()).collect();
-        encode::write_named(writer, &("avg_prob_phe", reports))?;
-        Ok(())
+        Ok(to_value(HashMap::from([("avg_prob_phe", reports)]))?)
     }
 }
 
@@ -82,10 +82,9 @@ impl Observable for NAgtDiff {
         self.time_series.push(state.n_agt_diff as f64);
     }
 
-    fn write(&self, writer: &mut dyn Write) -> Result<()> {
+    fn result(&self) -> Result<Value> {
         let report = self.time_series.report();
-        encode::write_named(writer, &("n_agt_diff", report))?;
-        Ok(())
+        Ok(to_value(HashMap::from([("n_agt_diff", report)]))?)
     }
 }
 
@@ -122,10 +121,11 @@ impl Analyzer {
         let file = File::create(file).with_context(|| format!("failed to create {:?}", file))?;
         let mut writer = BufWriter::new(file);
 
-        for obs in &self.obs_vec {
-            obs.write(&mut writer)
-                .context("failed to write observable")?;
-        }
+        let results: Result<Vec<_>> = self.obs_vec.iter().map(|obs| obs.result()).collect();
+        let results = results.context("failed to generate results")?;
+
+        encode::write_named(&mut writer, &results).context("failed to serialize results")?;
+
         Ok(())
     }
 }

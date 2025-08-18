@@ -75,7 +75,7 @@ fn check_vec(vec: &[f64], exp_len: usize, prob_vec: bool) -> Result<()> {
     if vec.iter().any(|&ele| ele < 0.0) {
         bail!("vector must have only non-negative elements");
     }
-    let sum = vec.iter().sum::<f64>();
+    let sum: f64 = vec.iter().sum();
     let tol = 1e-8;
     if (sum - 1.0).abs() > tol {
         bail!("vector must sum to 1.0 (tolerance: {tol}), but sums to {sum}");
