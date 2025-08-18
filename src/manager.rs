@@ -2,10 +2,8 @@ use crate::analysis::Analyzer;
 use crate::config::Config;
 use crate::engine::Engine;
 use anyhow::{Context, Result, bail};
-use std::{
-    fs,
-    path::{Path, PathBuf},
-};
+use glob::glob;
+use std::path::{Path, PathBuf};
 
 pub struct Manager {
     sim_dir: PathBuf,
@@ -25,12 +23,12 @@ impl Manager {
     pub fn run_simulation(&self, sim_idx: Option<usize>) -> Result<()> {
         let (sim_idx, file_idx, mut engine) = match sim_idx {
             None => {
-                let sim_idx = self.count_entries(&format!("^checkpoint-.*$"))?;
+                let sim_idx = self.count_entries("checkpoint-*.bin")?;
                 let engine = Engine::generate_initial_condition(self.cfg.clone())?;
                 (sim_idx, 0, engine)
             }
             Some(sim_idx) => {
-                let file_idx = self.count_entries(&format!("^trajectory-{sim_idx:04}.*$"))?;
+                let file_idx = self.count_entries(&format!("trajectory-{sim_idx:04}-*.bin"))?;
                 let engine = Engine::load_checkpoint(self.checkpoint_file(sim_idx))?;
                 if engine.cfg() != &self.cfg {
                     bail!("checkpoint cfg differs from the current cfg");
@@ -52,9 +50,9 @@ impl Manager {
     }
 
     pub fn run_analysis(&self) -> Result<()> {
-        let n_sim = self.count_entries(&format!("^checkpoint-.*$"))?;
+        let n_sim = self.count_entries("checkpoint-*.bin")?;
         for sim_idx in 0..n_sim {
-            let n_files = self.count_entries(&format!("^trajectory-{sim_idx:04}-.*$"))?;
+            let n_files = self.count_entries(&format!("trajectory-{sim_idx:04}-*.bin"))?;
             let mut analyzer = Analyzer::new(self.cfg.clone());
             for file_idx in 0..n_files {
                 analyzer.add_file(self.trajectory_file(sim_idx, file_idx))?;
@@ -65,18 +63,11 @@ impl Manager {
         Ok(())
     }
 
-    fn count_entries(&self, regex: &str) -> Result<usize> {
-        let dir = &self.sim_dir;
-        let regex = regex::Regex::new(regex)?;
-        let count = fs::read_dir(dir)
-            .with_context(|| format!("failed to read {dir:?}"))?
+    fn count_entries(&self, pattern: &str) -> Result<usize> {
+        let pattern = self.sim_dir.join(pattern).to_string_lossy().into_owned();
+        let count = glob(&pattern)
+            .context("...")?
             .filter_map(Result::ok)
-            .filter(|entry| {
-                entry
-                    .file_name()
-                    .to_str()
-                    .is_some_and(|name| regex.is_match(name))
-            })
             .count();
         Ok(count)
     }
