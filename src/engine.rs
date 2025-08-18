@@ -52,7 +52,6 @@ impl Engine {
         let mut i_agt_dec = Vec::with_capacity(self.cfg.n_agt_init);
 
         const MAX_N_AGT_FACTOR: usize = 2;
-
         let i_agt_all = (0..MAX_N_AGT_FACTOR * self.cfg.n_agt_init).collect();
 
         for i_save in 0..self.cfg.saves_per_file {
@@ -137,8 +136,10 @@ impl Engine {
         for &prob in &self.cfg.prob_dec[self.state.env] {
             dec_dist_vec.push(Bernoulli::new(prob)?);
         }
+
         i_agt_rep.clear();
         i_agt_dec.clear();
+
         for (i_agt, agt) in self.state.agt_vec.iter().enumerate() {
             let phe = agt.phe();
             if rep_dist_vec[phe].sample(&mut self.rng) {

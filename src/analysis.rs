@@ -116,6 +116,7 @@ impl Analyzer {
                 obs.update(&state);
             }
         }
+
         Ok(())
     }
 
