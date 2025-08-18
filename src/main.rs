@@ -43,7 +43,7 @@ fn main() {
 
 fn run() -> Result<()> {
     let args = CLI::parse();
-    log::info!("{args:#?}");
+    log::info!("{args:?}");
 
     match args.command {
         Commands::Run {
