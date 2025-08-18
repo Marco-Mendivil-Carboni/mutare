@@ -2,7 +2,6 @@ use crate::config::Config;
 use crate::model::State;
 use crate::stats::{Accumulator, TimeSeries};
 use anyhow::{Context, Result};
-use ndarray::Array1;
 use rmp_serde::{decode, encode};
 use serde_value::{Value, to_value};
 use std::{
@@ -55,11 +54,15 @@ impl AvgProbPhe {
 
 impl Observable for AvgProbPhe {
     fn update(&mut self, state: &State) {
-        let mut avg_prob_phe = Array1::zeros(self.acc_vec.len());
+        let mut avg_prob_phe = vec![0.0; self.acc_vec.len()];
         for agt in &state.agt_vec {
-            avg_prob_phe += agt.prob_phe();
+            for (sum, &ele) in avg_prob_phe.iter_mut().zip(agt.prob_phe()) {
+                *sum += ele;
+            }
         }
-        avg_prob_phe /= state.agt_vec.len() as f64;
+        avg_prob_phe
+            .iter_mut()
+            .for_each(|ele| *ele /= state.agt_vec.len() as f64);
         self.acc_vec
             .iter_mut()
             .zip(avg_prob_phe.iter())

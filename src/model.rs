@@ -1,15 +1,14 @@
-use ndarray::Array1;
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Agent {
     phe: usize,
 
-    prob_phe: Array1<f64>,
+    prob_phe: Vec<f64>,
 }
 
 impl Agent {
-    pub fn new(phe: usize, prob_phe: Array1<f64>) -> Self {
+    pub fn new(phe: usize, prob_phe: Vec<f64>) -> Self {
         Self { phe, prob_phe }
     }
 
@@ -17,7 +16,7 @@ impl Agent {
         self.phe
     }
 
-    pub fn prob_phe(&self) -> &Array1<f64> {
+    pub fn prob_phe(&self) -> &Vec<f64> {
         &self.prob_phe
     }
 }

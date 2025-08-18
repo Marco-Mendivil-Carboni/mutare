@@ -1,7 +1,6 @@
 use crate::config::Config;
 use crate::model::{Agent, State};
 use anyhow::{Context, Result};
-use ndarray::Array1;
 use rand::prelude::*;
 use rand_chacha::ChaCha12Rng;
 use rand_distr::{Bernoulli, LogNormal, Uniform, weighted::WeightedIndex};
@@ -31,7 +30,7 @@ impl Engine {
         let phe_dist = Uniform::new(0, cfg.n_phe)?;
         for _ in 0..cfg.n_agt_init {
             let phe = phe_dist.sample(&mut rng);
-            let prob_phe = Array1::from_elem(cfg.n_phe, 1.0 / cfg.n_phe as f64);
+            let prob_phe = vec![1.0 / cfg.n_phe as f64; cfg.n_phe];
             agt_vec.push(Agent::new(phe, prob_phe));
         }
 
@@ -161,10 +160,12 @@ impl Engine {
             let phe_dist = WeightedIndex::new(prob_phe)?;
             let phe_new = phe_dist.sample(&mut self.rng);
 
-            let rand_arr =
-                Array1::from_shape_fn(self.cfg.n_phe, |_| mut_dist.sample(&mut self.rng));
-            let mut prob_phe_new = prob_phe * rand_arr;
-            prob_phe_new /= prob_phe_new.sum();
+            let mut prob_phe_new: Vec<_> = prob_phe
+                .iter()
+                .map(|ele| ele * mut_dist.sample(&mut self.rng))
+                .collect();
+            let sum: f64 = prob_phe_new.iter().sum();
+            prob_phe_new.iter_mut().for_each(|ele| *ele /= sum);
 
             self.state.agt_vec.push(Agent::new(phe_new, prob_phe_new));
 
