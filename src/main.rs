@@ -33,7 +33,7 @@ fn main() -> Result<()> {
     let cfg = Config::from_file("config.bin")
         .context("failed to create config")
         .unwrap_or_else(|err| {
-            log::error!("{:?}", err);
+            log::error!("{err:?}");
             std::process::exit(1);
         });
     log::info!("{cfg:#?}");
@@ -46,7 +46,7 @@ fn main() -> Result<()> {
         let start = Instant::now();
         mgr.run_simulation(args.sim_idx)?;
         let duration = start.elapsed();
-        log::info!("elapsed time = {:?}", duration);
+        log::info!("elapsed time = {duration:?}");
     }
 
     Ok(())

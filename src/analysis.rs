@@ -104,7 +104,7 @@ impl Analyzer {
 
     pub fn add_file<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
         let file = file.as_ref();
-        let file = File::open(file).with_context(|| format!("failed to open {:?}", file))?;
+        let file = File::open(file).with_context(|| format!("failed to open {file:?}"))?;
         let mut reader = BufReader::new(file);
 
         for _ in 0..self.cfg.saves_per_file {
@@ -118,7 +118,7 @@ impl Analyzer {
 
     pub fn save_results<P: AsRef<Path>>(&self, file: P) -> Result<()> {
         let file = file.as_ref();
-        let file = File::create(file).with_context(|| format!("failed to create {:?}", file))?;
+        let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
         let mut writer = BufWriter::new(file);
 
         let results: Result<Vec<_>> = self.obs_vec.iter().map(|obs| obs.result()).collect();

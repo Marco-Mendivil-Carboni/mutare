@@ -62,9 +62,10 @@ impl Manager {
     }
 
     fn count_entries(&self, regex: &str) -> Result<usize> {
+        let dir = &self.sim_dir;
         let regex = regex::Regex::new(regex)?;
-        let count = fs::read_dir(&self.sim_dir)
-            .with_context(|| format!("failed to read {:?}", self.sim_dir))?
+        let count = fs::read_dir(dir)
+            .with_context(|| format!("failed to read {dir:?}"))?
             .filter_map(Result::ok)
             .filter(|entry| {
                 entry

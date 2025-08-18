@@ -23,7 +23,7 @@ pub struct Config {
 impl Config {
     pub fn from_file<P: AsRef<Path>>(file: P) -> Result<Self> {
         let file = file.as_ref();
-        let file = File::open(file).with_context(|| format!("failed to open {:?}", file))?;
+        let file = File::open(file).with_context(|| format!("failed to open {file:?}"))?;
         let reader = BufReader::new(file);
 
         let config: Config = decode::from_read(reader).context("failed to deserialize config")?;

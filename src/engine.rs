@@ -46,7 +46,7 @@ impl Engine {
 
     pub fn run_simulation<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
         let file = file.as_ref();
-        let file = File::create(file).with_context(|| format!("failed to create {:?}", file))?;
+        let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
         let mut writer = BufWriter::new(file);
 
         let mut i_agt_rep = Vec::with_capacity(self.cfg.n_agt_init);
@@ -65,7 +65,7 @@ impl Engine {
             encode::write(&mut writer, &self.state).context("failed to serialize state")?;
 
             let progress = 100.0 * (i_save + 1) as f64 / self.cfg.saves_per_file as f64;
-            log::info!("completed {:06.2}%", progress);
+            log::info!("completed {progress:06.2}%");
         }
 
         writer.flush().context("failed to flush writer stream")?;
@@ -77,7 +77,7 @@ impl Engine {
 
     pub fn save_checkpoint<P: AsRef<Path>>(&self, file: P) -> Result<()> {
         let file = file.as_ref();
-        let file = File::create(file).with_context(|| format!("failed to create {:?}", file))?;
+        let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
         let mut writer = BufWriter::new(file);
         encode::write(&mut writer, &self).context("failed to serialize engine")?;
         Ok(())
@@ -85,7 +85,7 @@ impl Engine {
 
     pub fn load_checkpoint<P: AsRef<Path>>(file: P) -> Result<Self> {
         let file = file.as_ref();
-        let file = File::open(file).with_context(|| format!("failed to open {:?}", file))?;
+        let file = File::open(file).with_context(|| format!("failed to open {file:?}"))?;
         let mut reader = BufReader::new(file);
         let engine = decode::from_read(&mut reader).context("failed to deserialize engine")?;
         Ok(engine)
