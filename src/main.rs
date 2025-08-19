@@ -47,7 +47,7 @@ fn run() -> Result<()> {
 
     match args.command {
         Commands::Run { sim_dir, run_idx } => {
-            let mgr = Manager::new(sim_dir).context("failed to create mgr")?;
+            let mgr = Manager::new(sim_dir).context("failed to construct mgr")?;
 
             let start = Instant::now();
             mgr.run_simulation(run_idx)?;
@@ -56,7 +56,7 @@ fn run() -> Result<()> {
             log::info!("elapsed time = {duration:?}");
         }
         Commands::Analyze { sim_dir } => {
-            let mgr = Manager::new(sim_dir).context("failed to create mgr")?;
+            let mgr = Manager::new(sim_dir).context("failed to construct mgr")?;
 
             mgr.run_analysis()?;
         }
