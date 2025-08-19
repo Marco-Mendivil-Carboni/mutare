@@ -21,7 +21,7 @@ struct CLI {
 enum Commands {
     Run {
         sim_dir: PathBuf,
-        instance_idx: Option<usize>,
+        run_idx: Option<usize>,
     },
     Analyze {
         sim_dir: PathBuf,
@@ -46,14 +46,11 @@ fn run() -> Result<()> {
     log::info!("{args:?}");
 
     match args.command {
-        Commands::Run {
-            sim_dir,
-            instance_idx,
-        } => {
+        Commands::Run { sim_dir, run_idx } => {
             let mgr = Manager::new(sim_dir).context("failed to create mgr")?;
 
             let start = Instant::now();
-            mgr.run_simulation(instance_idx)?;
+            mgr.run_simulation(run_idx)?;
             let duration = start.elapsed();
 
             log::info!("elapsed time = {duration:?}");
