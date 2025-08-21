@@ -6,6 +6,7 @@ use glob::glob;
 use std::{
     fs,
     path::{Path, PathBuf},
+    time::Instant,
 };
 
 pub struct Manager {
@@ -24,41 +25,15 @@ impl Manager {
         Ok(Self { sim_dir, cfg })
     }
 
-    pub fn run_simulation(&self, run_idx: Option<usize>) -> Result<()> {
-        let (run_idx, file_idx, mut engine) = match run_idx {
-            None => {
-                let run_idx = self.count_run_dirs().context("failed to count run dirs")?;
+    pub fn create_run(&self) -> Result<()> {
+        let run_idx = self.count_run_dirs().context("failed to count run dirs")?;
 
-                let run_dir = self.run_dir(run_idx);
-                fs::create_dir_all(&run_dir)
-                    .with_context(|| format!("failed to create {run_dir:?}"))?;
-                log::info!("created {run_dir:?}");
+        let run_dir = self.run_dir(run_idx);
+        fs::create_dir_all(&run_dir).with_context(|| format!("failed to create {run_dir:?}"))?;
+        log::info!("created {run_dir:?}");
 
-                let engine = Engine::generate_initial_condition(self.cfg.clone())
-                    .context("failed to generate initial condition")?;
-
-                (run_idx, 0, engine)
-            }
-            Some(run_idx) => {
-                let file_idx = self
-                    .count_trajectory_files(run_idx)
-                    .context("failed to count trajectory files")?;
-
-                let checkpoint_file = self.checkpoint_file(run_idx);
-                let engine = Engine::load_checkpoint(&checkpoint_file)
-                    .with_context(|| format!("failed to load {checkpoint_file:?}"))?;
-                if engine.cfg() != &self.cfg {
-                    bail!("checkpoint config differs from the current config");
-                }
-                log::info!("loaded {checkpoint_file:?}");
-
-                (run_idx, file_idx, engine)
-            }
-        };
-
-        engine
-            .run_simulation(self.trajectory_file(run_idx, file_idx))
-            .context("failed to run simulation")?;
+        let engine = Engine::generate_initial_condition(self.cfg.clone())
+            .context("failed to generate initial condition")?;
 
         engine
             .save_checkpoint(self.checkpoint_file(run_idx))
@@ -67,7 +42,34 @@ impl Manager {
         Ok(())
     }
 
-    pub fn run_analysis(&self) -> Result<()> {
+    pub fn resume_run(&self, run_idx: usize) -> Result<()> {
+        let file_idx = self
+            .count_trajectory_files(run_idx)
+            .context("failed to count trajectory files")?;
+
+        let checkpoint_file = self.checkpoint_file(run_idx);
+        let mut engine = Engine::load_checkpoint(&checkpoint_file)
+            .with_context(|| format!("failed to load {checkpoint_file:?}"))?;
+        if engine.cfg() != &self.cfg {
+            bail!("checkpoint config differs from the current config");
+        }
+        log::info!("loaded {checkpoint_file:?}");
+
+        let start = Instant::now();
+        engine
+            .perform_simulation(self.trajectory_file(run_idx, file_idx))
+            .context("failed to perform simulation")?;
+        let duration = start.elapsed();
+        log::info!("finished simulation in {duration:?}");
+
+        engine
+            .save_checkpoint(self.checkpoint_file(run_idx))
+            .context("failed to save checkpoint")?;
+
+        Ok(())
+    }
+
+    pub fn analyze_sim(&self) -> Result<()> {
         let n_runs = self.count_run_dirs().context("failed to count run dirs")?;
         for run_idx in 0..n_runs {
             let mut analyzer = Analyzer::new(self.cfg.clone());
@@ -84,8 +86,22 @@ impl Manager {
             analyzer
                 .save_results(self.results_file(run_idx))
                 .context("failed to save results")?;
+
+            let run_dir = self.run_dir(run_idx);
+            log::info!("analyzed {run_dir:?}");
         }
 
+        Ok(())
+    }
+
+    pub fn clean_sim(&self) -> Result<()> {
+        let n_runs = self.count_run_dirs().context("failed to count run dirs")?;
+        for run_idx in 0..n_runs {
+            let run_dir = self.run_dir(run_idx);
+            fs::remove_dir_all(&run_dir)
+                .with_context(|| format!("failed to remove {run_dir:?}"))?;
+            log::info!("deleted {run_dir:?}");
+        }
         Ok(())
     }
 

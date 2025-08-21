@@ -8,24 +8,30 @@ mod stats;
 use crate::manager::Manager;
 use anyhow::{Context, Result};
 use clap::{Parser, Subcommand};
-use std::{path::PathBuf, time::Instant};
+use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 #[command(version, about)]
 struct CLI {
+    #[arg(long)]
+    sim_dir: PathBuf,
+
     #[command(subcommand)]
-    command: Commands,
+    command: Command,
 }
 
 #[derive(Debug, Subcommand)]
-enum Commands {
-    Run {
-        sim_dir: PathBuf,
-        run_idx: Option<usize>,
+enum Command {
+    Create,
+
+    Resume {
+        #[arg(long)]
+        run_idx: usize,
     },
-    Analyze {
-        sim_dir: PathBuf,
-    },
+
+    Analyze,
+
+    Clean,
 }
 
 fn main() {
@@ -35,31 +41,23 @@ fn main() {
         .parse_default_env()
         .init();
 
-    if let Err(err) = run() {
-        log::error!("{err:?}");
+    if let Err(error) = run_cli() {
+        log::error!("{error:#?}");
         std::process::exit(1);
     }
 }
 
-fn run() -> Result<()> {
+fn run_cli() -> Result<()> {
     let args = CLI::parse();
-    log::info!("{args:?}");
+    log::info!("{args:#?}");
+
+    let mgr = Manager::new(args.sim_dir).context("failed to construct mgr")?;
 
     match args.command {
-        Commands::Run { sim_dir, run_idx } => {
-            let mgr = Manager::new(sim_dir).context("failed to construct mgr")?;
-
-            let start = Instant::now();
-            mgr.run_simulation(run_idx)?;
-            let duration = start.elapsed();
-
-            log::info!("elapsed time = {duration:?}");
-        }
-        Commands::Analyze { sim_dir } => {
-            let mgr = Manager::new(sim_dir).context("failed to construct mgr")?;
-
-            mgr.run_analysis()?;
-        }
+        Command::Create => mgr.create_run()?,
+        Command::Resume { run_idx } => mgr.resume_run(run_idx)?,
+        Command::Analyze => mgr.analyze_sim()?,
+        Command::Clean => mgr.clean_sim()?,
     }
 
     Ok(())

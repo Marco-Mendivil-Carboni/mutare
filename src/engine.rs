@@ -43,7 +43,7 @@ impl Engine {
         Ok(Self { cfg, state, rng })
     }
 
-    pub fn run_simulation<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
+    pub fn perform_simulation<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
         let file = file.as_ref();
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
         let mut writer = BufWriter::new(file);
@@ -67,8 +67,6 @@ impl Engine {
         }
 
         writer.flush().context("failed to flush writer stream")?;
-
-        log::info!("finished simulation");
 
         Ok(())
     }
