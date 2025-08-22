@@ -1,6 +1,6 @@
 [package]
 name = "mutare"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Marco Mendívil Carboni <marcomc@ucm.es>"]
 edition = "2024"
 license = "MIT"
