@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Marco Mendívil Carboni <marcomc@ucm.es>"]
 edition = "2024"
 license = "MIT"
-description = "A simple tool to simulate and analyze a stochastic agent-based model for adaptation in uncertain environments."
+description = "A simple tool to simulate and analyze a stochastic agent-based model of adaptation in uncertain environments."
 
 [dependencies]
 anyhow = "1.0.99"

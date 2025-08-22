@@ -25,7 +25,7 @@ config = {
 with open("simulations/config.msgpack", "wb") as f:
     msgpack.dump(config, f)
 
-file_path = "simulations/run-0000/results.msgpack"
+file_path = "simulations/run-0000/reports.msgpack"
 
 with open(file_path, "rb") as f:
     unpacker = msgpack.Unpacker(f, raw=False)
