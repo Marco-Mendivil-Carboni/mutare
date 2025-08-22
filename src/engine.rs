@@ -12,6 +12,10 @@ use std::{
     path::Path,
 };
 
+/// Simulation engine.
+///
+/// Holds the configuration, current state, and random number generator,
+/// and provides methods to initialize, run, save, and load simulations.
 #[derive(Serialize, Deserialize)]
 pub struct Engine {
     cfg: Config,
@@ -20,6 +24,13 @@ pub struct Engine {
 }
 
 impl Engine {
+    /// Generate an initial simulation state from the given configuration.
+    ///
+    /// # Arguments
+    /// * `cfg` - Simulation configuration.
+    ///
+    /// # Returns
+    /// A new `Engine` with agents initialized and environment chosen randomly.
     pub fn generate_initial_condition(cfg: Config) -> Result<Self> {
         let mut rng = ChaCha12Rng::try_from_os_rng()?;
 
@@ -43,6 +54,13 @@ impl Engine {
         Ok(Self { cfg, state, rng })
     }
 
+    /// Run the simulation and save the resulting states to a file.
+    ///
+    /// # Arguments
+    /// * `file` - Path to the output file.
+    ///
+    /// # Errors
+    /// Returns an error if a step fails or if writing the output fails.
     pub fn perform_simulation<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
         let file = file.as_ref();
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
@@ -71,6 +89,9 @@ impl Engine {
         Ok(())
     }
 
+    /// Save a checkpoint of the entire engine state.
+    ///
+    /// Can be used to resume simulation later.
     pub fn save_checkpoint<P: AsRef<Path>>(&self, file: P) -> Result<()> {
         let file = file.as_ref();
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
@@ -79,6 +100,7 @@ impl Engine {
         Ok(())
     }
 
+    /// Load a previously saved engine checkpoint.
     pub fn load_checkpoint<P: AsRef<Path>>(file: P) -> Result<Self> {
         let file = file.as_ref();
         let file = File::open(file).with_context(|| format!("failed to open {file:?}"))?;
@@ -87,6 +109,7 @@ impl Engine {
         Ok(engine)
     }
 
+    /// Access the configuration of the engine.
     pub fn cfg(&self) -> &Config {
         &self.cfg
     }
@@ -97,19 +120,24 @@ impl Engine {
         i_agt_dec: &mut Vec<usize>,
         i_agt_all: &Vec<usize>,
     ) -> Result<()> {
+        // Update environment according to transition probabilities.
         self.update_environment()
             .context("failed to update environment")?;
 
+        // Select replicating and deceased agents.
         self.select_rep_and_dec(i_agt_rep, i_agt_dec)
             .context("failed to select replicating and deceased agents")?;
 
         self.state.n_agt_diff = 0;
 
+        // Replicate selected agents.
         self.replicate_agents(i_agt_rep)
-            .context("failed to replicate agents")?;
+            .context("failed to replicate selected agents")?;
 
+        // Remove deceased agents.
         self.remove_deceased(i_agt_dec);
 
+        // Enforce maximum population size.
         self.remove_excess(i_agt_all);
 
         Ok(())
@@ -155,9 +183,11 @@ impl Engine {
         for &i_agt in i_agt_rep {
             let prob_phe = self.state.agt_vec[i_agt].prob_phe();
 
+            // Sample the offspring's phenotype from the parent's probability distribution.
             let phe_dist = WeightedIndex::new(prob_phe)?;
             let phe_new = phe_dist.sample(&mut self.rng);
 
+            // Mutate the parent's probability distribution to create the one of the offspring.
             let mut prob_phe_new: Vec<_> = prob_phe
                 .iter()
                 .map(|ele| ele * mut_dist.sample(&mut self.rng))
@@ -173,6 +203,7 @@ impl Engine {
     }
 
     fn remove_deceased(&mut self, i_agt_dec: &mut Vec<usize>) {
+        // Sort in reverse to safely remove by index.
         i_agt_dec.sort_by(|a, b| b.cmp(a));
         for &i_agt in i_agt_dec.iter() {
             self.state.agt_vec.swap_remove(i_agt);
@@ -184,9 +215,13 @@ impl Engine {
         let n_agt = self.state.agt_vec.len();
         if n_agt > self.cfg.n_agt_init {
             let excess = n_agt - self.cfg.n_agt_init;
+
+            // Randomly pick excess agents to remove.
             let mut i_agt_rm: Vec<_> = i_agt_all[..n_agt]
                 .choose_multiple(&mut self.rng, excess)
                 .collect();
+
+            // Sort in reverse to safely remove by index.
             i_agt_rm.sort_by(|a, b| b.cmp(a));
             for &i_agt in i_agt_rm {
                 self.state.agt_vec.swap_remove(i_agt);

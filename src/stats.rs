@@ -1,12 +1,19 @@
 use serde::Serialize;
 use std::default::Default;
 
+/// Stores summary statistics of a set of values.
+///
+/// Optional fields (`sem` and `is_eq`) are skipped during serialization if `None`.
 #[derive(Serialize)]
 pub struct Report {
+    /// Arithmetic mean of the values.
     mean: f64,
+    /// Standard deviation of the values.
     std_dev: f64,
+    /// Standard error of the mean, if available.
     #[serde(skip_serializing_if = "Option::is_none")]
     sem: Option<f64>,
+    /// Whether equilibration was detected, if available.
     #[serde(skip_serializing_if = "Option::is_none")]
     is_eq: Option<bool>,
 }
@@ -22,6 +29,9 @@ impl Default for Report {
     }
 }
 
+/// Accumulator for streaming values.
+///
+/// Tracks running mean and sum of squared differences to compute the standard deviation.
 #[derive(Clone, Default)]
 pub struct Accumulator {
     n_vals: usize,
@@ -30,6 +40,7 @@ pub struct Accumulator {
 }
 
 impl Accumulator {
+    /// Add a value to the accumulator.
     pub fn add(&mut self, val: f64) {
         self.n_vals += 1;
 
@@ -40,6 +51,7 @@ impl Accumulator {
         self.diff_2_sum += diff_a * diff_b;
     }
 
+    /// Return a `Report` of the accumulated values.
     pub fn report(&self) -> Report {
         Report {
             mean: if self.n_vals > 0 { self.mean } else { f64::NAN },
@@ -54,16 +66,19 @@ impl Accumulator {
     }
 }
 
+/// Stores a series of values over time.
 #[derive(Default)]
 pub struct TimeSeries {
     vals: Vec<f64>,
 }
 
 impl TimeSeries {
+    /// Append a value to the time series.
     pub fn push(&mut self, val: f64) {
         self.vals.push(val);
     }
 
+    /// Return a `Report` of the time series values.
     pub fn report(&self) -> Report {
         if self.vals.is_empty() {
             return Report::default();
@@ -84,7 +99,7 @@ impl TimeSeries {
     }
 }
 
-/// Compute the optimal equilibration index using the marginal standard error rule
+/// Compute the optimal equilibration index using the marginal standard error rule.
 fn compute_opt_eq_idx(time_series: &[f64]) -> Option<usize> {
     if time_series.is_empty() {
         return None;
@@ -92,7 +107,11 @@ fn compute_opt_eq_idx(time_series: &[f64]) -> Option<usize> {
 
     let n_vals = time_series.len();
     let n_idxs = n_vals.ilog2() + 1;
+
+    // Candidate equilibration indices based on series length
     let eq_idxs: Vec<_> = (0..n_idxs).map(|idx| n_vals >> (n_idxs - idx)).collect();
+
+    // Optimal equilibration index based on the MSER
     let opt_eq_idx = eq_idxs
         .iter()
         .filter_map(|&eq_idx| {
@@ -108,6 +127,7 @@ fn compute_opt_eq_idx(time_series: &[f64]) -> Option<usize> {
         .min_by(|(_, a), (_, b)| a.total_cmp(b))
         .map(|(eq_idx, _)| eq_idx);
 
+    // If the optimal index is the last candidate, reject it.
     if opt_eq_idx == eq_idxs.last().copied() {
         return None;
     } else {
@@ -115,6 +135,7 @@ fn compute_opt_eq_idx(time_series: &[f64]) -> Option<usize> {
     }
 }
 
+/// Compute the arithmetic mean of a slice of values.
 fn compute_mean(time_series: &[f64]) -> f64 {
     if time_series.is_empty() {
         return f64::NAN;
@@ -122,6 +143,7 @@ fn compute_mean(time_series: &[f64]) -> f64 {
     time_series.iter().sum::<f64>() / time_series.len() as f64
 }
 
+/// Compute the sample variance of a slice of values.
 fn compute_var(time_series: &[f64]) -> f64 {
     let n_vals = time_series.len();
     if n_vals < 2 {
@@ -135,19 +157,21 @@ fn compute_var(time_series: &[f64]) -> f64 {
         / (n_vals - 1) as f64
 }
 
-/// Compute the standard error of the mean (SEM) using the Flyvbjerg-Petersen blocking method
+/// Compute the standard error of the mean (SEM) using the Flyvbjerg-Petersen blocking method.
 fn compute_sem(time_series: &[f64]) -> f64 {
     let mut blk_time_series = time_series.to_vec();
     let mut n_vals = blk_time_series.len();
     let mut sem2_ests = Vec::new();
     let mut sem2_errs = Vec::new();
 
+    // Perform blocking until only one value remains.
     while n_vals > 1 {
         let sem2_est = compute_var(&blk_time_series) / n_vals as f64;
         let sem2_err = sem2_est * (2.0 / (n_vals as f64 - 1.0)).sqrt();
         sem2_ests.push(sem2_est);
         sem2_errs.push(sem2_err);
 
+        // Average pairs of consecutive values to form the new blocked series.
         blk_time_series = blk_time_series
             .chunks_exact(2)
             .map(|pair| (pair[0] + pair[1]) / 2.0)
@@ -155,6 +179,7 @@ fn compute_sem(time_series: &[f64]) -> f64 {
         n_vals = blk_time_series.len();
     }
 
+    // Select SEM estimate which first exceeds the max lower bound of subsequent estimates.
     for (idx, &sem2_est) in sem2_ests.iter().enumerate() {
         let max_low = sem2_ests[idx..]
             .iter()
@@ -168,5 +193,6 @@ fn compute_sem(time_series: &[f64]) -> f64 {
         }
     }
 
+    // Fallback
     sem2_ests.last().copied().unwrap_or(f64::NAN).sqrt()
 }

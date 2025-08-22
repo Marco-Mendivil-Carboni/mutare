@@ -9,12 +9,18 @@ use std::{
     time::Instant,
 };
 
+/// Simulation manager.
+///
+/// Manages the production and analysis of simulation runs.
 pub struct Manager {
     sim_dir: PathBuf,
     cfg: Config,
 }
 
 impl Manager {
+    /// Create a new simulation manager for a given simulation directory.
+    ///
+    /// Expects a `config.msgpack` file inside theis directory.
     pub fn new<P: AsRef<Path>>(sim_dir: P) -> Result<Self> {
         let sim_dir = sim_dir.as_ref().to_path_buf();
 
@@ -25,6 +31,7 @@ impl Manager {
         Ok(Self { sim_dir, cfg })
     }
 
+    /// Create a new simulation run directory and initialize the engine.
     pub fn create_run(&self) -> Result<()> {
         let run_idx = self.count_run_dirs().context("failed to count run dirs")?;
 
@@ -42,6 +49,7 @@ impl Manager {
         Ok(())
     }
 
+    /// Resume a simulation run from its checkpoint and generate a new trajectory file.
     pub fn resume_run(&self, run_idx: usize) -> Result<()> {
         let file_idx = self
             .count_trajectory_files(run_idx)
@@ -69,6 +77,7 @@ impl Manager {
         Ok(())
     }
 
+    /// Analyze all trajectory files from all simulation runs and save reports.
     pub fn analyze_sim(&self) -> Result<()> {
         let n_runs = self.count_run_dirs().context("failed to count run dirs")?;
         for run_idx in 0..n_runs {
@@ -84,8 +93,8 @@ impl Manager {
             }
 
             analyzer
-                .save_results(self.results_file(run_idx))
-                .context("failed to save results")?;
+                .save_reports(self.reports_file(run_idx))
+                .context("failed to save reports")?;
 
             let run_dir = self.run_dir(run_idx);
             log::info!("analyzed {run_dir:?}");
@@ -94,6 +103,7 @@ impl Manager {
         Ok(())
     }
 
+    /// Delete all simulation runs in the simulation directory.
     pub fn clean_sim(&self) -> Result<()> {
         let n_runs = self.count_run_dirs().context("failed to count run dirs")?;
         for run_idx in 0..n_runs {
@@ -105,6 +115,7 @@ impl Manager {
         Ok(())
     }
 
+    /// Count simulation run directories.
     fn count_run_dirs(&self) -> Result<usize> {
         let pattern = self.sim_dir.join("run-*");
         let pattern = pattern.to_str().context("pattern is not valid UTF-8")?;
@@ -116,10 +127,12 @@ impl Manager {
         Ok(count)
     }
 
+    /// Construct the path of a simulation run directory.
     fn run_dir(&self, run_idx: usize) -> PathBuf {
         self.sim_dir.join(format!("run-{run_idx:04}"))
     }
 
+    /// Count trajectory files in a simulation run.
     fn count_trajectory_files(&self, run_idx: usize) -> Result<usize> {
         let pattern = self.run_dir(run_idx).join("trajectory-*.msgpack");
         let pattern = pattern.to_str().context("pattern is not valid UTF-8")?;
@@ -130,16 +143,19 @@ impl Manager {
         Ok(count)
     }
 
+    /// Construct the path of a checkpoint file.
     fn checkpoint_file(&self, run_idx: usize) -> PathBuf {
         self.run_dir(run_idx).join("checkpoint.msgpack")
     }
 
+    /// Construct the path of a trajectory file.
     fn trajectory_file(&self, run_idx: usize, file_idx: usize) -> PathBuf {
         self.run_dir(run_idx)
             .join(format!("trajectory-{file_idx:04}.msgpack"))
     }
 
-    fn results_file(&self, run_idx: usize) -> PathBuf {
-        self.run_dir(run_idx).join("results.msgpack")
+    /// Construct the path of a reports file.
+    fn reports_file(&self, run_idx: usize) -> PathBuf {
+        self.run_dir(run_idx).join("reports.msgpack")
     }
 }

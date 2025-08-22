@@ -3,24 +3,45 @@ use rmp_serde::decode;
 use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, fs::File, io::BufReader, ops::RangeBounds, path::Path};
 
+/// Simulation configuration parameters.
+///
+/// Loaded from a MessagePack-encoded file and validated before use.
+/// See [`Config::from_file`] for loading.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Config {
+    /// Number of environments.
     pub n_env: usize,
+    /// Number of phenotypes.
     pub n_phe: usize,
 
+    /// Environment transition probabilities (matrix `n_env x n_env`).
     pub prob_env: Vec<Vec<f64>>,
+    /// Replication probabilities (matrix `n_env x n_phe`).
     pub prob_rep: Vec<Vec<f64>>,
+    /// Death probabilities (matrix `n_env x n_phe).
     pub prob_dec: Vec<Vec<f64>>,
 
+    /// Initial number of agents.
     pub n_agt_init: usize,
 
+    /// Standard deviation of mutation noise.
     pub std_dev_mut: f64,
 
+    /// Number of steps between simulation saves.
     pub steps_per_save: usize,
+    /// Number of saves written per file.
     pub saves_per_file: usize,
 }
 
 impl Config {
+    /// Load a [`Config`] from a file.
+    ///
+    /// The file must be MessagePack-encoded and contain a serialized [`Config`].
+    /// Performs validation on all parameters before returning.
+    ///
+    /// # Errors
+    /// Returns an error if the file cannot be read, deserialized,
+    /// or if the configuration values are invalid.
     pub fn from_file<P: AsRef<Path>>(file: P) -> Result<Self> {
         let file = file.as_ref();
         let file = File::open(file).with_context(|| format!("failed to open {file:?}"))?;
@@ -65,6 +86,7 @@ where
 }
 
 fn check_vec(vec: &[f64], exp_len: usize, prob_vec: bool) -> Result<()> {
+    // Ensure vector has expected length.
     let len = vec.len();
     if len != exp_len {
         bail!("vector length must be {exp_len}, but is {len}");
@@ -72,6 +94,7 @@ fn check_vec(vec: &[f64], exp_len: usize, prob_vec: bool) -> Result<()> {
     if !prob_vec {
         return Ok(());
     }
+    // For probability vectors: non-negative elements and sums to ~1.0.
     if vec.iter().any(|&ele| ele < 0.0) {
         bail!("vector must have only non-negative elements");
     }
@@ -84,6 +107,7 @@ fn check_vec(vec: &[f64], exp_len: usize, prob_vec: bool) -> Result<()> {
 }
 
 fn check_mat(mat: &[Vec<f64>], exp_dim: (usize, usize), trans_mat: bool) -> Result<()> {
+    // Ensure matrix has expected dimensions.
     let exp_n_rows = exp_dim.0;
     let exp_n_cols = exp_dim.1;
     let n_rows = mat.len();
@@ -96,6 +120,7 @@ fn check_mat(mat: &[Vec<f64>], exp_dim: (usize, usize), trans_mat: bool) -> Resu
     if !trans_mat {
         return Ok(());
     }
+    // For transition matrices: must be square and each row a valid probability vector.
     if exp_n_rows != exp_n_cols {
         bail!("matrix must be square");
     }
