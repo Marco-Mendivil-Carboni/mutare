@@ -13,6 +13,7 @@ use std::path::PathBuf;
 #[derive(Debug, Parser)]
 #[command(version, about)]
 struct CLI {
+    /// Path to simulation directory
     #[arg(long)]
     sim_dir: PathBuf,
 
@@ -22,15 +23,20 @@ struct CLI {
 
 #[derive(Debug, Subcommand)]
 enum Command {
+    /// Create a new simulation run
     Create,
 
+    /// Resume an existing run
     Resume {
+        /// Index of the run to resume
         #[arg(long)]
         run_idx: usize,
     },
 
+    /// Analyze simulation results
     Analyze,
 
+    /// Clean up simulation data
     Clean,
 }
 
