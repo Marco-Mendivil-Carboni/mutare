@@ -20,7 +20,7 @@ pub struct Manager {
 impl Manager {
     /// Create a new simulation manager for a given simulation directory.
     ///
-    /// Expects a `config.msgpack` file inside theis directory.
+    /// Expects a `config.msgpack` file inside this directory.
     pub fn new<P: AsRef<Path>>(sim_dir: P) -> Result<Self> {
         let sim_dir = sim_dir.as_ref().to_path_buf();
 
@@ -115,7 +115,6 @@ impl Manager {
         Ok(())
     }
 
-    /// Count simulation run directories.
     fn count_run_dirs(&self) -> Result<usize> {
         let pattern = self.sim_dir.join("run-*");
         let pattern = pattern.to_str().context("pattern is not valid UTF-8")?;
@@ -127,12 +126,10 @@ impl Manager {
         Ok(count)
     }
 
-    /// Construct the path of a simulation run directory.
     fn run_dir(&self, run_idx: usize) -> PathBuf {
         self.sim_dir.join(format!("run-{run_idx:04}"))
     }
 
-    /// Count trajectory files in a simulation run.
     fn count_trajectory_files(&self, run_idx: usize) -> Result<usize> {
         let pattern = self.run_dir(run_idx).join("trajectory-*.msgpack");
         let pattern = pattern.to_str().context("pattern is not valid UTF-8")?;
@@ -143,18 +140,15 @@ impl Manager {
         Ok(count)
     }
 
-    /// Construct the path of a checkpoint file.
     fn checkpoint_file(&self, run_idx: usize) -> PathBuf {
         self.run_dir(run_idx).join("checkpoint.msgpack")
     }
 
-    /// Construct the path of a trajectory file.
     fn trajectory_file(&self, run_idx: usize, file_idx: usize) -> PathBuf {
         self.run_dir(run_idx)
             .join(format!("trajectory-{file_idx:04}.msgpack"))
     }
 
-    /// Construct the path of a reports file.
     fn reports_file(&self, run_idx: usize) -> PathBuf {
         self.run_dir(run_idx).join("reports.msgpack")
     }

@@ -4,9 +4,6 @@ use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, fs::File, io::BufReader, ops::RangeBounds, path::Path};
 
 /// Simulation configuration parameters.
-///
-/// Loaded from a MessagePack-encoded file and validated before use.
-/// See [`Config::from_file`] for loading.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Config {
     /// Number of environments.
@@ -18,7 +15,7 @@ pub struct Config {
     pub prob_env: Vec<Vec<f64>>,
     /// Replication probabilities (matrix `n_env x n_phe`).
     pub prob_rep: Vec<Vec<f64>>,
-    /// Death probabilities (matrix `n_env x n_phe).
+    /// Death probabilities (matrix `n_env x n_phe`).
     pub prob_dec: Vec<Vec<f64>>,
 
     /// Initial number of agents.
@@ -34,14 +31,9 @@ pub struct Config {
 }
 
 impl Config {
-    /// Load a [`Config`] from a file.
+    /// Load a `Config` from a MessagePack file.
     ///
-    /// The file must be MessagePack-encoded and contain a serialized [`Config`].
     /// Performs validation on all parameters before returning.
-    ///
-    /// # Errors
-    /// Returns an error if the file cannot be read, deserialized,
-    /// or if the configuration values are invalid.
     pub fn from_file<P: AsRef<Path>>(file: P) -> Result<Self> {
         let file = file.as_ref();
         let file = File::open(file).with_context(|| format!("failed to open {file:?}"))?;

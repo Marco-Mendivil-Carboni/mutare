@@ -24,13 +24,7 @@ pub struct Engine {
 }
 
 impl Engine {
-    /// Generate an initial simulation state from the given configuration.
-    ///
-    /// # Arguments
-    /// * `cfg` - Simulation configuration.
-    ///
-    /// # Returns
-    /// A new `Engine` with agents initialized and environment chosen randomly.
+    /// Create a new `Engine` with the given configuration and a random initial state.
     pub fn generate_initial_condition(cfg: Config) -> Result<Self> {
         let mut rng = ChaCha12Rng::try_from_os_rng()?;
 
@@ -54,13 +48,7 @@ impl Engine {
         Ok(Self { cfg, state, rng })
     }
 
-    /// Run the simulation and save the resulting states to a file.
-    ///
-    /// # Arguments
-    /// * `file` - Path to the output file.
-    ///
-    /// # Errors
-    /// Returns an error if a step fails or if writing the output fails.
+    /// Perform the simulation and save the resulting states to a binary file.
     pub fn perform_simulation<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
         let file = file.as_ref();
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
@@ -91,7 +79,7 @@ impl Engine {
 
     /// Save a checkpoint of the entire engine state.
     ///
-    /// Can be used to resume simulation later.
+    /// Can be used to resume the simulation later.
     pub fn save_checkpoint<P: AsRef<Path>>(&self, file: P) -> Result<()> {
         let file = file.as_ref();
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
