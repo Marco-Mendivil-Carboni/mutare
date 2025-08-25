@@ -3,9 +3,9 @@ name = "mutare"
 version = "0.2.0"
 authors = ["Marco Mendívil Carboni <marcomc@ucm.es>"]
 edition = "2024"
-license = "MIT"
 description = "A simple tool to simulate and analyze a stochastic agent-based model of adaptation in uncertain environments."
 repository = "https://github.com/Marco-Mendivil-Carboni/mutare"
+license = "MIT"
 
 [dependencies]
 anyhow = "1.0.99"

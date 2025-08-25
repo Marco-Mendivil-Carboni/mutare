@@ -10,7 +10,6 @@ fn test_cli_create_resume_analyze_clean() {
     fs::create_dir(&temp_dir).unwrap();
 
     // Write config.msgpack
-
     // USE PYTHON SCRIPT TO DO IT -------------------------------------------------------------------------------------
 
     // Helper function to run the binary and check success
