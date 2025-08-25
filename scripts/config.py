@@ -39,3 +39,15 @@ def create_config(overrides=None):
 def save_config(config, filepath):
     with open(filepath, "wb") as file:
         msgpack.dump(config, file)
+
+
+if __name__ == "__main__":
+    import sys
+    from pathlib import Path
+
+    if len(sys.argv) != 2:
+        raise ValueError("You must provide one argument")
+
+    config_file = Path(sys.argv[1]) / "config.msgpack"
+
+    save_config(DEFAULT_CONFIG, config_file)
