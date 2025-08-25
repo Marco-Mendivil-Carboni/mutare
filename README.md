@@ -39,7 +39,7 @@ cargo build
 
 ### Basic Usage
 
-Run `mutare --help` to see available commands. They can be used as follows:
+Run `mutare --help` to display help information. Here are some examples of common commands:
 
 ```bash
 mutare --sim-dir ./my_sim_dir create # Create a new simulation run

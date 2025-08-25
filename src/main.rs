@@ -18,14 +18,14 @@ struct CLI {
     #[arg(long)]
     sim_dir: PathBuf,
 
-    /// Command to specify the desired action.
+    /// Simulation command.
     #[command(subcommand)]
-    command: Command,
+    sim_cmd: SimCmd,
 }
 
-/// Available commands for the simulation CLI.
+/// Available simulation commands.
 #[derive(Debug, Subcommand)]
-enum Command {
+enum SimCmd {
     /// Create a new simulation run.
     Create,
 
@@ -59,21 +59,21 @@ fn main() {
     }
 }
 
-/// Parse CLI arguments and execute the requested command.
+/// Parse CLI and execute the requested simulation command.
 fn run_cli() -> Result<()> {
-    // Parse command-line arguments.
-    let args = CLI::parse();
-    log::info!("{args:#?}");
+    // Parse command-line interface.
+    let cli = CLI::parse();
+    log::info!("{cli:#?}");
 
     // Construct a manager for the specified simulation directory.
-    let mgr = Manager::new(args.sim_dir).context("failed to construct mgr")?;
+    let mgr = Manager::new(cli.sim_dir).context("failed to construct mgr")?;
 
-    // Execute the requested command.
-    match args.command {
-        Command::Create => mgr.create_run()?,
-        Command::Resume { run_idx } => mgr.resume_run(run_idx)?,
-        Command::Analyze => mgr.analyze_sim()?,
-        Command::Clean => mgr.clean_sim()?,
+    // Execute the requested simulation command.
+    match cli.sim_cmd {
+        SimCmd::Create => mgr.create_run()?,
+        SimCmd::Resume { run_idx } => mgr.resume_run(run_idx)?,
+        SimCmd::Analyze => mgr.analyze_sim()?,
+        SimCmd::Clean => mgr.clean_sim()?,
     }
 
     Ok(())
