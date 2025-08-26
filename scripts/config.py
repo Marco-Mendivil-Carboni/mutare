@@ -1,5 +1,3 @@
-#!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
-
 import toml
 from copy import deepcopy
 from pathlib import Path
@@ -17,7 +15,7 @@ DEFAULT_CONFIG = {
 }
 
 
-def create_config(overrides=None):
+def create_config(overrides: dict | None = None) -> dict:
     config = deepcopy(DEFAULT_CONFIG)
     if overrides:
         for key, value in overrides.items():
@@ -28,17 +26,7 @@ def create_config(overrides=None):
     return config
 
 
-def save_config(config, filepath):
+def save_config(config: dict, sim_dir: str):
+    filepath = Path(sim_dir).joinpath("config.toml")
     with open(filepath, "w") as file:
         toml.dump(config, file)
-
-
-if __name__ == "__main__":
-    import sys
-
-    if len(sys.argv) != 2:
-        raise ValueError("You must provide one argument (directory)")
-
-    config_file = Path(sys.argv[1]) / "config.toml"
-
-    save_config(DEFAULT_CONFIG, config_file)
