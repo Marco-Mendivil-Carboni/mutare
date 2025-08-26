@@ -40,12 +40,14 @@ Or build it from source:
 ```bash
 git clone https://github.com/Marco-Mendivil-Carboni/mutare.git
 cd mutare
-cargo build --release # The release profile is much faster than the dev profile.
+cargo build --release # The release profile is much faster than the dev profile
 ```
 
 ### Basic Usage
 
-First you must create a simulation directory (`./my_sim_dir`) and place inside it a config file named `config.toml`. Here is an example config file:
+Start by creating a simulation directory (e.g. `example_sim/`) and placing a config file named `config.toml` inside it.
+
+Here is an example config file:
 
 ```toml
 n_env = 2
@@ -59,28 +61,30 @@ steps_per_save = 4096
 saves_per_file = 64
 ```
 
-Then you can use this tool. Run `mutare --help` to display help information. Here are some examples of common commands:
+Now you can begin making simulation runs and analyzing them. Here are some examples of common commands:
 
 ```bash
-mutare --sim-dir ./my_sim_dir create # Create a new simulation run.
-mutare --sim-dir ./my_sim_dir resume --run-idx 0  # Resume run 0.
-mutare --sim-dir ./my_sim_dir analyze # Analyze all runs.
-mutare --sim-dir ./my_sim_dir clean # Clean up all simulation runs.
+mutare --sim-dir example_sim/ create # Create a new simulation run
+mutare --sim-dir example_sim/ resume --run-idx 0  # Resume run 0
+mutare --sim-dir example_sim/ analyze # Analyze all runs
+mutare --sim-dir example_sim/ clean # Clean up all simulation runs
 ```
+
+Run `mutare --help` to see more detailed help information.
 
 ---
 
 ## Advanced Usage
 
-Convenient Python scripts are provided in the `scripts/` folder that allow orchestration of multiple simulations automatically.
+The repository also includes Python scripts (in the `scripts/` folder) for orchestrating multiple simulations automatically.
 
-### Prerequisites:
+### Prerequisites
 
-- **Python 3.10+**
+- **Python 3.12+**
 
 ### Python Setup
 
-To setup the python environment run the following commands (asuming you have cloned the repo and built the binary):
+If you want to use this scripts the Python environment can be set up running the following commands (after having cloned the repository):
 
 ```bash
 python3 -m venv .venv
@@ -95,7 +99,7 @@ pip install -r requirements.txt
 Documentation is available via:
 
 ```bash
-cargo doc --no-deps --open # Not generating the dependency docs is much faster.
+cargo doc --no-deps --open # Not generating docs for dependencies saves time
 ```
 
 ---
