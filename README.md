@@ -84,7 +84,7 @@ The repository also includes Python scripts (in the `scripts/` folder) for orche
 
 ### Python Setup
 
-If you want to use this scripts the Python environment can be set up running the following commands (after having cloned the repository):
+If you want to use these scripts you can set up the Python environment by running the following commands (after having cloned the repository):
 
 ```bash
 python3 -m venv .venv
