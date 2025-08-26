@@ -1,7 +1,7 @@
 use anyhow::{Context, Result, bail};
-use rmp_serde::decode;
 use serde::{Deserialize, Serialize};
-use std::{fmt::Debug, fs::File, io::BufReader, ops::RangeBounds, path::Path};
+use std::{fmt::Debug, fs, ops::RangeBounds, path::Path};
+use toml::from_str;
 
 /// Simulation configuration parameters.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -31,15 +31,14 @@ pub struct Config {
 }
 
 impl Config {
-    /// Load a `Config` from a MessagePack file.
+    /// Load a `Config` from a TOML file.
     ///
     /// Performs validation on all parameters before returning.
     pub fn from_file<P: AsRef<Path>>(file: P) -> Result<Self> {
         let file = file.as_ref();
-        let file = File::open(file).with_context(|| format!("failed to open {file:?}"))?;
-        let reader = BufReader::new(file);
+        let file = fs::read_to_string(file).with_context(|| format!("failed to read {file:?}"))?;
 
-        let config: Config = decode::from_read(reader).context("failed to deserialize config")?;
+        let config: Config = from_str(&file).context("failed to deserialize config")?;
 
         config.validate().context("failed to validate config")?;
 

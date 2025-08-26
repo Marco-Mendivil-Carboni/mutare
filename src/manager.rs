@@ -20,12 +20,12 @@ pub struct Manager {
 impl Manager {
     /// Create a new simulation manager for a given simulation directory.
     ///
-    /// Expects a `config.msgpack` file inside this directory.
+    /// Expects a `config.toml` file inside this directory.
     pub fn new<P: AsRef<Path>>(sim_dir: P) -> Result<Self> {
         let sim_dir = sim_dir.as_ref().to_path_buf();
 
         let cfg =
-            Config::from_file(sim_dir.join("config.msgpack")).context("failed to construct cfg")?;
+            Config::from_file(sim_dir.join("config.toml")).context("failed to construct cfg")?;
         log::info!("{cfg:#?}");
 
         Ok(Self { sim_dir, cfg })

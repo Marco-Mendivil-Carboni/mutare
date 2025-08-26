@@ -1,4 +1,8 @@
 /target
+
 .venv
 
-*.msgpack
+__pycache__
+
+simulations
+

@@ -1,7 +1,8 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
-import msgpack
+import toml
 from copy import deepcopy
+from pathlib import Path
 
 DEFAULT_CONFIG = {
     "n_env": 2,
@@ -37,17 +38,16 @@ def create_config(overrides=None):
 
 
 def save_config(config, filepath):
-    with open(filepath, "wb") as file:
-        msgpack.dump(config, file)
+    with open(filepath, "w") as file:
+        toml.dump(config, file)
 
 
 if __name__ == "__main__":
     import sys
-    from pathlib import Path
 
     if len(sys.argv) != 2:
-        raise ValueError("You must provide one argument")
+        raise ValueError("You must provide one argument (directory)")
 
-    config_file = Path(sys.argv[1]) / "config.msgpack"
+    config_file = Path(sys.argv[1]) / "config.toml"
 
     save_config(DEFAULT_CONFIG, config_file)
