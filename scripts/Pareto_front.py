@@ -51,12 +51,6 @@ def calc_gamma(r_x, p_xgs, p_s):
     return gamma
 
 
-def calc_sig_q_xgs(r_x, p_xgs, p_x_s):
-    q_xgs = r_x / p_xgs
-    sig_q_xgs = np.sqrt(np.sum(p_x_s * q_xgs**2) - 1)
-    return sig_q_xgs
-
-
 def calc_Pareto_front_W(p_x, p_sgx, r_x):
     n_x, n_s = check_dists(p_x, p_sgx, r_x)
     p_x_s, p_s, p_xgs = calc_aux_dists(p_sgx, p_x)

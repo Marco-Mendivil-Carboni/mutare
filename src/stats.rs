@@ -4,29 +4,19 @@ use std::default::Default;
 /// Stores summary statistics of a set of values.
 ///
 /// Optional fields (`sem` and `is_eq`) are skipped during serialization if `None`.
-#[derive(Serialize)]
+#[derive(Default, Serialize)]
 pub struct Report {
     /// Arithmetic mean of the values.
-    mean: f64,
-    /// Standard deviation of the values.
-    std_dev: f64,
-    /// Standard error of the mean, if available.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    sem: Option<f64>,
-    /// Whether equilibration was detected, if available.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    is_eq: Option<bool>,
-}
+    mean: Option<f64>,
 
-impl Default for Report {
-    fn default() -> Self {
-        Self {
-            mean: f64::NAN,
-            std_dev: f64::NAN,
-            sem: None,
-            is_eq: None,
-        }
-    }
+    /// Standard deviation of the values.
+    std_dev: Option<f64>,
+
+    /// Standard error of the mean, if available.
+    sem: Option<f64>,
+
+    /// Whether equilibration was detected, if available.
+    is_eq: Option<bool>,
 }
 
 /// Stores a series of values over time.
@@ -54,8 +44,8 @@ impl TimeSeries {
         };
 
         Report {
-            mean: compute_mean(eq_time_series),
-            std_dev: compute_var(eq_time_series).sqrt(),
+            mean: Some(compute_mean(eq_time_series)),
+            std_dev: Some(compute_var(eq_time_series).sqrt()),
             sem: Some(compute_sem(eq_time_series)),
             is_eq: Some(opt_eq_idx.is_some()),
         }
