@@ -1,9 +1,9 @@
 use crate::config::Config;
 use crate::model::State;
-use crate::stats::TimeSeries;
-use anyhow::{Context, Result};
+use crate::stats::{SummaryStats, TimeSeries};
+use anyhow::{Context, Result, bail};
 use rmp_serde::{decode, encode};
-use serde_value::{Value, to_value};
+use serde::Serialize;
 use std::{
     collections::HashMap,
     fs::File,
@@ -11,13 +11,23 @@ use std::{
     path::Path,
 };
 
+/// Represents the different kinds of observable statistics.
+#[derive(Serialize)]
+#[serde(untagged)]
+enum ObsStats {
+    StatsVec(Vec<SummaryStats>),
+}
+
 /// Trait for observables (metrics) computed from the simulation state.
 trait Observable {
+    /// Return the name of the observable.
+    fn name(&self) -> &'static str;
+
     /// Update the observable with the current simulation state.
     fn update(&mut self, state: &State);
 
-    /// Return the observable's report as a `serde_value::Value`.
-    fn report(&self) -> Result<Value>;
+    /// Return the observable statistics.
+    fn stats(&self) -> ObsStats;
 }
 
 /// Generic observable that tracks one or more time series.
@@ -45,15 +55,19 @@ impl TimeSeriesObservable {
 }
 
 impl Observable for TimeSeriesObservable {
+    fn name(&self) -> &'static str {
+        self.name
+    }
+
     fn update(&mut self, state: &State) {
         // Apply the custom update function to the time series.
         (self.update_fn)(&mut self.time_series_vec, state);
     }
 
-    fn report(&self) -> Result<Value> {
-        // Collect reports for each time series.
-        let reports: Vec<_> = self.time_series_vec.iter().map(|ts| ts.report()).collect();
-        Ok(to_value(HashMap::from([(self.name, reports)]))?)
+    fn stats(&self) -> ObsStats {
+        // Collect the statistics of all time series.
+        let stats_vec = self.time_series_vec.iter().map(|ts| ts.stats()).collect();
+        ObsStats::StatsVec(stats_vec)
     }
 }
 
@@ -136,18 +150,21 @@ impl Analyzer {
         Ok(())
     }
 
-    /// Save reports from all observables to a file.
-    pub fn save_reports<P: AsRef<Path>>(&self, file: P) -> Result<()> {
+    /// Save the analysis results to a file.
+    pub fn save_results<P: AsRef<Path>>(&self, file: P) -> Result<()> {
         let file = file.as_ref();
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
         let mut writer = BufWriter::new(file);
 
-        // Collect reports from all observables.
-        let reports: Result<Vec<_>> = self.obs_vec.iter().map(|obs| obs.report()).collect();
-        let reports = reports.context("failed to generate reports")?;
+        // Collect the name and statistics of all observables into a HashMap.
+        let mut results = HashMap::new();
+        for obs in &self.obs_vec {
+            if results.insert(obs.name(), obs.stats()).is_some() {
+                bail!("the names of the observables must be unique");
+            }
+        }
 
-        // Serialize reports to file.
-        encode::write_named(&mut writer, &reports).context("failed to serialize reports")?;
+        encode::write_named(&mut writer, &results).context("failed to serialize results")?;
 
         Ok(())
     }

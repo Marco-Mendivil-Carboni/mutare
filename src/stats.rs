@@ -2,10 +2,8 @@ use serde::Serialize;
 use std::default::Default;
 
 /// Stores summary statistics of a set of values.
-///
-/// Optional fields (`sem` and `is_eq`) are skipped during serialization if `None`.
 #[derive(Default, Serialize)]
-pub struct Report {
+pub struct SummaryStats {
     /// Arithmetic mean of the values.
     mean: Option<f64>,
 
@@ -31,10 +29,10 @@ impl TimeSeries {
         self.vals.push(val);
     }
 
-    /// Return a `Report` of the time series values.
-    pub fn report(&self) -> Report {
+    /// Return summary statistics of the time series values.
+    pub fn stats(&self) -> SummaryStats {
         if self.vals.is_empty() {
-            return Report::default();
+            return SummaryStats::default();
         }
 
         let opt_eq_idx = compute_opt_eq_idx(&self.vals);
@@ -43,7 +41,7 @@ impl TimeSeries {
             None => &self.vals,
         };
 
-        Report {
+        SummaryStats {
             mean: Some(compute_mean(eq_time_series)),
             std_dev: Some(compute_var(eq_time_series).sqrt()),
             sem: Some(compute_sem(eq_time_series)),

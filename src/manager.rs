@@ -77,7 +77,7 @@ impl Manager {
         Ok(())
     }
 
-    /// Analyze all trajectory files from all simulation runs and save reports.
+    /// Analyze all trajectory files from all simulation runs and save analysis results.
     pub fn analyze_sim(&self) -> Result<()> {
         let n_runs = self.count_run_dirs().context("failed to count run dirs")?;
         for run_idx in 0..n_runs {
@@ -93,8 +93,8 @@ impl Manager {
             }
 
             analyzer
-                .save_reports(self.reports_file(run_idx))
-                .context("failed to save reports")?;
+                .save_results(self.results_file(run_idx))
+                .context("failed to save results")?;
 
             let run_dir = self.run_dir(run_idx);
             log::info!("analyzed {run_dir:?}");
@@ -149,7 +149,7 @@ impl Manager {
             .join(format!("trajectory-{file_idx:04}.msgpack"))
     }
 
-    fn reports_file(&self, run_idx: usize) -> PathBuf {
-        self.run_dir(run_idx).join("reports.msgpack")
+    fn results_file(&self, run_idx: usize) -> PathBuf {
+        self.run_dir(run_idx).join("results.msgpack")
     }
 }

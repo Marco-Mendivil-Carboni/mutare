@@ -2,7 +2,7 @@
 
 from config import create_config, save_config
 from runner import mutare_create, mutare_resume, mutare_analyze, mutare_clean
-from reports import read_reports, print_reports
+from results import read_results, print_results
 from Pareto_front import calc_aux_dists
 from Pareto_front import calc_Pareto_front_W
 
@@ -42,17 +42,9 @@ mutare_resume(sim_dir, 1)
 
 mutare_analyze(sim_dir)
 
-print_reports(sim_dir, 0)
-print_reports(sim_dir, 1)
+print_results(sim_dir, 0)
+print_results(sim_dir, 1)
 
+p_x = read_results(sim_dir, 0)["prob_env"][0]["mean"]
 
-def get_prob_env_means(sim_dir: Path, run_idx: int) -> float | None:
-    for report in read_reports(sim_dir, run_idx):
-        if "prob_env" in report:
-            print("hey")
-            return report["prob_env"][:]["mean"]
-    return None
-
-
-p_x = get_prob_env_means(sim_dir, 0)
 print(p_x)
