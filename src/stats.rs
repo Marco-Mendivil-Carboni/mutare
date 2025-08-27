@@ -29,45 +29,8 @@ impl Default for Report {
     }
 }
 
-/// Accumulator for streaming values.
-///
-/// Tracks running mean and sum of squared differences to compute the standard deviation.
-#[derive(Clone, Default)]
-pub struct Accumulator {
-    n_vals: usize,
-    mean: f64,
-    diff_2_sum: f64,
-}
-
-impl Accumulator {
-    /// Add a value to the accumulator.
-    pub fn add(&mut self, val: f64) {
-        self.n_vals += 1;
-
-        let diff_a = val - self.mean;
-        self.mean += diff_a / self.n_vals as f64;
-
-        let diff_b = val - self.mean;
-        self.diff_2_sum += diff_a * diff_b;
-    }
-
-    /// Return a `Report` of the accumulated values.
-    pub fn report(&self) -> Report {
-        Report {
-            mean: if self.n_vals > 0 { self.mean } else { f64::NAN },
-            std_dev: if self.n_vals > 1 {
-                (self.diff_2_sum / (self.n_vals as f64 - 1.0)).sqrt()
-            } else {
-                f64::NAN
-            },
-            sem: None,
-            is_eq: None,
-        }
-    }
-}
-
 /// Stores a series of values over time.
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct TimeSeries {
     vals: Vec<f64>,
 }
@@ -184,7 +147,7 @@ fn compute_sem(time_series: &[f64]) -> f64 {
         let max_low = sem2_ests[idx..]
             .iter()
             .zip(sem2_errs[idx..].iter())
-            .map(|(s, e)| s - e)
+            .map(|(est, err)| est - err)
             .max_by(|a, b| a.total_cmp(b))
             .unwrap_or(f64::NAN);
 

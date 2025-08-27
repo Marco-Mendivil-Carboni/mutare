@@ -1,8 +1,8 @@
 use std::{env, fs, path::PathBuf, process::Command};
 
 #[test]
-fn basic_test() {
-    let test_dir = PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join("basic_test");
+fn basic_workflow() {
+    let test_dir = PathBuf::from(env!("CARGO_TARGET_TMPDIR")).join("basic_workflow");
 
     fs::remove_dir_all(&test_dir).ok();
     fs::create_dir(&test_dir).expect("failed to create test directory");

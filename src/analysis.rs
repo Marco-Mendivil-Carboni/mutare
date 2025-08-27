@@ -1,6 +1,6 @@
 use crate::config::Config;
 use crate::model::State;
-use crate::stats::{Accumulator, TimeSeries};
+use crate::stats::TimeSeries;
 use anyhow::{Context, Result};
 use rmp_serde::{decode, encode};
 use serde_value::{Value, to_value};
@@ -23,48 +23,48 @@ pub trait Observable {
 
 /// Tracks the probability of each environment over time.
 pub struct ProbEnv {
-    acc_vec: Vec<Accumulator>,
+    time_series_vec: Vec<TimeSeries>,
 }
 
 impl ProbEnv {
     /// Create a new `ProbEnv` observable from the given configuration.
     pub fn new(cfg: &Config) -> Self {
-        let acc_vec = vec![Accumulator::default(); cfg.n_env];
-        Self { acc_vec }
+        let time_series_vec = vec![TimeSeries::default(); cfg.n_env];
+        Self { time_series_vec }
     }
 }
 
 impl Observable for ProbEnv {
     fn update(&mut self, state: &State) {
         // Add 1.0 for the current environment, 0.0 for others.
-        for (i_env, acc) in self.acc_vec.iter_mut().enumerate() {
-            acc.add(if i_env == state.env { 1.0 } else { 0.0 });
+        for (i_env, time_series) in self.time_series_vec.iter_mut().enumerate() {
+            time_series.push(if i_env == state.env { 1.0 } else { 0.0 });
         }
     }
 
     fn report(&self) -> Result<Value> {
-        let reports: Vec<_> = self.acc_vec.iter().map(|acc| acc.report()).collect();
+        let reports: Vec<_> = self.time_series_vec.iter().map(|ts| ts.report()).collect();
         Ok(to_value(HashMap::from([("prob_env", reports)]))?)
     }
 }
 
 /// Tracks the average probability distribution over phenotypes across agents.
 pub struct AvgProbPhe {
-    acc_vec: Vec<Accumulator>,
+    time_series_vec: Vec<TimeSeries>,
 }
 
 impl AvgProbPhe {
     /// Create a new `AvgProbPhe` observable from the given configuration.
     pub fn new(cfg: &Config) -> Self {
-        let acc_vec = vec![Accumulator::default(); cfg.n_phe];
-        Self { acc_vec }
+        let time_series_vec = vec![TimeSeries::default(); cfg.n_phe];
+        Self { time_series_vec }
     }
 }
 
 impl Observable for AvgProbPhe {
     fn update(&mut self, state: &State) {
         // Compute average probability for each phenotype across all agents.
-        let mut avg_prob_phe = vec![0.0; self.acc_vec.len()];
+        let mut avg_prob_phe = vec![0.0; self.time_series_vec.len()];
         for agt in &state.agt_vec {
             for (sum, &ele) in avg_prob_phe.iter_mut().zip(agt.prob_phe()) {
                 *sum += ele;
@@ -74,15 +74,15 @@ impl Observable for AvgProbPhe {
             .iter_mut()
             .for_each(|ele| *ele /= state.agt_vec.len() as f64);
 
-        // Update accumulators with the averaged probabilities.
-        self.acc_vec
+        // Update time series with the averaged probabilities.
+        self.time_series_vec
             .iter_mut()
             .zip(avg_prob_phe.iter())
-            .for_each(|(acc, &val)| acc.add(val));
+            .for_each(|(ts, &val)| ts.push(val));
     }
 
     fn report(&self) -> Result<Value> {
-        let reports: Vec<_> = self.acc_vec.iter().map(|acc| acc.report()).collect();
+        let reports: Vec<_> = self.time_series_vec.iter().map(|ts| ts.report()).collect();
         Ok(to_value(HashMap::from([("avg_prob_phe", reports)]))?)
     }
 }
