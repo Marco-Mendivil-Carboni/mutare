@@ -4,7 +4,7 @@ from pathlib import Path
 bin = Path("target/release/mutare")
 
 
-def mutare_create(sim_dir: Path):
+def mutare_create(sim_dir):
     return subprocess.run([str(bin), "--sim-dir", str(sim_dir), "create"])
 
 
