@@ -12,7 +12,7 @@ use std::{
 };
 
 /// Trait for observables (metrics) computed from the simulation state.
-pub trait Observable {
+trait Observable {
     /// Update the observable with the current simulation state.
     fn update(&mut self, state: &State);
 
@@ -20,14 +20,19 @@ pub trait Observable {
     fn report(&self) -> Result<Value>;
 }
 
-pub struct TimeSeriesObservable {
+/// Generic observable that tracks one or more time series.
+///
+/// Each observable carries a custom `update_fn`, which defines
+/// how its time series should be updated from the simulation state.
+struct TimeSeriesObservable {
     name: &'static str,
     time_series_vec: Vec<TimeSeries>,
     update_fn: Box<dyn Fn(&mut [TimeSeries], &State)>,
 }
 
 impl TimeSeriesObservable {
-    pub fn new<F>(name: &'static str, n_ts: usize, update_fn: F) -> Self
+    /// Create a new `TimeSeriesObservable`.
+    fn new<F>(name: &'static str, n_ts: usize, update_fn: F) -> Self
     where
         F: Fn(&mut [TimeSeries], &State) + 'static,
     {
@@ -41,10 +46,12 @@ impl TimeSeriesObservable {
 
 impl Observable for TimeSeriesObservable {
     fn update(&mut self, state: &State) {
+        // Apply the custom update function to the time series.
         (self.update_fn)(&mut self.time_series_vec, state);
     }
 
     fn report(&self) -> Result<Value> {
+        // Collect reports for each time series.
         let reports: Vec<_> = self.time_series_vec.iter().map(|ts| ts.report()).collect();
         Ok(to_value(HashMap::from([(self.name, reports)]))?)
     }
@@ -118,6 +125,7 @@ impl Analyzer {
         let file = File::open(file).with_context(|| format!("failed to open {file:?}"))?;
         let mut reader = BufReader::new(file);
 
+        // Process each saved state in the file.
         for _ in 0..self.cfg.saves_per_file {
             let state = decode::from_read(&mut reader).context("failed to deserialize state")?;
             for obs in &mut self.obs_vec {
