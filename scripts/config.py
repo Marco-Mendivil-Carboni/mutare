@@ -4,15 +4,15 @@ from pathlib import Path
 
 DEFAULT_CONFIG = {
     "n_env": 2,
-    "n_phe": 2,
-    "prob_env": [[0.99, 0.01], [0.01, 0.99]],
-    "prob_rep": [[0.04, 0.0], [0.0, 0.03]],
-    "prob_dec": [[0.0, 0.02], [0.02, 0.0]],
+    "n_phe": 3,
+    "prob_env": [[0.999, 0.001], [0.001, 0.999]],
+    "prob_rep": [[0.0036, 0.0035, 0.0032], [0.0015, 0.0031, 0.0034]],
+    "prob_dec": [[0.0023, 0.0021, 0.0021], [0.0022, 0.0014, 0.0017]],
     "n_agt_init": 1024,
-    "prob_phe_init": [0.5, 0.5],
+    "prob_phe_init": [1 / 3, 1 / 3, 1 / 3],
     "std_dev_mut": 0.01,
-    "steps_per_save": 4096,
-    "saves_per_file": 64,
+    "steps_per_save": 1024,
+    "saves_per_file": 1024,
 }
 
 
