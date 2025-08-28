@@ -3,19 +3,12 @@ use crate::model::State;
 use crate::stats::{SummaryStats, TimeSeries};
 use anyhow::{Context, Result, bail};
 use rmp_serde::{decode, encode};
-use serde::Serialize;
 use std::{
     collections::HashMap,
     fs::File,
     io::{BufReader, BufWriter},
     path::Path,
 };
-
-/// Represents the different kinds of observable statistics.
-#[derive(Serialize)]
-enum ObsStats {
-    StatsVec(Vec<SummaryStats>),
-}
 
 /// Trait for observables (metrics) computed from the simulation state.
 trait Observable {
@@ -26,10 +19,10 @@ trait Observable {
     fn update(&mut self, state: &State);
 
     /// Return the observable statistics.
-    fn stats(&self) -> ObsStats;
+    fn stats(&self) -> Vec<SummaryStats>;
 }
 
-/// Generic observable that tracks one or more time series.
+/// Generic observable that holds a vector of time series.
 ///
 /// Each observable carries a custom `update_fn`, which defines
 /// how its time series should be updated from the simulation state.
@@ -59,14 +52,11 @@ impl Observable for TimeSeriesObservable {
     }
 
     fn update(&mut self, state: &State) {
-        // Apply the custom update function to the time series.
         (self.update_fn)(&mut self.time_series_vec, state);
     }
 
-    fn stats(&self) -> ObsStats {
-        // Collect the statistics of all time series.
-        let stats_vec = self.time_series_vec.iter().map(|ts| ts.stats()).collect();
-        ObsStats::StatsVec(stats_vec)
+    fn stats(&self) -> Vec<SummaryStats> {
+        self.time_series_vec.iter().map(|ts| ts.stats()).collect()
     }
 }
 
