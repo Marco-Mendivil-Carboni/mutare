@@ -46,11 +46,13 @@ config = create_config()
 print_results(sim_dir, 0)
 print_results(sim_dir, 1)
 
-p_x = np.array([[stats["mean"] for stats in read_results(sim_dir, 0)["prob_env"]]])
+p_x = np.array(
+    [[stats["mean"] for stats in read_results(sim_dir, 0)["prob_env"]["StatsVec"]]]
+)
 print(p_x)
 
 avg_prob_phe = np.array(
-    [[stats["mean"] for stats in read_results(sim_dir, 0)["avg_prob_phe"]]]
+    [[stats["mean"] for stats in read_results(sim_dir, 0)["avg_prob_phe"]["StatsVec"]]]
 )
 print(avg_prob_phe)
 

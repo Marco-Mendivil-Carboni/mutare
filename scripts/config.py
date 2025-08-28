@@ -9,6 +9,7 @@ DEFAULT_CONFIG = {
     "prob_rep": [[0.04, 0.0], [0.0, 0.03]],
     "prob_dec": [[0.0, 0.02], [0.02, 0.0]],
     "n_agt_init": 1024,
+    "prob_phe_init": [0.5, 0.5],
     "std_dev_mut": 0.01,
     "steps_per_save": 4096,
     "saves_per_file": 64,

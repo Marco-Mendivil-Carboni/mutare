@@ -2,7 +2,6 @@ use crate::analysis::Analyzer;
 use crate::config::Config;
 use crate::engine::Engine;
 use anyhow::{Context, Result, bail};
-use glob::glob;
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -118,7 +117,7 @@ impl Manager {
     fn count_run_dirs(&self) -> Result<usize> {
         let pattern = self.sim_dir.join("run-*");
         let pattern = pattern.to_str().context("pattern is not valid UTF-8")?;
-        let count = glob(pattern)
+        let count = glob::glob(pattern)
             .context("failed to glob run dirs")?
             .filter_map(Result::ok)
             .filter(|p| p.is_dir())
@@ -133,7 +132,7 @@ impl Manager {
     fn count_trajectory_files(&self, run_idx: usize) -> Result<usize> {
         let pattern = self.run_dir(run_idx).join("trajectory-*.msgpack");
         let pattern = pattern.to_str().context("pattern is not valid UTF-8")?;
-        let count = glob(pattern)
+        let count = glob::glob(pattern)
             .context("failed to glob trajectory files")?
             .filter_map(Result::ok)
             .count();

@@ -15,10 +15,10 @@ fn basic_workflow() {
         + "prob_rep = [ [ 0.04, 0.0,], [ 0.0, 0.03,],]\n"
         + "prob_dec = [ [ 0.0, 0.02,], [ 0.02, 0.0,],]\n"
         + "n_agt_init = 256\n"
+        + "prob_phe_init = [ 0.5, 0.5,]\n"
         + "std_dev_mut = 0.01\n"
         + "steps_per_save = 1024\n"
-        + "saves_per_file = 64\n"
-        + "";
+        + "saves_per_file = 64\n";
 
     fs::write(&config_path, config_contents).expect("failed to write config file");
 

@@ -13,7 +13,6 @@ use std::{
 
 /// Represents the different kinds of observable statistics.
 #[derive(Serialize)]
-#[serde(untagged)]
 enum ObsStats {
     StatsVec(Vec<SummaryStats>),
 }

@@ -1,7 +1,6 @@
 use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, fs, ops::RangeBounds, path::Path};
-use toml::from_str;
 
 /// Simulation configuration parameters.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
@@ -20,6 +19,8 @@ pub struct Config {
 
     /// Initial number of agents.
     pub n_agt_init: usize,
+    /// Initial probability distribution over phenotypes.
+    pub prob_phe_init: Vec<f64>,
 
     /// Standard deviation of mutation noise.
     pub std_dev_mut: f64,
@@ -38,7 +39,7 @@ impl Config {
         let file = file.as_ref();
         let file = fs::read_to_string(file).with_context(|| format!("failed to read {file:?}"))?;
 
-        let config: Config = from_str(&file).context("failed to deserialize config")?;
+        let config: Config = toml::from_str(&file).context("failed to deserialize config")?;
 
         config.validate().context("failed to validate config")?;
 
@@ -57,7 +58,11 @@ impl Config {
             .context("invalid deceased probabilities")?;
 
         check_num(self.n_agt_init, 1..100_000).context("invalid initial number of agents")?;
+        check_vec(&self.prob_phe_init, self.n_phe, true)
+            .context("invalid initial probability distribution over phenotypes")?;
+
         check_num(self.std_dev_mut, 0.0..1.0).context("invalid mutation standard deviation")?;
+
         check_num(self.steps_per_save, 1..10_000).context("invalid number of steps per save")?;
         check_num(self.saves_per_file, 1..10_000).context("invalid number of saves per file")?;
 

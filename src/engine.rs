@@ -32,10 +32,10 @@ impl Engine {
         let env = env_dist.sample(&mut rng);
 
         let mut agt_vec = Vec::with_capacity(cfg.n_agt_init);
-        let phe_dist = Uniform::new(0, cfg.n_phe)?;
+        let phe_dist = WeightedIndex::new(&cfg.prob_phe_init)?;
         for _ in 0..cfg.n_agt_init {
             let phe = phe_dist.sample(&mut rng);
-            let prob_phe = vec![1.0 / cfg.n_phe as f64; cfg.n_phe];
+            let prob_phe = cfg.prob_phe_init.clone();
             agt_vec.push(Agent::new(phe, prob_phe));
         }
 
