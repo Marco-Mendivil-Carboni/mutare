@@ -5,29 +5,50 @@ use std::{fmt::Debug, fs, ops::RangeBounds, path::Path};
 /// Simulation configuration parameters.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct Config {
+    /// Stochastic agent-based model parameters.
+    pub model: ModelParams,
+    /// State initialization parameters.
+    pub init: InitParams,
+    /// Output format parameters.
+    pub output: OutputParams,
+}
+
+/// Stochastic agent-based model parameters.
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct ModelParams {
     /// Number of environments.
     pub n_env: usize,
     /// Number of phenotypes.
     pub n_phe: usize,
 
     /// Environment transition probabilities (matrix `n_env x n_env`).
-    pub prob_env: Vec<Vec<f64>>,
+    pub prob_trans_env: Vec<Vec<f64>>,
     /// Replication probabilities (matrix `n_env x n_phe`).
     pub prob_rep: Vec<Vec<f64>>,
-    /// Death probabilities (matrix `n_env x n_phe`).
+    /// Deceased probabilities (matrix `n_env x n_phe`).
     pub prob_dec: Vec<Vec<f64>>,
 
-    /// Initial number of agents.
-    pub n_agt_init: usize,
-    /// Initial probability distribution over phenotypes.
-    pub prob_phe_init: Vec<f64>,
-
-    /// Standard deviation of mutation noise.
+    /// Mutation probability.
+    pub prob_mut: f64,
+    /// Mutation standard deviation.
     pub std_dev_mut: f64,
+}
 
-    /// Number of steps between simulation saves.
+/// State initialization parameters.
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct InitParams {
+    /// Number of agents.
+    pub n_agt: usize,
+    /// Probability distribution over phenotypes.
+    pub prob_phe: Vec<f64>,
+}
+
+/// Output format parameters.
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
+pub struct OutputParams {
+    /// Number of steps per saved state.
     pub steps_per_save: usize,
-    /// Number of saves written per file.
+    /// Number of saved states per file.
     pub saves_per_file: usize,
 }
 
@@ -47,24 +68,31 @@ impl Config {
     }
 
     fn validate(&self) -> Result<()> {
-        check_num(self.n_env, 1..100).context("invalid number of environments")?;
-        check_num(self.n_phe, 1..100).context("invalid number of phenotypes")?;
+        let model = &self.model;
+        let init = &self.init;
+        let output = &self.output;
 
-        check_mat(&self.prob_env, (self.n_env, self.n_env), true)
-            .context("invalid environment probabilities")?;
-        check_mat(&self.prob_rep, (self.n_env, self.n_phe), false)
+        check_num(model.n_env, 1..100).context("invalid number of environments")?;
+        check_num(model.n_phe, 1..100).context("invalid number of phenotypes")?;
+
+        check_mat(&model.prob_trans_env, (model.n_env, model.n_env), true)
+            .context("invalid environment transition probabilities")?;
+        check_mat(&model.prob_rep, (model.n_env, model.n_phe), false)
             .context("invalid replicating probabilities")?;
-        check_mat(&self.prob_dec, (self.n_env, self.n_phe), false)
+        check_mat(&model.prob_dec, (model.n_env, model.n_phe), false)
             .context("invalid deceased probabilities")?;
 
-        check_num(self.n_agt_init, 1..100_000).context("invalid initial number of agents")?;
-        check_vec(&self.prob_phe_init, self.n_phe, true)
-            .context("invalid initial probability distribution over phenotypes")?;
+        check_num(model.prob_mut, 0.0..1.0).context("invalid mutation probability")?;
+        check_num(model.std_dev_mut, 0.0..1.0).context("invalid mutation standard deviation")?;
 
-        check_num(self.std_dev_mut, 0.0..1.0).context("invalid mutation standard deviation")?;
+        check_num(init.n_agt, 1..10_000).context("invalid number of agents")?;
+        check_vec(&init.prob_phe, model.n_phe, true)
+            .context("invalid probability distribution over phenotypes")?;
 
-        check_num(self.steps_per_save, 1..10_000).context("invalid number of steps per save")?;
-        check_num(self.saves_per_file, 1..10_000).context("invalid number of saves per file")?;
+        check_num(output.steps_per_save, 1..10_000)
+            .context("invalid number of steps per saved state")?;
+        check_num(output.saves_per_file, 1..1_000)
+            .context("invalid number of saved states per file")?;
 
         Ok(())
     }

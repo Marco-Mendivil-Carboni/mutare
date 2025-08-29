@@ -76,7 +76,7 @@ impl Analyzer {
         // Probability of each environment over time
         obs_vec.push(Box::new(TimeSeriesObservable::new(
             "prob_env",
-            cfg.n_env,
+            cfg.model.n_env,
             |time_series_vec, state| {
                 // Add 1.0 for the current environment, 0.0 for others.
                 for (i_env, time_series) in time_series_vec.iter_mut().enumerate() {
@@ -88,7 +88,7 @@ impl Analyzer {
         // Average probability distribution over phenotypes across agents
         obs_vec.push(Box::new(TimeSeriesObservable::new(
             "avg_prob_phe",
-            cfg.n_phe,
+            cfg.model.n_phe,
             |time_series_vec, state| {
                 // Compute average probability for each phenotype across all agents.
                 let mut avg_prob_phe = vec![0.0; time_series_vec.len()];
@@ -129,7 +129,7 @@ impl Analyzer {
         let mut reader = BufReader::new(file);
 
         // Process each saved state in the file.
-        for _ in 0..self.cfg.saves_per_file {
+        for _ in 0..self.cfg.output.saves_per_file {
             let state = decode::from_read(&mut reader).context("failed to deserialize state")?;
             for obs in &mut self.obs_vec {
                 obs.update(&state);

@@ -28,14 +28,14 @@ impl Engine {
     pub fn generate_initial_condition(cfg: Config) -> Result<Self> {
         let mut rng = ChaCha12Rng::try_from_os_rng()?;
 
-        let env_dist = Uniform::new(0, cfg.n_env)?;
+        let env_dist = Uniform::new(0, cfg.model.n_env)?;
         let env = env_dist.sample(&mut rng);
 
-        let mut agt_vec = Vec::with_capacity(cfg.n_agt_init);
-        let phe_dist = WeightedIndex::new(&cfg.prob_phe_init)?;
-        for _ in 0..cfg.n_agt_init {
+        let mut agt_vec = Vec::with_capacity(cfg.init.n_agt);
+        let phe_dist = WeightedIndex::new(&cfg.init.prob_phe)?;
+        for _ in 0..cfg.init.n_agt {
             let phe = phe_dist.sample(&mut rng);
-            let prob_phe = cfg.prob_phe_init.clone();
+            let prob_phe = cfg.init.prob_phe.clone();
             agt_vec.push(Agent::new(phe, prob_phe));
         }
 
@@ -54,21 +54,21 @@ impl Engine {
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
         let mut writer = BufWriter::new(file);
 
-        let mut i_agt_rep = Vec::with_capacity(self.cfg.n_agt_init);
-        let mut i_agt_dec = Vec::with_capacity(self.cfg.n_agt_init);
+        let mut i_agt_rep = Vec::with_capacity(self.cfg.init.n_agt);
+        let mut i_agt_dec = Vec::with_capacity(self.cfg.init.n_agt);
 
         const MAX_N_AGT_FACTOR: usize = 2;
-        let i_agt_all = (0..MAX_N_AGT_FACTOR * self.cfg.n_agt_init).collect();
+        let i_agt_all = (0..MAX_N_AGT_FACTOR * self.cfg.init.n_agt).collect();
 
-        for i_save in 0..self.cfg.saves_per_file {
-            for _ in 0..self.cfg.steps_per_save {
+        for i_save in 0..self.cfg.output.saves_per_file {
+            for _ in 0..self.cfg.output.steps_per_save {
                 self.perform_step(&mut i_agt_rep, &mut i_agt_dec, &i_agt_all)
                     .context("failed to perform step")?;
             }
 
             encode::write(&mut writer, &self.state).context("failed to serialize state")?;
 
-            let progress = 100.0 * (i_save + 1) as f64 / self.cfg.saves_per_file as f64;
+            let progress = 100.0 * (i_save + 1) as f64 / self.cfg.output.saves_per_file as f64;
             log::info!("completed {progress:06.2}%");
         }
 
@@ -132,7 +132,7 @@ impl Engine {
     }
 
     fn update_environment(&mut self) -> Result<()> {
-        let env_dist = WeightedIndex::new(&self.cfg.prob_env[self.state.env])?;
+        let env_dist = WeightedIndex::new(&self.cfg.model.prob_trans_env[self.state.env])?;
         self.state.env = env_dist.sample(&mut self.rng);
         Ok(())
     }
@@ -142,12 +142,12 @@ impl Engine {
         i_agt_rep: &mut Vec<usize>,
         i_agt_dec: &mut Vec<usize>,
     ) -> Result<()> {
-        let mut rep_dist_vec = Vec::with_capacity(self.cfg.n_phe);
-        for &prob in &self.cfg.prob_rep[self.state.env] {
+        let mut rep_dist_vec = Vec::with_capacity(self.cfg.model.n_phe);
+        for &prob in &self.cfg.model.prob_rep[self.state.env] {
             rep_dist_vec.push(Bernoulli::new(prob)?);
         }
-        let mut dec_dist_vec = Vec::with_capacity(self.cfg.n_phe);
-        for &prob in &self.cfg.prob_dec[self.state.env] {
+        let mut dec_dist_vec = Vec::with_capacity(self.cfg.model.n_phe);
+        for &prob in &self.cfg.model.prob_dec[self.state.env] {
             dec_dist_vec.push(Bernoulli::new(prob)?);
         }
 
@@ -166,7 +166,8 @@ impl Engine {
     }
 
     fn replicate_agents(&mut self, i_agt_rep: &Vec<usize>) -> Result<()> {
-        let mut_dist = LogNormal::new(0.0, self.cfg.std_dev_mut)?;
+        let mut_dist = Bernoulli::new(self.cfg.model.prob_mut)?;
+        let ele_mut_dist = LogNormal::new(0.0, self.cfg.model.std_dev_mut)?;
 
         for &i_agt in i_agt_rep {
             let prob_phe = self.state.agt_vec[i_agt].prob_phe();
@@ -175,13 +176,18 @@ impl Engine {
             let phe_dist = WeightedIndex::new(prob_phe)?;
             let phe_new = phe_dist.sample(&mut self.rng);
 
-            // Mutate the parent's probability distribution to create the one of the offspring.
-            let mut prob_phe_new: Vec<_> = prob_phe
-                .iter()
-                .map(|ele| ele * mut_dist.sample(&mut self.rng))
-                .collect();
-            let sum: f64 = prob_phe_new.iter().sum();
-            prob_phe_new.iter_mut().for_each(|ele| *ele /= sum);
+            // The offspring inherits the parent's probability distribution by default.
+            let mut prob_phe_new = prob_phe.clone();
+
+            // With probability `prob_mut` the offspring's distribution mutates randomly.
+            if mut_dist.sample(&mut self.rng) {
+                prob_phe_new = prob_phe_new
+                    .iter()
+                    .map(|ele| ele * ele_mut_dist.sample(&mut self.rng))
+                    .collect();
+                let sum: f64 = prob_phe_new.iter().sum();
+                prob_phe_new.iter_mut().for_each(|ele| *ele /= sum);
+            }
 
             self.state.agt_vec.push(Agent::new(phe_new, prob_phe_new));
 
@@ -201,8 +207,8 @@ impl Engine {
 
     fn remove_excess(&mut self, i_agt_all: &Vec<usize>) {
         let n_agt = self.state.agt_vec.len();
-        if n_agt > self.cfg.n_agt_init {
-            let excess = n_agt - self.cfg.n_agt_init;
+        if n_agt > self.cfg.init.n_agt {
+            let excess = n_agt - self.cfg.init.n_agt;
 
             // Randomly pick excess agents to remove.
             let mut i_agt_rm: Vec<_> = i_agt_all[..n_agt]

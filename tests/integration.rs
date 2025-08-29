@@ -9,14 +9,20 @@ fn basic_workflow() {
 
     let config_path = test_dir.join("config.toml");
     let config_contents = String::new()
+        + "[model]\n"
         + "n_env = 2\n"
         + "n_phe = 2\n"
-        + "prob_env = [ [ 0.99, 0.01,], [ 0.01, 0.99,],]\n"
+        + "prob_trans_env = [ [ 0.99, 0.01,], [ 0.01, 0.99,],]\n"
         + "prob_rep = [ [ 0.04, 0.0,], [ 0.0, 0.03,],]\n"
         + "prob_dec = [ [ 0.0, 0.02,], [ 0.02, 0.0,],]\n"
-        + "n_agt_init = 256\n"
-        + "prob_phe_init = [ 0.5, 0.5,]\n"
-        + "std_dev_mut = 0.01\n"
+        + "prob_mut = 0.06\n"
+        + "std_dev_mut = 0.06\n"
+        + "\n"
+        + "[init]\n"
+        + "n_agt = 256\n"
+        + "prob_phe = [ 0.5, 0.5,]\n"
+        + "\n"
+        + "[output]\n"
         + "steps_per_save = 1024\n"
         + "saves_per_file = 64\n";
 
