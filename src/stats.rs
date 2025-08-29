@@ -10,10 +10,10 @@ pub struct SummaryStats {
     /// Standard deviation of the values.
     std_dev: Option<f64>,
 
-    /// Standard error of the mean, if available.
+    /// Standard error of the mean.
     sem: Option<f64>,
 
-    /// Whether equilibration was detected, if available.
+    /// Whether equilibration was detected.
     is_eq: Option<bool>,
 }
 
