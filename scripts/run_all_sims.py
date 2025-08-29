@@ -34,7 +34,7 @@ mutare_clean(sim_dir)
 mutare_create(sim_dir)
 mutare_create(sim_dir)
 
-for _ in range(16):
+for _ in range(64):
     mutare_resume(sim_dir, 0)
     mutare_resume(sim_dir, 1)
 
@@ -47,24 +47,26 @@ p_e = np.array([[stats["mean"] for stats in read_results(sim_dir, 0)["prob_env"]
 print(p_e)
 
 p_e = np.array([[0.5, 0.5]])
-
 p_sge = np.array([[1.0, 1.0]])
 
 # probability of duplication
-p_d_cge = np.array(config["prob_rep"]) - np.array(config["prob_dec"])
+p_d_cge = np.array(config["model"]["prob_rep"]) - np.array(config["model"]["prob_dec"])
 print(p_d_cge)
 
 # expected sojourn time
-prob_env = config["prob_env"]
+prob_trans_env = config["model"]["prob_trans_env"]
 tau_env = np.array(
-    [[1 / (1 - prob_env[i][i]) for i in range(len(prob_env))]]
+    [[1 / (1 - prob_trans_env[i][i]) for i in range(len(prob_trans_env))]]
 ).transpose()
+print(tau_env)
 
 f_cge = np.exp(p_d_cge * tau_env).transpose()
 print(f_cge)
+print(np.trace(1 / f_cge**2))
 
 b_cgs_l, avg_W_l, sig_W_l = calc_Pareto_front(p_e, p_sge, f_cge)
-print(b_cgs_l[0])
+print(b_cgs_l[+0])
+print(b_cgs_l[-1])
 
 fig, ax = plt.subplots()
 
