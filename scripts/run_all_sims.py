@@ -1,7 +1,13 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
 from config import DEFAULT_CONFIG, save_config
-from runner import mutare_create, mutare_resume, mutare_analyze, mutare_clean
+from runner import (
+    exit_if_stopped,
+    mutare_create,
+    mutare_resume,
+    mutare_analyze,
+    mutare_clean,
+)
 from results import read_results, print_results
 from Pareto_front import calc_Pareto_front
 
@@ -34,6 +40,7 @@ mutare_create(sim_dir)
 mutare_create(sim_dir)
 
 for _ in range(16):
+    exit_if_stopped()
     mutare_resume(sim_dir, 0)
     mutare_resume(sim_dir, 1)
 
