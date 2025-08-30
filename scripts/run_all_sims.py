@@ -34,7 +34,7 @@ mutare_clean(sim_dir)
 mutare_create(sim_dir)
 mutare_create(sim_dir)
 
-for _ in range(64):
+for _ in range(16):
     mutare_resume(sim_dir, 0)
     mutare_resume(sim_dir, 1)
 

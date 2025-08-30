@@ -116,7 +116,8 @@ impl Engine {
         self.select_rep_and_dec(i_agt_rep, i_agt_dec)
             .context("failed to select replicating and deceased agents")?;
 
-        self.state.n_agt_diff = 0;
+        // Compute the net change in the number of agents.
+        self.state.n_agt_diff = i_agt_rep.len() as i32 - i_agt_dec.len() as i32;
 
         // Replicate selected agents.
         self.replicate_agents(i_agt_rep)
@@ -162,6 +163,7 @@ impl Engine {
                 i_agt_dec.push(i_agt);
             }
         }
+
         Ok(())
     }
 
@@ -190,9 +192,8 @@ impl Engine {
             }
 
             self.state.agt_vec.push(Agent::new(phe_new, prob_phe_new));
-
-            self.state.n_agt_diff += 1;
         }
+
         Ok(())
     }
 
@@ -201,7 +202,6 @@ impl Engine {
         i_agt_dec.sort_by(|a, b| b.cmp(a));
         for &i_agt in i_agt_dec.iter() {
             self.state.agt_vec.swap_remove(i_agt);
-            self.state.n_agt_diff -= 1;
         }
     }
 
