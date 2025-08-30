@@ -1,8 +1,35 @@
 import toml
-from copy import deepcopy
 from pathlib import Path
+from typing import TypedDict, List
 
-DEFAULT_CONFIG = {
+
+class ModelParams(TypedDict):
+    n_env: int
+    n_phe: int
+    prob_trans_env: List[List[float]]
+    prob_rep: List[List[float]]
+    prob_dec: List[List[float]]
+    prob_mut: float
+    std_dev_mut: float
+
+
+class InitParams(TypedDict):
+    n_agt: int
+    prob_phe: List[float]
+
+
+class OutputParams(TypedDict):
+    steps_per_save: int
+    saves_per_file: int
+
+
+class Config(TypedDict):
+    model: ModelParams
+    init: InitParams
+    output: OutputParams
+
+
+DEFAULT_CONFIG: Config = {
     "model": {
         "n_env": 2,
         "n_phe": 2,
@@ -23,18 +50,7 @@ DEFAULT_CONFIG = {
 }
 
 
-def create_config(overrides: dict | None = None) -> dict:
-    config = deepcopy(DEFAULT_CONFIG)
-    if overrides:
-        for key, value in overrides.items():
-            if key in config:
-                config[key].update(value)
-            else:
-                raise KeyError(f"Unknown config key: {key}")
-    return config
-
-
-def save_config(config: dict, sim_dir: str):
-    filepath = Path(sim_dir).joinpath("config.toml")
-    with open(filepath, "w") as file:
+def save_config(config: Config, sim_dir: Path) -> None:
+    file_path = sim_dir.joinpath("config.toml")
+    with file_path.open("w") as file:
         toml.dump(config, file)

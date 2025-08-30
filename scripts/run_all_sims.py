@@ -1,7 +1,6 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
-from config import create_config, save_config
-
+from config import DEFAULT_CONFIG, save_config
 from runner import mutare_create, mutare_resume, mutare_analyze, mutare_clean
 from results import read_results, print_results
 from Pareto_front import calc_Pareto_front
@@ -25,7 +24,7 @@ sim_dir = Path("simulations")
 
 sim_dir.mkdir(parents=True, exist_ok=True)
 
-config = create_config()
+config = DEFAULT_CONFIG
 
 save_config(config, sim_dir)
 

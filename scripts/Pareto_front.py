@@ -1,9 +1,6 @@
 import numpy as np
-
 from scipy.optimize import minimize, basinhopping
-
 from tqdm import tqdm
-
 from typing import Tuple, List, Callable
 
 
@@ -103,9 +100,9 @@ def calc_Pareto_front(
                 self.f_min = f
                 self.niter_eq = 0
             print(
-                "f_min={: .16f}".format(self.f_min),
-                "niter={:04d}".format(self.niter),
-                "niter_eq={:04d}".format(self.niter_eq),
+                f"f_min={self.f_min}",
+                f"niter={self.niter}",
+                f"niter_eq={self.niter_eq}",
                 end="\r",
             )
 
@@ -132,9 +129,9 @@ def calc_Pareto_front(
 
     print("")
 
-    b_cgs_l: List[np.ndarray] = []
-    avg_W_l: List[float] = []
-    sig_W_l: List[float] = []
+    b_cgs_l = []
+    avg_W_l = []
+    sig_W_l = []
 
     for alpha in tqdm(alpha_l, ncols=80):
         res = minimize(
