@@ -33,18 +33,18 @@ DEFAULT_CONFIG: Config = {
     "model": {
         "n_env": 2,
         "n_phe": 2,
-        "prob_trans_env": [[0.999, 0.001], [0.001, 0.999]],
-        "prob_rep": [[0.006, 0.0], [0.0, 0.004]],
+        "prob_trans_env": [[0.99, 0.01], [0.01, 0.99]],
+        "prob_rep": [[0.010, 0.0], [0.0, 0.008]],
         "prob_dec": [[0.0, 0.0], [0.0, 0.0]],
-        "prob_mut": 0.001,
+        "prob_mut": 0.0001,
         "std_dev_mut": 0.1,
     },
     "init": {
-        "n_agt": 1024,
+        "n_agt": 256,
         "prob_phe": [0.5, 0.5],
     },
     "output": {
-        "steps_per_save": 1024,
+        "steps_per_save": 4096,
         "saves_per_file": 256,
     },
 }
