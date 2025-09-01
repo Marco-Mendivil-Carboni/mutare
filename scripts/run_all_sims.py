@@ -18,11 +18,6 @@ cm = 1 / 2.54
 mpl.rcParams["figure.figsize"] = [16.00 * cm, 10.00 * cm]
 mpl.rcParams["figure.constrained_layout.use"] = True
 
-fig, ax = plt.subplots()
-
-ax.set_xlabel("$\\langle\\Delta N\\rangle$")
-ax.set_ylabel("$\\sigma_{\\Delta N}$")
-
 sim_dir = Path("simulations/with_mut/")
 sim_dir.mkdir(parents=True, exist_ok=True)
 
@@ -74,10 +69,27 @@ for sim_idx, prob_phe in enumerate(prob_phe_l):
     avg_W_err_l.append(sem)
     sig_W_err_l.append(std_dev / np.sqrt(2 * (n_eff - 1)))
 
-ax.errorbar(avg_W_l, sig_W_l, xerr=avg_W_err_l, yerr=sig_W_err_l, c="b", label="fixed")
+fig, ax = plt.subplots()
 
-ax.errorbar(avg_W, sig_W, xerr=avg_W_err, yerr=sig_W_err, c="r", label="with mutations")
-
+ax.set_xlabel("$\\langle\\Delta N\\rangle$")
+ax.set_ylabel("$\\sigma_{\\Delta N}$")
+ax.errorbar(
+    avg_W_l,
+    sig_W_l,
+    xerr=avg_W_err_l,
+    yerr=sig_W_err_l,
+    c="b",
+    ls="",
+    label="fixed",
+)
+ax.errorbar(
+    avg_W,
+    sig_W,
+    xerr=avg_W_err,
+    yerr=sig_W_err,
+    c="r",
+    label="with mutations",
+)
 ax.legend()
 
 fig.savefig("simulations/test-plot.pdf")
