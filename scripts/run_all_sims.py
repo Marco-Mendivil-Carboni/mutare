@@ -1,15 +1,8 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
 from config import DEFAULT_CONFIG, save_config
-from runner import (
-    exit_if_stopped,
-    mutare_create,
-    mutare_resume,
-    mutare_analyze,
-    mutare_clean,
-)
+from runner import mutare_make_sim
 from results import read_results, print_results
-from Pareto_front import calc_Pareto_front
 
 import numpy as np
 from pathlib import Path
@@ -25,87 +18,57 @@ cm = 1 / 2.54
 mpl.rcParams["figure.figsize"] = [16.00 * cm, 10.00 * cm]
 mpl.rcParams["figure.constrained_layout.use"] = True
 
+fig, ax = plt.subplots()
 
-sim_dir = Path("simulations")
-
+sim_dir = Path("simulations/with_mut/")
 sim_dir.mkdir(parents=True, exist_ok=True)
 
 config = DEFAULT_CONFIG
-
 save_config(config, sim_dir)
 
-mutare_clean(sim_dir)
-
-mutare_create(sim_dir)
-mutare_create(sim_dir)
-
-for _ in range(16):
-    exit_if_stopped()
-    mutare_resume(sim_dir, 0)
-    mutare_resume(sim_dir, 1)
-
-mutare_analyze(sim_dir)
-
+mutare_make_sim(sim_dir, 1, 64)
 print_results(sim_dir, 0)
-print_results(sim_dir, 1)
 
-p_e = np.array([[stats["mean"] for stats in read_results(sim_dir, 0)["prob_env"]]])
-print(p_e)
+results = read_results(sim_dir, 0)
+n_agt = config["init"]["n_agt"]
+mean = results["n_agt_diff"][0]["mean"]
+std_dev = results["n_agt_diff"][0]["std_dev"]
+sem = results["n_agt_diff"][0]["sem"]
+n_eff = (std_dev / sem) ** 2
+avg_W = mean
+avg_W_err = sem
+sig_W = std_dev
+sig_W_err = std_dev / np.sqrt(2 * (n_eff - 1))
 
-p_e = np.array([[0.5, 0.5]])
-p_sge = np.array([[1.0, 1.0]])
+ax.errorbar(avg_W, sig_W, avg_W_err, sig_W_err, c="r")
 
-# probability of duplication
-p_d_cge = np.array(config["model"]["prob_rep"]) - np.array(config["model"]["prob_dec"])
-print(p_d_cge)
+n_sims = 16
+prob_phe_l = list(np.linspace(0, 1, num=n_sims))
 
-# expected sojourn time
-prob_trans_env = config["model"]["prob_trans_env"]
-tau_env = np.array(
-    [[1 / (1 - prob_trans_env[i][i]) for i in range(len(prob_trans_env))]]
-).transpose()
-print(tau_env)
+config["model"]["prob_mut"] = 0.0
 
-f_cge = np.exp(p_d_cge * tau_env).transpose()
-print(f_cge)
-print(np.trace(1 / f_cge**2))
+for sim_idx, prob_phe in enumerate(prob_phe_l):
+    sim_dir = Path(f"simulations/fixed-{sim_idx:02d}/")
+    sim_dir.mkdir(parents=True, exist_ok=True)
 
-b_cgs_l, avg_W_l, sig_W_l = calc_Pareto_front(p_e, p_sge, f_cge)
-print(b_cgs_l[+0])
-print(b_cgs_l[-1])
+    config["init"]["prob_phe"] = [float(prob_phe), float(1 - prob_phe)]
+    save_config(config, sim_dir)
 
-fig, ax = plt.subplots()
+    mutare_make_sim(sim_dir, 1, 64)
+    print_results(sim_dir, 0)
 
-ax.plot(avg_W_l, sig_W_l, c="b")
+    results = read_results(sim_dir, 0)
+    n_agt = config["init"]["n_agt"]
+    mean = results["n_agt_diff"][0]["mean"]
+    std_dev = results["n_agt_diff"][0]["std_dev"]
+    sem = results["n_agt_diff"][0]["sem"]
+    n_eff = (std_dev / sem) ** 2
+    avg_W = mean
+    avg_W_err = sem
+    sig_W = std_dev
+    sig_W_err = std_dev / np.sqrt(2 * (n_eff - 1))
 
-# tmp ------------------------------------------------------------
-
-avg_prob_phe = np.array(
-    [[stats["mean"] for stats in read_results(sim_dir, 0)["avg_prob_phe"]]]
-).transpose()
-print(avg_prob_phe)
-
-
-def avg_W(b_cgs: np.ndarray) -> float:
-    b_cge = b_cgs @ p_sge
-    f_b_c = np.sum(f_cge * b_cge, axis=0, keepdims=True)
-    return np.sum(p_e * np.log(f_b_c))
-
-
-def sig_W(b_cgs: np.ndarray) -> float:
-    b_cge = b_cgs @ p_sge
-    f_b_c = np.sum(f_cge * b_cge, axis=0, keepdims=True)
-    return np.sqrt(np.sum(p_e * np.log(f_b_c) ** 2) - avg_W(b_cgs) ** 2)
-
-
-avg_W_sim = avg_W(avg_prob_phe)
-sig_W_sim = sig_W(avg_prob_phe)
-
-print(avg_W_sim, sig_W_sim)
-
-ax.scatter(avg_W_sim, sig_W_sim, c="r", s=20)
-
-# tmp ------------------------------------------------------------
+    ax.errorbar(avg_W, sig_W, avg_W_err, sig_W_err, c="b")
 
 fig.savefig("simulations/test-plot.pdf")
 

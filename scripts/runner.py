@@ -67,3 +67,18 @@ def mutare_analyze(sim_dir: Path) -> None:
 def mutare_clean(sim_dir: Path) -> None:
     process = run(mutare_base_args(sim_dir) + ["clean"])
     exit_if_failed(process.returncode)
+
+
+def mutare_make_sim(sim_dir: Path, n_runs: int, n_files: int) -> None:
+    mutare_clean(sim_dir)
+
+    for run_idx in range(n_runs):
+        exit_if_stopped()
+        mutare_create(sim_dir)
+
+        for _ in range(n_files):
+            exit_if_stopped()
+            mutare_resume(sim_dir, run_idx)
+
+    exit_if_stopped()
+    mutare_analyze(sim_dir)

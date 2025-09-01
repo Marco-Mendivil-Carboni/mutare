@@ -25,4 +25,4 @@ def read_results(sim_dir: Path, run_idx: int) -> Results:
 
 
 def print_results(sim_dir: Path, run_idx: int) -> None:
-    print(json.dumps(read_results(sim_dir, run_idx), indent=2))
+    print(json.dumps(read_results(sim_dir, run_idx), indent=2), flush=True)
