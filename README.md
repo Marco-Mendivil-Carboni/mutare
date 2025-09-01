@@ -8,7 +8,7 @@
 
 `mutare` simulates a stochastic agent-based model of adaptation in uncertain environments with the following characteristics:
 
-- The **environment** is a discrete random variable with `n_env` possible states and follows a **Markov chain** with configurable transition probabilities (`prob_env`).
+- The **environment** is a discrete random variable with `n_env` possible states and follows a **Markov chain** with configurable transition probabilities (`prob_trans_env`).
 - Each agent carries a **phenotype**, a discrete variable with `n_phe` possible states, and a **probability distribution over phenotypes**.
 - At every simulation step, agents may **replicate** or **decease** according to environment and phenotype specific probabilities (`prob_rep` and `prob_dec`).
 - The offspring's phenotype is sampled from the parent's distribution.

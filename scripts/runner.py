@@ -10,7 +10,7 @@ from types import FrameType
 stop_requested = False
 
 
-def request_stop(signum: int, frame: Optional[FrameType]) -> None:
+def request_stop(signum: int, _: Optional[FrameType]) -> None:
     global stop_requested
     print(f"Received signal {signum}, requesting stop...")
     stop_requested = True
@@ -69,16 +69,24 @@ def mutare_clean(sim_dir: Path) -> None:
     exit_if_failed(process.returncode)
 
 
-def mutare_make_sim(sim_dir: Path, n_runs: int, n_files: int) -> None:
-    mutare_clean(sim_dir)
+def mutare_make_sim(
+    sim_dir: Path, n_runs: int, n_files: int, clean: bool = False
+) -> None:
+    if clean:
+        mutare_clean(sim_dir)
 
-    for run_idx in range(n_runs):
+    while len(list(sim_dir.glob("run-*"))) < n_runs:
         exit_if_stopped()
         mutare_create(sim_dir)
 
-        for _ in range(n_files):
+    new_sim = False
+    for run_idx in range(n_runs):
+        run_dir = sim_dir.joinpath(f"run-{run_idx:04}")
+        while len(list(run_dir.glob("trajectory-*.msgpack"))) < n_files:
             exit_if_stopped()
             mutare_resume(sim_dir, run_idx)
+            new_sim = True
 
-    exit_if_stopped()
-    mutare_analyze(sim_dir)
+    if new_sim:
+        exit_if_stopped()
+        mutare_analyze(sim_dir)
