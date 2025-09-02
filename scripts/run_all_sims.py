@@ -24,7 +24,7 @@ sim_dir.mkdir(parents=True, exist_ok=True)
 config = DEFAULT_CONFIG
 save_config(config, sim_dir)
 
-make_sim(sim_dir, 1, 2048)
+make_sim(sim_dir, 1, 16)
 print_results(sim_dir, 0)
 
 results = read_results(sim_dir, 0)
@@ -55,7 +55,7 @@ for sim_idx, prob_phe in enumerate(prob_phe_l):
     config["init"]["prob_phe"] = [float(prob_phe), float(1 - prob_phe)]
     save_config(config, sim_dir)
 
-    make_sim(sim_dir, 1, 256)
+    make_sim(sim_dir, 1, 16)
     print_results(sim_dir, 0)
 
     results = read_results(sim_dir, 0)

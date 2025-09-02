@@ -1,7 +1,9 @@
-from subprocess import run
+import subprocess
 from pathlib import Path
 from signal import signal, SIGTERM
-from sys import exit
+import sys
+import os
+from tempfile import NamedTemporaryFile
 from typing import List, Optional
 from types import FrameType
 
@@ -21,66 +23,51 @@ signal(SIGTERM, request_stop)
 # Helper exit functions
 
 
-def exit_if_stopped() -> None:
+def exit_if_stop_requested() -> None:
     if stop_requested:
         print("Exiting due to stop request")
-        exit(0)
-
-
-def exit_if_failed(returncode: int) -> None:
-    if returncode != 0:
-        print(f"Exiting due to return code {returncode}")
-        exit(returncode)
+        sys.exit(0)
 
 
 # Build the binary in release mode
 
-run(["cargo", "build", "--release"])
+subprocess.run(["cargo", "build", "--release"])
 
 # Helper functions to run the binary
 
-bin = Path("target/release/mutare")
+bin_path = Path("target/release/mutare")
 
 
-def mutare_base_args(sim_dir: Path) -> List[str]:
-    return [str(bin), "--sim-dir", str(sim_dir)]
-
-
-def run_mutare_command(sim_dir: Path, extra_args: List[str]) -> None:
-    process = run(mutare_base_args(sim_dir) + extra_args)
-    exit_if_failed(process.returncode)
-
-
-def run_mutare_create(sim_dir: Path) -> None:
-    run_mutare_command(sim_dir, ["create"])
-
-
-def run_mutare_resume(sim_dir: Path, run_idx: int) -> None:
-    run_mutare_command(sim_dir, ["resume", "--run-idx", str(run_idx)])
-
-
-def run_mutare_analyze(sim_dir: Path) -> None:
-    run_mutare_command(sim_dir, ["analyze"])
-
-
-def run_mutare_clean(sim_dir: Path) -> None:
-    run_mutare_command(sim_dir, ["clean"])
+def run_command(sim_dir: Path, extra_args: List[str]) -> None:
+    with NamedTemporaryFile(mode="w+", suffix=".log", dir=".") as tmp_file:
+        try:
+            subprocess.run(
+                [str(bin_path), "--sim-dir", str(sim_dir)] + extra_args,
+                stdout=tmp_file,
+                stderr=subprocess.STDOUT,
+                check=True,
+            )
+        except subprocess.CalledProcessError as error:
+            tmp_file.flush()
+            tmp_file.seek(0)
+            print(f"Command failed. output:\n{tmp_file.read()}")
+            sys.exit(error.returncode)
 
 
 def make_sim(sim_dir: Path, n_runs: int, n_files: int, clean: bool = False) -> None:
     if clean:
-        run_mutare_clean(sim_dir)
+        run_command(sim_dir, ["clean"])
 
     while len(list(sim_dir.glob("run-*"))) < n_runs:
-        run_mutare_create(sim_dir)
+        run_command(sim_dir, ["create"])
 
     new_sim = False
     for run_idx in range(n_runs):
         run_dir = sim_dir.joinpath(f"run-{run_idx:04}")
         while len(list(run_dir.glob("trajectory-*.msgpack"))) < n_files:
-            exit_if_stopped()
-            run_mutare_resume(sim_dir, run_idx)
+            exit_if_stop_requested()
+            run_command(sim_dir, ["resume", "--run-idx", str(run_idx)])
             new_sim = True
 
     if new_sim:
-        run_mutare_analyze(sim_dir)
+        run_command(sim_dir, ["analyze"])
