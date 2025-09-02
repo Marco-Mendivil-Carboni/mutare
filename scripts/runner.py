@@ -5,7 +5,7 @@ from sys import exit
 from typing import List, Optional
 from types import FrameType
 
-# Signal handling to stop gracefully
+# Set up signal handling to stop gracefully
 
 stop_requested = False
 
@@ -33,60 +33,54 @@ def exit_if_failed(returncode: int) -> None:
         exit(returncode)
 
 
-# Build the Rust project in release mode
+# Build the binary in release mode
 
 run(["cargo", "build", "--release"])
 
-# Path to the mutare binary
+# Helper functions to run the binary
 
 bin = Path("target/release/mutare")
-
-# Helper mutare functions
 
 
 def mutare_base_args(sim_dir: Path) -> List[str]:
     return [str(bin), "--sim-dir", str(sim_dir)]
 
 
-def mutare_create(sim_dir: Path) -> None:
-    process = run(mutare_base_args(sim_dir) + ["create"])
+def run_mutare_command(sim_dir: Path, extra_args: List[str]) -> None:
+    process = run(mutare_base_args(sim_dir) + extra_args)
     exit_if_failed(process.returncode)
 
 
-def mutare_resume(sim_dir: Path, run_idx: int) -> None:
-    run_idx_args = ["--run-idx", str(run_idx)]
-    process = run(mutare_base_args(sim_dir) + ["resume"] + run_idx_args)
-    exit_if_failed(process.returncode)
+def run_mutare_create(sim_dir: Path) -> None:
+    run_mutare_command(sim_dir, ["create"])
 
 
-def mutare_analyze(sim_dir: Path) -> None:
-    process = run(mutare_base_args(sim_dir) + ["analyze"])
-    exit_if_failed(process.returncode)
+def run_mutare_resume(sim_dir: Path, run_idx: int) -> None:
+    run_mutare_command(sim_dir, ["resume", "--run-idx", str(run_idx)])
 
 
-def mutare_clean(sim_dir: Path) -> None:
-    process = run(mutare_base_args(sim_dir) + ["clean"])
-    exit_if_failed(process.returncode)
+def run_mutare_analyze(sim_dir: Path) -> None:
+    run_mutare_command(sim_dir, ["analyze"])
 
 
-def mutare_make_sim(
-    sim_dir: Path, n_runs: int, n_files: int, clean: bool = False
-) -> None:
+def run_mutare_clean(sim_dir: Path) -> None:
+    run_mutare_command(sim_dir, ["clean"])
+
+
+def make_sim(sim_dir: Path, n_runs: int, n_files: int, clean: bool = False) -> None:
     if clean:
-        mutare_clean(sim_dir)
+        run_mutare_clean(sim_dir)
 
     while len(list(sim_dir.glob("run-*"))) < n_runs:
-        exit_if_stopped()
-        mutare_create(sim_dir)
+        run_mutare_create(sim_dir)
 
     new_sim = False
     for run_idx in range(n_runs):
         run_dir = sim_dir.joinpath(f"run-{run_idx:04}")
         while len(list(run_dir.glob("trajectory-*.msgpack"))) < n_files:
             exit_if_stopped()
-            mutare_resume(sim_dir, run_idx)
+            run_mutare_resume(sim_dir, run_idx)
             new_sim = True
 
     if new_sim:
-        exit_if_stopped()
-        mutare_analyze(sim_dir)
+        run_mutare_analyze(sim_dir)

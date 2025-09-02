@@ -1,7 +1,7 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
 from config import DEFAULT_CONFIG, save_config
-from runner import mutare_make_sim
+from runner import make_sim
 from results import read_results, print_results
 
 import numpy as np
@@ -24,7 +24,7 @@ sim_dir.mkdir(parents=True, exist_ok=True)
 config = DEFAULT_CONFIG
 save_config(config, sim_dir)
 
-mutare_make_sim(sim_dir, 1, 256)
+make_sim(sim_dir, 1, 2048)
 print_results(sim_dir, 0)
 
 results = read_results(sim_dir, 0)
@@ -55,7 +55,7 @@ for sim_idx, prob_phe in enumerate(prob_phe_l):
     config["init"]["prob_phe"] = [float(prob_phe), float(1 - prob_phe)]
     save_config(config, sim_dir)
 
-    mutare_make_sim(sim_dir, 1, 256)
+    make_sim(sim_dir, 1, 256)
     print_results(sim_dir, 0)
 
     results = read_results(sim_dir, 0)
@@ -95,3 +95,20 @@ ax.legend()
 fig.savefig("simulations/Delta-N-plot.pdf")
 
 plt.close(fig)
+
+
+# from concurrent.futures import ThreadPoolExecutor, as_completed
+# import os
+
+# n_cpus = os.cpu_count() or 4
+# max_workers = max(1, n_cpus - 4)
+
+
+# with ThreadPoolExecutor(max_workers=max_workers) as executor:
+#     futures = {executor.submit(lambda idx: print(idx), idx): idx for idx in range(64)}
+#     for fut in as_completed(futures):
+#         sim_dir = futures[fut]
+#         try:
+#             fut.result()
+#         except Exception as e:
+#             print(f"Simulation in {sim_dir} failed: {e}")
