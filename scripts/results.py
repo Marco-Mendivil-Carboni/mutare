@@ -18,11 +18,13 @@ class Results(TypedDict):
 
 
 def read_results(sim_dir: Path, run_idx: int) -> Results:
-    file_path = sim_dir.joinpath(f"run-{run_idx:04}/results.msgpack")
+    file_path = sim_dir / f"run-{run_idx:04}/results.msgpack"
     with file_path.open("rb") as file:
         results = msgpack.unpack(file)
     return cast(Results, results)
 
 
-def print_results(sim_dir: Path, run_idx: int) -> None:
-    print(json.dumps(read_results(sim_dir, run_idx), indent=2), flush=True)
+def print_all_results(sim_dir: Path) -> None:
+    n_runs = len(list(sim_dir.glob("run-*")))
+    for run_idx in range(n_runs):
+        print(json.dumps(read_results(sim_dir, run_idx), indent=4))

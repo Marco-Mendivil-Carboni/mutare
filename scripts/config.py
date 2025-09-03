@@ -51,6 +51,6 @@ DEFAULT_CONFIG: Config = {
 
 
 def save_config(config: Config, sim_dir: Path) -> None:
-    file_path = sim_dir.joinpath("config.toml")
+    file_path = sim_dir / "config.toml"
     with file_path.open("w") as file:
         toml.dump(config, file)

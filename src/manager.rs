@@ -130,7 +130,7 @@ impl Manager {
     }
 
     fn count_trajectory_files(&self, run_idx: usize) -> Result<usize> {
-        let pattern = self.run_dir(run_idx).join("trajectory-*.msgpack");
+        let pattern = self.run_dir(run_idx).join("trajectory-*");
         let pattern = pattern.to_str().context("pattern is not valid UTF-8")?;
         let count = glob::glob(pattern)
             .context("failed to glob trajectory files")?

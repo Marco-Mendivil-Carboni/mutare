@@ -1,13 +1,14 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
-from config import DEFAULT_CONFIG, save_config
-from runner import make_sim
-from results import read_results, print_results
-
 import numpy as np
 from pathlib import Path
 import matplotlib as mpl
 from matplotlib import pyplot as plt
+
+from config import DEFAULT_CONFIG, save_config
+from runner import make_sim
+from results import read_results, print_results
+
 
 mpl.use("pdf")
 
@@ -95,20 +96,3 @@ ax.legend()
 fig.savefig("simulations/Delta-N-plot.pdf")
 
 plt.close(fig)
-
-
-# from concurrent.futures import ThreadPoolExecutor, as_completed
-# import os
-
-# n_cpus = os.cpu_count() or 4
-# max_workers = max(1, n_cpus - 4)
-
-
-# with ThreadPoolExecutor(max_workers=max_workers) as executor:
-#     futures = {executor.submit(lambda idx: print(idx), idx): idx for idx in range(64)}
-#     for fut in as_completed(futures):
-#         sim_dir = futures[fut]
-#         try:
-#             fut.result()
-#         except Exception as e:
-#             print(f"Simulation in {sim_dir} failed: {e}")

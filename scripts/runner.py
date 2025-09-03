@@ -2,7 +2,8 @@ import subprocess
 from pathlib import Path
 from signal import signal, SIGTERM
 import sys
-from typing import List, Optional
+import contextlib
+from typing import TypedDict, List, Optional
 from types import FrameType
 
 # Set up signal handling to stop gracefully
@@ -20,11 +21,9 @@ signal(SIGTERM, request_stop)
 
 # Build the binary in release mode
 
-subprocess.run(["cargo", "build", "--release"])
+subprocess.run(["cargo", "build", "--release"], check=True)
 
-# Helper functions to run the binary
-
-bin_path = Path("target/release/mutare")
+# Define helper function to run the binary
 
 
 def run_bin(sim_dir: Path, extra_args: List[str]) -> None:
@@ -33,7 +32,7 @@ def run_bin(sim_dir: Path, extra_args: List[str]) -> None:
         sys.exit(0)
     try:
         subprocess.run(
-            [str(bin_path), "--sim-dir", str(sim_dir)] + extra_args,
+            ["target/release/mutare", "--sim-dir", str(sim_dir)] + extra_args,
             check=True,
         )
     except subprocess.CalledProcessError as error:
@@ -41,24 +40,35 @@ def run_bin(sim_dir: Path, extra_args: List[str]) -> None:
         sys.exit(error.returncode)
 
 
-def make_sim(sim_dir: Path, n_runs: int, n_files: int, clean: bool = False) -> None:
-    if clean:
-        run_bin(sim_dir, ["clean"])
+class RunOptions(TypedDict):
+    n_runs: int
+    n_files: int
+    clean: bool
 
-    while len(list(sim_dir.glob("run-*"))) < n_runs:
-        run_bin(sim_dir, ["create"])
 
-    analyze = False
+def run_sim(sim_dir: Path, run_options: RunOptions) -> None:
+    with (
+        open(sim_dir / "output.log", "w", buffering=1) as output_file,
+        contextlib.redirect_stdout(output_file),
+        contextlib.redirect_stderr(output_file),
+    ):
+        if run_options["clean"]:
+            run_bin(sim_dir, ["clean"])
 
-    for run_idx in range(n_runs):
-        run_dir = sim_dir.joinpath(f"run-{run_idx:04}")
+        while len(list(sim_dir.glob("run-*"))) < run_options["n_runs"]:
+            run_bin(sim_dir, ["create"])
 
-        while len(list(run_dir.glob("trajectory-*.msgpack"))) < n_files:
-            run_bin(sim_dir, ["resume", "--run-idx", str(run_idx)])
-            analyze = True
+        analyze = False
 
-        if not (run_dir / "results.msgpack").exists():
-            analyze = True
+        for run_idx in range(run_options["n_runs"]):
+            run_dir = sim_dir / f"run-{run_idx:04}"
 
-    if analyze:
-        run_bin(sim_dir, ["analyze"])
+            while len(list(run_dir.glob("trajectory-*"))) < run_options["n_files"]:
+                run_bin(sim_dir, ["resume", "--run-idx", str(run_idx)])
+                analyze = True
+
+            if not (run_dir / "results.msgpack").exists():
+                analyze = True
+
+        if analyze:
+            run_bin(sim_dir, ["analyze"])
