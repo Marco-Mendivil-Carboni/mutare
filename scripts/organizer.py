@@ -4,8 +4,8 @@ import fcntl
 from os import cpu_count
 from typing import TypedDict, List
 
-from config import Config, save_config
-from runner import run_sim, RunOptions
+from .config import Config, save_config
+from .runner import run_sim, RunOptions
 
 
 class SimTask(TypedDict):

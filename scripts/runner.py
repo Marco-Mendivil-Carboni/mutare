@@ -5,7 +5,7 @@ import contextlib
 from typing import TypedDict, List, Optional
 from types import FrameType
 
-from results import print_all_results
+from .results import print_all_results
 
 stop_requested = False
 
