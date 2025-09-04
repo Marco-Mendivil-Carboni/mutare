@@ -5,6 +5,10 @@ from typing import TypedDict, List, Optional
 from types import FrameType
 
 
+class StopRequested(Exception):
+    pass
+
+
 stop_requested = False
 
 
@@ -22,9 +26,15 @@ subprocess.run(["cargo", "build", "--release"], check=True)
 
 
 def run_bin(sim_dir: Path, extra_args: List[str]) -> None:
-    subprocess.run(
-        ["target/release/mutare", "--sim-dir", str(sim_dir)] + extra_args, check=True
-    )
+    if stop_requested:
+        raise StopRequested()
+    with open(sim_dir / "output.log", "w", buffering=1) as output_file:
+        subprocess.run(
+            ["target/release/mutare", "--sim-dir", str(sim_dir)] + extra_args,
+            stdout=output_file,
+            stderr=output_file,
+            check=True,
+        )
 
 
 class RunOptions(TypedDict):
@@ -48,8 +58,6 @@ def run_sim(sim_dir: Path, run_options: RunOptions) -> None:
 
         n_files = len(list(run_dir.glob("trajectory-*")))
         while n_files < run_options["n_files"]:
-            if stop_requested:
-                return
             run_bin(sim_dir, ["resume", "--run-idx", str(run_idx)])
             n_files += 1
 
