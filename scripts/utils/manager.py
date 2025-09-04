@@ -1,6 +1,7 @@
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 import fcntl
+import os
 import sys
 from enum import Enum, auto
 from typing import TypedDict, List
@@ -22,27 +23,34 @@ class JobResult(Enum):
 
 
 def execute_sim_job(sim_job: SimJob) -> JobResult:
-    try:
-        sim_job["sim_dir"].mkdir(parents=True, exist_ok=True)
+    pid = os.getpid()
+    sim_dir = sim_job["sim_dir"]
 
-        with open(sim_job["sim_dir"] / ".lock", "w") as lock_file:
+    try:
+        print(f"[{pid}] {sim_dir} job started")
+
+        sim_dir.mkdir(parents=True, exist_ok=True)
+
+        with open(sim_dir / ".lock", "w") as lock_file:
             fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
-            save_config(sim_job["config"], sim_job["sim_dir"])
-            run_sim(sim_job["sim_dir"], sim_job["run_options"])
+            save_config(sim_job["config"], sim_dir)
+            run_sim(sim_dir, sim_job["run_options"])
 
+        print(f"[{pid}] {sim_dir} job finished")
         return JobResult.FINISHED
 
     except StopRequested:
+        print(f"[{pid}] {sim_dir} job stopped")
         return JobResult.STOPPED
 
     except Exception as exception:
-        print(f"{sim_job} failed: {exception}")
+        print(f"[{pid}] {sim_dir} job failed: {exception}")
         return JobResult.FAILED
 
 
-def execute_sim_jobs(sim_jobs: List[SimJob]):
-    with Pool(processes=max(1, cpu_count() - 4)) as pool:
+def execute_sim_jobs(sim_jobs: List[SimJob]) -> None:
+    with Pool(processes=max(1, cpu_count() // 2)) as pool:
         job_results = pool.map(execute_sim_job, sim_jobs)
 
     if job_results.count(JobResult.FAILED) > 0:

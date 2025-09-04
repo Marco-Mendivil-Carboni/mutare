@@ -1,6 +1,7 @@
 import subprocess
 from pathlib import Path
 from signal import signal, SIGTERM
+import os
 from typing import TypedDict, List, Optional
 from types import FrameType
 
@@ -13,8 +14,10 @@ stop_requested = False
 
 
 def request_stop(signum: int, _: Optional[FrameType]) -> None:
+    pid = os.getpid()
+    print(f"[{pid}] Received signal {signum}: requesting stop")
+
     global stop_requested
-    print(f"Received signal {signum}: requesting stop")
     stop_requested = True
 
 
@@ -28,6 +31,7 @@ subprocess.run(["cargo", "build", "--release"], check=True)
 def run_bin(sim_dir: Path, extra_args: List[str]) -> None:
     if stop_requested:
         raise StopRequested()
+
     with open(sim_dir / "output.log", "w", buffering=1) as output_file:
         subprocess.run(
             ["target/release/mutare", "--sim-dir", str(sim_dir)] + extra_args,

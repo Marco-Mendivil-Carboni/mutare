@@ -46,7 +46,7 @@ if __name__ == "__main__":
     # sig_W_err = std_dev / np.sqrt(2 * (n_eff - 1))
 
     # ------------------ Sweep over fixed probabilities ------------------ #
-    n_sims = 4
+    n_sims = 24
     prob_phe_list = np.linspace(0, 1, n_sims)
 
     sim_jobs: list[SimJob] = []
@@ -63,7 +63,7 @@ if __name__ == "__main__":
                 "run_options": {
                     "clean": True,
                     "n_runs": 1,
-                    "n_files": 16,
+                    "n_files": 1,
                     "analyze": True,
                 },
             }
