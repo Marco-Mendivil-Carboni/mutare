@@ -97,11 +97,6 @@ impl Engine {
         Ok(engine)
     }
 
-    /// Access the configuration of the engine.
-    pub fn cfg(&self) -> &Config {
-        &self.cfg
-    }
-
     fn perform_step(
         &mut self,
         i_agt_rep: &mut Vec<usize>,

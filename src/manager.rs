@@ -1,7 +1,7 @@
 use crate::analysis::Analyzer;
 use crate::config::Config;
 use crate::engine::Engine;
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result};
 use std::{
     fs,
     path::{Path, PathBuf},
@@ -57,9 +57,6 @@ impl Manager {
         let checkpoint_file = self.checkpoint_file(run_idx);
         let mut engine = Engine::load_checkpoint(&checkpoint_file)
             .with_context(|| format!("failed to load {checkpoint_file:?}"))?;
-        if engine.cfg() != &self.cfg {
-            bail!("checkpoint config differs from the current config");
-        }
         log::info!("loaded {checkpoint_file:?}");
 
         let start = Instant::now();
