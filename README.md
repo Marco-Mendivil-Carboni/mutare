@@ -85,7 +85,7 @@ Run `mutare --help` to see more detailed help information.
 
 ## Advanced Usage
 
-The repository also includes Python scripts (in the `scripts/` folder) for orchestrating multiple simulations automatically.
+The repository also includes some Python utility modules in `scripts/utils/` for automating simulation workflows.
 
 ### Prerequisites
 
@@ -93,7 +93,7 @@ The repository also includes Python scripts (in the `scripts/` folder) for orche
 
 ### Python Setup
 
-If you want to use these scripts you can set up the Python environment by running the following commands (after having cloned the repository):
+If you want to use these utilities you can set up the Python environment by running the following commands (after having cloned the repository):
 
 ```bash
 python3 -m venv .venv
