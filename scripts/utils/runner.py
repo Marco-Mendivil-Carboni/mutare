@@ -15,7 +15,7 @@ stop_requested = False
 
 def request_stop(signum: int, _: Optional[FrameType]) -> None:
     pid = os.getpid()
-    print(f"[{pid}] Received signal {signum}: requesting stop")
+    print(f"[{pid}] received signal {signum}: requesting stop")
 
     global stop_requested
     stop_requested = True

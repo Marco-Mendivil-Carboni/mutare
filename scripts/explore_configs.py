@@ -3,6 +3,8 @@
 import numpy as np
 import copy
 from pathlib import Path
+import os
+
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from typing import TypedDict
@@ -10,7 +12,9 @@ from typing import TypedDict
 from utils.config import DEFAULT_CONFIG, Config
 from utils.runner import RunOptions
 from utils.manager import SimJob, execute_sim_jobs
-from utils.results import read_results
+from utils.results import read_results, print_all_results
+
+os.environ["PYTHONUNBUFFERED"] = "1"
 
 mpl.use("pdf")
 mpl.rcParams["text.usetex"] = True
@@ -28,6 +32,7 @@ class GrowthRateResult(TypedDict):
 
 
 def compute_growth_rate_result(sim_dir: Path, run_idx: int) -> GrowthRateResult:
+    print_all_results(sim_dir)
     results = read_results(sim_dir, run_idx)
     mean = results["n_agt_diff"][0]["mean"]
     std_dev = results["n_agt_diff"][0]["std_dev"]
@@ -45,7 +50,7 @@ if __name__ == "__main__":
     common_run_options: RunOptions = {
         "clean": True,
         "n_runs": 1,
-        "n_files": 64,
+        "n_files": 256,
         "analyze": True,
     }
 
@@ -59,7 +64,7 @@ if __name__ == "__main__":
 
     sim_jobs = [sim_job]
 
-    prob_phe_0_list = list(map(float, np.linspace(0, 1, 25)))
+    prob_phe_0_list = list(map(float, np.linspace(0, 1, 15)))
     for sim_idx, prob_phe_0 in enumerate(prob_phe_0_list):
         sim_dir = Path(f"simulations/fixed-{sim_idx:02d}/")
         config: Config = copy.deepcopy(DEFAULT_CONFIG)
