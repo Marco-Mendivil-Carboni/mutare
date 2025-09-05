@@ -149,7 +149,7 @@ impl Analyzer {
         let mut results = HashMap::new();
         for obs in &self.obs_vec {
             if results.insert(obs.name(), obs.stats()).is_some() {
-                bail!("the names of the observables must be unique");
+                bail!("names of observables must be unique");
             }
         }
 

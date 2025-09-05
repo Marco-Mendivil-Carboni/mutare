@@ -34,8 +34,8 @@ DEFAULT_CONFIG: Config = {
         "n_env": 2,
         "n_phe": 2,
         "prob_trans_env": [[0.99, 0.01], [0.01, 0.99]],
-        "prob_rep": [[0.010, 0.0], [0.0, 0.008]],
-        "prob_dec": [[0.0, 0.0], [0.0, 0.0]],
+        "prob_rep": [[0.010, 0.000], [0.000, 0.008]],
+        "prob_dec": [[0.000, 0.005], [0.004, 0.000]],
         "prob_mut": 0.0001,
         "std_dev_mut": 0.1,
     },
@@ -45,7 +45,7 @@ DEFAULT_CONFIG: Config = {
     },
     "output": {
         "steps_per_save": 4096,
-        "saves_per_file": 512,
+        "saves_per_file": 256,
     },
 }
 

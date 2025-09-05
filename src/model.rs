@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 /// Represents an agent in the simulation.
 ///
 /// Each agent has a phenotype (`phe`) and a probability distribution over phenotypes (`prob_phe`).
-#[derive(Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize)]
 pub struct Agent {
     phe: usize,
     prob_phe: Vec<f64>,

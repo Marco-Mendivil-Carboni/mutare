@@ -1,6 +1,6 @@
 use crate::config::Config;
 use crate::model::{Agent, State};
-use anyhow::{Context, Result};
+use anyhow::{Context, Result, bail};
 use rand::prelude::*;
 use rand_chacha::ChaCha12Rng;
 use rand_distr::{Bernoulli, LogNormal, Uniform, weighted::WeightedIndex};
@@ -121,8 +121,8 @@ impl Engine {
         // Remove deceased agents.
         self.remove_deceased(i_agt_dec);
 
-        // Enforce maximum population size.
-        self.remove_excess(i_agt_all);
+        // Normalize population size.
+        self.normalize_population(i_agt_all)?;
 
         Ok(())
     }
@@ -200,21 +200,41 @@ impl Engine {
         }
     }
 
-    fn remove_excess(&mut self, i_agt_all: &Vec<usize>) {
+    fn normalize_population(&mut self, i_agt_all: &Vec<usize>) -> Result<()> {
         let n_agt = self.state.agt_vec.len();
-        if n_agt > self.cfg.init.n_agt {
-            let excess = n_agt - self.cfg.init.n_agt;
+        let n_agt_min = 1;
+        if n_agt < n_agt_min {
+            bail!("number of agents must be at least {n_agt_min}");
+        }
 
-            // Randomly pick excess agents to remove.
-            let mut i_agt_rm: Vec<_> = i_agt_all[..n_agt]
+        let diff = n_agt as i32 - self.cfg.init.n_agt as i32;
+        if diff < 0 {
+            // Too few agents: duplicate missing agents.
+            let missing = -diff as usize;
+
+            // Randomly pick missing agents to duplicate.
+            for _ in 0..missing {
+                let &i_agt = i_agt_all[..n_agt]
+                    .choose(&mut self.rng)
+                    .context("failed to choose an agent to duplicate")?;
+                self.state.agt_vec.push(self.state.agt_vec[i_agt].clone());
+            }
+        } else if diff > 0 {
+            // Too many agents: delete excess agents.
+            let excess = diff as usize;
+
+            // Randomly pick excess agents to delete.
+            let mut i_agt_del: Vec<_> = i_agt_all[..n_agt]
                 .choose_multiple(&mut self.rng, excess)
                 .collect();
 
             // Sort in reverse to safely remove by index.
-            i_agt_rm.sort_by(|a, b| b.cmp(a));
-            for &i_agt in i_agt_rm {
+            i_agt_del.sort_by(|a, b| b.cmp(a));
+            for &i_agt in i_agt_del {
                 self.state.agt_vec.swap_remove(i_agt);
             }
         }
+
+        Ok(())
     }
 }
