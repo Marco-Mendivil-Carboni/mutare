@@ -1,10 +1,8 @@
-#!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
+#!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3 -u
 
 import numpy as np
 import copy
 from pathlib import Path
-import os
-
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from typing import TypedDict
@@ -13,8 +11,6 @@ from utils.config import DEFAULT_CONFIG, Config
 from utils.runner import RunOptions
 from utils.manager import SimJob, execute_sim_jobs
 from utils.results import read_results, print_all_results
-
-os.environ["PYTHONUNBUFFERED"] = "1"
 
 mpl.use("pdf")
 mpl.rcParams["text.usetex"] = True
@@ -48,9 +44,9 @@ def compute_growth_rate_result(sim_dir: Path, run_idx: int) -> GrowthRateResult:
 
 if __name__ == "__main__":
     common_run_options: RunOptions = {
-        "clean": True,
+        "clean": False,
         "n_runs": 1,
-        "n_files": 256,
+        "n_files": 512,
         "analyze": True,
     }
 
@@ -64,7 +60,7 @@ if __name__ == "__main__":
 
     sim_jobs = [sim_job]
 
-    prob_phe_0_list = list(map(float, np.linspace(0, 1, 15)))
+    prob_phe_0_list = list(map(float, np.linspace(1 / 16, 15 / 16, 15)))
     for sim_idx, prob_phe_0 in enumerate(prob_phe_0_list):
         sim_dir = Path(f"simulations/fixed-{sim_idx:02d}/")
         config: Config = copy.deepcopy(DEFAULT_CONFIG)
@@ -89,14 +85,6 @@ if __name__ == "__main__":
     ax.set_ylabel("$\\sigma_{\\Delta N}$")
 
     ax.errorbar(
-        growth_rate_results[0]["avg_W"],
-        growth_rate_results[0]["sig_W"],
-        xerr=growth_rate_results[0]["avg_W_err"],
-        yerr=growth_rate_results[0]["sig_W_err"],
-        c="r",
-        label="with mutations",
-    )
-    ax.errorbar(
         [r["avg_W"] for r in growth_rate_results[1:]],
         [r["sig_W"] for r in growth_rate_results[1:]],
         xerr=[r["avg_W_err"] for r in growth_rate_results[1:]],
@@ -104,6 +92,15 @@ if __name__ == "__main__":
         c="b",
         ls="",
         label="fixed",
+    )
+    ax.errorbar(
+        growth_rate_results[0]["avg_W"],
+        growth_rate_results[0]["sig_W"],
+        xerr=growth_rate_results[0]["avg_W_err"],
+        yerr=growth_rate_results[0]["sig_W_err"],
+        c="r",
+        ls="",
+        label="with mutations",
     )
     ax.legend()
 
