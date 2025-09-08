@@ -72,8 +72,8 @@ impl Config {
         let init = &self.init;
         let output = &self.output;
 
-        check_num(model.n_env, 1..=100).context("invalid number of environments")?;
-        check_num(model.n_phe, 1..=100).context("invalid number of phenotypes")?;
+        check_num(model.n_env, 1..=10).context("invalid number of environments")?;
+        check_num(model.n_phe, 1..=10).context("invalid number of phenotypes")?;
 
         check_mat(&model.prob_trans_env, (model.n_env, model.n_env), true)
             .context("invalid environment transition probabilities")?;
@@ -91,7 +91,7 @@ impl Config {
 
         check_num(output.steps_per_save, 1..=10_000)
             .context("invalid number of steps per saved state")?;
-        check_num(output.saves_per_file, 1..=1_000)
+        check_num(output.saves_per_file, 1..=10_000)
             .context("invalid number of saved states per file")?;
 
         Ok(())

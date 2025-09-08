@@ -46,7 +46,7 @@ if __name__ == "__main__":
     common_run_options: RunOptions = {
         "clean": False,
         "n_runs": 1,
-        "n_files": 512,
+        "n_files": 2048,
         "analyze": True,
     }
 

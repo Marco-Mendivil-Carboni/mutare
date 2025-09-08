@@ -37,7 +37,7 @@ DEFAULT_CONFIG: Config = {
         "prob_rep": [[0.012, 0.000], [0.000, 0.008]],
         "prob_dec": [[0.000, 0.016], [0.012, 0.000]],
         "prob_mut": 0.0001,
-        "std_dev_mut": 0.01,
+        "std_dev_mut": 0.1,
     },
     "init": {
         "n_agt": 256,
