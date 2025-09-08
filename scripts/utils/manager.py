@@ -28,7 +28,7 @@ def execute_sim_job(sim_job: SimJob) -> JobResult:
     sim_dir = sim_job["sim_dir"]
 
     try:
-        print(f"[{pid}] {sim_dir} job started")
+        print(f"[{pid}] {sim_dir} job started", flush=True)
 
         sim_dir.mkdir(parents=True, exist_ok=True)
 
@@ -42,15 +42,16 @@ def execute_sim_job(sim_job: SimJob) -> JobResult:
             if sim_job["run_options"]["analyze"]:
                 print_all_results(sim_dir)
 
-        print(f"[{pid}] {sim_dir} job finished")
+        print(f"[{pid}] {sim_dir} job finished", flush=True)
         return JobResult.FINISHED
 
     except StopRequested:
-        print(f"[{pid}] {sim_dir} job stopped")
+        print(f"[{pid}] {sim_dir} job stopped", flush=True)
         return JobResult.STOPPED
 
     except Exception as exception:
-        print(f"[{pid}] {sim_dir} job failed: {exception}")
+        print(f"[{pid}] {sim_dir} job failed", flush=True)
+        print(f"[{pid}] exception: {exception}", flush=True)
         return JobResult.FAILED
 
 

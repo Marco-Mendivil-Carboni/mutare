@@ -9,13 +9,9 @@ from matplotlib import pyplot as plt
 from typing import TypedDict
 
 from utils.config import DEFAULT_CONFIG, Config
-from utils.runner import RunOptions
+from utils.runner import set_signal_handler, build_bin, RunOptions
 from utils.manager import SimJob, execute_sim_jobs
 from utils.results import read_results
-
-log_file = open("explore_configs.log", "w", buffering=1)
-sys.stdout = log_file
-sys.stderr = sys.stdout
 
 mpl.use("pdf")
 mpl.rcParams["text.usetex"] = True
@@ -47,10 +43,18 @@ def compute_growth_rate_result(sim_dir: Path, run_idx: int) -> GrowthRateResult:
 
 
 if __name__ == "__main__":
+    log_file = open("output.log", "w")
+    sys.stdout = log_file
+    sys.stderr = sys.stdout
+
+    set_signal_handler()
+
+    build_bin()
+
     common_run_options: RunOptions = {
-        "clean": False,
+        "clean": True,
         "n_runs": 1,
-        "n_files": 4,
+        "n_files": 16,
         "analyze": True,
     }
 

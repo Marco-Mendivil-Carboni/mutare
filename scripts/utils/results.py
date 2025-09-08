@@ -27,4 +27,4 @@ def read_results(sim_dir: Path, run_idx: int) -> Results:
 def print_all_results(sim_dir: Path) -> None:
     n_runs = len(list(sim_dir.glob("run-*")))
     for run_idx in range(n_runs):
-        print(json.dumps(read_results(sim_dir, run_idx), indent=4))
+        print(json.dumps(read_results(sim_dir, run_idx), indent=4), flush=True)

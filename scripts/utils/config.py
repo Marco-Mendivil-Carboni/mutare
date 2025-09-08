@@ -40,7 +40,7 @@ DEFAULT_CONFIG: Config = {
         "std_dev_mut": 0.1,
     },
     "init": {
-        "n_agt": 1024,
+        "n_agt": 256,
         "prob_phe": [0.5, 0.5],
     },
     "output": {

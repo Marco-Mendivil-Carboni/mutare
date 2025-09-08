@@ -15,17 +15,18 @@ stop_requested = False
 
 def request_stop(signum: int, _: Optional[FrameType]) -> None:
     pid = os.getpid()
-    print(f"[{pid}] received signal {signum}: requesting stop")
+    print(f"[{pid}] received signal {signum}: requesting stop", flush=True)
 
     global stop_requested
     stop_requested = True
 
 
-# Set signal handler to stop gracefully
-signal(SIGTERM, request_stop)
+def set_signal_handler():
+    signal(SIGTERM, request_stop)
 
-# Build the binary in release mode
-subprocess.run(["cargo", "build", "--release"], check=True)
+
+def build_bin():
+    subprocess.run(["cargo", "build", "--release"], check=True)
 
 
 def run_bin(sim_dir: Path, extra_args: List[str]) -> None:
