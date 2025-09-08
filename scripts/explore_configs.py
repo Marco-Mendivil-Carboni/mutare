@@ -3,7 +3,6 @@
 import numpy as np
 import copy
 from pathlib import Path
-import sys
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 from typing import TypedDict
@@ -43,10 +42,6 @@ def compute_growth_rate_result(sim_dir: Path, run_idx: int) -> GrowthRateResult:
 
 
 if __name__ == "__main__":
-    log_file = open("output.log", "w")
-    sys.stdout = log_file
-    sys.stderr = sys.stdout
-
     set_signal_handler()
 
     build_bin()
@@ -54,7 +49,7 @@ if __name__ == "__main__":
     common_run_options: RunOptions = {
         "clean": True,
         "n_runs": 1,
-        "n_files": 16,
+        "n_files": 64,
         "analyze": True,
     }
 
