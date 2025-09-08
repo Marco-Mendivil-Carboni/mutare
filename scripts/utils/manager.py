@@ -8,6 +8,7 @@ from typing import TypedDict, List
 
 from .config import Config, save_config
 from .runner import run_sim, RunOptions, StopRequested
+from .results import print_all_results
 
 
 class SimJob(TypedDict):
@@ -35,7 +36,11 @@ def execute_sim_job(sim_job: SimJob) -> JobResult:
             fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
             save_config(sim_job["config"], sim_dir)
+
             run_sim(sim_dir, sim_job["run_options"])
+
+            if sim_job["run_options"]["analyze"]:
+                print_all_results(sim_dir)
 
         print(f"[{pid}] {sim_dir} job finished")
         return JobResult.FINISHED
