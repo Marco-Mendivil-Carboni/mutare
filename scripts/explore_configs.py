@@ -47,9 +47,9 @@ if __name__ == "__main__":
     build_bin()
 
     common_run_options: RunOptions = {
-        "clean": True,
+        "clean": False,
         "n_runs": 1,
-        "n_files": 64,
+        "n_files": 256,
         "analyze": True,
     }
 
