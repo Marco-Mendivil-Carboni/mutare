@@ -49,7 +49,7 @@ if __name__ == "__main__":
     common_run_options: RunOptions = {
         "clean": True,
         "n_runs": 1,
-        "n_files": 16,
+        "n_files": 64,
         "analyze": True,
     }
 

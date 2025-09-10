@@ -1,3 +1,5 @@
+//! Statistical analysis utilities.
+
 use serde::Serialize;
 use std::default::Default;
 

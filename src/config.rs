@@ -1,3 +1,5 @@
+//! Simulation configuration parameters.
+
 use anyhow::{Context, Result, bail};
 use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, fs, ops::RangeBounds, path::Path};

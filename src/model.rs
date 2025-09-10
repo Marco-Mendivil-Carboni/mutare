@@ -1,3 +1,5 @@
+//! Simulation model data types.
+
 use serde::{Deserialize, Serialize};
 
 /// Represents an agent in the simulation.

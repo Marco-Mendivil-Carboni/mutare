@@ -1,3 +1,5 @@
+//! Simulation manager.
+
 use crate::analysis::Analyzer;
 use crate::config::Config;
 use crate::engine::Engine;

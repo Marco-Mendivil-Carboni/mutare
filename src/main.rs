@@ -1,3 +1,5 @@
+//! A simple tool to simulate and analyze a stochastic agent-based model of adaptation in uncertain environments.
+
 mod analysis;
 mod config;
 mod engine;

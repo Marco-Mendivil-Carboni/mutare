@@ -1,3 +1,5 @@
+//! Simulation analyzer and observables.
+
 use crate::config::Config;
 use crate::model::State;
 use crate::stats::{SummaryStats, TimeSeries};

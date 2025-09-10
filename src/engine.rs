@@ -1,3 +1,5 @@
+//! Simulation engine.
+
 use crate::config::Config;
 use crate::model::{Agent, State};
 use anyhow::{Context, Result};
