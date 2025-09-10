@@ -36,7 +36,7 @@ DEFAULT_CONFIG: Config = {
         "prob_trans_env": [[0.99, 0.01], [0.01, 0.99]],
         "prob_rep": [[0.016, 0.0], [0.0, 0.012]],
         "prob_dec": [[0.0, 0.024], [0.016, 0.0]],
-        "prob_mut": 0.0001,
+        "prob_mut": 0.001,
         "std_dev_mut": 0.1,
     },
     "init": {
@@ -44,8 +44,8 @@ DEFAULT_CONFIG: Config = {
         "prob_phe": [0.5, 0.5],
     },
     "output": {
-        "steps_per_save": 4096,
-        "saves_per_file": 4096,
+        "steps_per_save": 1024,
+        "saves_per_file": 1024,
     },
 }
 

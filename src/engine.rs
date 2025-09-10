@@ -52,12 +52,9 @@ impl Engine {
         let mut i_agt_rep = Vec::with_capacity(self.cfg.init.n_agt);
         let mut i_agt_dec = Vec::with_capacity(self.cfg.init.n_agt);
 
-        const MAX_N_AGT_FACTOR: usize = 2;
-        let i_agt_all = (0..MAX_N_AGT_FACTOR * self.cfg.init.n_agt).collect();
-
         for i_save in 0..self.cfg.output.saves_per_file {
             for _ in 0..self.cfg.output.steps_per_save {
-                self.perform_step(&mut i_agt_rep, &mut i_agt_dec, &i_agt_all)
+                self.perform_step(&mut i_agt_rep, &mut i_agt_dec)
                     .context("failed to perform step")?;
             }
 
@@ -108,7 +105,6 @@ impl Engine {
         &mut self,
         i_agt_rep: &mut Vec<usize>,
         i_agt_dec: &mut Vec<usize>,
-        i_agt_all: &Vec<usize>,
     ) -> Result<()> {
         // Update environment according to transition probabilities.
         self.update_environment()
@@ -130,7 +126,7 @@ impl Engine {
         self.remove_deceased(i_agt_dec);
 
         // Normalize population size.
-        self.normalize_population(i_agt_all)
+        self.normalize_population()
             .context("failed to normalize population size")?;
 
         Ok(())
@@ -209,13 +205,13 @@ impl Engine {
         }
     }
 
-    fn normalize_population(&mut self, i_agt_all: &Vec<usize>) -> Result<()> {
+    fn normalize_population(&mut self) -> Result<()> {
         let n_agt = self.state.agt_vec.len();
         if n_agt == 0 {
-            // Extinction event: generate a new random vector of agents.
+            // Extinction: generate a new random vector of agents.
             self.state.agt_vec = Engine::generate_random_agt_vec(&self.cfg, &mut self.rng)
                 .context("failed to generate random agt_vec")?;
-            log::info!("extinction event occurred");
+            log::info!("reached extinction");
 
             return Ok(());
         }
@@ -226,13 +222,11 @@ impl Engine {
             let excess = diff as usize;
 
             // Randomly pick excess agents to delete.
-            let mut i_agt_del: Vec<_> = i_agt_all[..n_agt]
-                .choose_multiple(&mut self.rng, excess)
-                .collect();
+            let mut i_agt_del = (0..n_agt).choose_multiple(&mut self.rng, excess);
 
             // Sort in reverse to safely remove by index.
             i_agt_del.sort_by(|a, b| b.cmp(a));
-            for &i_agt in i_agt_del {
+            for i_agt in i_agt_del {
                 self.state.agt_vec.swap_remove(i_agt);
             }
         }

@@ -47,13 +47,13 @@ if __name__ == "__main__":
     build_bin()
 
     common_run_options: RunOptions = {
-        "clean": False,
+        "clean": True,
         "n_runs": 1,
         "n_files": 16,
         "analyze": True,
     }
 
-    sim_dir = Path("simulations/with_mut_2/")
+    sim_dir = Path("simulations/with_mut/")
     config = copy.deepcopy(DEFAULT_CONFIG)
     sim_job: SimJob = {
         "sim_dir": sim_dir,
@@ -63,9 +63,9 @@ if __name__ == "__main__":
 
     sim_jobs = [sim_job]
 
-    prob_phe_0_list = list(map(float, np.linspace(1 / 16, 15 / 16, 15)))
+    prob_phe_0_list = list(map(float, np.linspace(1 / 8, 7 / 8, 7)))
     for sim_idx, prob_phe_0 in enumerate(prob_phe_0_list):
-        sim_dir = Path(f"simulations/fixed-{sim_idx:02d}_2/")
+        sim_dir = Path(f"simulations/fixed-{sim_idx:02d}/")
         config: Config = copy.deepcopy(DEFAULT_CONFIG)
         config["model"]["prob_mut"] = 0.0
         config["init"]["prob_phe"] = [prob_phe_0, 1 - prob_phe_0]
