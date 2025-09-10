@@ -39,10 +39,9 @@ def execute_sim_job(sim_job: SimJob) -> JobResult:
 
             run_sim(sim_dir, sim_job["run_options"])
 
-            if sim_job["run_options"]["analyze"]:
-                print_all_results(sim_dir)
-
         print(f"[{pid}] {sim_dir} job finished", flush=True)
+        if sim_job["run_options"]["analyze"]:
+            print_all_results(sim_dir)
         return JobResult.FINISHED
 
     except StopRequested:
@@ -61,5 +60,6 @@ def execute_sim_jobs(sim_jobs: List[SimJob]) -> None:
 
     if job_results.count(JobResult.FAILED) > 0:
         sys.exit(1)
+
     if job_results.count(JobResult.STOPPED) > 0:
         sys.exit(0)

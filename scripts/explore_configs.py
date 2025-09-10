@@ -47,7 +47,7 @@ if __name__ == "__main__":
     build_bin()
 
     common_run_options: RunOptions = {
-        "clean": True,
+        "clean": False,
         "n_runs": 1,
         "n_files": 16,
         "analyze": True,
@@ -84,8 +84,8 @@ if __name__ == "__main__":
     ]
 
     fig, ax = plt.subplots()
-    ax.set_xlabel("$\\langle\\Delta N\\rangle$")
-    ax.set_ylabel("$\\sigma_{\\Delta N}$")
+    ax.set_xlabel("$\\langle\\mu\\rangle$")
+    ax.set_ylabel("$\\sigma_{\\mu}$")
 
     ax.errorbar(
         [r["avg_W"] for r in growth_rate_results[1:]],
