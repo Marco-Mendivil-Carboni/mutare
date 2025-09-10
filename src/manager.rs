@@ -23,8 +23,7 @@ impl Manager {
     pub fn new<P: AsRef<Path>>(sim_dir: P) -> Result<Self> {
         let sim_dir = sim_dir.as_ref().to_path_buf();
 
-        let cfg =
-            Config::from_file(sim_dir.join("config.toml")).context("failed to construct cfg")?;
+        let cfg = Config::from_file(sim_dir.join("config.toml")).context("failed to load cfg")?;
         log::info!("{cfg:#?}");
 
         Ok(Self { sim_dir, cfg })
@@ -38,8 +37,7 @@ impl Manager {
         fs::create_dir_all(&run_dir).with_context(|| format!("failed to create {run_dir:?}"))?;
         log::info!("created {run_dir:?}");
 
-        let engine = Engine::generate_initial_condition(self.cfg.clone())
-            .context("failed to generate initial condition")?;
+        let engine = Engine::new(self.cfg.clone()).context("failed to create engine")?;
 
         engine
             .save_checkpoint(self.checkpoint_file(run_idx))

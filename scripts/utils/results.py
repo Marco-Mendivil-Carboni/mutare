@@ -14,7 +14,7 @@ class SummaryStats(TypedDict):
 class Results(TypedDict):
     prob_env: List[SummaryStats]
     avg_prob_phe: List[SummaryStats]
-    n_agt_diff: List[SummaryStats]
+    discrete_growth_rate: List[SummaryStats]
 
 
 def read_results(sim_dir: Path, run_idx: int) -> Results:

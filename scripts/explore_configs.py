@@ -29,9 +29,9 @@ class GrowthRateResult(TypedDict):
 
 def compute_growth_rate_result(sim_dir: Path, run_idx: int) -> GrowthRateResult:
     results = read_results(sim_dir, run_idx)
-    mean = results["n_agt_diff"][0]["mean"]
-    std_dev = results["n_agt_diff"][0]["std_dev"]
-    sem = results["n_agt_diff"][0]["sem"]
+    mean = results["discrete_growth_rate"][0]["mean"]
+    std_dev = results["discrete_growth_rate"][0]["std_dev"]
+    sem = results["discrete_growth_rate"][0]["sem"]
     n_eff = (std_dev / sem) ** 2
     return {
         "avg_W": mean,
@@ -47,13 +47,13 @@ if __name__ == "__main__":
     build_bin()
 
     common_run_options: RunOptions = {
-        "clean": False,
+        "clean": True,
         "n_runs": 1,
-        "n_files": 256,
+        "n_files": 16,
         "analyze": True,
     }
 
-    sim_dir = Path("simulations/with_mut/")
+    sim_dir = Path("simulations/with_mut_2/")
     config = copy.deepcopy(DEFAULT_CONFIG)
     sim_job: SimJob = {
         "sim_dir": sim_dir,
@@ -65,7 +65,7 @@ if __name__ == "__main__":
 
     prob_phe_0_list = list(map(float, np.linspace(1 / 16, 15 / 16, 15)))
     for sim_idx, prob_phe_0 in enumerate(prob_phe_0_list):
-        sim_dir = Path(f"simulations/fixed-{sim_idx:02d}/")
+        sim_dir = Path(f"simulations/fixed-{sim_idx:02d}_2/")
         config: Config = copy.deepcopy(DEFAULT_CONFIG)
         config["model"]["prob_mut"] = 0.0
         config["init"]["prob_phe"] = [prob_phe_0, 1 - prob_phe_0]
@@ -107,5 +107,5 @@ if __name__ == "__main__":
     )
     ax.legend()
 
-    fig.savefig("simulations/Delta-N-plot.pdf")
+    fig.savefig("simulations/growth_rate.pdf")
     plt.close(fig)

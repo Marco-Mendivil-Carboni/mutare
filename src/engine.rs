@@ -1,6 +1,6 @@
 use crate::config::Config;
 use crate::model::{Agent, State};
-use anyhow::{Context, Result, bail};
+use anyhow::{Context, Result};
 use rand::prelude::*;
 use rand_chacha::ChaCha12Rng;
 use rand_distr::{Bernoulli, LogNormal, Uniform, weighted::WeightedIndex};
@@ -25,24 +25,19 @@ pub struct Engine {
 
 impl Engine {
     /// Create a new `Engine` with the given configuration and a random initial state.
-    pub fn generate_initial_condition(cfg: Config) -> Result<Self> {
+    pub fn new(cfg: Config) -> Result<Self> {
         let mut rng = ChaCha12Rng::try_from_os_rng()?;
 
         let env_dist = Uniform::new(0, cfg.model.n_env)?;
         let env = env_dist.sample(&mut rng);
 
-        let mut agt_vec = Vec::with_capacity(cfg.init.n_agt);
-        let phe_dist = WeightedIndex::new(&cfg.init.prob_phe)?;
-        for _ in 0..cfg.init.n_agt {
-            let phe = phe_dist.sample(&mut rng);
-            let prob_phe = cfg.init.prob_phe.clone();
-            agt_vec.push(Agent::new(phe, prob_phe));
-        }
+        let agt_vec = Engine::generate_random_agt_vec(&cfg, &mut rng)
+            .context("failed to generate random agt_vec")?;
 
         let state = State {
             env,
             agt_vec,
-            n_agt_diff: 0,
+            discrete_growth_rate: 0.0,
         };
 
         Ok(Self { cfg, state, rng })
@@ -97,6 +92,18 @@ impl Engine {
         Ok(engine)
     }
 
+    fn generate_random_agt_vec(cfg: &Config, rng: &mut ChaCha12Rng) -> Result<Vec<Agent>> {
+        let mut agt_vec = Vec::with_capacity(cfg.init.n_agt);
+        let phe_dist = WeightedIndex::new(&cfg.init.prob_phe)?;
+        for _ in 0..cfg.init.n_agt {
+            let phe = phe_dist.sample(rng);
+            let prob_phe = cfg.init.prob_phe.clone();
+            agt_vec.push(Agent::new(phe, prob_phe));
+        }
+
+        Ok(agt_vec)
+    }
+
     fn perform_step(
         &mut self,
         i_agt_rep: &mut Vec<usize>,
@@ -111,8 +118,9 @@ impl Engine {
         self.select_rep_and_dec(i_agt_rep, i_agt_dec)
             .context("failed to select replicating and deceased agents")?;
 
-        // Compute the net change in the number of agents.
-        self.state.n_agt_diff = i_agt_rep.len() as i32 - i_agt_dec.len() as i32;
+        // Compute the relative change in the number of agents per step.
+        self.state.discrete_growth_rate =
+            (i_agt_rep.len() as f64 - i_agt_dec.len() as f64) / self.state.agt_vec.len() as f64;
 
         // Replicate selected agents.
         self.replicate_agents(i_agt_rep)
@@ -122,7 +130,8 @@ impl Engine {
         self.remove_deceased(i_agt_dec);
 
         // Normalize population size.
-        self.normalize_population(i_agt_all)?;
+        self.normalize_population(i_agt_all)
+            .context("failed to normalize population size")?;
 
         Ok(())
     }
@@ -202,24 +211,17 @@ impl Engine {
 
     fn normalize_population(&mut self, i_agt_all: &Vec<usize>) -> Result<()> {
         let n_agt = self.state.agt_vec.len();
-        let n_agt_min = 1;
-        if n_agt < n_agt_min {
-            bail!("number of agents must be at least {n_agt_min}");
+        if n_agt == 0 {
+            // Extinction event: generate a new random vector of agents.
+            self.state.agt_vec = Engine::generate_random_agt_vec(&self.cfg, &mut self.rng)
+                .context("failed to generate random agt_vec")?;
+            log::info!("extinction event occurred");
+
+            return Ok(());
         }
 
         let diff = n_agt as i32 - self.cfg.init.n_agt as i32;
-        if diff < 0 {
-            // Too few agents: duplicate missing agents.
-            let missing = -diff as usize;
-
-            // Randomly pick missing agents to duplicate.
-            for _ in 0..missing {
-                let &i_agt = i_agt_all[..n_agt]
-                    .choose(&mut self.rng)
-                    .context("failed to choose an agent to duplicate")?;
-                self.state.agt_vec.push(self.state.agt_vec[i_agt].clone());
-            }
-        } else if diff > 0 {
+        if diff > 0 {
             // Too many agents: delete excess agents.
             let excess = diff as usize;
 

@@ -109,13 +109,13 @@ impl Analyzer {
             },
         )));
 
-        // Net change in the number of agents per step
+        // Relative change in the number of agents per step
         obs_vec.push(Box::new(TimeSeriesObservable::new(
-            "n_agt_diff",
+            "discrete_growth_rate",
             1,
             |time_series_vec, state| {
-                // Record the net change in the number of agents for this step.
-                time_series_vec[0].push(state.n_agt_diff as f64);
+                // Record the relative change in the number of agents for this step.
+                time_series_vec[0].push(state.discrete_growth_rate);
             },
         )));
 

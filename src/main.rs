@@ -65,8 +65,8 @@ fn run_cli() -> Result<()> {
     let cli = CLI::parse();
     log::info!("{cli:#?}");
 
-    // Construct a manager for the specified simulation directory.
-    let mgr = Manager::new(cli.sim_dir).context("failed to construct mgr")?;
+    // Create a manager for the specified simulation directory.
+    let mgr = Manager::new(cli.sim_dir).context("failed to create mgr")?;
 
     // Execute the requested simulation command.
     match cli.sim_cmd {

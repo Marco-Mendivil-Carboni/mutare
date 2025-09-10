@@ -29,7 +29,7 @@ impl Agent {
 /// Represents the state of the simulation at a given step.
 ///
 /// Contains the current environment and all agents in the simulation,
-/// as well as the net change in the number of agents.
+/// as well as the relative change in the number of agents per step.
 #[derive(Serialize, Deserialize)]
 pub struct State {
     /// Current environment index.
@@ -38,6 +38,6 @@ pub struct State {
     /// Vector of agents currently in the simulation.
     pub agt_vec: Vec<Agent>,
 
-    /// Net change in the number of agents (positive = increase, negative = decrease).
-    pub n_agt_diff: i32,
+    /// Relative change in the number of agents per step.
+    pub discrete_growth_rate: f64,
 }
