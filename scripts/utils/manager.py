@@ -47,7 +47,7 @@ def execute_sim_jobs(sim_jobs: List[SimJob]) -> None:
     with mp.Pool(processes=max(1, mp.cpu_count() // 2)) as pool:
         job_results = pool.map(execute_sim_job, sim_jobs)
 
-    print_process_msg("simulation jobs have terminated")
+    print("simulation jobs have terminated")
 
     if job_results.count(JobResult.FAILED) > 0:
         sys.exit(1)
