@@ -24,22 +24,22 @@ def read_results(sim_dir: Path, run_idx: int) -> Results:
     return cast(Results, results)
 
 
-class GrowthRateResult(TypedDict):
-    avg_W: float
-    avg_W_err: float
-    sig_W: float
-    sig_W_err: float
+class GrowthRate(TypedDict):
+    avg: float
+    avg_err: float
+    sig: float
+    sig_err: float
 
 
-def compute_growth_rate_result(sim_dir: Path, run_idx: int) -> GrowthRateResult:
+def compute_growth_rate(sim_dir: Path, run_idx: int) -> GrowthRate:
     results = read_results(sim_dir, run_idx)
     mean = results["discrete_growth_rate"][0]["mean"]
     std_dev = results["discrete_growth_rate"][0]["std_dev"]
     sem = results["discrete_growth_rate"][0]["sem"]
     n_eff = (std_dev / sem) ** 2
     return {
-        "avg_W": mean,
-        "avg_W_err": sem,
-        "sig_W": std_dev,
-        "sig_W_err": std_dev / np.sqrt(2 * (n_eff - 1)),
+        "avg": mean,
+        "avg_err": sem,
+        "sig": std_dev,
+        "sig_err": std_dev / np.sqrt(2 * (n_eff - 1)),
     }

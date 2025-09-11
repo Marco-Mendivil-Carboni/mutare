@@ -3,7 +3,7 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 from typing import List
 
-from .results import GrowthRateResult
+from .results import GrowthRate
 
 mpl.use("pdf")
 
@@ -18,8 +18,8 @@ mpl.rcParams["figure.constrained_layout.use"] = True
 
 
 def make_growth_rate_plot(
-    with_mut_result: GrowthRateResult,
-    fixed_results: List[GrowthRateResult],
+    rate_with_mut: GrowthRate,
+    rates_fixed: List[GrowthRate],
     output_file: Path,
 ) -> None:
     fig, ax = plt.subplots()
@@ -27,20 +27,20 @@ def make_growth_rate_plot(
     ax.set_ylabel("$\\sigma_{\\mu}$")
 
     ax.errorbar(
-        [res["avg_W"] for res in fixed_results],
-        [res["sig_W"] for res in fixed_results],
-        xerr=[res["avg_W_err"] for res in fixed_results],
-        yerr=[res["sig_W_err"] for res in fixed_results],
+        [rate["avg"] for rate in rates_fixed],
+        [rate["sig"] for rate in rates_fixed],
+        xerr=[rate["avg_err"] for rate in rates_fixed],
+        yerr=[rate["sig_err"] for rate in rates_fixed],
         c="b",
         ls="",
         label="fixed",
     )
 
     ax.errorbar(
-        with_mut_result["avg_W"],
-        with_mut_result["sig_W"],
-        xerr=with_mut_result["avg_W_err"],
-        yerr=with_mut_result["sig_W_err"],
+        rate_with_mut["avg"],
+        rate_with_mut["sig"],
+        xerr=rate_with_mut["avg_err"],
+        yerr=rate_with_mut["sig_err"],
         c="r",
         ls="",
         label="with mutations",
