@@ -20,7 +20,7 @@ if __name__ == "__main__":
     common_run_options: RunOptions = {
         "clean": False,
         "n_runs": 1,
-        "n_files": 64,
+        "n_files": 256,
         "analyze": True,
     }
 
@@ -29,18 +29,18 @@ if __name__ == "__main__":
             "n_env": 2,
             "n_phe": 2,
             "prob_trans_env": [[0.99, 0.01], [0.01, 0.99]],
-            "prob_rep": [[0.016, 0.0], [0.0, 0.012]],
-            "prob_dec": [[0.0, 0.024], [0.016, 0.0]],
-            "prob_mut": 0.001,
+            "prob_rep": [[0.012, 0.0], [0.0, 0.008]],
+            "prob_dec": [[0.0, 0.016], [0.012, 0.0]],
+            "prob_mut": 0.0001,
             "std_dev_mut": 0.1,
         },
         "init": {
-            "n_agt": 1024,
+            "n_agt": 4096,
             "prob_phe": [0.5, 0.5],
         },
         "output": {
-            "steps_per_save": 1024,
-            "saves_per_file": 1024,
+            "steps_per_save": 256,
+            "saves_per_file": 256,
         },
     }
 
@@ -52,7 +52,7 @@ if __name__ == "__main__":
     sim_jobs = [sim_job]
 
     config["model"]["prob_mut"] = 0.0
-    prob_phe_0_list = list(map(float, np.linspace(9 / 16, 15 / 16, 7)))
+    prob_phe_0_list = list(map(float, np.linspace(1 / 16, 15 / 16, 15)))
     for sim_idx, prob_phe_0 in enumerate(prob_phe_0_list):
         config["init"]["prob_phe"] = [prob_phe_0, 1 - prob_phe_0]
         sim_jobs.append(
