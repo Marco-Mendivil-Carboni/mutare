@@ -4,7 +4,7 @@ import numpy as np
 import copy
 from pathlib import Path
 
-from utils.config import DEFAULT_CONFIG, Config
+from utils.config import DEFAULT_CONFIG, Config, hash_sim_dir
 from utils.runner import set_signal_handler, build_bin, RunOptions
 from utils.manager import SimJob, execute_sim_jobs
 from utils.results import compute_growth_rate_result
@@ -16,33 +16,31 @@ if __name__ == "__main__":
 
     build_bin()
 
+    sim_base_dir = Path("simulations/")
+
     common_run_options: RunOptions = {
         "clean": False,
         "n_runs": 1,
-        "n_files": 256,
+        "n_files": 64,
         "analyze": True,
     }
 
-    sim_dir = Path("simulations/with_mut/")
     config = copy.deepcopy(DEFAULT_CONFIG)
     sim_job: SimJob = {
-        "sim_dir": sim_dir,
-        "config": config,
+        "sim_dir": hash_sim_dir(sim_base_dir, config),
         "run_options": common_run_options,
     }
 
     sim_jobs = [sim_job]
 
-    prob_phe_0_list = list(map(float, np.linspace(1 / 16, 15 / 16, 15)))
+    prob_phe_0_list = list(map(float, np.linspace(9 / 16, 15 / 16, 7)))
     for sim_idx, prob_phe_0 in enumerate(prob_phe_0_list):
-        sim_dir = Path(f"simulations/fixed-{sim_idx:02d}/")
         config: Config = copy.deepcopy(DEFAULT_CONFIG)
         config["model"]["prob_mut"] = 0.0
         config["init"]["prob_phe"] = [prob_phe_0, 1 - prob_phe_0]
         sim_jobs.append(
             {
-                "sim_dir": sim_dir,
-                "config": config,
+                "sim_dir": hash_sim_dir(sim_base_dir, config),
                 "run_options": common_run_options,
             }
         )
@@ -56,5 +54,5 @@ if __name__ == "__main__":
     make_growth_rate_plot(
         growth_rate_results[0],
         growth_rate_results[1:],
-        Path("simulations/growth_rate.pdf"),
+        sim_base_dir / "growth_rate.pdf",
     )
