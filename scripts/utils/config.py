@@ -1,6 +1,6 @@
 import toml
 from pathlib import Path
-from typing import TypedDict, List
+from typing import TypedDict, List, cast
 
 
 class ModelParams(TypedDict):
@@ -54,3 +54,10 @@ def save_config(config: Config, sim_dir: Path) -> None:
     file_path = sim_dir / "config.toml"
     with file_path.open("w") as file:
         toml.dump(config, file)
+
+
+def load_config(sim_dir: Path) -> Config:
+    file_path = sim_dir / "config.toml"
+    with file_path.open("r") as file:
+        config = toml.load(file)
+    return cast(Config, config)

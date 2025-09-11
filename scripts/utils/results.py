@@ -1,6 +1,6 @@
 import msgpack
-import json
 from pathlib import Path
+import numpy as np
 from typing import TypedDict, List, cast
 
 
@@ -24,7 +24,22 @@ def read_results(sim_dir: Path, run_idx: int) -> Results:
     return cast(Results, results)
 
 
-def print_all_results(sim_dir: Path) -> None:
-    n_runs = len(list(sim_dir.glob("run-*")))
-    for run_idx in range(n_runs):
-        print(json.dumps(read_results(sim_dir, run_idx), indent=4), flush=True)
+class GrowthRateResult(TypedDict):
+    avg_W: float
+    avg_W_err: float
+    sig_W: float
+    sig_W_err: float
+
+
+def compute_growth_rate_result(sim_dir: Path, run_idx: int) -> GrowthRateResult:
+    results = read_results(sim_dir, run_idx)
+    mean = results["discrete_growth_rate"][0]["mean"]
+    std_dev = results["discrete_growth_rate"][0]["std_dev"]
+    sem = results["discrete_growth_rate"][0]["sem"]
+    n_eff = (std_dev / sem) ** 2
+    return {
+        "avg_W": mean,
+        "avg_W_err": sem,
+        "sig_W": std_dev,
+        "sig_W_err": std_dev / np.sqrt(2 * (n_eff - 1)),
+    }

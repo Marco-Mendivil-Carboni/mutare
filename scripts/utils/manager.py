@@ -1,14 +1,12 @@
 from multiprocessing import Pool, cpu_count
 from pathlib import Path
 import fcntl
-import os
 import sys
 from enum import Enum, auto
 from typing import TypedDict, List
 
 from .config import Config, save_config
-from .runner import run_sim, RunOptions, StopRequested
-from .results import print_all_results
+from .runner import run_sim, RunOptions, StopRequested, print_log_msg
 
 
 class SimJob(TypedDict):
@@ -24,11 +22,10 @@ class JobResult(Enum):
 
 
 def execute_sim_job(sim_job: SimJob) -> JobResult:
-    pid = os.getpid()
     sim_dir = sim_job["sim_dir"]
 
     try:
-        print(f"[{pid}] {sim_dir} job started", flush=True)
+        print_log_msg(f"{sim_dir} job started")
 
         sim_dir.mkdir(parents=True, exist_ok=True)
 
@@ -39,18 +36,16 @@ def execute_sim_job(sim_job: SimJob) -> JobResult:
 
             run_sim(sim_dir, sim_job["run_options"])
 
-        print(f"[{pid}] {sim_dir} job finished", flush=True)
-        if sim_job["run_options"]["analyze"]:
-            print_all_results(sim_dir)
+        print_log_msg(f"{sim_dir} job finished")
         return JobResult.FINISHED
 
     except StopRequested:
-        print(f"[{pid}] {sim_dir} job stopped", flush=True)
+        print_log_msg(f"{sim_dir} job stopped")
         return JobResult.STOPPED
 
     except Exception as exception:
-        print(f"[{pid}] {sim_dir} job failed", flush=True)
-        print(f"[{pid}] exception: {exception}", flush=True)
+        print_log_msg(f"{sim_dir} job failed")
+        print_log_msg(f"exception: {exception}")
         return JobResult.FAILED
 
 

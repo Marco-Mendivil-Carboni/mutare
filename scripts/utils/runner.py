@@ -1,9 +1,17 @@
 import subprocess
 from pathlib import Path
-from signal import signal, SIGTERM
 import os
+from datetime import datetime
+from signal import signal, SIGTERM
+import json
 from typing import TypedDict, List, Optional
 from types import FrameType
+
+from .results import read_results
+
+
+def print_log_msg(message: str) -> None:
+    print(f"[{os.getpid()}] [{datetime.now()}] {message}", flush=True)
 
 
 class StopRequested(Exception):
@@ -14,8 +22,7 @@ stop_requested = False
 
 
 def request_stop(signum: int, _: Optional[FrameType]) -> None:
-    pid = os.getpid()
-    print(f"[{pid}] received signal {signum}: requesting stop", flush=True)
+    print_log_msg(f"received signal {signum}: requesting stop")
 
     global stop_requested
     stop_requested = True
@@ -33,13 +40,14 @@ def run_bin(sim_dir: Path, extra_args: List[str]) -> None:
     if stop_requested:
         raise StopRequested()
 
+    args = ["target/release/mutare", "--sim-dir", str(sim_dir)] + extra_args
+
+    print_log_msg(f"starting process {args}")
+
     with open(sim_dir / "output.log", "w", buffering=1) as output_file:
-        subprocess.run(
-            ["target/release/mutare", "--sim-dir", str(sim_dir)] + extra_args,
-            stdout=output_file,
-            stderr=output_file,
-            check=True,
-        )
+        subprocess.run(args, stdout=output_file, stderr=output_file, check=True)
+
+    print_log_msg(f"completed process {args}")
 
 
 class RunOptions(TypedDict):
@@ -68,3 +76,7 @@ def run_sim(sim_dir: Path, run_options: RunOptions) -> None:
 
     if run_options["analyze"]:
         run_bin(sim_dir, ["analyze"])
+
+        for run_idx in range(n_runs):
+            results = json.dumps(read_results(sim_dir, run_idx), indent=4)
+            print_log_msg(f"{sim_dir} run {run_idx} results:\n{results}")
