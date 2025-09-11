@@ -1,4 +1,4 @@
-from multiprocessing import Pool, cpu_count
+import multiprocessing as mp
 from pathlib import Path
 import fcntl
 import sys
@@ -6,7 +6,7 @@ from enum import Enum, auto
 from typing import TypedDict, List
 
 from .config import Config, save_config
-from .runner import run_sim, RunOptions, StopRequested, print_log_msg
+from .runner import run_sim, RunOptions, StopRequested, print_process_msg
 
 
 class SimJob(TypedDict):
@@ -25,7 +25,7 @@ def execute_sim_job(sim_job: SimJob) -> JobResult:
     sim_dir = sim_job["sim_dir"]
 
     try:
-        print_log_msg(f"{sim_dir} job started")
+        print_process_msg(f"{sim_dir} job started")
 
         sim_dir.mkdir(parents=True, exist_ok=True)
 
@@ -36,22 +36,24 @@ def execute_sim_job(sim_job: SimJob) -> JobResult:
 
             run_sim(sim_dir, sim_job["run_options"])
 
-        print_log_msg(f"{sim_dir} job finished")
+        print_process_msg(f"{sim_dir} job finished")
         return JobResult.FINISHED
 
     except StopRequested:
-        print_log_msg(f"{sim_dir} job stopped")
+        print_process_msg(f"{sim_dir} job stopped")
         return JobResult.STOPPED
 
     except Exception as exception:
-        print_log_msg(f"{sim_dir} job failed")
-        print_log_msg(f"exception: {exception}")
+        print_process_msg(f"{sim_dir} job failed")
+        print_process_msg(f"exception: {exception}")
         return JobResult.FAILED
 
 
 def execute_sim_jobs(sim_jobs: List[SimJob]) -> None:
-    with Pool(processes=max(1, cpu_count() // 2)) as pool:
+    with mp.Pool(processes=max(1, mp.cpu_count() // 2)) as pool:
         job_results = pool.map(execute_sim_job, sim_jobs)
+
+    print_process_msg("simulation jobs have ended")
 
     if job_results.count(JobResult.FAILED) > 0:
         sys.exit(1)

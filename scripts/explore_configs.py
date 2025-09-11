@@ -3,20 +3,12 @@
 import numpy as np
 import copy
 from pathlib import Path
-import matplotlib as mpl
-from matplotlib import pyplot as plt
 
 from utils.config import DEFAULT_CONFIG, Config
 from utils.runner import set_signal_handler, build_bin, RunOptions
 from utils.manager import SimJob, execute_sim_jobs
 from utils.results import compute_growth_rate_result
-
-mpl.use("pdf")
-mpl.rcParams["text.usetex"] = True
-mpl.rcParams["font.family"] = "serif"
-cm = 1 / 2.54
-mpl.rcParams["figure.figsize"] = [16.0 * cm, 10.0 * cm]
-mpl.rcParams["figure.constrained_layout.use"] = True
+from utils.plotting import make_growth_rate_plot
 
 
 if __name__ == "__main__":
@@ -61,29 +53,8 @@ if __name__ == "__main__":
         compute_growth_rate_result(sim_job["sim_dir"], 0) for sim_job in sim_jobs
     ]
 
-    fig, ax = plt.subplots()
-    ax.set_xlabel("$\\langle\\mu\\rangle$")
-    ax.set_ylabel("$\\sigma_{\\mu}$")
-
-    ax.errorbar(
-        [r["avg_W"] for r in growth_rate_results[1:]],
-        [r["sig_W"] for r in growth_rate_results[1:]],
-        xerr=[r["avg_W_err"] for r in growth_rate_results[1:]],
-        yerr=[r["sig_W_err"] for r in growth_rate_results[1:]],
-        c="b",
-        ls="",
-        label="fixed",
+    make_growth_rate_plot(
+        growth_rate_results[0],
+        growth_rate_results[1:],
+        Path("simulations/growth_rate.pdf"),
     )
-    ax.errorbar(
-        growth_rate_results[0]["avg_W"],
-        growth_rate_results[0]["sig_W"],
-        xerr=growth_rate_results[0]["avg_W_err"],
-        yerr=growth_rate_results[0]["sig_W_err"],
-        c="r",
-        ls="",
-        label="with mutations",
-    )
-    ax.legend()
-
-    fig.savefig("simulations/growth_rate.pdf")
-    plt.close(fig)

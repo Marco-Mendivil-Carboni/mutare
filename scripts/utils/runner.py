@@ -10,8 +10,8 @@ from types import FrameType
 from .results import read_results
 
 
-def print_log_msg(message: str) -> None:
-    print(f"[{os.getpid()}] [{datetime.now()}] {message}", flush=True)
+def print_process_msg(message: str) -> None:
+    print(f"[{datetime.now()}] [{os.getpid()}] {message}", flush=True)
 
 
 class StopRequested(Exception):
@@ -22,7 +22,7 @@ stop_requested = False
 
 
 def request_stop(signum: int, _: Optional[FrameType]) -> None:
-    print_log_msg(f"received signal {signum}: requesting stop")
+    print_process_msg(f"received signal {signum}: requesting stop")
 
     global stop_requested
     stop_requested = True
@@ -40,14 +40,9 @@ def run_bin(sim_dir: Path, extra_args: List[str]) -> None:
     if stop_requested:
         raise StopRequested()
 
-    args = ["target/release/mutare", "--sim-dir", str(sim_dir)] + extra_args
-
-    print_log_msg(f"starting process {args}")
-
     with open(sim_dir / "output.log", "w", buffering=1) as output_file:
-        subprocess.run(args, stdout=output_file, stderr=output_file, check=True)
-
-    print_log_msg(f"completed process {args}")
+        args = ["target/release/mutare", "--sim-dir", str(sim_dir)] + extra_args
+        subprocess.run(args, stdout=output_file, stderr=subprocess.STDOUT, check=True)
 
 
 class RunOptions(TypedDict):
@@ -59,10 +54,12 @@ class RunOptions(TypedDict):
 
 def run_sim(sim_dir: Path, run_options: RunOptions) -> None:
     if run_options["clean"]:
+        print_process_msg(f"cleaning {sim_dir}")
         run_bin(sim_dir, ["clean"])
 
     n_runs = len(list(sim_dir.glob("run-*")))
     while n_runs < run_options["n_runs"]:
+        print_process_msg(f"creating {sim_dir} run {n_runs}")
         run_bin(sim_dir, ["create"])
         n_runs += 1
 
@@ -71,12 +68,14 @@ def run_sim(sim_dir: Path, run_options: RunOptions) -> None:
 
         n_files = len(list(run_dir.glob("trajectory-*")))
         while n_files < run_options["n_files"]:
+            print_process_msg(f"resuming {sim_dir} run {run_idx} file {n_files}")
             run_bin(sim_dir, ["resume", "--run-idx", str(run_idx)])
             n_files += 1
 
     if run_options["analyze"]:
+        print_process_msg(f"analyzing {sim_dir}")
         run_bin(sim_dir, ["analyze"])
 
         for run_idx in range(n_runs):
             results = json.dumps(read_results(sim_dir, run_idx), indent=4)
-            print_log_msg(f"{sim_dir} run {run_idx} results:\n{results}")
+            print_process_msg(f"{sim_dir} run {run_idx} results:\n{results}")
