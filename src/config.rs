@@ -41,6 +41,7 @@ pub struct ModelParams {
 pub struct InitParams {
     /// Number of agents.
     pub n_agt: usize,
+
     /// Probability distribution over phenotypes.
     pub prob_phe: Vec<f64>,
 }
@@ -48,10 +49,11 @@ pub struct InitParams {
 /// Output format parameters.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct OutputParams {
+    /// Number of steps per output file.
+    pub steps_per_file: usize,
+
     /// Number of steps per saved state.
-    pub steps_per_save: usize,
-    /// Number of saved states per file.
-    pub saves_per_file: usize,
+    pub steps_per_save: Option<usize>,
 }
 
 impl Config {
@@ -87,14 +89,18 @@ impl Config {
         check_num(model.prob_mut, 0.0..=1.0).context("invalid mutation probability")?;
         check_num(model.std_dev_mut, 0.0..=1.0).context("invalid mutation standard deviation")?;
 
-        check_num(init.n_agt, 1..=10_000).context("invalid number of agents")?;
+        check_num(init.n_agt, 1..=100_000).context("invalid number of agents")?;
+
         check_vec(&init.prob_phe, model.n_phe, true)
             .context("invalid probability distribution over phenotypes")?;
 
-        check_num(output.steps_per_save, 1..=10_000)
-            .context("invalid number of steps per saved state")?;
-        check_num(output.saves_per_file, 1..=10_000)
-            .context("invalid number of saved states per file")?;
+        check_num(output.steps_per_file, 1..=1_000_000)
+            .context("invalid number of steps per output file")?;
+
+        if let Some(steps_per_save) = output.steps_per_save {
+            check_num(steps_per_save, 1_000..)
+                .context("invalid number of steps per saved state")?;
+        }
 
         Ok(())
     }

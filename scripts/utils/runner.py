@@ -66,7 +66,7 @@ def run_sim(sim_dir: Path, run_options: RunOptions) -> None:
     for run_idx in range(run_options["n_runs"]):
         run_dir = sim_dir / f"run-{run_idx:04}"
 
-        n_files = len(list(run_dir.glob("trajectory-*")))
+        n_files = len(list(run_dir.glob("output-*")))
         while n_files < run_options["n_files"]:
             print_process_msg(f"resuming {sim_dir} run {run_idx} file {n_files}")
             run_bin(sim_dir, ["resume", "--run-idx", str(run_idx)])

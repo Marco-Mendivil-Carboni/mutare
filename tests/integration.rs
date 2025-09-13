@@ -19,12 +19,12 @@ fn basic_workflow() {
         + "std_dev_mut = 0.1\n"
         + "\n"
         + "[init]\n"
-        + "n_agt = 1024\n"
+        + "n_agt = 4096\n"
         + "prob_phe = [ 0.5, 0.5,]\n"
         + "\n"
         + "[output]\n"
-        + "steps_per_save = 256\n"
-        + "saves_per_file = 64\n";
+        + "steps_per_file = 16384\n"
+        + "steps_per_save = 1024\n";
 
     fs::write(&config_path, config_contents).expect("failed to write config file");
 

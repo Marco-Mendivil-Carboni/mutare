@@ -20,7 +20,7 @@ if __name__ == "__main__":
     common_run_options: RunOptions = {
         "clean": False,
         "n_runs": 1,
-        "n_files": 256,
+        "n_files": 16,
         "analyze": True,
     }
 
@@ -39,8 +39,8 @@ if __name__ == "__main__":
             "prob_phe": [0.5, 0.5],
         },
         "output": {
-            "steps_per_save": 256,
-            "saves_per_file": 256,
+            "steps_per_file": 262144,
+            "steps_per_save": 1024,
         },
     }
 
@@ -52,6 +52,7 @@ if __name__ == "__main__":
     sim_jobs = [sim_job]
 
     config["model"]["prob_mut"] = 0.0
+    config["output"].pop("steps_per_save")
     prob_phe_0_list = list(map(float, np.linspace(1 / 16, 15 / 16, 15)))
     for sim_idx, prob_phe_0 in enumerate(prob_phe_0_list):
         config["init"]["prob_phe"] = [prob_phe_0, 1 - prob_phe_0]

@@ -1,7 +1,7 @@
 //! Simulation engine.
 
 use crate::config::Config;
-use crate::model::{Agent, State};
+use crate::types::{Agent, Record, State};
 use anyhow::{Context, Result};
 use rand::prelude::*;
 use rand_chacha::ChaCha12Rng;
@@ -16,13 +16,18 @@ use std::{
 
 /// Simulation engine.
 ///
-/// Holds the configuration, current state, and random number generator,
-/// and provides methods to initialize, run, save, and load simulations.
+/// Holds the configuration, a random number generator and the current step and state.
+/// Provides methods to initialize, run, save, and load simulations.
 #[derive(Serialize, Deserialize)]
 pub struct Engine {
+    /// Simulation configuration parameters.
     cfg: Config,
-    state: State,
+    /// Random number generator.
     rng: ChaCha12Rng,
+    /// Current simulation step.
+    step: usize,
+    /// Current simulation state.
+    state: State,
 }
 
 impl Engine {
@@ -36,16 +41,17 @@ impl Engine {
         let agt_vec = Engine::generate_random_agt_vec(&cfg, &mut rng)
             .context("failed to generate random agt_vec")?;
 
-        let state = State {
-            env,
-            agt_vec,
-            discrete_growth_rate: 0.0,
-        };
+        let state = State { env, agt_vec };
 
-        Ok(Self { cfg, state, rng })
+        Ok(Self {
+            cfg,
+            rng,
+            step: 0,
+            state,
+        })
     }
 
-    /// Perform the simulation and save the resulting states to a binary file.
+    /// Perform the simulation and save the output records to a binary file.
     pub fn perform_simulation<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
         let file = file.as_ref();
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
@@ -54,16 +60,17 @@ impl Engine {
         let mut i_agt_rep = Vec::with_capacity(self.cfg.init.n_agt);
         let mut i_agt_dec = Vec::with_capacity(self.cfg.init.n_agt);
 
-        for i_save in 0..self.cfg.output.saves_per_file {
-            for _ in 0..self.cfg.output.steps_per_save {
-                self.perform_step(&mut i_agt_rep, &mut i_agt_dec)
-                    .context("failed to perform step")?;
+        for i_step in 0..self.cfg.output.steps_per_file {
+            if i_step % (self.cfg.output.steps_per_file / 100).max(1) == 0 {
+                let progress = 100.0 * i_step as f64 / self.cfg.output.steps_per_file as f64;
+                log::info!("completed {progress:06.2}%");
             }
 
-            encode::write(&mut writer, &self.state).context("failed to serialize state")?;
+            let record = self
+                .perform_step(&mut i_agt_rep, &mut i_agt_dec)
+                .context("failed to perform step")?;
 
-            let progress = 100.0 * (i_save + 1) as f64 / self.cfg.output.saves_per_file as f64;
-            log::info!("completed {progress:06.2}%");
+            encode::write(&mut writer, &record).context("failed to serialize record")?;
         }
 
         writer.flush().context("failed to flush writer stream")?;
@@ -91,6 +98,7 @@ impl Engine {
         Ok(engine)
     }
 
+    /// Generate random vector of agents.
     fn generate_random_agt_vec(cfg: &Config, rng: &mut ChaCha12Rng) -> Result<Vec<Agent>> {
         let mut agt_vec = Vec::with_capacity(cfg.init.n_agt);
         let phe_dist = WeightedIndex::new(&cfg.init.prob_phe)?;
@@ -103,43 +111,60 @@ impl Engine {
         Ok(agt_vec)
     }
 
+    /// Perform a single simulation step and return a `Record`.
     fn perform_step(
         &mut self,
         i_agt_rep: &mut Vec<usize>,
         i_agt_dec: &mut Vec<usize>,
-    ) -> Result<()> {
-        // Update environment according to transition probabilities.
+    ) -> Result<Record> {
         self.update_environment()
             .context("failed to update environment")?;
 
-        // Select replicating and deceased agents.
         self.select_rep_and_dec(i_agt_rep, i_agt_dec)
             .context("failed to select replicating and deceased agents")?;
 
-        // Compute the relative change in the number of agents per step.
-        self.state.discrete_growth_rate =
+        // Compute the relative change in the number of agents at this step.
+        let growth_rate =
             (i_agt_rep.len() as f64 - i_agt_dec.len() as f64) / self.state.agt_vec.len() as f64;
 
-        // Replicate selected agents.
         self.replicate_agents(i_agt_rep)
             .context("failed to replicate selected agents")?;
 
-        // Remove deceased agents.
         self.remove_deceased(i_agt_dec);
 
-        // Normalize population size.
+        // Determine if population reached extinction at this step.
+        let extinction = self.state.agt_vec.is_empty();
+
         self.normalize_population()
             .context("failed to normalize population size")?;
 
-        Ok(())
+        let record = Record {
+            step: self.step,
+            growth_rate,
+            extinction,
+            state: self.cfg.output.steps_per_save.and_then(|steps_per_save| {
+                if self.step % steps_per_save == 0 {
+                    Some(self.state.clone())
+                } else {
+                    None
+                }
+            }),
+        };
+
+        // Increment simulation step.
+        self.step += 1;
+
+        Ok(record)
     }
 
+    /// Update environment according to transition probabilities.
     fn update_environment(&mut self) -> Result<()> {
         let env_dist = WeightedIndex::new(&self.cfg.model.prob_trans_env[self.state.env])?;
         self.state.env = env_dist.sample(&mut self.rng);
         Ok(())
     }
 
+    /// Select replicating and deceased agents.
     fn select_rep_and_dec(
         &mut self,
         i_agt_rep: &mut Vec<usize>,
@@ -169,6 +194,7 @@ impl Engine {
         Ok(())
     }
 
+    /// Replicate selected agents.
     fn replicate_agents(&mut self, i_agt_rep: &Vec<usize>) -> Result<()> {
         let mut_dist = Bernoulli::new(self.cfg.model.prob_mut)?;
         let ele_mut_dist = LogNormal::new(0.0, self.cfg.model.std_dev_mut)?;
@@ -199,6 +225,7 @@ impl Engine {
         Ok(())
     }
 
+    /// Remove deceased agents.
     fn remove_deceased(&mut self, i_agt_dec: &mut Vec<usize>) {
         // Sort in reverse to safely remove by index.
         i_agt_dec.sort_by(|a, b| b.cmp(a));
@@ -207,13 +234,13 @@ impl Engine {
         }
     }
 
+    /// Normalize population size.
     fn normalize_population(&mut self) -> Result<()> {
         let n_agt = self.state.agt_vec.len();
         if n_agt == 0 {
             // Extinction: generate a new random vector of agents.
             self.state.agt_vec = Engine::generate_random_agt_vec(&self.cfg, &mut self.rng)
                 .context("failed to generate random agt_vec")?;
-            log::info!("reached extinction");
 
             return Ok(());
         }

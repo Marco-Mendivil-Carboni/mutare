@@ -14,7 +14,9 @@ use std::{
 ///
 /// Manages the production and analysis of simulation runs.
 pub struct Manager {
+    /// Path to the simulation directory.
     sim_dir: PathBuf,
+    /// Simulation configuration parameters.
     cfg: Config,
 }
 
@@ -48,11 +50,11 @@ impl Manager {
         Ok(())
     }
 
-    /// Resume a simulation run from its checkpoint and generate a new trajectory file.
+    /// Resume a simulation run from its checkpoint and generate a new output file.
     pub fn resume_run(&self, run_idx: usize) -> Result<()> {
         let file_idx = self
-            .count_trajectory_files(run_idx)
-            .context("failed to count trajectory files")?;
+            .count_output_files(run_idx)
+            .context("failed to count output files")?;
 
         let checkpoint_file = self.checkpoint_file(run_idx);
         let mut engine = Engine::load_checkpoint(&checkpoint_file)
@@ -61,7 +63,7 @@ impl Manager {
 
         let start = Instant::now();
         engine
-            .perform_simulation(self.trajectory_file(run_idx, file_idx))
+            .perform_simulation(self.output_file(run_idx, file_idx))
             .context("failed to perform simulation")?;
         let duration = start.elapsed();
         log::info!("finished simulation in {duration:?}");
@@ -73,19 +75,19 @@ impl Manager {
         Ok(())
     }
 
-    /// Analyze all trajectory files from all simulation runs and save analysis results.
+    /// Analyze all output files from all simulation runs and save analysis results.
     pub fn analyze_sim(&self) -> Result<()> {
         let n_runs = self.count_run_dirs().context("failed to count run dirs")?;
         for run_idx in 0..n_runs {
             let mut analyzer = Analyzer::new(self.cfg.clone());
 
             let n_files = self
-                .count_trajectory_files(run_idx)
-                .context("failed to count trajectory files")?;
+                .count_output_files(run_idx)
+                .context("failed to count output files")?;
             for file_idx in 0..n_files {
                 analyzer
-                    .add_file(self.trajectory_file(run_idx, file_idx))
-                    .context("failed to add file")?;
+                    .add_output_file(self.output_file(run_idx, file_idx))
+                    .context("failed to add output file")?;
             }
 
             analyzer
@@ -126,11 +128,11 @@ impl Manager {
         self.sim_dir.join(format!("run-{run_idx:04}"))
     }
 
-    fn count_trajectory_files(&self, run_idx: usize) -> Result<usize> {
-        let pattern = self.run_dir(run_idx).join("trajectory-*");
+    fn count_output_files(&self, run_idx: usize) -> Result<usize> {
+        let pattern = self.run_dir(run_idx).join("output-*");
         let pattern = pattern.to_str().context("pattern is not valid UTF-8")?;
         let count = glob::glob(pattern)
-            .context("failed to glob trajectory files")?
+            .context("failed to glob output files")?
             .filter_map(Result::ok)
             .count();
         Ok(count)
@@ -140,9 +142,9 @@ impl Manager {
         self.run_dir(run_idx).join("checkpoint.msgpack")
     }
 
-    fn trajectory_file(&self, run_idx: usize, file_idx: usize) -> PathBuf {
+    fn output_file(&self, run_idx: usize, file_idx: usize) -> PathBuf {
         self.run_dir(run_idx)
-            .join(format!("trajectory-{file_idx:04}.msgpack"))
+            .join(format!("output-{file_idx:04}.msgpack"))
     }
 
     fn results_file(&self, run_idx: usize) -> PathBuf {

@@ -4,8 +4,8 @@ mod analysis;
 mod config;
 mod engine;
 mod manager;
-mod model;
 mod stats;
+mod types;
 
 use crate::manager::Manager;
 use anyhow::{Context, Result};

@@ -2,7 +2,7 @@ import toml
 from pathlib import Path
 import hashlib
 import json
-from typing import TypedDict, List, cast
+from typing import TypedDict, List, NotRequired, cast
 
 
 class ModelParams(TypedDict):
@@ -21,8 +21,8 @@ class InitParams(TypedDict):
 
 
 class OutputParams(TypedDict):
-    steps_per_save: int
-    saves_per_file: int
+    steps_per_file: int
+    steps_per_save: NotRequired[int]
 
 
 class Config(TypedDict):
@@ -48,7 +48,7 @@ def load_config(sim_dir: Path) -> Config:
 
 def hash_sim_dir(sim_base_dir: Path, config: Config) -> Path:
     config_str = json.dumps(config, sort_keys=True)
-    config_hash = hashlib.md5(config_str.encode()).hexdigest()[:16]
+    config_hash = hashlib.sha256(config_str.encode()).hexdigest()
 
     sim_dir = sim_base_dir / config_hash
 

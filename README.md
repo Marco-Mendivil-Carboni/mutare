@@ -13,12 +13,14 @@
 - At every simulation step, agents may **replicate** or **decease** according to environment and phenotype specific probabilities (`prob_rep` and `prob_dec`).
 - The offspring's phenotype is sampled from the parent's distribution.
 - The offspring inherits the parent's distribution, but with probability `prob_mut` this distribution suffers a slight mutation (modulated by `std_dev_mut`).
-- The simulation state is saved every `steps_per_save` steps, and `saves_per_file` states are stored in each trajectory file.
+- At every simulation step, the population is capped at its initial size and reinitialized if extinction is reached.
+- Each output file contains `steps_per_file` records, and the state is saved every `steps_per_save` steps if specified.
 
-From these trajectories `mutare` can compute metrics such as:
-- The probability of finding the system in each environment.
+From these output files `mutare` can also compute the following observables:
+- The relative change in the number of agents per step.
+- The probability of extinction.
+- The probability of each environment.
 - The average probability distribution over phenotypes across agents.
-- The net change in the number of agents per step.
 
 ---
 
@@ -61,12 +63,12 @@ prob_mut = 0.001
 std_dev_mut = 0.1
 
 [init]
-n_agt = 1024
+n_agt = 4096
 prob_phe = [ 0.5, 0.5,]
 
 [output]
-steps_per_save = 256
-saves_per_file = 64
+steps_per_file = 16384
+steps_per_save = 1024
 
 ```
 

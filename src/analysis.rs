@@ -1,7 +1,7 @@
 //! Simulation analyzer and observables.
 
 use crate::config::Config;
-use crate::model::State;
+use crate::types::Record;
 use crate::stats::{SummaryStats, TimeSeries};
 use anyhow::{Context, Result, bail};
 use rmp_serde::{decode, encode};
@@ -12,13 +12,13 @@ use std::{
     path::Path,
 };
 
-/// Trait for observables (metrics) computed from the simulation state.
+/// Trait for observables (metrics) computed from the simulation record.
 trait Observable {
     /// Return the name of the observable.
     fn name(&self) -> &'static str;
 
-    /// Update the observable with the current simulation state.
-    fn update(&mut self, state: &State);
+    /// Update the observable with the current simulation record.
+    fn update(&mut self, record: &Record);
 
     /// Return the observable statistics.
     fn stats(&self) -> Vec<SummaryStats>;
@@ -27,18 +27,18 @@ trait Observable {
 /// Generic observable that holds a vector of time series.
 ///
 /// Each observable carries a custom `update_fn`, which defines
-/// how its time series should be updated from the simulation state.
+/// how its time series should be updated from the simulation record.
 struct TimeSeriesObservable {
     name: &'static str,
     time_series_vec: Vec<TimeSeries>,
-    update_fn: Box<dyn Fn(&mut [TimeSeries], &State)>,
+    update_fn: Box<dyn Fn(&mut [TimeSeries], &Record)>,
 }
 
 impl TimeSeriesObservable {
     /// Create a new `TimeSeriesObservable`.
     fn new<F>(name: &'static str, n_ts: usize, update_fn: F) -> Self
     where
-        F: Fn(&mut [TimeSeries], &State) + 'static,
+        F: Fn(&mut [TimeSeries], &Record) + 'static,
     {
         Self {
             name,
@@ -53,8 +53,8 @@ impl Observable for TimeSeriesObservable {
         self.name
     }
 
-    fn update(&mut self, state: &State) {
-        (self.update_fn)(&mut self.time_series_vec, state);
+    fn update(&mut self, record: &Record) {
+        (self.update_fn)(&mut self.time_series_vec, record);
     }
 
     fn stats(&self) -> Vec<SummaryStats> {
@@ -66,7 +66,9 @@ impl Observable for TimeSeriesObservable {
 ///
 /// Computes and manages a set of observables (metrics).
 pub struct Analyzer {
+    /// Simulation configuration parameters.
     cfg: Config,
+    /// Vector of observables.
     obs_vec: Vec<Box<dyn Observable>>,
 }
 
@@ -75,14 +77,33 @@ impl Analyzer {
     pub fn new(cfg: Config) -> Self {
         let mut obs_vec: Vec<Box<dyn Observable>> = Vec::new();
 
-        // Probability of each environment over time
+        // Relative change in the number of agents per step
+        obs_vec.push(Box::new(TimeSeriesObservable::new(
+            "growth_rate",
+            1,
+            |time_series_vec, record| {
+                time_series_vec[0].push(record.growth_rate);
+            },
+        )));
+
+        // Probability of extinction
+        obs_vec.push(Box::new(TimeSeriesObservable::new(
+            "prob_extinct",
+            1,
+            |time_series_vec, record| {
+                time_series_vec[0].push(if record.extinction { 1.0 } else { 0.0 });
+            },
+        )));
+
+        // Probability of each environment
         obs_vec.push(Box::new(TimeSeriesObservable::new(
             "prob_env",
             cfg.model.n_env,
-            |time_series_vec, state| {
-                // Add 1.0 for the current environment, 0.0 for others.
-                for (i_env, time_series) in time_series_vec.iter_mut().enumerate() {
-                    time_series.push(if i_env == state.env { 1.0 } else { 0.0 });
+            |time_series_vec, record| {
+                if let Some(state) = &record.state {
+                    for (i_env, time_series) in time_series_vec.iter_mut().enumerate() {
+                        time_series.push(if i_env == state.env { 1.0 } else { 0.0 });
+                    }
                 }
             },
         )));
@@ -91,48 +112,40 @@ impl Analyzer {
         obs_vec.push(Box::new(TimeSeriesObservable::new(
             "avg_prob_phe",
             cfg.model.n_phe,
-            |time_series_vec, state| {
-                // Compute average probability for each phenotype across all agents.
-                let mut avg_prob_phe = vec![0.0; time_series_vec.len()];
-                for agt in &state.agt_vec {
-                    for (sum, &ele) in avg_prob_phe.iter_mut().zip(agt.prob_phe()) {
-                        *sum += ele;
+            |time_series_vec, record| {
+                if let Some(state) = &record.state {
+                    // Compute average probability for each phenotype across all agents.
+                    let mut avg_prob_phe = vec![0.0; time_series_vec.len()];
+                    for agt in &state.agt_vec {
+                        for (sum, &ele) in avg_prob_phe.iter_mut().zip(agt.prob_phe()) {
+                            *sum += ele;
+                        }
                     }
+                    avg_prob_phe
+                        .iter_mut()
+                        .for_each(|ele| *ele /= state.agt_vec.len() as f64);
+
+                    // Update time series with the averaged probabilities.
+                    time_series_vec
+                        .iter_mut()
+                        .zip(avg_prob_phe.iter())
+                        .for_each(|(ts, &val)| ts.push(val));
                 }
-                avg_prob_phe
-                    .iter_mut()
-                    .for_each(|ele| *ele /= state.agt_vec.len() as f64);
-
-                // Update time series with the averaged probabilities.
-                time_series_vec
-                    .iter_mut()
-                    .zip(avg_prob_phe.iter())
-                    .for_each(|(ts, &val)| ts.push(val));
-            },
-        )));
-
-        // Relative change in the number of agents per step
-        obs_vec.push(Box::new(TimeSeriesObservable::new(
-            "discrete_growth_rate",
-            1,
-            |time_series_vec, state| {
-                // Record the relative change in the number of agents for this step.
-                time_series_vec[0].push(state.discrete_growth_rate);
             },
         )));
 
         Self { cfg, obs_vec }
     }
 
-    /// Load simulation states from a file and update all observables.
-    pub fn add_file<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
+    /// Read simulation output file and update all observables.
+    pub fn add_output_file<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
         let file = file.as_ref();
         let file = File::open(file).with_context(|| format!("failed to open {file:?}"))?;
         let mut reader = BufReader::new(file);
 
-        // Process each saved state in the file.
-        for _ in 0..self.cfg.output.saves_per_file {
-            let state = decode::from_read(&mut reader).context("failed to deserialize state")?;
+        // Process each record in the file.
+        for _ in 0..self.cfg.output.steps_per_file {
+            let state = decode::from_read(&mut reader).context("failed to deserialize record")?;
             for obs in &mut self.obs_vec {
                 obs.update(&state);
             }

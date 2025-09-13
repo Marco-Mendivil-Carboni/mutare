@@ -1,8 +1,8 @@
-//! Simulation model data types.
+//! Simulation data types.
 
 use serde::{Deserialize, Serialize};
 
-/// Represents an agent in the simulation.
+/// Agent of the simulation.
 ///
 /// Each agent has a phenotype (`phe`) and a probability distribution over phenotypes (`prob_phe`).
 #[derive(Clone, Serialize, Deserialize)]
@@ -22,24 +22,38 @@ impl Agent {
         self.phe
     }
 
-    /// Get the probability distribution associated with the agent.
+    /// Get the current probability distribution over phenotypes of the agent.
     pub fn prob_phe(&self) -> &Vec<f64> {
         &self.prob_phe
     }
 }
 
-/// Represents the state of the simulation at a given step.
+/// State of the simulation at a given step.
 ///
-/// Contains the current environment and all agents in the simulation,
-/// as well as the relative change in the number of agents per step.
-#[derive(Serialize, Deserialize)]
+/// Contains the current environment and all agents in the simulation.
+#[derive(Clone, Serialize, Deserialize)]
 pub struct State {
     /// Current environment index.
     pub env: usize,
 
     /// Vector of agents currently in the simulation.
     pub agt_vec: Vec<Agent>,
+}
 
-    /// Relative change in the number of agents per step.
-    pub discrete_growth_rate: f64,
+/// Record of the simulation at a single step.
+///
+/// Contains the current step, growth rate, extinction flag and state (optional).
+#[derive(Serialize, Deserialize)]
+pub struct Record {
+    /// Current simulation step.
+    pub step: usize,
+
+    /// Relative change in the number of agents at this step.
+    pub growth_rate: f64,
+
+    /// Population reached extinction at this step.
+    pub extinction: bool,
+
+    /// Current simulation state.
+    pub state: Option<State>,
 }
