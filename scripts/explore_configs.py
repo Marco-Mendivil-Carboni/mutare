@@ -15,12 +15,12 @@ if __name__ == "__main__":
 
     build_bin()
 
-    sim_base_dir = Path("simulations/")
+    sim_base_dir = Path("simulations/explore_configs/")
 
     common_run_options: RunOptions = {
         "clean": False,
         "n_runs": 1,
-        "n_files": 16,
+        "n_files": 64,
         "analyze": True,
     }
 
@@ -31,16 +31,16 @@ if __name__ == "__main__":
             "prob_trans_env": [[0.99, 0.01], [0.01, 0.99]],
             "prob_rep": [[0.012, 0.0], [0.0, 0.008]],
             "prob_dec": [[0.0, 0.016], [0.012, 0.0]],
-            "prob_mut": 1 / 4096,
+            "prob_mut": 1 / 1024,
             "std_dev_mut": 1 / 16,
         },
         "init": {
-            "n_agt": 4096,
+            "n_agt": 16384,
             "prob_phe": [0.5, 0.5],
         },
         "output": {
             "steps_per_file": 262144,
-            "steps_per_save": 1024,
+            "steps_per_save": 4096,
         },
     }
 
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     config["model"]["prob_mut"] = 0.0
     config["output"].pop("steps_per_save")
     prob_phe_0_list = list(map(float, np.linspace(1 / 16, 15 / 16, 15)))
-    for sim_idx, prob_phe_0 in enumerate(prob_phe_0_list):
+    for prob_phe_0 in prob_phe_0_list:
         config["init"]["prob_phe"] = [prob_phe_0, 1 - prob_phe_0]
         sim_jobs.append(
             {

@@ -38,8 +38,7 @@ def execute_sim_job(sim_job: SimJob) -> JobResult:
         return JobResult.STOPPED
 
     except Exception as exception:
-        print_process_msg(f"{sim_dir} job failed")
-        print_process_msg(f"exception: {exception}")
+        print_process_msg(f"{sim_dir} job failed:\n{exception}")
         return JobResult.FAILED
 
 
