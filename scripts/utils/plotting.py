@@ -8,11 +8,11 @@ from .results import GrowthRate
 mpl.use("pdf")
 
 mpl.rcParams["text.usetex"] = True
-
-mpl.rcParams["font.family"] = "serif"
+mpl.rcParams["text.latex.preamble"] = "\\usepackage{lmodern}"
+mpl.rcParams["font.family"] = "lmodern"
+mpl.rcParams["font.size"] = 11
 
 cm = 1 / 2.54
-mpl.rcParams["figure.figsize"] = [16.0 * cm, 10.0 * cm]
 
 mpl.rcParams["figure.constrained_layout.use"] = True
 
@@ -22,7 +22,7 @@ def make_growth_rate_plot(
     rates_fixed: List[GrowthRate],
     output_file: Path,
 ) -> None:
-    fig, ax = plt.subplots()
+    fig, ax = plt.subplots(figsize=(16.0 * cm, 10.0 * cm))
 
     ax.set_xlabel("$\\langle\\mu\\rangle$")
     ax.set_ylabel("$\\sigma_{\\mu}$")
