@@ -138,10 +138,10 @@ fn check_vec(vec: &[f64], exp_len: usize, prob_vec: bool) -> Result<()> {
     Ok(())
 }
 
-fn check_mat(mat: &[Vec<f64>], exp_dim: (usize, usize), trans_mat: bool) -> Result<()> {
-    // Ensure matrix has expected dimensions.
-    let exp_n_rows = exp_dim.0;
-    let exp_n_cols = exp_dim.1;
+fn check_mat(mat: &[Vec<f64>], exp_shape: (usize, usize), trans_mat: bool) -> Result<()> {
+    // Ensure matrix has expected shape.
+    let exp_n_rows = exp_shape.0;
+    let exp_n_cols = exp_shape.1;
     let n_rows = mat.len();
     if n_rows != exp_n_rows {
         bail!("matrix must have {exp_n_rows} rows, but has {n_rows}");

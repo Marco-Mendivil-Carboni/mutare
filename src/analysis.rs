@@ -1,8 +1,8 @@
 //! Simulation analyzer and observables.
 
 use crate::config::Config;
-use crate::types::Record;
 use crate::stats::{SummaryStats, TimeSeries};
+use crate::types::Record;
 use anyhow::{Context, Result, bail};
 use rmp_serde::{decode, encode};
 use std::{
@@ -12,37 +12,40 @@ use std::{
     path::Path,
 };
 
-/// Trait for observables (metrics) computed from the simulation record.
+/// Trait for generic observables computed from simulation records.
 trait Observable {
     /// Return the name of the observable.
     fn name(&self) -> &'static str;
 
-    /// Update the observable with the current simulation record.
+    /// Update the observable from the given simulation record.
     fn update(&mut self, record: &Record);
 
-    /// Return the observable statistics.
+    /// Return vector of summary statistics for the observable.
     fn stats(&self) -> Vec<SummaryStats>;
 }
 
-/// Generic observable that holds a vector of time series.
+/// Generic observable that uses time series.
 ///
 /// Each observable carries a custom `update_fn`, which defines
-/// how its time series should be updated from the simulation record.
+/// how its time series should be updated from simulation records.
 struct TimeSeriesObservable {
+    /// Name of the observable.
     name: &'static str,
+    /// Vector of time series.
     time_series_vec: Vec<TimeSeries>,
+    /// Function used to update the time series from simulation records.
     update_fn: Box<dyn Fn(&mut [TimeSeries], &Record)>,
 }
 
 impl TimeSeriesObservable {
     /// Create a new `TimeSeriesObservable`.
-    fn new<F>(name: &'static str, n_ts: usize, update_fn: F) -> Self
+    fn new<F>(name: &'static str, len: usize, update_fn: F) -> Self
     where
         F: Fn(&mut [TimeSeries], &Record) + 'static,
     {
         Self {
             name,
-            time_series_vec: vec![TimeSeries::default(); n_ts],
+            time_series_vec: vec![TimeSeries::default(); len],
             update_fn: Box::new(update_fn),
         }
     }
@@ -64,7 +67,7 @@ impl Observable for TimeSeriesObservable {
 
 /// Simulation analyzer.
 ///
-/// Computes and manages a set of observables (metrics).
+/// Computes and manages a set of observables.
 pub struct Analyzer {
     /// Simulation configuration parameters.
     cfg: Config,
@@ -160,7 +163,7 @@ impl Analyzer {
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
         let mut writer = BufWriter::new(file);
 
-        // Collect the name and statistics of all observables into a HashMap.
+        // Collect the name and summary statistics of all observables into a HashMap.
         let mut results = HashMap::new();
         for obs in &self.obs_vec {
             if results.insert(obs.name(), obs.stats()).is_some() {

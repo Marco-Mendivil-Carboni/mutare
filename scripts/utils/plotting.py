@@ -23,6 +23,7 @@ def make_growth_rate_plot(
     output_file: Path,
 ) -> None:
     fig, ax = plt.subplots()
+
     ax.set_xlabel("$\\langle\\mu\\rangle$")
     ax.set_ylabel("$\\sigma_{\\mu}$")
 
@@ -49,4 +50,5 @@ def make_growth_rate_plot(
     ax.legend()
 
     fig.savefig(output_file)
+
     plt.close(fig)
