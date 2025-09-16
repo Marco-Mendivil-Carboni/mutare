@@ -2,13 +2,15 @@ import multiprocessing as mp
 from pathlib import Path
 import fcntl
 import sys
+from dataclasses import dataclass
 from enum import Enum, auto
-from typing import TypedDict, List
+from typing import List
 
 from .runner import run_sim, RunOptions, StopRequested, print_process_msg
 
 
-class SimJob(TypedDict):
+@dataclass
+class SimJob:
     sim_dir: Path
     run_options: RunOptions
 
@@ -20,25 +22,23 @@ class JobResult(Enum):
 
 
 def execute_sim_job(sim_job: SimJob) -> JobResult:
-    sim_dir = sim_job["sim_dir"]
-
     try:
-        print_process_msg(f"{sim_dir} job started")
+        print_process_msg(f"job started: {sim_job.sim_dir}")
 
-        with open(sim_dir / ".lock", "w") as lock_file:
+        with open(sim_job.sim_dir / ".lock", "w") as lock_file:
             fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
-            run_sim(sim_dir, sim_job["run_options"])
+            run_sim(sim_job.sim_dir, sim_job.run_options)
 
-        print_process_msg(f"{sim_dir} job finished")
+        print_process_msg("job finished")
         return JobResult.FINISHED
 
     except StopRequested:
-        print_process_msg(f"{sim_dir} job stopped")
+        print_process_msg("job stopped")
         return JobResult.STOPPED
 
     except Exception as exception:
-        print_process_msg(f"{sim_dir} job failed:\n{exception}")
+        print_process_msg(f"job failed:\n{exception}")
         return JobResult.FAILED
 
 

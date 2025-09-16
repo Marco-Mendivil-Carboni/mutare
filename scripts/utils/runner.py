@@ -4,7 +4,8 @@ import os
 from datetime import datetime
 from signal import signal, SIGTERM
 import json
-from typing import TypedDict, List, Optional
+from dataclasses import dataclass
+from typing import List, Optional
 from types import FrameType
 
 from .results import read_results
@@ -45,7 +46,8 @@ def run_bin(sim_dir: Path, extra_args: List[str]) -> None:
         subprocess.run(args, stdout=output_file, stderr=subprocess.STDOUT, check=True)
 
 
-class RunOptions(TypedDict):
+@dataclass
+class RunOptions:
     clean: bool
     n_runs: int
     n_files: int
@@ -53,29 +55,29 @@ class RunOptions(TypedDict):
 
 
 def run_sim(sim_dir: Path, run_options: RunOptions) -> None:
-    if run_options["clean"]:
-        print_process_msg(f"cleaning {sim_dir}")
+    if run_options.clean:
+        print_process_msg("cleaning all runs")
         run_bin(sim_dir, ["clean"])
 
     n_runs = len(list(sim_dir.glob("run-*")))
-    while n_runs < run_options["n_runs"]:
-        print_process_msg(f"creating {sim_dir} run {n_runs}")
+    while n_runs < run_options.n_runs:
+        print_process_msg(f"creating run {n_runs}")
         run_bin(sim_dir, ["create"])
         n_runs += 1
 
-    for run_idx in range(run_options["n_runs"]):
+    for run_idx in range(run_options.n_runs):
         run_dir = sim_dir / f"run-{run_idx:04}"
 
         n_files = len(list(run_dir.glob("output-*")))
-        while n_files < run_options["n_files"]:
-            print_process_msg(f"resuming {sim_dir} run {run_idx} file {n_files}")
+        while n_files < run_options.n_files:
+            print_process_msg(f"resuming run {run_idx} file {n_files}")
             run_bin(sim_dir, ["resume", "--run-idx", str(run_idx)])
             n_files += 1
 
-    if run_options["analyze"]:
-        print_process_msg(f"analyzing {sim_dir}")
+    if run_options.analyze:
+        print_process_msg("analyzing all runs")
         run_bin(sim_dir, ["analyze"])
 
         for run_idx in range(n_runs):
             results = json.dumps(read_results(sim_dir, run_idx), indent=4)
-            print_process_msg(f"{sim_dir} run {run_idx} results:\n{results}")
+            print_process_msg(f"run {run_idx} results:\n{results}")

@@ -17,12 +17,7 @@ if __name__ == "__main__":
 
     sim_base_dir = Path("simulations/explore_configs/")
 
-    common_run_options: RunOptions = {
-        "clean": False,
-        "n_runs": 1,
-        "n_files": 64,
-        "analyze": True,
-    }
+    common_run_options = RunOptions(clean=False, n_runs=1, n_files=64, analyze=True)
 
     config: Config = {
         "model": {
@@ -44,10 +39,9 @@ if __name__ == "__main__":
         },
     }
 
-    sim_job: SimJob = {
-        "sim_dir": hash_sim_dir(sim_base_dir, config),
-        "run_options": common_run_options,
-    }
+    sim_job = SimJob(
+        sim_dir=hash_sim_dir(sim_base_dir, config), run_options=common_run_options
+    )
 
     sim_jobs = [sim_job]
 
@@ -57,15 +51,15 @@ if __name__ == "__main__":
     for prob_phe_0 in prob_phe_0_list:
         config["init"]["prob_phe"] = [prob_phe_0, 1 - prob_phe_0]
         sim_jobs.append(
-            {
-                "sim_dir": hash_sim_dir(sim_base_dir, config),
-                "run_options": common_run_options,
-            }
+            SimJob(
+                sim_dir=hash_sim_dir(sim_base_dir, config),
+                run_options=common_run_options,
+            )
         )
 
     execute_sim_jobs(sim_jobs)
 
-    growth_rates = [compute_growth_rate(sim_job["sim_dir"], 0) for sim_job in sim_jobs]
+    growth_rates = [compute_growth_rate(sim_job.sim_dir, 0) for sim_job in sim_jobs]
 
     make_growth_rate_plot(
         growth_rates[0], growth_rates[1:], sim_base_dir / "growth_rate.pdf"

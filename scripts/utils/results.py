@@ -25,7 +25,7 @@ def read_results(sim_dir: Path, run_idx: int) -> Results:
     return cast(Results, results)
 
 
-class GrowthRate(TypedDict):
+class GrowthRate(TypedDict):  # stop using a TypedDict for this
     avg: float
     avg_err: float
     sig: float
