@@ -5,8 +5,7 @@ import numpy as np
 
 from utils.config import Config, NormModelParams
 from utils.runner import RunOptions, SimJob, execute_sim_jobs
-from utils.plotting import make_std_dev_plot
-
+from utils.plotting import make_std_dev_plot, make_rate_extinct_plot
 
 if __name__ == "__main__":
     base_dir = Path("simulations/explore_configs_2/")
@@ -34,7 +33,7 @@ if __name__ == "__main__":
         },
     }
 
-    run_options = RunOptions(clean=False, n_runs=1, n_files=16, analyze=True)
+    run_options = RunOptions(clean=False, n_runs=1, n_files=16, analyze=False)
 
     sim_jobs = [SimJob.from_config(base_dir, config, run_options)]
 
@@ -48,3 +47,4 @@ if __name__ == "__main__":
     execute_sim_jobs(sim_jobs)
 
     make_std_dev_plot(base_dir, time_step)
+    make_rate_extinct_plot(base_dir, time_step)

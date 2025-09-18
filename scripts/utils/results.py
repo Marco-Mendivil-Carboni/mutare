@@ -29,23 +29,28 @@ class NormResults:
 
     @classmethod
     def from_results(cls, results: Results, time_step: float):
+        def stats_to_df(list: List[SummaryStats]) -> pd.DataFrame:
+            return pd.DataFrame(
+                list, index=pd.Index(range(len(list)), name="stats_idx")
+            )
+
         def normalize_num_cols(
-            df: pd.DataFrame, func: Callable[[pd.DataFrame], pd.DataFrame]
+            df: pd.DataFrame, norm_func: Callable[[pd.DataFrame], pd.DataFrame]
         ) -> pd.DataFrame:
             num_cols = df.select_dtypes(include="number").columns
-            df[num_cols] = func(df[num_cols])
+            df[num_cols] = norm_func(df[num_cols])
             return df
 
         return cls(
             norm_growth_rate=normalize_num_cols(
-                pd.DataFrame(results["growth_rate"]), lambda x: x / time_step
+                stats_to_df(results["growth_rate"]), lambda x: x / time_step
             ),
             rate_extinct=normalize_num_cols(
-                pd.DataFrame(results["prob_extinct"]),
+                stats_to_df(results["prob_extinct"]),
                 lambda x: -cast(pd.DataFrame, np.log(1.0 - x)) / time_step,
             ),
-            prob_env=pd.DataFrame(results["prob_env"]),
-            avg_prob_phe=pd.DataFrame(results["avg_prob_phe"]),
+            prob_env=stats_to_df(results["prob_env"]),
+            avg_prob_phe=stats_to_df(results["avg_prob_phe"]),
         )
 
 

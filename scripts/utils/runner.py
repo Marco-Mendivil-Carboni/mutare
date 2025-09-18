@@ -33,11 +33,13 @@ def request_stop(signum: int, _: Optional[FrameType]) -> None:
 
 
 def set_signal_handler():
+    print_process_msg("setting signal handler")
     signal(SIGTERM, request_stop)
 
 
 def build_bin():
-    subprocess.run(["cargo", "build", "--release"], check=True)
+    print_process_msg("building binary")
+    subprocess.run(["cargo", "build", "--release"], check=True, capture_output=True)
 
 
 def run_bin(sim_dir: Path, extra_args: List[str]) -> None:
@@ -100,7 +102,7 @@ class JobResult(Enum):
 
 def execute_sim_job(sim_job: SimJob) -> JobResult:
     try:
-        print_process_msg(f"job started: {sim_job.sim_dir}")
+        print_process_msg(f"starting job: {sim_job.sim_dir}")
 
         with open(sim_job.sim_dir / ".lock", "w") as lock_file:
             fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -124,10 +126,12 @@ def execute_sim_jobs(sim_jobs: List[SimJob]) -> None:
 
     build_bin()
 
+    print_process_msg("starting multiprocessing pool")
+
     with mp.Pool(processes=max(1, mp.cpu_count() // 2)) as pool:
         job_results = pool.map(execute_sim_job, sim_jobs)
 
-    print("simulation jobs have terminated")
+    print_process_msg("multiprocessing pool ended")
 
     if job_results.count(JobResult.FAILED) > 0:
         sys.exit(1)
