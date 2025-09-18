@@ -6,13 +6,25 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import List
 
-from .runner import run_sim, RunOptions, StopRequested, print_process_msg
+from .config import Config, hash_sim_dir
+from .runner import (
+    print_process_msg,
+    StopRequested,
+    set_signal_handler,
+    build_bin,
+    RunOptions,
+    run_sim,
+)
 
 
 @dataclass
 class SimJob:
     sim_dir: Path
     run_options: RunOptions
+
+    @classmethod
+    def from_config(cls, base_dir: Path, config: Config, run_options: RunOptions):
+        return cls(sim_dir=hash_sim_dir(base_dir, config), run_options=run_options)
 
 
 class JobResult(Enum):
@@ -43,6 +55,10 @@ def execute_sim_job(sim_job: SimJob) -> JobResult:
 
 
 def execute_sim_jobs(sim_jobs: List[SimJob]) -> None:
+    set_signal_handler()
+
+    build_bin()
+
     with mp.Pool(processes=max(1, mp.cpu_count() // 2)) as pool:
         job_results = pool.map(execute_sim_job, sim_jobs)
 

@@ -1,7 +1,10 @@
 import toml
 from pathlib import Path
+import numpy as np
+from scipy.linalg import expm
 import hashlib
 import json
+from dataclasses import dataclass
 from typing import TypedDict, List, NotRequired, cast
 
 
@@ -31,6 +34,36 @@ class Config(TypedDict):
     output: OutputParams
 
 
+@dataclass
+class NormModelParams:
+    n_env: int
+    n_phe: int
+    rate_trans_env: List[List[float]]
+    rate_rep: List[List[float]]
+    rate_dec: List[List[float]]
+    rate_mut: float
+    std_dev_mut: float
+    time_step: float
+
+    def to_model_params(self) -> ModelParams:
+        return {
+            "n_env": self.n_env,
+            "n_phe": self.n_phe,
+            "prob_trans_env": cast(
+                List[List[float]],
+                expm(np.array(self.rate_trans_env) * self.time_step).tolist(),
+            ),
+            "prob_rep": (
+                1.0 - np.exp(-np.array(self.rate_rep) * self.time_step)
+            ).tolist(),
+            "prob_dec": (
+                1.0 - np.exp(-np.array(self.rate_dec) * self.time_step)
+            ).tolist(),
+            "prob_mut": float(1.0 - np.exp(-self.rate_mut * self.time_step)),
+            "std_dev_mut": self.std_dev_mut,
+        }
+
+
 def config_file_path(sim_dir: Path) -> Path:
     return sim_dir / "config.toml"
 
@@ -46,11 +79,11 @@ def load_config(sim_dir: Path) -> Config:
     return cast(Config, config)
 
 
-def hash_sim_dir(sim_base_dir: Path, config: Config) -> Path:
+def hash_sim_dir(base_dir: Path, config: Config) -> Path:
     config_str = json.dumps(config, sort_keys=True)
     config_hash = hashlib.sha256(config_str.encode()).hexdigest()
 
-    sim_dir = sim_base_dir / config_hash
+    sim_dir = base_dir / config_hash
 
     config_file = config_file_path(sim_dir)
     if config_file.exists():

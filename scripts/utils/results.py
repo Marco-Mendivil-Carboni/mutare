@@ -1,7 +1,9 @@
 import msgpack
 from pathlib import Path
 import numpy as np
-from typing import TypedDict, List, cast
+import pandas as pd
+from dataclasses import dataclass
+from typing import TypedDict, List, Callable, cast
 
 
 class SummaryStats(TypedDict):
@@ -18,29 +20,37 @@ class Results(TypedDict):
     avg_prob_phe: List[SummaryStats]
 
 
+@dataclass
+class NormResults:
+    norm_growth_rate: pd.DataFrame
+    rate_extinct: pd.DataFrame
+    prob_env: pd.DataFrame
+    avg_prob_phe: pd.DataFrame
+
+    @classmethod
+    def from_results(cls, results: Results, time_step: float):
+        def normalize_num_cols(
+            df: pd.DataFrame, func: Callable[[pd.DataFrame], pd.DataFrame]
+        ) -> pd.DataFrame:
+            num_cols = df.select_dtypes(include="number").columns
+            df[num_cols] = func(df[num_cols])
+            return df
+
+        return cls(
+            norm_growth_rate=normalize_num_cols(
+                pd.DataFrame(results["growth_rate"]), lambda x: x / time_step
+            ),
+            rate_extinct=normalize_num_cols(
+                pd.DataFrame(results["prob_extinct"]),
+                lambda x: -cast(pd.DataFrame, np.log(1.0 - x)) / time_step,
+            ),
+            prob_env=pd.DataFrame(results["prob_env"]),
+            avg_prob_phe=pd.DataFrame(results["avg_prob_phe"]),
+        )
+
+
 def read_results(sim_dir: Path, run_idx: int) -> Results:
     file_path = sim_dir / f"run-{run_idx:04}/results.msgpack"
     with file_path.open("rb") as file:
         results = msgpack.unpack(file)
     return cast(Results, results)
-
-
-class GrowthRate(TypedDict):  # stop using a TypedDict for this
-    avg: float
-    avg_err: float
-    sig: float
-    sig_err: float
-
-
-def compute_growth_rate(sim_dir: Path, run_idx: int) -> GrowthRate:
-    results = read_results(sim_dir, run_idx)
-    mean = results["growth_rate"][0]["mean"]
-    std_dev = results["growth_rate"][0]["std_dev"]
-    sem = results["growth_rate"][0]["sem"]
-    n_eff = (std_dev / sem) ** 2
-    return {
-        "avg": mean,
-        "avg_err": sem,
-        "sig": std_dev,
-        "sig_err": std_dev / np.sqrt(2 * (n_eff - 1)),
-    }
