@@ -1,8 +1,9 @@
 from pathlib import Path
 import pandas as pd
 import matplotlib as mpl
-from matplotlib import pyplot as plt
-from typing import Optional, Tuple
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+from typing import Tuple, Optional
 
 from .config import load_config
 from .results import NormResults, read_results
@@ -17,6 +18,21 @@ mpl.rcParams["font.size"] = 11
 cm = 1 / 2.54
 
 mpl.rcParams["figure.constrained_layout.use"] = True
+
+colors = [
+    "#df591f",
+    "#d81e2c",
+    "#d21e6f",
+    "#cc1dad",
+    "#a31cc5",
+    "#611bbf",
+    "#221ab9",
+    "#194bb2",
+    "#1880ac",
+    "#17a69b",
+    "#169f62",
+    "#15992c",
+]
 
 
 def collect_all_scalar_results(base_dir: Path, time_step: float) -> pd.DataFrame:
@@ -44,31 +60,17 @@ def collect_all_scalar_results(base_dir: Path, time_step: float) -> pd.DataFrame
 
 
 def plot_scalar_results(
-    base_dir: Path,
-    time_step: float,
-    xlabel: str,
-    ylabel: str,
-    yscale: Optional[str],
+    all_scalar_results: pd.DataFrame,
+    ax: Axes,
     x_col: Tuple[str, str],
     y_col: Tuple[str, str],
     xerr_col: Optional[Tuple[str, str]],
     yerr_col: Optional[Tuple[str, str]],
-    filename: str,
 ) -> None:
-    fig, ax = plt.subplots(figsize=(16.0 * cm, 10.0 * cm))
-
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-
-    if yscale:
-        ax.set_yscale(yscale)
-
-    all_scalar_results = collect_all_scalar_results(base_dir, time_step)
     with_mut = all_scalar_results["with_mut"]
-
     for scalar_results, color, label in [
-        (all_scalar_results[~with_mut], "b", "fixed"),
-        (all_scalar_results[with_mut], "r", "with mutations"),
+        (all_scalar_results[~with_mut], colors[1], "fixed"),
+        (all_scalar_results[with_mut], colors[7], "with mutations"),
     ]:
         ax.errorbar(
             scalar_results[x_col],
@@ -81,35 +83,37 @@ def plot_scalar_results(
         )
 
     ax.legend()
-    fig.savefig(base_dir / filename)
-    plt.close(fig)
 
 
-def make_std_dev_plot(base_dir: Path, time_step: float) -> None:
+def make_plots(base_dir: Path, time_step: float) -> None:
+    all_scalar_results = collect_all_scalar_results(base_dir, time_step)
+    print(all_scalar_results.to_string())
+
+    fig = Figure(figsize=(16.0 * cm, 10.0 * cm))
+    ax = fig.add_subplot(1, 1, 1)
+    ax.set_xlabel("$\\langle\\mu\\rangle$")
+    ax.set_ylabel("$\\sigma_{\\mu}$")
     plot_scalar_results(
-        base_dir,
-        time_step,
-        xlabel="$\\langle\\mu\\rangle$",
-        ylabel="$\\sigma_{\\mu}$",
-        yscale=None,
+        all_scalar_results,
+        ax,
         x_col=("norm_growth_rate", "mean"),
         y_col=("norm_growth_rate", "std_dev"),
         xerr_col=("norm_growth_rate", "sem"),
         yerr_col=None,
-        filename="std_dev.pdf",
     )
+    fig.savefig(base_dir / "std_dev.pdf")
 
-
-def make_rate_extinct_plot(base_dir: Path, time_step: float) -> None:
+    fig = Figure(figsize=(16.0 * cm, 10.0 * cm))
+    ax = fig.add_subplot(1, 1, 1)
+    ax.set_xlabel("$\\langle\\mu\\rangle$")
+    ax.set_ylabel("$r_e$")
+    ax.set_yscale("log")
     plot_scalar_results(
-        base_dir,
-        time_step,
-        xlabel="$\\langle\\mu\\rangle$",
-        ylabel="$r_e$",
+        all_scalar_results,
+        ax,
         x_col=("norm_growth_rate", "mean"),
         y_col=("rate_extinct", "mean"),
         xerr_col=("norm_growth_rate", "sem"),
         yerr_col=("rate_extinct", "sem"),
-        yscale="log",
-        filename="rate_extinct.pdf",
     )
+    fig.savefig(base_dir / "rate_extinct.pdf")

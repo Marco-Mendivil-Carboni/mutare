@@ -126,12 +126,12 @@ def execute_sim_jobs(sim_jobs: List[SimJob]) -> None:
 
     build_bin()
 
-    print_process_msg("starting multiprocessing pool")
+    print_process_msg("starting process pool")
 
     with mp.Pool(processes=max(1, mp.cpu_count() // 2)) as pool:
         job_results = pool.map(execute_sim_job, sim_jobs)
 
-    print_process_msg("multiprocessing pool ended")
+    print_process_msg("process pool finished")
 
     if job_results.count(JobResult.FAILED) > 0:
         sys.exit(1)

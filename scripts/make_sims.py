@@ -5,10 +5,10 @@ import numpy as np
 
 from utils.config import Config, NormModelParams
 from utils.runner import RunOptions, SimJob, execute_sim_jobs
-from utils.plotting import make_std_dev_plot, make_rate_extinct_plot
+from utils.plotting import make_plots
 
 if __name__ == "__main__":
-    base_dir = Path("simulations/explore_configs_2/")
+    base_dir = Path("simulations/std_sims/")
 
     time_step = 0.01
 
@@ -19,13 +19,13 @@ if __name__ == "__main__":
             rate_trans_env=[[-1.0, 1.0], [1.0, -1.0]],
             rate_rep=[[1.2, 0.0], [0.0, 0.8]],
             rate_dec=[[0.0, 1.6], [1.2, 0.0]],
-            rate_mut=0.1,
+            rate_mut=1 / 16,
             std_dev_mut=1 / 16,
             time_step=time_step,
         ).to_model_params(),
         "init": {
             "n_agt": 16384,
-            "prob_phe": [0.5, 0.5],
+            "prob_phe": [1.0, 0.0],
         },
         "output": {
             "steps_per_file": 262144,
@@ -33,7 +33,7 @@ if __name__ == "__main__":
         },
     }
 
-    run_options = RunOptions(clean=False, n_runs=1, n_files=16, analyze=False)
+    run_options = RunOptions(clean=False, n_runs=1, n_files=64, analyze=True)
 
     sim_jobs = [SimJob.from_config(base_dir, config, run_options)]
 
@@ -46,5 +46,4 @@ if __name__ == "__main__":
 
     execute_sim_jobs(sim_jobs)
 
-    make_std_dev_plot(base_dir, time_step)
-    make_rate_extinct_plot(base_dir, time_step)
+    make_plots(base_dir, time_step)
