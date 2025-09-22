@@ -13,11 +13,16 @@ class SummaryStats(TypedDict):
     is_eq: bool
 
 
+class ObservableResult(TypedDict):
+    shape: List[int]
+    stats_vec: List[SummaryStats]
+
+
 class Results(TypedDict):
-    growth_rate: List[SummaryStats]
-    prob_extinct: List[SummaryStats]
-    prob_env: List[SummaryStats]
-    avg_prob_phe: List[SummaryStats]
+    growth_rate: ObservableResult
+    prob_extinct: ObservableResult
+    prob_env: ObservableResult
+    avg_prob_phe: ObservableResult
 
 
 @dataclass
@@ -29,9 +34,10 @@ class NormResults:
 
     @classmethod
     def from_results(cls, results: Results, time_step: float):
-        def stats_to_df(list: List[SummaryStats]) -> pd.DataFrame:
+        def result_to_df(result: ObservableResult) -> pd.DataFrame:
             return pd.DataFrame(
-                list, index=pd.Index(range(len(list)), name="stats_idx")
+                result["stats_vec"],
+                index=pd.MultiIndex.from_tuples(np.ndindex(tuple(result["shape"]))),
             )
 
         def normalize_num_cols(
@@ -43,14 +49,14 @@ class NormResults:
 
         return cls(
             norm_growth_rate=normalize_num_cols(
-                stats_to_df(results["growth_rate"]), lambda x: x / time_step
+                result_to_df(results["growth_rate"]), lambda x: x / time_step
             ),
             rate_extinct=normalize_num_cols(
-                stats_to_df(results["prob_extinct"]),
+                result_to_df(results["prob_extinct"]),
                 lambda x: -cast(pd.DataFrame, np.log(1.0 - x)) / time_step,
             ),
-            prob_env=stats_to_df(results["prob_env"]),
-            avg_prob_phe=stats_to_df(results["avg_prob_phe"]),
+            prob_env=result_to_df(results["prob_env"]),
+            avg_prob_phe=result_to_df(results["avg_prob_phe"]),
         )
 
 

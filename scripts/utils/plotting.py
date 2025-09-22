@@ -41,16 +41,15 @@ def collect_all_scalar_results(base_dir: Path, time_step: float) -> pd.DataFrame
     for sim_dir in [entry for entry in base_dir.iterdir() if entry.is_dir()]:
         norm_results = NormResults.from_results(read_results(sim_dir, 0), time_step)
 
-        scalar_results = pd.concat(
-            [
-                df.rename(columns=lambda col: (name, col))
-                for name, df in {
-                    "norm_growth_rate": norm_results.norm_growth_rate,
-                    "rate_extinct": norm_results.rate_extinct,
-                }.items()
-            ],
-            axis=1,
-        )
+        scalar_results = []
+        for name, df in {
+            "norm_growth_rate": norm_results.norm_growth_rate,
+            "rate_extinct": norm_results.rate_extinct,
+        }.items():
+            df.columns = pd.MultiIndex.from_product([[name], df.columns])
+            scalar_results.append(df)
+
+        scalar_results = pd.concat(scalar_results, axis=1)
 
         scalar_results["with_mut"] = load_config(sim_dir)["model"]["prob_mut"] > 0.0
 
@@ -69,8 +68,8 @@ def plot_scalar_results(
 ) -> None:
     with_mut = all_scalar_results["with_mut"]
     for scalar_results, color, label in [
-        (all_scalar_results[~with_mut], colors[1], "fixed"),
-        (all_scalar_results[with_mut], colors[7], "with mutations"),
+        (all_scalar_results[~with_mut], colors[7], "fixed"),
+        (all_scalar_results[with_mut], colors[1], "with mutations"),
     ]:
         ax.errorbar(
             scalar_results[x_col],

@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import numpy as np
+from typing import List
 
 from utils.config import Config, NormModelParams
 from utils.runner import RunOptions, SimJob, execute_sim_jobs
@@ -10,7 +11,7 @@ from utils.plotting import make_plots
 if __name__ == "__main__":
     base_dir = Path("simulations/std_sims/")
 
-    time_step = 0.01
+    time_step = 1 / 64
 
     config: Config = {
         "model": NormModelParams(
@@ -25,7 +26,7 @@ if __name__ == "__main__":
         ).to_model_params(),
         "init": {
             "n_agt": 16384,
-            "prob_phe": [1.0, 0.0],
+            "prob_phe": [0.0, 0.0],
         },
         "output": {
             "steps_per_file": 262144,
@@ -35,11 +36,16 @@ if __name__ == "__main__":
 
     run_options = RunOptions(clean=False, n_runs=1, n_files=64, analyze=True)
 
-    sim_jobs = [SimJob.from_config(base_dir, config, run_options)]
+    sim_jobs: List[SimJob] = []
+
+    prob_phe_0_list = list(map(float, np.linspace(1 / 4, 4 / 4, 4)))
+    for prob_phe_0 in prob_phe_0_list:
+        config["init"]["prob_phe"] = [prob_phe_0, 1 - prob_phe_0]
+        sim_jobs.append(SimJob.from_config(base_dir, config, run_options))
 
     config["model"]["prob_mut"] = 0.0
     config["output"].pop("steps_per_save")
-    prob_phe_0_list = list(map(float, np.linspace(1 / 16, 15 / 16, 15)))
+    prob_phe_0_list = list(map(float, np.linspace(4 / 16, 15 / 16, 12)))
     for prob_phe_0 in prob_phe_0_list:
         config["init"]["prob_phe"] = [prob_phe_0, 1 - prob_phe_0]
         sim_jobs.append(SimJob.from_config(base_dir, config, run_options))

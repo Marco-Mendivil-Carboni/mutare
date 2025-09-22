@@ -5,6 +5,7 @@ use crate::stats::{SummaryStats, TimeSeries};
 use crate::types::Record;
 use anyhow::{Context, Result, bail};
 use rmp_serde::{decode, encode};
+use serde::Serialize;
 use std::{
     collections::HashMap,
     fs::File,
@@ -12,7 +13,16 @@ use std::{
     path::Path,
 };
 
-/// Trait for generic observables computed from simulation records.
+/// Result of a generic tensor observable.
+#[derive(Serialize)]
+struct ObservableResult {
+    /// Shape of the observable result.
+    shape: Vec<usize>,
+    /// Flattened vector of summary statistics, stored in row-major order.
+    stats_vec: Vec<SummaryStats>,
+}
+
+/// Trait for generic tensor observables computed from simulation records.
 trait Observable {
     /// Return the name of the observable.
     fn name(&self) -> &'static str;
@@ -20,18 +30,20 @@ trait Observable {
     /// Update the observable from the given simulation record.
     fn update(&mut self, record: &Record);
 
-    /// Return vector of summary statistics for the observable.
-    fn stats(&self) -> Vec<SummaryStats>;
+    /// Return the observable result.
+    fn result(&self) -> ObservableResult;
 }
 
-/// Generic observable that uses time series.
+/// Generic tensor observable that uses time series.
 ///
 /// Each observable carries a custom `update_fn`, which defines
 /// how its time series should be updated from simulation records.
 struct TimeSeriesObservable {
     /// Name of the observable.
     name: &'static str,
-    /// Vector of time series.
+    /// Shape of the observable.
+    shape: Vec<usize>,
+    /// Flattened vector of time series, stored in row-major order.
     time_series_vec: Vec<TimeSeries>,
     /// Function used to update the time series from simulation records.
     update_fn: Box<dyn Fn(&mut [TimeSeries], &Record)>,
@@ -39,13 +51,14 @@ struct TimeSeriesObservable {
 
 impl TimeSeriesObservable {
     /// Create a new `TimeSeriesObservable`.
-    fn new<F>(name: &'static str, len: usize, update_fn: F) -> Self
+    fn new<F>(name: &'static str, shape: &[usize], update_fn: F) -> Self
     where
         F: Fn(&mut [TimeSeries], &Record) + 'static,
     {
         Self {
             name,
-            time_series_vec: vec![TimeSeries::default(); len],
+            shape: shape.to_vec(),
+            time_series_vec: vec![TimeSeries::default(); shape.iter().product()],
             update_fn: Box::new(update_fn),
         }
     }
@@ -60,8 +73,11 @@ impl Observable for TimeSeriesObservable {
         (self.update_fn)(&mut self.time_series_vec, record);
     }
 
-    fn stats(&self) -> Vec<SummaryStats> {
-        self.time_series_vec.iter().map(|ts| ts.stats()).collect()
+    fn result(&self) -> ObservableResult {
+        ObservableResult {
+            shape: self.shape.clone(),
+            stats_vec: self.time_series_vec.iter().map(|ts| ts.stats()).collect(),
+        }
     }
 }
 
@@ -83,7 +99,7 @@ impl Analyzer {
         // Relative change in the number of agents per step
         obs_vec.push(Box::new(TimeSeriesObservable::new(
             "growth_rate",
-            1,
+            &[],
             |time_series_vec, record| {
                 time_series_vec[0].push(record.growth_rate);
             },
@@ -92,7 +108,7 @@ impl Analyzer {
         // Probability of extinction
         obs_vec.push(Box::new(TimeSeriesObservable::new(
             "prob_extinct",
-            1,
+            &[],
             |time_series_vec, record| {
                 time_series_vec[0].push(if record.extinction { 1.0 } else { 0.0 });
             },
@@ -101,7 +117,7 @@ impl Analyzer {
         // Probability of each environment
         obs_vec.push(Box::new(TimeSeriesObservable::new(
             "prob_env",
-            cfg.model.n_env,
+            &[cfg.model.n_env],
             |time_series_vec, record| {
                 if let Some(state) = &record.state {
                     for (i_env, time_series) in time_series_vec.iter_mut().enumerate() {
@@ -114,7 +130,7 @@ impl Analyzer {
         // Average probability distribution over phenotypes across agents
         obs_vec.push(Box::new(TimeSeriesObservable::new(
             "avg_prob_phe",
-            cfg.model.n_phe,
+            &[cfg.model.n_phe],
             |time_series_vec, record| {
                 if let Some(state) = &record.state {
                     // Compute average probability for each phenotype across all agents.
@@ -163,10 +179,10 @@ impl Analyzer {
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
         let mut writer = BufWriter::new(file);
 
-        // Collect the name and summary statistics of all observables into a HashMap.
+        // Collect the name and result of all observables into a HashMap.
         let mut results = HashMap::new();
         for obs in &self.obs_vec {
-            if results.insert(obs.name(), obs.stats()).is_some() {
+            if results.insert(obs.name(), obs.result()).is_some() {
                 bail!("names of observables must be unique");
             }
         }
