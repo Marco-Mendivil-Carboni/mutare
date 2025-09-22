@@ -3,9 +3,10 @@ import pandas as pd
 import matplotlib as mpl
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
-from typing import Tuple, Optional
+from typing import List, Tuple, Optional
 
 from .config import load_config
+from .runner import SimJob
 from .results import NormResults, read_results
 
 mpl.use("pdf")
@@ -35,25 +36,31 @@ colors = [
 ]
 
 
-def collect_all_scalar_results(base_dir: Path, time_step: float) -> pd.DataFrame:
+def collect_all_scalar_results(
+    sim_jobs: List[SimJob], time_step: float
+) -> pd.DataFrame:
     all_scalar_results = []
+    for sim_job in sim_jobs:
+        for run_idx in range(sim_job.run_options.n_runs):
+            norm_results = NormResults.from_results(
+                read_results(sim_job.sim_dir, run_idx), time_step
+            )
 
-    for sim_dir in [entry for entry in base_dir.iterdir() if entry.is_dir()]:
-        norm_results = NormResults.from_results(read_results(sim_dir, 0), time_step)
+            scalar_results = []
+            for name, df in {
+                "norm_growth_rate": norm_results.norm_growth_rate,
+                "rate_extinct": norm_results.rate_extinct,
+            }.items():
+                df.columns = pd.MultiIndex.from_product([[name], df.columns])
+                scalar_results.append(df)
 
-        scalar_results = []
-        for name, df in {
-            "norm_growth_rate": norm_results.norm_growth_rate,
-            "rate_extinct": norm_results.rate_extinct,
-        }.items():
-            df.columns = pd.MultiIndex.from_product([[name], df.columns])
-            scalar_results.append(df)
+            scalar_results = pd.concat(scalar_results, axis=1)
 
-        scalar_results = pd.concat(scalar_results, axis=1)
+            scalar_results["with_mut"] = (
+                load_config(sim_job.sim_dir)["model"]["prob_mut"] > 0.0
+            )
 
-        scalar_results["with_mut"] = load_config(sim_dir)["model"]["prob_mut"] > 0.0
-
-        all_scalar_results.append(scalar_results)
+            all_scalar_results.append(scalar_results)
 
     return pd.concat(all_scalar_results)
 
@@ -84,8 +91,8 @@ def plot_scalar_results(
     ax.legend()
 
 
-def make_plots(base_dir: Path, time_step: float) -> None:
-    all_scalar_results = collect_all_scalar_results(base_dir, time_step)
+def make_plots(sim_jobs: List[SimJob], time_step: float, fig_dir: Path) -> None:
+    all_scalar_results = collect_all_scalar_results(sim_jobs, time_step)
     print(all_scalar_results.to_string())
 
     fig = Figure(figsize=(16.0 * cm, 10.0 * cm))
@@ -100,7 +107,7 @@ def make_plots(base_dir: Path, time_step: float) -> None:
         xerr_col=("norm_growth_rate", "sem"),
         yerr_col=None,
     )
-    fig.savefig(base_dir / "std_dev.pdf")
+    fig.savefig(fig_dir / "std_dev.pdf")
 
     fig = Figure(figsize=(16.0 * cm, 10.0 * cm))
     ax = fig.add_subplot(1, 1, 1)
@@ -115,4 +122,4 @@ def make_plots(base_dir: Path, time_step: float) -> None:
         xerr_col=("norm_growth_rate", "sem"),
         yerr_col=("rate_extinct", "sem"),
     )
-    fig.savefig(base_dir / "rate_extinct.pdf")
+    fig.savefig(fig_dir / "rate_extinct.pdf")

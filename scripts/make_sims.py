@@ -52,4 +52,4 @@ if __name__ == "__main__":
 
     execute_sim_jobs(sim_jobs)
 
-    make_plots(base_dir, time_step)
+    make_plots(sim_jobs, time_step, base_dir)
