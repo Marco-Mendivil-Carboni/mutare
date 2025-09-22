@@ -15,7 +15,8 @@ from .config import Config, hash_sim_dir
 
 
 def print_process_msg(message: str) -> None:
-    print(f"[{datetime.now()}] [{os.getpid()}] {message}", flush=True)
+    timestamp = datetime.now().isoformat(timespec="seconds")
+    print(f"[{timestamp} PID:{os.getpid()}] {message}", flush=True)
 
 
 class StopRequested(Exception):
