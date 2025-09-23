@@ -29,7 +29,7 @@ if __name__ == "__main__":
                 time_step=time_step,
             ).to_model_params(),
             "init": {
-                "n_agt": 4096,
+                "n_agt": 16384,
                 "prob_phe": [prob_phe_0, 1 - prob_phe_0],
             },
             "output": {
@@ -38,17 +38,15 @@ if __name__ == "__main__":
             },
         }
 
-        run_options = RunOptions(n_files=64)
+        run_options = RunOptions(n_files=256)
 
         sim_jobs.append(SimJob.from_config(base_dir, config, run_options))
 
         config["model"]["prob_mut"] = 0.0
         config["output"].pop("steps_per_save")
 
-        run_options.n_files = 256
-
         sim_jobs.append(SimJob.from_config(base_dir, config, run_options))
 
     execute_sim_jobs(sim_jobs)
 
-    make_plots(sim_jobs, time_step, base_dir)
+    make_plots(sim_jobs, time_step, Path("plots/"))
