@@ -54,10 +54,10 @@ def run_bin(sim_dir: Path, extra_args: List[str]) -> None:
 
 @dataclass
 class RunOptions:
-    clean: bool
-    n_runs: int
-    n_files: int
-    analyze: bool
+    clean: bool = False
+    n_runs: int = 1
+    n_files: int = 1
+    analyze: bool = True
 
 
 def run_sim(sim_dir: Path, run_options: RunOptions) -> None:

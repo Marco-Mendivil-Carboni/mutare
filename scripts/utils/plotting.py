@@ -5,9 +5,8 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from typing import List, Tuple, Optional
 
-from .config import load_config
 from .runner import SimJob
-from .results import NormResults, read_results
+from .results import collect_all_scalar_results
 
 mpl.use("pdf")
 
@@ -34,35 +33,6 @@ colors = [
     "#169f62",
     "#15992c",
 ]
-
-
-def collect_all_scalar_results(
-    sim_jobs: List[SimJob], time_step: float
-) -> pd.DataFrame:
-    all_scalar_results = []
-    for sim_job in sim_jobs:
-        for run_idx in range(sim_job.run_options.n_runs):
-            norm_results = NormResults.from_results(
-                read_results(sim_job.sim_dir, run_idx), time_step
-            )
-
-            scalar_results = []
-            for name, df in {
-                "norm_growth_rate": norm_results.norm_growth_rate,
-                "rate_extinct": norm_results.rate_extinct,
-            }.items():
-                df.columns = pd.MultiIndex.from_product([[name], df.columns])
-                scalar_results.append(df)
-
-            scalar_results = pd.concat(scalar_results, axis=1)
-
-            scalar_results["with_mut"] = (
-                load_config(sim_job.sim_dir)["model"]["prob_mut"] > 0.0
-            )
-
-            all_scalar_results.append(scalar_results)
-
-    return pd.concat(all_scalar_results)
 
 
 def plot_scalar_results(

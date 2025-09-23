@@ -5,6 +5,9 @@ import pandas as pd
 from dataclasses import dataclass
 from typing import TypedDict, List, Callable, cast
 
+from .config import load_config
+from .runner import SimJob
+
 
 class SummaryStats(TypedDict):
     mean: float
@@ -65,3 +68,32 @@ def read_results(sim_dir: Path, run_idx: int) -> Results:
     with file_path.open("rb") as file:
         results = msgpack.unpack(file)
     return cast(Results, results)
+
+
+def collect_all_scalar_results(
+    sim_jobs: List[SimJob], time_step: float
+) -> pd.DataFrame:
+    all_scalar_results = []
+    for sim_job in sim_jobs:
+        for run_idx in range(sim_job.run_options.n_runs):
+            norm_results = NormResults.from_results(
+                read_results(sim_job.sim_dir, run_idx), time_step
+            )
+
+            scalar_results = []
+            for name, df in {
+                "norm_growth_rate": norm_results.norm_growth_rate,
+                "rate_extinct": norm_results.rate_extinct,
+            }.items():
+                df.columns = pd.MultiIndex.from_product([[name], df.columns])
+                scalar_results.append(df)
+
+            scalar_results = pd.concat(scalar_results, axis=1)
+
+            scalar_results["with_mut"] = (
+                load_config(sim_job.sim_dir)["model"]["prob_mut"] > 0.0
+            )
+
+            all_scalar_results.append(scalar_results)
+
+    return pd.concat(all_scalar_results)

@@ -13,8 +13,6 @@ if __name__ == "__main__":
 
     time_step = 1 / 64
 
-    run_options = RunOptions(clean=False, n_runs=1, n_files=64, analyze=True)
-
     sim_jobs: List[SimJob] = []
 
     prob_phe_0_list = list(map(float, np.linspace(7 / 16, 14 / 16, 8)))
@@ -25,9 +23,9 @@ if __name__ == "__main__":
                 n_phe=2,
                 rate_trans_env=[[-1.2, 1.2], [1.0, -1.0]],
                 rate_rep=[[1.2, 0.0], [0.0, 0.8]],
-                rate_dec=[[0.0, 0.8], [0.6, 0.0]],
-                rate_mut=1 / 4,
-                std_dev_mut=1 / 16,
+                rate_dec=[[0.0, 1.6], [1.2, 0.0]],
+                rate_mut=1 / 64,
+                std_dev_mut=1 / 4,
                 time_step=time_step,
             ).to_model_params(),
             "init": {
@@ -40,10 +38,14 @@ if __name__ == "__main__":
             },
         }
 
+        run_options = RunOptions(n_files=64)
+
         sim_jobs.append(SimJob.from_config(base_dir, config, run_options))
 
         config["model"]["prob_mut"] = 0.0
         config["output"].pop("steps_per_save")
+
+        run_options.n_files = 256
 
         sim_jobs.append(SimJob.from_config(base_dir, config, run_options))
 
