@@ -15,16 +15,16 @@ if __name__ == "__main__":
 
     sim_jobs: List[SimJob] = []
 
-    prob_phe_0_list = list(map(float, np.linspace(7 / 16, 14 / 16, 8)))
+    prob_phe_0_list = list(map(float, np.linspace(1 / 16, 1, 16)))
     for prob_phe_0 in prob_phe_0_list:
         config: Config = {
             "model": NormModelParams(
                 n_env=2,
                 n_phe=2,
-                rate_trans_env=[[-1.2, 1.2], [1.0, -1.0]],
+                rate_trans_env=[[-1.0, 1.0], [1.0, -1.0]],
                 rate_rep=[[1.2, 0.0], [0.0, 0.8]],
                 rate_dec=[[0.0, 1.6], [1.2, 0.0]],
-                rate_mut=1 / 64,
+                rate_mut=1 / 1024,
                 std_dev_mut=1 / 4,
                 time_step=time_step,
             ).to_model_params(),
@@ -33,7 +33,7 @@ if __name__ == "__main__":
                 "prob_phe": [prob_phe_0, 1 - prob_phe_0],
             },
             "output": {
-                "steps_per_file": 262144,
+                "steps_per_file": int(4096 / time_step),
                 "steps_per_save": int(256 / time_step),
             },
         }
