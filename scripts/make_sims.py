@@ -23,13 +23,13 @@ if __name__ == "__main__":
                 n_phe=2,
                 rate_trans_env=[[-1.0, 1.0], [1.0, -1.0]],
                 rate_rep=[[1.2, 0.0], [0.0, 0.8]],
-                rate_dec=[[0.0, 1.6], [1.2, 0.0]],
-                rate_mut=1 / 1024,
-                std_dev_mut=1 / 4,
+                rate_dec=[[0.0, 1.4], [1.0, 0.0]],
+                prob_mut=1 / 64,
+                std_dev_mut=1 / 16,
                 time_step=time_step,
             ).to_model_params(),
             "init": {
-                "n_agt": 16384,
+                "n_agt": 256,
                 "prob_phe": [prob_phe_0, 1 - prob_phe_0],
             },
             "output": {
@@ -43,6 +43,8 @@ if __name__ == "__main__":
         sim_jobs.append(SimJob.from_config(base_dir, config, run_options))
 
         config["model"]["prob_mut"] = 0.0
+        config["model"]["std_dev_mut"] = 0.0
+
         config["output"].pop("steps_per_save")
 
         sim_jobs.append(SimJob.from_config(base_dir, config, run_options))

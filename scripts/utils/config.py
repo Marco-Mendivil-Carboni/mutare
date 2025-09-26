@@ -41,7 +41,7 @@ class NormModelParams:
     rate_trans_env: List[List[float]]
     rate_rep: List[List[float]]
     rate_dec: List[List[float]]
-    rate_mut: float
+    prob_mut: float
     std_dev_mut: float
     time_step: float
 
@@ -59,7 +59,7 @@ class NormModelParams:
             "prob_dec": (
                 1.0 - np.exp(-np.array(self.rate_dec) * self.time_step)
             ).tolist(),
-            "prob_mut": float(1.0 - np.exp(-self.rate_mut * self.time_step)),
+            "prob_mut": self.prob_mut,
             "std_dev_mut": self.std_dev_mut,
         }
 
