@@ -24,8 +24,8 @@ if __name__ == "__main__":
                 rate_trans_env=[[-1.0, 1.0], [1.0, -1.0]],
                 rate_rep=[[1.2, 0.0], [0.0, 0.8]],
                 rate_dec=[[0.0, 1.4], [1.0, 0.0]],
-                prob_mut=1 / 64,
-                std_dev_mut=1 / 16,
+                prob_mut=1 / 256,
+                std_dev_mut=1 / 4,
                 time_step=time_step,
             ).to_model_params(),
             "init": {
