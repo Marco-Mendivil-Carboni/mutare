@@ -5,8 +5,8 @@ import numpy as np
 from typing import List
 
 from utils.config import Config, NormModelParams
-from utils.runner import RunOptions, SimJob, execute_sim_jobs
-from utils.plotting import make_plots
+from utils.exec import RunOptions, SimJob, execute_sim_jobs
+from utils.plots import make_plots
 
 if __name__ == "__main__":
     base_dir = Path("simulations/std_sims/")

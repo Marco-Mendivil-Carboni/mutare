@@ -5,7 +5,7 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from typing import List, Tuple, Optional
 
-from .runner import SimJob
+from .exec import SimJob
 from .results import collect_all_scalar_results
 
 mpl.use("pdf")
@@ -64,20 +64,6 @@ def plot_scalar_results(
 def make_plots(sim_jobs: List[SimJob], time_step: float, fig_dir: Path) -> None:
     all_scalar_results = collect_all_scalar_results(sim_jobs, time_step)
     print(all_scalar_results.to_string())
-
-    fig = Figure(figsize=(16.0 * cm, 10.0 * cm))
-    ax = fig.add_subplot(1, 1, 1)
-    ax.set_xlabel("$\\langle\\mu\\rangle$")
-    ax.set_ylabel("$\\sigma_{\\mu}$")
-    plot_scalar_results(
-        all_scalar_results,
-        ax,
-        x_col=("norm_growth_rate", "mean"),
-        y_col=("norm_growth_rate", "std_dev"),
-        xerr_col=("norm_growth_rate", "sem"),
-        yerr_col=None,
-    )
-    fig.savefig(fig_dir / "std_dev.pdf")
 
     fig = Figure(figsize=(16.0 * cm, 10.0 * cm))
     ax = fig.add_subplot(1, 1, 1)

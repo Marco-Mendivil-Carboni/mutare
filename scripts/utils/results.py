@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import TypedDict, List, Callable, cast
 
 from .config import load_config
-from .runner import SimJob
+from .exec import SimJob
 
 
 class SummaryStats(TypedDict):
@@ -87,7 +87,6 @@ def collect_all_scalar_results(
             }.items():
                 df.columns = pd.MultiIndex.from_product([[name], df.columns])
                 scalar_results.append(df)
-
             scalar_results = pd.concat(scalar_results, axis=1)
 
             scalar_results["with_mut"] = (

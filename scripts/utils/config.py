@@ -64,6 +64,11 @@ class NormModelParams:
         }
 
 
+class MarkovConfig(TypedDict):
+    norm_model: NormModelParams
+    init: InitParams
+
+
 def config_file_path(sim_dir: Path) -> Path:
     return sim_dir / "config.toml"
 
