@@ -24,11 +24,11 @@ pub struct ModelParams {
     pub n_phe: usize,
 
     /// Environment transition probabilities (matrix `n_env x n_env`).
-    pub prob_trans_env: Vec<Vec<f64>>,
-    /// Replication probabilities (matrix `n_env x n_phe`).
-    pub prob_rep: Vec<Vec<f64>>,
-    /// Deceased probabilities (matrix `n_env x n_phe`).
-    pub prob_dec: Vec<Vec<f64>>,
+    pub rates_trans_env: Vec<Vec<f64>>,
+    /// Replication rates (matrix `n_env x n_phe`).
+    pub rates_rep: Vec<Vec<f64>>,
+    /// Deceased rates (matrix `n_env x n_phe`).
+    pub rates_dec: Vec<Vec<f64>>,
 
     /// Mutation probability.
     pub prob_mut: f64,
@@ -43,7 +43,7 @@ pub struct InitParams {
     pub n_agt: usize,
 
     /// Probability distribution over phenotypes.
-    pub prob_phe: Vec<f64>,
+    pub strat_phe: Vec<f64>,
 }
 
 /// Output format parameters.
@@ -76,29 +76,29 @@ impl Config {
         let init = &self.init;
         let output = &self.output;
 
-        check_num(model.n_env, 1..=10).context("invalid number of environments")?;
-        check_num(model.n_phe, 1..=10).context("invalid number of phenotypes")?;
+        check_num(model.n_env, 1..=16).context("invalid number of environments")?;
+        check_num(model.n_phe, 1..=16).context("invalid number of phenotypes")?;
 
-        check_mat(&model.prob_trans_env, (model.n_env, model.n_env), true)
-            .context("invalid environment transition probabilities")?;
-        check_mat(&model.prob_rep, (model.n_env, model.n_phe), false)
-            .context("invalid replicating probabilities")?;
-        check_mat(&model.prob_dec, (model.n_env, model.n_phe), false)
-            .context("invalid deceased probabilities")?;
+        check_mat(&model.rates_trans_env, (model.n_env, model.n_env), true)
+            .context("invalid environment transition rates")?;
+        check_mat(&model.rates_rep, (model.n_env, model.n_phe), false)
+            .context("invalid replicating rates")?;
+        check_mat(&model.rates_dec, (model.n_env, model.n_phe), false)
+            .context("invalid deceased rates")?;
 
         check_num(model.prob_mut, 0.0..=1.0).context("invalid mutation probability")?;
         check_num(model.std_dev_mut, 0.0..=1.0).context("invalid mutation standard deviation")?;
 
-        check_num(init.n_agt, 1..=100_000).context("invalid number of agents")?;
+        check_num(init.n_agt, 1..=65_536).context("invalid number of agents")?;
 
-        check_vec(&init.prob_phe, model.n_phe, true)
+        check_vec(&init.strat_phe, model.n_phe, Some(1.0))
             .context("invalid probability distribution over phenotypes")?;
 
-        check_num(output.steps_per_file, 1..=1_000_000)
+        check_num(output.steps_per_file, 0..=1_048_576)
             .context("invalid number of steps per output file")?;
 
         if let Some(steps_per_save) = output.steps_per_save {
-            check_num(steps_per_save, 1_000..)
+            check_num(steps_per_save, 1_024..)
                 .context("invalid number of steps per saved state")?;
         }
 
@@ -117,23 +117,21 @@ where
     Ok(())
 }
 
-fn check_vec(vec: &[f64], exp_len: usize, prob_vec: bool) -> Result<()> {
+fn check_vec(vec: &[f64], exp_len: usize, exp_sum: Option<f64>) -> Result<()> {
     // Ensure vector has expected length.
     let len = vec.len();
     if len != exp_len {
         bail!("vector length must be {exp_len}, but is {len}");
     }
-    if !prob_vec {
-        return Ok(());
-    }
-    // For probability vectors: non-negative elements and sums to ~1.0.
-    if vec.iter().any(|&ele| ele < 0.0) {
-        bail!("vector must have only non-negative elements");
-    }
-    let sum: f64 = vec.iter().sum();
-    let tol = 1e-8;
-    if (sum - 1.0).abs() > tol {
-        bail!("vector must sum to 1.0 (tolerance: {tol}), but sums to {sum}");
+    // if vec.iter().any(|&ele| ele < 0.0) {
+    //     bail!("vector must have only non-negative elements");
+    // }
+    if let Some(exp_sum) = exp_sum {
+        let sum: f64 = vec.iter().sum();
+        let tol = 1e-8;
+        if (sum - exp_sum).abs() > tol {
+            bail!("vector must sum to {exp_sum} (tolerance: {tol}), but sums to {sum}");
+        }
     }
     Ok(())
 }
@@ -149,15 +147,13 @@ fn check_mat(mat: &[Vec<f64>], exp_shape: (usize, usize), trans_mat: bool) -> Re
     if mat.iter().any(|row| row.len() != exp_n_cols) {
         bail!("matrix must have {exp_n_cols} columns");
     }
-    if !trans_mat {
-        return Ok(());
+    let exp_sum = if trans_mat { Some(0.0) } else { None };
+    for (i_row, row) in mat.iter().enumerate() {
+        check_vec(row, exp_n_cols, exp_sum).with_context(|| format!("invalid row {i_row}"))?;
     }
-    // For transition matrices: must be square and each row a valid probability vector.
+    // For transition matrices: must be square and each row a valid transition vector.
     if exp_n_rows != exp_n_cols {
         bail!("matrix must be square");
-    }
-    for (i_row, row) in mat.iter().enumerate() {
-        check_vec(row, exp_n_cols, true).with_context(|| format!("invalid row {i_row}"))?;
     }
     Ok(())
 }

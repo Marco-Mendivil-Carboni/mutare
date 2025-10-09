@@ -1,6 +1,7 @@
 import subprocess
 import multiprocessing as mp
 from pathlib import Path
+from copy import deepcopy
 import os
 from datetime import datetime
 from signal import signal, SIGTERM
@@ -55,8 +56,8 @@ def run_bin(sim_dir: Path, extra_args: List[str]) -> None:
 @dataclass
 class RunOptions:
     clean: bool = False
-    n_runs: int = 1
-    n_files: int = 1
+    n_runs: int = 4
+    n_files: int = 16
     analyze: bool = True
 
 
@@ -87,12 +88,14 @@ def run_sim(sim_dir: Path, run_options: RunOptions) -> None:
 
 @dataclass
 class SimJob:
-    sim_dir: Path
+    base_dir: Path
+    config: Config
     run_options: RunOptions
 
-    @classmethod
-    def from_config(cls, base_dir: Path, config: Config, run_options: RunOptions):
-        return cls(sim_dir=hash_sim_dir(base_dir, config), run_options=run_options)
+    def __post_init__(self):
+        self.sim_dir = hash_sim_dir(self.base_dir, self.config)
+        self.config = deepcopy(self.config)
+        self.run_options = deepcopy(self.run_options)
 
 
 class JobResult(Enum):
@@ -103,7 +106,7 @@ class JobResult(Enum):
 
 def execute_sim_job(sim_job: SimJob) -> JobResult:
     try:
-        print_process_msg(f"starting job: {sim_job.sim_dir}")
+        print_process_msg(f"starting job:\n{sim_job}")
 
         with open(sim_job.sim_dir / ".lock", "w") as lock_file:
             fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -135,7 +138,9 @@ def execute_sim_jobs(sim_jobs: List[SimJob]) -> None:
     print_process_msg("process pool finished")
 
     if job_results.count(JobResult.FAILED) > 0:
+        print_process_msg("some job failed")
         sys.exit(1)
 
     if job_results.count(JobResult.STOPPED) > 0:
+        print_process_msg("some job was stopped")
         sys.exit(0)

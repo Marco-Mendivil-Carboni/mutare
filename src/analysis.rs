@@ -1,7 +1,7 @@
 //! Simulation analyzer and observables.
 
 use crate::config::Config;
-use crate::stats::{SummaryStats, TimeSeries};
+use crate::stats;
 use crate::types::Record;
 use anyhow::{Context, Result, bail};
 use rmp_serde::{decode, encode};
@@ -19,7 +19,7 @@ struct ObservableResult {
     /// Shape of the observable result.
     shape: Vec<usize>,
     /// Flattened vector of summary statistics, stored in row-major order.
-    stats_vec: Vec<SummaryStats>,
+    summary_stats_vec: Vec<f64>,
 }
 
 /// Trait for generic tensor observables computed from simulation records.
@@ -44,21 +44,21 @@ struct TimeSeriesObservable {
     /// Shape of the observable.
     shape: Vec<usize>,
     /// Flattened vector of time series, stored in row-major order.
-    time_series_vec: Vec<TimeSeries>,
+    time_series_vec: Vec<Vec<f64>>,
     /// Function used to update the time series from simulation records.
-    update_fn: Box<dyn Fn(&mut [TimeSeries], &Record)>,
+    update_fn: Box<dyn Fn(&mut [Vec<f64>], &Record)>,
 }
 
 impl TimeSeriesObservable {
     /// Create a new `TimeSeriesObservable`.
     fn new<F>(name: &'static str, shape: &[usize], update_fn: F) -> Self
     where
-        F: Fn(&mut [TimeSeries], &Record) + 'static,
+        F: Fn(&mut [Vec<f64>], &Record) + 'static,
     {
         Self {
             name,
             shape: shape.to_vec(),
-            time_series_vec: vec![TimeSeries::default(); shape.iter().product()],
+            time_series_vec: vec![Vec::new(); shape.iter().product()],
             update_fn: Box::new(update_fn),
         }
     }
@@ -76,7 +76,11 @@ impl Observable for TimeSeriesObservable {
     fn result(&self) -> ObservableResult {
         ObservableResult {
             shape: self.shape.clone(),
-            stats_vec: self.time_series_vec.iter().map(|ts| ts.stats()).collect(),
+            summary_stats_vec: self
+                .time_series_vec
+                .iter()
+                .map(|ts| stats::compute_mean(ts))
+                .collect(),
         }
     }
 }
@@ -88,16 +92,25 @@ pub struct Analyzer {
     /// Simulation configuration parameters.
     cfg: Config,
     /// Vector of observables.
-    obs_vec: Vec<Box<dyn Observable>>,
+    observables: Vec<Box<TimeSeriesObservable>>,
 }
 
 impl Analyzer {
     /// Create a new `Analyzer` with the given configuration.
     pub fn new(cfg: Config) -> Self {
-        let mut obs_vec: Vec<Box<dyn Observable>> = Vec::new();
+        let mut observables = Vec::new();
+
+        // ...
+        observables.push(Box::new(TimeSeriesObservable::new(
+            "time_step",
+            &[],
+            |time_series_vec, record| {
+                time_series_vec[0].push(record.time_step);
+            },
+        )));
 
         // Relative change in the number of agents per step
-        obs_vec.push(Box::new(TimeSeriesObservable::new(
+        observables.push(Box::new(TimeSeriesObservable::new(
             "growth_rate",
             &[],
             |time_series_vec, record| {
@@ -106,16 +119,16 @@ impl Analyzer {
         )));
 
         // Probability of extinction
-        obs_vec.push(Box::new(TimeSeriesObservable::new(
-            "prob_extinct",
+        observables.push(Box::new(TimeSeriesObservable::new(
+            "extinction_rate",
             &[],
             |time_series_vec, record| {
-                time_series_vec[0].push(if record.extinction { 1.0 } else { 0.0 });
+                time_series_vec[0].push(record.extinction_rate);
             },
         )));
 
         // Probability of each environment
-        obs_vec.push(Box::new(TimeSeriesObservable::new(
+        observables.push(Box::new(TimeSeriesObservable::new(
             "prob_env",
             &[cfg.model.n_env],
             |time_series_vec, record| {
@@ -128,32 +141,32 @@ impl Analyzer {
         )));
 
         // Average probability distribution over phenotypes across agents
-        obs_vec.push(Box::new(TimeSeriesObservable::new(
-            "avg_prob_phe",
+        observables.push(Box::new(TimeSeriesObservable::new(
+            "avg_strat_phe",
             &[cfg.model.n_phe],
             |time_series_vec, record| {
                 if let Some(state) = &record.state {
                     // Compute average probability for each phenotype across all agents.
-                    let mut avg_prob_phe = vec![0.0; time_series_vec.len()];
-                    for agt in &state.agt_vec {
-                        for (sum, &ele) in avg_prob_phe.iter_mut().zip(agt.prob_phe()) {
+                    let mut avg_strat_phe = vec![0.0; time_series_vec.len()];
+                    for agt in &state.agents {
+                        for (sum, &ele) in avg_strat_phe.iter_mut().zip(agt.strat_phe()) {
                             *sum += ele;
                         }
                     }
-                    avg_prob_phe
+                    avg_strat_phe
                         .iter_mut()
-                        .for_each(|ele| *ele /= state.agt_vec.len() as f64);
+                        .for_each(|ele| *ele /= state.agents.len() as f64);
 
                     // Update time series with the averaged probabilities.
                     time_series_vec
                         .iter_mut()
-                        .zip(avg_prob_phe.iter())
+                        .zip(avg_strat_phe.iter())
                         .for_each(|(ts, &val)| ts.push(val));
                 }
             },
         )));
 
-        Self { cfg, obs_vec }
+        Self { cfg, observables }
     }
 
     /// Read simulation output file and update all observables.
@@ -164,9 +177,9 @@ impl Analyzer {
 
         // Process each record in the file.
         for _ in 0..self.cfg.output.steps_per_file {
-            let state = decode::from_read(&mut reader).context("failed to deserialize record")?;
-            for obs in &mut self.obs_vec {
-                obs.update(&state);
+            let record = decode::from_read(&mut reader).context("failed to deserialize record")?;
+            for obs in &mut self.observables {
+                obs.update(&record);
             }
         }
 
@@ -181,7 +194,8 @@ impl Analyzer {
 
         // Collect the name and result of all observables into a HashMap.
         let mut results = HashMap::new();
-        for obs in &self.obs_vec {
+        for obs in &self.observables {
+            println!("{}", obs.name());
             if results.insert(obs.name(), obs.result()).is_some() {
                 bail!("names of observables must be unique");
             }
@@ -192,3 +206,36 @@ impl Analyzer {
         Ok(())
     }
 }
+
+// // Average probability distribution over phenotypes across agents
+// observables.push(Observable::new(
+//     "std_dev_strat_phe",
+//     &[],
+//     move |result, record| {
+//         if let Some(state) = &record.state {
+//             // Compute average probability for each phenotype across all agents.
+//             let mut avg_strat_phe = vec![0.0; cfg.model.n_phe];
+//             for agt in &state.agents {
+//                 for (sum, &ele) in avg_strat_phe.iter_mut().zip(agt.strat_phe()) {
+//                     *sum += ele;
+//                 }
+//             }
+//             avg_strat_phe
+//                 .iter_mut()
+//                 .for_each(|ele| *ele /= state.agents.len() as f64);
+
+//             let mut diff_strat_phe = 0.0;
+//             for agt in &state.agents {
+//                 let mut diff = 0.0;
+//                 for (ele, avg_ele) in agt.strat_phe().iter().zip(&avg_strat_phe) {
+//                     diff += (ele - avg_ele).powi(2);
+//                 }
+//                 diff /= cfg.model.n_phe as f64;
+//                 diff_strat_phe += diff;
+//             }
+//             diff_strat_phe /= state.agents.len() as f64;
+
+//             result.values_vec.push([diff_strat_phe].to_vec());
+//         }
+//     },
+// ));

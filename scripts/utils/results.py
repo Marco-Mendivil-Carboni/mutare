@@ -3,63 +3,53 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from dataclasses import dataclass
-from typing import TypedDict, List, Callable, cast
+from typing import TypedDict, List, cast
 
-from .config import load_config
 from .exec import SimJob
 
 
 class SummaryStats(TypedDict):
     mean: float
-    std_dev: float
-    sem: float
-    is_eq: bool
 
 
 class ObservableResult(TypedDict):
     shape: List[int]
-    stats_vec: List[SummaryStats]
+    summary_stats_vec: List[SummaryStats]
 
 
 class Results(TypedDict):
+    time_step: ObservableResult
     growth_rate: ObservableResult
-    prob_extinct: ObservableResult
+    extinction_rate: ObservableResult
     prob_env: ObservableResult
-    avg_prob_phe: ObservableResult
+    avg_strat_phe: ObservableResult
+    std_dev_strat_phe: ObservableResult
 
 
 @dataclass
 class NormResults:
-    norm_growth_rate: pd.DataFrame
-    rate_extinct: pd.DataFrame
+    time_step: pd.DataFrame
+    growth_rate: pd.DataFrame
+    extinction_rate: pd.DataFrame
     prob_env: pd.DataFrame
-    avg_prob_phe: pd.DataFrame
+    avg_strat_phe: pd.DataFrame
+    # std_dev_strat_phe: pd.DataFrame
 
     @classmethod
-    def from_results(cls, results: Results, time_step: float):
+    def from_results(cls, results: Results):
         def result_to_df(result: ObservableResult) -> pd.DataFrame:
             return pd.DataFrame(
-                result["stats_vec"],
+                result["summary_stats_vec"],
                 index=pd.MultiIndex.from_tuples(np.ndindex(tuple(result["shape"]))),
             )
 
-        def normalize_num_cols(
-            df: pd.DataFrame, norm_func: Callable[[pd.DataFrame], pd.DataFrame]
-        ) -> pd.DataFrame:
-            num_cols = df.select_dtypes(include="number").columns
-            df[num_cols] = norm_func(df[num_cols])
-            return df
-
         return cls(
-            norm_growth_rate=normalize_num_cols(
-                result_to_df(results["growth_rate"]), lambda x: x / time_step
-            ),
-            rate_extinct=normalize_num_cols(
-                result_to_df(results["prob_extinct"]),
-                lambda x: -cast(pd.DataFrame, np.log(1.0 - x)) / time_step,
-            ),
+            time_step=result_to_df(results["time_step"]),
+            growth_rate=result_to_df(results["growth_rate"]),
+            extinction_rate=result_to_df(results["extinction_rate"]),
             prob_env=result_to_df(results["prob_env"]),
-            avg_prob_phe=result_to_df(results["avg_prob_phe"]),
+            avg_strat_phe=result_to_df(results["avg_strat_phe"]),
+            # std_dev_strat_phe=result_to_df(results["std_dev_strat_phe"]),
         )
 
 
@@ -70,28 +60,25 @@ def read_results(sim_dir: Path, run_idx: int) -> Results:
     return cast(Results, results)
 
 
-def collect_all_scalar_results(
-    sim_jobs: List[SimJob], time_step: float
-) -> pd.DataFrame:
+def collect_all_scalar_results(sim_jobs: List[SimJob]) -> pd.DataFrame:
     all_scalar_results = []
     for sim_job in sim_jobs:
         for run_idx in range(sim_job.run_options.n_runs):
             norm_results = NormResults.from_results(
-                read_results(sim_job.sim_dir, run_idx), time_step
+                read_results(sim_job.sim_dir, run_idx)
             )
 
             scalar_results = []
             for name, df in {
-                "norm_growth_rate": norm_results.norm_growth_rate,
-                "rate_extinct": norm_results.rate_extinct,
+                "time_step": norm_results.time_step,
+                "growth_rate": norm_results.growth_rate,
+                "extinction_rate": norm_results.extinction_rate,
             }.items():
-                df.columns = pd.MultiIndex.from_product([[name], df.columns])
+                df.columns = [name]
                 scalar_results.append(df)
             scalar_results = pd.concat(scalar_results, axis=1)
 
-            scalar_results["with_mut"] = (
-                load_config(sim_job.sim_dir)["model"]["prob_mut"] > 0.0
-            )
+            scalar_results["with_mut"] = sim_job.config["model"]["prob_mut"] > 0.0
 
             all_scalar_results.append(scalar_results)
 

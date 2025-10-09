@@ -1,26 +1,23 @@
 import toml
 from pathlib import Path
-import numpy as np
-from scipy.linalg import expm
 import hashlib
 import json
-from dataclasses import dataclass
 from typing import TypedDict, List, NotRequired, cast
 
 
 class ModelParams(TypedDict):
     n_env: int
     n_phe: int
-    prob_trans_env: List[List[float]]
-    prob_rep: List[List[float]]
-    prob_dec: List[List[float]]
+    rates_trans_env: List[List[float]]
+    rates_rep: List[List[float]]
+    rates_dec: List[List[float]]
     prob_mut: float
     std_dev_mut: float
 
 
 class InitParams(TypedDict):
     n_agt: int
-    prob_phe: List[float]
+    strat_phe: List[float]
 
 
 class OutputParams(TypedDict):
@@ -32,41 +29,6 @@ class Config(TypedDict):
     model: ModelParams
     init: InitParams
     output: OutputParams
-
-
-@dataclass
-class NormModelParams:
-    n_env: int
-    n_phe: int
-    rate_trans_env: List[List[float]]
-    rate_rep: List[List[float]]
-    rate_dec: List[List[float]]
-    prob_mut: float
-    std_dev_mut: float
-    time_step: float
-
-    def to_model_params(self) -> ModelParams:
-        return {
-            "n_env": self.n_env,
-            "n_phe": self.n_phe,
-            "prob_trans_env": cast(
-                List[List[float]],
-                expm(np.array(self.rate_trans_env) * self.time_step).tolist(),
-            ),
-            "prob_rep": (
-                1.0 - np.exp(-np.array(self.rate_rep) * self.time_step)
-            ).tolist(),
-            "prob_dec": (
-                1.0 - np.exp(-np.array(self.rate_dec) * self.time_step)
-            ).tolist(),
-            "prob_mut": self.prob_mut,
-            "std_dev_mut": self.std_dev_mut,
-        }
-
-
-class MarkovConfig(TypedDict):
-    norm_model: NormModelParams
-    init: InitParams
 
 
 def config_file_path(sim_dir: Path) -> Path:

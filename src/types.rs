@@ -3,18 +3,19 @@
 use serde::{Deserialize, Serialize};
 
 /// Agent of the simulation.
-///
-/// Each agent has a phenotype (`phe`) and a probability distribution over phenotypes (`prob_phe`).
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Agent {
+    /// Phenotype.
     phe: usize,
-    prob_phe: Vec<f64>,
+
+    /// Phenotypic strategy.
+    strat_phe: Vec<f64>,
 }
 
 impl Agent {
-    /// Create a new agent with a given phenotype and probability distribution.
-    pub fn new(phe: usize, prob_phe: Vec<f64>) -> Self {
-        Self { phe, prob_phe }
+    /// Create a new agent with a given phenotype and phenotypic strategy.
+    pub fn new(phe: usize, strat_phe: Vec<f64>) -> Self {
+        Self { phe, strat_phe }
     }
 
     /// Get the current phenotype of the agent.
@@ -22,38 +23,72 @@ impl Agent {
         self.phe
     }
 
-    /// Get the current probability distribution over phenotypes of the agent.
-    pub fn prob_phe(&self) -> &Vec<f64> {
-        &self.prob_phe
+    /// Get the current phenotypic strategy of the agent.
+    pub fn strat_phe(&self) -> &Vec<f64> {
+        &self.strat_phe
     }
 }
 
-/// State of the simulation at a given step.
-///
-/// Contains the current environment and all agents in the simulation.
+/// State of the simulation at a certain instant.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct State {
     /// Current environment index.
     pub env: usize,
 
     /// Vector of agents currently in the simulation.
-    pub agt_vec: Vec<Agent>,
+    pub agents: Vec<Agent>,
 }
 
-/// Record of the simulation at a single step.
-///
-/// Contains the current step, growth rate, extinction flag and state (optional).
+/// Record of the simulation at a certain instant.
 #[derive(Serialize, Deserialize)]
 pub struct Record {
-    /// Current simulation step.
-    pub step: usize,
+    /// Current simulation time.
+    pub time_step: f64,
 
-    /// Relative change in the number of agents at this step.
+    /// Instantaneous growth rate.
     pub growth_rate: f64,
 
-    /// Population reached extinction at this step.
-    pub extinction: bool,
+    /// Extinction rate.
+    pub extinction_rate: f64,
 
     /// Current simulation state.
     pub state: Option<State>,
+}
+
+/// Basic simulation event type.
+pub enum Event {
+    /// Agent replication event.
+    Replication { agent_idx: usize },
+
+    /// Agent death event.
+    Death { agent_idx: usize },
+
+    /// Environment transition event.
+    EnvTrans { next_env: usize },
+}
+
+#[derive(Default)]
+pub struct Channels {
+    events: Vec<Event>,
+    rates: Vec<f64>,
+}
+
+impl Channels {
+    pub fn clear(&mut self) {
+        self.events.clear();
+        self.rates.clear();
+    }
+
+    pub fn push(&mut self, event: Event, rate: f64) {
+        self.events.push(event);
+        self.rates.push(rate);
+    }
+
+    pub fn events(&self) -> &[Event] {
+        &self.events
+    }
+
+    pub fn rates(&self) -> &[f64] {
+        &self.rates
+    }
 }
