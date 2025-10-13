@@ -9,7 +9,7 @@ from utils.exec import RunOptions, SimJob, execute_sim_jobs
 from utils.plots import make_plots
 
 if __name__ == "__main__":
-    base_dir = Path("simulations/std_sims_2/")
+    base_dir = Path("simulations/")
 
     sim_jobs: List[SimJob] = []
 
@@ -41,8 +41,6 @@ if __name__ == "__main__":
 
         config["model"]["prob_mut"] = 0.0
         config["model"]["std_dev_mut"] = 0.0
-
-        config["output"].pop("steps_per_save")
 
         sim_jobs.append(SimJob(base_dir, config, run_options))
 

@@ -4,7 +4,6 @@ mod analysis;
 mod config;
 mod engine;
 mod manager;
-mod stats;
 mod types;
 
 use crate::manager::Manager;

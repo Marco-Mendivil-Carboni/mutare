@@ -1,11 +1,11 @@
 //! Simulation engine.
 
 use crate::config::Config;
-use crate::types::{Agent, Channels, Event, Record, State};
+use crate::types::{Agent, Event, Record, State};
 use anyhow::{Context, Result};
 use rand::prelude::*;
 use rand_chacha::ChaCha12Rng;
-use rand_distr::{Bernoulli, Exp, LogNormal, Uniform, weighted::WeightedIndex};
+use rand_distr::{Bernoulli, Exp, Normal, Uniform, weighted::WeightedIndex};
 use rmp_serde::{decode, encode};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -13,6 +13,39 @@ use std::{
     io::{BufReader, BufWriter, Write},
     path::Path,
 };
+
+/// Collection of all possible events and their associated rates at a certain instant.
+#[derive(Default)]
+pub struct EventPool {
+    /// Vector of possible events.
+    events: Vec<Event>,
+    /// Vector of associated rates.
+    rates: Vec<f64>,
+}
+
+impl EventPool {
+    /// Clear the event pool.
+    pub fn clear(&mut self) {
+        self.events.clear();
+        self.rates.clear();
+    }
+
+    /// Add to the pool a new event with its associated rate.
+    pub fn push(&mut self, event: Event, rate: f64) {
+        self.events.push(event);
+        self.rates.push(rate);
+    }
+
+    /// Get all events in the pool.
+    pub fn events(&self) -> &[Event] {
+        &self.events
+    }
+
+    /// Get all rates in the pool.
+    pub fn rates(&self) -> &[f64] {
+        &self.rates
+    }
+}
 
 /// Simulation engine.
 ///
@@ -55,7 +88,7 @@ impl Engine {
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
         let mut writer = BufWriter::new(file);
 
-        let mut channels = Channels::default();
+        let mut event_pool = EventPool::default();
 
         for i_step in 0..self.cfg.output.steps_per_file {
             if i_step % (self.cfg.output.steps_per_file / 100).max(1) == 0 {
@@ -64,7 +97,7 @@ impl Engine {
             }
 
             let record = self
-                .perform_step(&mut channels)
+                .perform_step(&mut event_pool)
                 .context("failed to perform step")?;
 
             encode::write(&mut writer, &record).context("failed to serialize record")?;
@@ -104,88 +137,49 @@ impl Engine {
             let prob_phe = cfg.init.strat_phe.clone();
             agents.push(Agent::new(phe, prob_phe));
         }
-
         Ok(agents)
     }
 
-    fn update_channels(&self, channels: &mut Channels) {
-        channels.clear();
-
-        for (next_env, &rate) in self.cfg.model.rates_trans_env[self.state.env]
-            .iter()
-            .enumerate()
-        {
-            if next_env != self.state.env {
-                channels.push(Event::EnvTrans { next_env }, rate);
-            }
-        }
-
-        for (i, agt) in self.state.agents.iter().enumerate() {
-            let phe = agt.phe();
-            channels.push(
-                Event::Replication { agent_idx: i },
-                self.cfg.model.rates_rep[self.state.env][phe],
-            );
-            channels.push(
-                Event::Death { agent_idx: i },
-                self.cfg.model.rates_dec[self.state.env][phe],
-            );
-        }
-    }
-
     /// Perform a single simulation step and return a `Record`.
-    fn perform_step(&mut self, channels: &mut Channels) -> Result<Record> {
+    fn perform_step(&mut self, event_pool: &mut EventPool) -> Result<Record> {
         let prev_n_agents = self.state.agents.len();
 
-        // Select event
-        self.update_channels(channels);
-        let event_dist = WeightedIndex::new(channels.rates())?;
-        let total_rate = event_dist.total_weight();
-        let event = &channels.events()[event_dist.sample(&mut self.rng)];
+        self.update_event_pool(event_pool);
 
-        match *event {
+        // Select next simulation event.
+        let event_dist = WeightedIndex::new(event_pool.rates())?;
+        let event = event_pool.events()[event_dist.sample(&mut self.rng)].clone();
+
+        // Sample time to the next event.
+        let total_rate = event_dist.total_weight();
+        let time_step = Exp::new(total_rate)?.sample(&mut self.rng);
+
+        // Update simulation state.
+        match event {
             Event::EnvTrans { next_env } => {
                 self.state.env = next_env;
             }
             Event::Replication { agent_idx } => {
-                self.replicate_agent(agent_idx).context("...")?;
+                self.replicate_agent(agent_idx)
+                    .context("failed to replicate agent")?;
             }
             Event::Death { agent_idx } => {
                 self.state.agents.swap_remove(agent_idx);
             }
         }
 
-        // Time increment
-        let dt = Exp::new(total_rate)?.sample(&mut self.rng);
-
-        // Compute the relative change in the number of agents at this step.
-        let growth_rate = match event {
-            Event::EnvTrans { next_env: _ } => 0.0,
-            Event::Replication { agent_idx: _ } => 1.0,
-            Event::Death { agent_idx: _ } => -1.0,
-        } / (prev_n_agents as f64);
-
-        // Determine if population reached extinction at this step.
-        let extinction_rate = if self.state.agents.is_empty() {
-            1.0
-        } else {
-            0.0
-        };
-
         self.normalize_population()
             .context("failed to normalize population size")?;
 
         let record = Record {
-            time_step: dt,
-            growth_rate,
-            extinction_rate,
-            state: self.cfg.output.steps_per_save.and_then(|steps_per_save| {
-                if self.step % steps_per_save == 0 {
-                    Some(self.state.clone())
-                } else {
-                    None
-                }
-            }),
+            prev_n_agents,
+            time_step,
+            event,
+            state: if self.step % self.cfg.output.steps_per_save == 0 {
+                Some(self.state.clone())
+            } else {
+                None
+            },
         };
 
         // Increment simulation step.
@@ -194,6 +188,33 @@ impl Engine {
         Ok(record)
     }
 
+    /// Update the event pool based on the configuration and current state.
+    fn update_event_pool(&self, event_pool: &mut EventPool) {
+        event_pool.clear();
+
+        for (next_env, &rate) in self.cfg.model.rates_trans_env[self.state.env]
+            .iter()
+            .enumerate()
+        {
+            if next_env != self.state.env {
+                event_pool.push(Event::EnvTrans { next_env }, rate);
+            }
+        }
+
+        for (agent_idx, agent) in self.state.agents.iter().enumerate() {
+            let phe = agent.phe();
+            event_pool.push(
+                Event::Replication { agent_idx },
+                self.cfg.model.rates_rep[self.state.env][phe],
+            );
+            event_pool.push(
+                Event::Death { agent_idx },
+                self.cfg.model.rates_dec[self.state.env][phe],
+            );
+        }
+    }
+
+    /// Replicate agent: create a new agent with a new phenotype and phenotypic strategy.
     fn replicate_agent(&mut self, agent_idx: usize) -> Result<()> {
         let parent = &self.state.agents[agent_idx];
         let strat_phe = parent.strat_phe().clone();
@@ -201,13 +222,12 @@ impl Engine {
         let phe_new = phe_dist.sample(&mut self.rng);
         let mut strat_phe_new = strat_phe.clone();
 
-        // Mutation
         let mut_dist = Bernoulli::new(self.cfg.model.prob_mut)?;
-        let ele_mut_dist = LogNormal::new(0.0, self.cfg.model.std_dev_mut)?;
+        let ele_mut_dist = Normal::new(0.0, self.cfg.model.std_dev_mut)?;
         if mut_dist.sample(&mut self.rng) {
             strat_phe_new = strat_phe_new
                 .iter()
-                .map(|ele| ele * ele_mut_dist.sample(&mut self.rng))
+                .map(|ele| ele + ele_mut_dist.sample(&mut self.rng))
                 .collect();
             let sum: f64 = strat_phe_new.iter().sum();
             strat_phe_new.iter_mut().for_each(|ele| *ele /= sum);

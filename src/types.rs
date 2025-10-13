@@ -29,7 +29,7 @@ impl Agent {
     }
 }
 
-/// State of the simulation at a certain instant.
+/// State of the simulation at a certain step.
 #[derive(Clone, Serialize, Deserialize)]
 pub struct State {
     /// Current environment index.
@@ -39,23 +39,8 @@ pub struct State {
     pub agents: Vec<Agent>,
 }
 
-/// Record of the simulation at a certain instant.
-#[derive(Serialize, Deserialize)]
-pub struct Record {
-    /// Current simulation time.
-    pub time_step: f64,
-
-    /// Instantaneous growth rate.
-    pub growth_rate: f64,
-
-    /// Extinction rate.
-    pub extinction_rate: f64,
-
-    /// Current simulation state.
-    pub state: Option<State>,
-}
-
-/// Basic simulation event type.
+/// Single simulation event.
+#[derive(Clone, Serialize, Deserialize)]
 pub enum Event {
     /// Agent replication event.
     Replication { agent_idx: usize },
@@ -67,28 +52,18 @@ pub enum Event {
     EnvTrans { next_env: usize },
 }
 
-#[derive(Default)]
-pub struct Channels {
-    events: Vec<Event>,
-    rates: Vec<f64>,
-}
+/// Record of a single simulation step.
+#[derive(Serialize, Deserialize)]
+pub struct Record {
+    /// Previous number of agents.
+    pub prev_n_agents: usize,
 
-impl Channels {
-    pub fn clear(&mut self) {
-        self.events.clear();
-        self.rates.clear();
-    }
+    /// Time to the next event.
+    pub time_step: f64,
 
-    pub fn push(&mut self, event: Event, rate: f64) {
-        self.events.push(event);
-        self.rates.push(rate);
-    }
+    /// Next simulation event.
+    pub event: Event,
 
-    pub fn events(&self) -> &[Event] {
-        &self.events
-    }
-
-    pub fn rates(&self) -> &[f64] {
-        &self.rates
-    }
+    /// Next simulation state.
+    pub state: Option<State>,
 }

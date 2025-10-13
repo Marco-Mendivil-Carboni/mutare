@@ -2,7 +2,7 @@ import toml
 from pathlib import Path
 import hashlib
 import json
-from typing import TypedDict, List, NotRequired, cast
+from typing import TypedDict, List, cast
 
 
 class ModelParams(TypedDict):
@@ -22,7 +22,7 @@ class InitParams(TypedDict):
 
 class OutputParams(TypedDict):
     steps_per_file: int
-    steps_per_save: NotRequired[int]
+    steps_per_save: int
 
 
 class Config(TypedDict):
