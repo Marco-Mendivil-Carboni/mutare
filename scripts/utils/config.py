@@ -12,7 +12,6 @@ class ModelParams(TypedDict):
     rates_rep: List[List[float]]
     rates_dec: List[List[float]]
     prob_mut: float
-    std_dev_mut: float
 
 
 class InitParams(TypedDict):

@@ -5,7 +5,7 @@ use crate::types::{Agent, Event, Record, State};
 use anyhow::{Context, Result};
 use rand::prelude::*;
 use rand_chacha::ChaCha12Rng;
-use rand_distr::{Bernoulli, Exp, Normal, Uniform, weighted::WeightedIndex};
+use rand_distr::{Exp, weighted::WeightedIndex};
 use rmp_serde::{decode, encode};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -68,8 +68,7 @@ impl Engine {
     pub fn new(cfg: Config) -> Result<Self> {
         let mut rng = ChaCha12Rng::try_from_os_rng()?;
 
-        let env_dist = Uniform::new(0, cfg.model.n_env)?;
-        let env = env_dist.sample(&mut rng);
+        let env = rng.random_range(0..cfg.model.n_env);
 
         let agents = Engine::generate_random_agents(&cfg, &mut rng)
             .context("failed to generate random agents")?;
@@ -90,12 +89,7 @@ impl Engine {
 
         let mut event_pool = EventPool::default();
 
-        for i_step in 0..self.cfg.output.steps_per_file {
-            if i_step % (self.cfg.output.steps_per_file / 100).max(1) == 0 {
-                let progress = 100.0 * i_step as f64 / self.cfg.output.steps_per_file as f64;
-                log::info!("completed {progress:06.2}%");
-            }
-
+        for _ in 0..self.cfg.output.steps_per_file {
             let record = self
                 .perform_step(&mut event_pool)
                 .context("failed to perform step")?;
@@ -222,12 +216,9 @@ impl Engine {
         let phe_new = phe_dist.sample(&mut self.rng);
         let mut strat_phe_new = strat_phe.clone();
 
-        let mut_dist = Bernoulli::new(self.cfg.model.prob_mut)?;
-        let ele_mut_dist = Normal::new(0.0, self.cfg.model.std_dev_mut)?;
-        if mut_dist.sample(&mut self.rng) {
-            strat_phe_new = strat_phe_new
-                .iter()
-                .map(|ele| ele + ele_mut_dist.sample(&mut self.rng))
+        if self.rng.random_bool(self.cfg.model.prob_mut) {
+            strat_phe_new = (0..self.cfg.model.n_phe)
+                .map(|_| self.rng.random_range(0.0..1.0))
                 .collect();
             let sum: f64 = strat_phe_new.iter().sum();
             strat_phe_new.iter_mut().for_each(|ele| *ele /= sum);

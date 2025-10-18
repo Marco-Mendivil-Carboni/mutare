@@ -1,12 +1,10 @@
 from pathlib import Path
-import pandas as pd
 import matplotlib as mpl
 from matplotlib.figure import Figure
-from matplotlib.axes import Axes
 from typing import List
 
 from .exec import SimJob
-from .results import collect_sim_jobs_results
+from .results import collect_sim_jobs_avg_results
 
 mpl.use("pdf")
 
@@ -35,57 +33,85 @@ colors = [
 ]
 
 
-def plot_scalar_results(
-    sim_jobs_results: pd.DataFrame,
-    ax: Axes,
-    x_col: str,
-    y_col: str,
-) -> None:
-    with_mut = sim_jobs_results["with_mut"]
-    for scalar_results, color, label in [
-        (sim_jobs_results[~with_mut], colors[7], "fixed"),
-        (sim_jobs_results[with_mut], colors[1], "with mutations"),
+def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
+    sim_jobs_avg_results = collect_sim_jobs_avg_results(sim_jobs)
+    print(sim_jobs_avg_results.to_string())
+
+    with_mut = sim_jobs_avg_results["with_mut"]
+
+    fig_1 = Figure(figsize=(16.0 * cm, 10.0 * cm))
+    ax_1 = fig_1.add_subplot(1, 1, 1)
+    ax_1.set_xlabel("$\\langle\\mu\\rangle$")
+    ax_1.set_ylabel("$r_e$")
+    ax_1.set_yscale("log")
+
+    fig_2 = Figure(figsize=(16.0 * cm, 10.0 * cm))
+    ax_2 = fig_2.add_subplot(1, 1, 1)
+    ax_2.set_xlabel("$p_{\\phi}(0)_i$")
+    ax_2.set_ylabel("$\\langle\\mu\\rangle$")
+
+    fig_3 = Figure(figsize=(16.0 * cm, 10.0 * cm))
+    ax_3 = fig_3.add_subplot(1, 1, 1)
+    ax_3.set_xlabel("$p_{\\phi}(0)_i$")
+    ax_3.set_ylabel("$\\langle p_{\\phi}(0)\\rangle$")
+
+    for avg_results, color, label in [
+        (sim_jobs_avg_results[~with_mut], colors[7], "fixed"),
+        (sim_jobs_avg_results[with_mut], colors[1], "with mutations"),
     ]:
-        ax.errorbar(
-            scalar_results[x_col]["mean"],
-            scalar_results[y_col]["mean"],
-            xerr=scalar_results[x_col]["sem"],
-            yerr=scalar_results[y_col]["sem"],
+        ax_1.errorbar(
+            avg_results[("growth_rate", "mean")],
+            avg_results[("extinct_rate", "mean")],
+            xerr=avg_results[("growth_rate", "sem")],
+            yerr=avg_results[("extinct_rate", "sem")],
             c=color,
-            ls="",
+            ls=":",
             marker="o",
-            markersize=4,
+            markersize=2,
+            label=label,
+        )
+        ax_1.axvline(
+            avg_results[("growth_rate", "mean")].mean(),
+            c=color,
+            ls=":",
+            lw=1,
+            alpha=0.5,
+        )
+        ax_1.axhline(
+            avg_results[("extinct_rate", "mean")].mean(),
+            c=color,
+            ls=":",
+            lw=1,
+            alpha=0.5,
+        )
+
+        ax_2.errorbar(
+            avg_results["strat_phe_0"],
+            avg_results[("growth_rate", "mean")],
+            yerr=avg_results[("growth_rate", "sem")],
+            c=color,
+            ls=":",
+            marker="o",
+            markersize=2,
             label=label,
         )
 
-    ax.legend()
+        ax_3.errorbar(
+            avg_results["strat_phe_0"],
+            avg_results[("avg_strat_phe_0", "mean")],
+            yerr=avg_results[("std_dev_strat_phe", "mean")],
+            c=color,
+            ls=":",
+            marker="o",
+            markersize=2,
+            label=label,
+        )
 
+    ax_1.legend()
+    fig_1.savefig(fig_dir / "extinct_rate.pdf")
 
-def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
-    sim_jobs_results = collect_sim_jobs_results(sim_jobs)
-    print(sim_jobs_results.to_string())
+    ax_2.legend()
+    fig_2.savefig(fig_dir / "growth_rate.pdf")
 
-    fig = Figure(figsize=(16.0 * cm, 10.0 * cm))
-    ax = fig.add_subplot(1, 1, 1)
-    ax.set_xlabel("$\\langle\\mu\\rangle$")
-    ax.set_ylabel("$r_e$")
-    ax.set_yscale("log")
-    plot_scalar_results(
-        sim_jobs_results,
-        ax,
-        x_col="growth_rate",
-        y_col="extinct_rate",
-    )
-    fig.savefig(fig_dir / "extinct_rate.pdf")
-
-    fig = Figure(figsize=(16.0 * cm, 10.0 * cm))
-    ax = fig.add_subplot(1, 1, 1)
-    ax.set_xlabel("$\\langle\\mu\\rangle$")
-    ax.set_ylabel("$\\sigma_{p(\\phi)}$")
-    plot_scalar_results(
-        sim_jobs_results,
-        ax,
-        x_col="growth_rate",
-        y_col="std_dev_strat_phe",
-    )
-    fig.savefig(fig_dir / "std_dev_strat_phe.pdf")
+    ax_3.legend()
+    fig_3.savefig(fig_dir / "avg_strat_phe.pdf")

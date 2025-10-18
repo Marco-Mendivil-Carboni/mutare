@@ -36,8 +36,8 @@ def convert_to_df(result: ObservableResult) -> pd.DataFrame:
     )
 
 
-def collect_sim_jobs_results(sim_jobs: List[SimJob]) -> pd.DataFrame:
-    sim_jobs_results = []
+def collect_sim_jobs_avg_results(sim_jobs: List[SimJob]) -> pd.DataFrame:
+    sim_jobs_avg_results = []
     for sim_job in sim_jobs:
         job_results = []
         for run_idx in range(sim_job.run_options.n_runs):
@@ -53,18 +53,26 @@ def collect_sim_jobs_results(sim_jobs: List[SimJob]) -> pd.DataFrame:
                     "extinct_rate": results["prob_extinct"]["average"]
                     / results["time_step"]["average"],
                     "std_dev_strat_phe": results["std_dev_strat_phe"]["average"],
+                    "avg_strat_phe_0": results["avg_strat_phe"]["average"][0],
                 }
             )
 
             job_results.append(results)
 
         job_results = pd.concat(job_results)
-        job_results = pd.DataFrame(
-            {"mean": job_results.mean(), "sem": job_results.sem()}
-        ).transpose()
 
-        job_results["with_mut"] = sim_job.config["model"]["prob_mut"] > 0.0
+        job_avg_results = []
+        for column in job_results.columns:
+            job_avg_results.append(job_results[column].mean())
+            job_avg_results.append(job_results[column].sem())
+        job_avg_results = pd.DataFrame([job_avg_results])
+        job_avg_results.columns = pd.MultiIndex.from_product(
+            [job_results.columns, ["mean", "sem"]]
+        )
 
-        sim_jobs_results.append(job_results)
+        job_avg_results["with_mut"] = sim_job.config["model"]["prob_mut"] > 0.0
+        job_avg_results["strat_phe_0"] = sim_job.config["init"]["strat_phe"][0]
 
-    return pd.concat(sim_jobs_results)
+        sim_jobs_avg_results.append(job_avg_results)
+
+    return pd.concat(sim_jobs_avg_results, ignore_index=True)

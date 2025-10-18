@@ -160,12 +160,12 @@ impl Analyzer {
 
                     let mut std_dev_strat_phe = 0.0;
                     for agt in &state.agents {
-                        let mut diff_sq = 0.0;
+                        let mut variation = 0.0;
                         for (ele, avg_ele) in agt.strat_phe().iter().zip(&avg_strat_phe) {
-                            diff_sq += (ele - avg_ele).powi(2);
+                            variation += (ele - avg_ele).abs();
                         }
-                        diff_sq /= agt.strat_phe().len() as f64;
-                        std_dev_strat_phe += diff_sq;
+                        variation /= 2.0;
+                        std_dev_strat_phe += variation * variation;
                     }
                     std_dev_strat_phe /= state.agents.len() as f64;
                     std_dev_strat_phe = std_dev_strat_phe.sqrt();
@@ -204,7 +204,6 @@ impl Analyzer {
         // Collect the name and result of all observables into a HashMap.
         let mut results = HashMap::new();
         for obs in &self.observables {
-            println!("{}", obs.name());
             if results.insert(obs.name(), obs.result()).is_some() {
                 bail!("names of observables must be unique");
             }
