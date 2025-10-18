@@ -186,7 +186,7 @@ impl Engine {
     fn update_event_pool(&self, event_pool: &mut EventPool) {
         event_pool.clear();
 
-        for (next_env, &rate) in self.cfg.model.rates_trans_env[self.state.env]
+        for (next_env, &rate) in self.cfg.model.rates_trans[self.state.env]
             .iter()
             .enumerate()
         {
@@ -199,11 +199,11 @@ impl Engine {
             let phe = agent.phe();
             event_pool.push(
                 Event::Replication { agent_idx },
-                self.cfg.model.rates_rep[self.state.env][phe],
+                self.cfg.model.rates_birth[self.state.env][phe],
             );
             event_pool.push(
                 Event::Death { agent_idx },
-                self.cfg.model.rates_dec[self.state.env][phe],
+                self.cfg.model.rates_death[self.state.env][phe],
             );
         }
     }

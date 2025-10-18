@@ -12,19 +12,18 @@ fn basic_workflow() {
         + "[model]\n"
         + "n_env = 2\n"
         + "n_phe = 2\n"
-        + "prob_trans_env = [ [ 0.99, 0.01,], [ 0.01, 0.99,],]\n"
-        + "prob_rep = [ [ 0.012, 0.0,], [ 0.0, 0.008,],]\n"
-        + "prob_dec = [ [ 0.0, 0.016,], [ 0.012, 0.0,],]\n"
-        + "prob_mut = 0.001\n"
-        + "std_dev_mut = 0.1\n"
+        + "rates_trans = [ [ -1.0, 1.0,], [ 1.0, -1.0,],]\n"
+        + "rates_birth = [ [ 1.2, 0.0,], [ 0.0, 0.9,],]\n"
+        + "rates_death = [ [ 0.0, 1.6,], [ 1.0, 0.0,],]\n"
+        + "prob_mut = 0.002\n"
         + "\n"
         + "[init]\n"
-        + "n_agt = 4096\n"
-        + "prob_phe = [ 0.5, 0.5,]\n"
+        + "n_agt = 256\n"
+        + "strat_phe = [ 0.5, 0.5,]\n"
         + "\n"
         + "[output]\n"
-        + "steps_per_file = 16384\n"
-        + "steps_per_save = 1024\n";
+        + "steps_per_file = 65536\n"
+        + "steps_per_save = 256\n";
 
     fs::write(&config_path, config_contents).expect("failed to write config file");
 

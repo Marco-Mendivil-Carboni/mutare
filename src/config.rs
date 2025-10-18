@@ -23,12 +23,12 @@ pub struct ModelParams {
     /// Number of phenotypes.
     pub n_phe: usize,
 
-    /// Environment transition probabilities (matrix `n_env x n_env`).
-    pub rates_trans_env: Vec<Vec<f64>>,
-    /// Replication rates (matrix `n_env x n_phe`).
-    pub rates_rep: Vec<Vec<f64>>,
-    /// Deceased rates (matrix `n_env x n_phe`).
-    pub rates_dec: Vec<Vec<f64>>,
+    /// Environment transition rates (matrix `n_env x n_env`).
+    pub rates_trans: Vec<Vec<f64>>,
+    /// Agent birth rates (matrix `n_env x n_phe`).
+    pub rates_birth: Vec<Vec<f64>>,
+    /// Agent death rates (matrix `n_env x n_phe`).
+    pub rates_death: Vec<Vec<f64>>,
 
     /// Mutation probability.
     pub prob_mut: f64,
@@ -77,12 +77,12 @@ impl Config {
         check_num(model.n_env, 1..=16).context("invalid number of environments")?;
         check_num(model.n_phe, 1..=16).context("invalid number of phenotypes")?;
 
-        check_mat(&model.rates_trans_env, (model.n_env, model.n_env))
+        check_mat(&model.rates_trans, (model.n_env, model.n_env))
             .context("invalid environment transition rates")?;
-        check_mat(&model.rates_rep, (model.n_env, model.n_phe))
-            .context("invalid replicating rates")?;
-        check_mat(&model.rates_dec, (model.n_env, model.n_phe))
-            .context("invalid deceased rates")?;
+        check_mat(&model.rates_birth, (model.n_env, model.n_phe))
+            .context("invalid agent birth rates")?;
+        check_mat(&model.rates_death, (model.n_env, model.n_phe))
+            .context("invalid agent death rates")?;
 
         check_num(model.prob_mut, 0.0..=1.0).context("invalid mutation probability")?;
 

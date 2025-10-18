@@ -8,19 +8,20 @@
 
 `mutare` simulates a stochastic agent-based model of adaptation in uncertain environments with the following characteristics:
 
-- The **environment** is a discrete random variable with `n_env` possible states and follows a **Markov chain** with configurable transition probabilities (`prob_trans_env`).
-- Each agent carries a **phenotype**, a discrete variable with `n_phe` possible states, and a **probability distribution over phenotypes**.
-- At every simulation step, agents may **replicate** or **decease** according to environment and phenotype specific probabilities (`prob_rep` and `prob_dec`).
-- The offspring's phenotype is sampled from the parent's distribution.
-- The offspring inherits the parent's distribution, but with probability `prob_mut` this distribution suffers a slight mutation (modulated by `std_dev_mut`).
+- The **environment** is a discrete variable with `n_env` possible values and follows a **Markov chain** defined by the transition rates `rates_trans`.
+- Each agent carries a **phenotype**, a discrete variable with `n_phe` possible values, and a **phenotypic strategy**, a distribution over phenotypes.
+- Agents may **duplicate** or **die** according to environment and phenotype specific rates (`rates_birth` and `rates_death`).
+- The offspring's phenotype is sampled from the parent's phenotypic strategy.
+- The offspring inherits the parent's phenotypic strategy, but with probability `prob_mut` it suffers a random mutation and changes completely.
 - At every simulation step, the population is capped at its initial size and reinitialized if extinction is reached.
-- Each output file contains `steps_per_file` records, and the state is saved every `steps_per_save` steps if specified.
+- Each output file contains `steps_per_file` records, and the state is saved every `steps_per_save` steps.
 
 From these output files `mutare` can also compute the following observables:
-- The relative change in the number of agents per step.
+- The relative change in the number of agents.
 - The probability of extinction.
 - The probability of each environment.
-- The average probability distribution over phenotypes across agents.
+- The average phenotypic strategy across agents.
+- The standard deviation of the phenotypic strategy across agents.
 
 ---
 
@@ -56,19 +57,18 @@ Here is an example config file:
 [model]
 n_env = 2
 n_phe = 2
-prob_trans_env = [ [ 0.99, 0.01,], [ 0.01, 0.99,],]
-prob_rep = [ [ 0.012, 0.0,], [ 0.0, 0.008,],]
-prob_dec = [ [ 0.0, 0.016,], [ 0.012, 0.0,],]
-prob_mut = 0.001
-std_dev_mut = 0.1
+rates_trans = [ [ -1.0, 1.0,], [ 1.0, -1.0,],]
+rates_birth = [ [ 1.2, 0.0,], [ 0.0, 0.9,],]
+rates_death = [ [ 0.0, 1.6,], [ 1.0, 0.0,],]
+prob_mut = 0.002
 
 [init]
-n_agt = 4096
-prob_phe = [ 0.5, 0.5,]
+n_agt = 256
+strat_phe = [ 0.5, 0.5,]
 
 [output]
-steps_per_file = 16384
-steps_per_save = 1024
+steps_per_file = 65536
+steps_per_save = 256
 
 ```
 

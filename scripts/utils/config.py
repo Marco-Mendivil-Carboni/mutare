@@ -8,9 +8,9 @@ from typing import TypedDict, List, cast
 class ModelParams(TypedDict):
     n_env: int
     n_phe: int
-    rates_trans_env: List[List[float]]
-    rates_rep: List[List[float]]
-    rates_dec: List[List[float]]
+    rates_trans: List[List[float]]
+    rates_birth: List[List[float]]
+    rates_death: List[List[float]]
     prob_mut: float
 
 
