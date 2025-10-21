@@ -1,7 +1,6 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
 from pathlib import Path
-import numpy as np
 from typing import List
 
 from utils.config import Config
@@ -13,7 +12,7 @@ if __name__ == "__main__":
 
     sim_jobs: List[SimJob] = []
 
-    strat_phe_0_list = list(map(float, np.linspace(1 / 16, 1, 16)))
+    strat_phe_0_list = [(i + 1) / 16 for i in range(16)]
     for strat_phe_0 in strat_phe_0_list:
         config: Config = {
             "model": {
@@ -22,10 +21,10 @@ if __name__ == "__main__":
                 "rates_trans": [[-1.0, 1.0], [1.0, -1.0]],
                 "rates_birth": [[1.2, 0.0], [0.0, 0.9]],
                 "rates_death": [[0.0, 1.6], [1.0, 0.0]],
-                "prob_mut": 1 / 512,
+                "prob_mut": 0.0016,
             },
             "init": {
-                "n_agt": 256,
+                "n_agt": 240,
                 "strat_phe": [strat_phe_0, 1 - strat_phe_0],
             },
             "output": {
