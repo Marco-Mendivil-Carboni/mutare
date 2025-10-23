@@ -21,7 +21,7 @@ if __name__ == "__main__":
                 "rates_trans": [[-1.0, 1.0], [1.0, -1.0]],
                 "rates_birth": [[1.2, 0.0], [0.0, 0.9]],
                 "rates_death": [[0.0, 1.6], [1.0, 0.0]],
-                "prob_mut": 0.0016,
+                "prob_mut": 0.0018,
             },
             "init": {
                 "n_agt": 240,
@@ -29,7 +29,7 @@ if __name__ == "__main__":
             },
             "output": {
                 "steps_per_file": 1_048_576,
-                "steps_per_save": 4_096,
+                "steps_per_save": 256,
             },
         }
 

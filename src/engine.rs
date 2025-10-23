@@ -1,7 +1,8 @@
 //! Simulation engine.
 
+use crate::analysis::calc_observables;
 use crate::config::Config;
-use crate::types::{Agent, Event, Record, State};
+use crate::types::{Agent, Event, Observables, State};
 use anyhow::{Context, Result};
 use rand::prelude::*;
 use rand_chacha::ChaCha12Rng;
@@ -61,6 +62,8 @@ pub struct Engine {
     step: usize,
     /// Current simulation state.
     state: State,
+    /// Number of extinctions so far.
+    n_extinct: usize,
 }
 
 impl Engine {
@@ -77,7 +80,12 @@ impl Engine {
             cfg,
             rng,
             step: 0,
-            state: State { env, agents },
+            state: State {
+                time: 0.0,
+                env,
+                agents,
+            },
+            n_extinct: 0,
         })
     }
 
@@ -94,7 +102,9 @@ impl Engine {
                 .perform_step(&mut event_pool)
                 .context("failed to perform step")?;
 
-            encode::write(&mut writer, &record).context("failed to serialize record")?;
+            if let Some(record) = record {
+                encode::write(&mut writer, &record).context("failed to serialize record")?;
+            }
         }
 
         writer.flush().context("failed to flush writer stream")?;
@@ -134,22 +144,26 @@ impl Engine {
         Ok(agents)
     }
 
-    /// Perform a single simulation step and return a `Record`.
-    fn perform_step(&mut self, event_pool: &mut EventPool) -> Result<Record> {
-        let prev_n_agents = self.state.agents.len();
-
+    /// Perform a single simulation step and return ...
+    fn perform_step(&mut self, event_pool: &mut EventPool) -> Result<Option<Observables>> {
+        // Create event distribution.
         self.update_event_pool(event_pool);
+        let event_dist = WeightedIndex::new(event_pool.rates())?;
 
         // Select next simulation event.
-        let event_dist = WeightedIndex::new(event_pool.rates())?;
-        let event = event_pool.events()[event_dist.sample(&mut self.rng)].clone();
+        let event = &event_pool.events()[event_dist.sample(&mut self.rng)];
 
         // Sample time to the next event.
         let total_rate = event_dist.total_weight();
         let time_step = Exp::new(total_rate)?.sample(&mut self.rng);
 
+        // ...
+        let observables = (self.step % self.cfg.output.steps_per_save == 0)
+            .then(|| calc_observables(&self.state, event, time_step, self.n_extinct));
+
         // Update simulation state.
-        match event {
+        self.state.time += time_step;
+        match *event {
             Event::EnvTrans { next_env } => {
                 self.state.env = next_env;
             }
@@ -162,24 +176,17 @@ impl Engine {
             }
         }
 
+        if self.state.agents.len() == 0 {
+            self.n_extinct += 1;
+        }
+
         self.normalize_population()
             .context("failed to normalize population size")?;
-
-        let record = Record {
-            prev_n_agents,
-            time_step,
-            event,
-            state: if self.step % self.cfg.output.steps_per_save == 0 {
-                Some(self.state.clone())
-            } else {
-                None
-            },
-        };
 
         // Increment simulation step.
         self.step += 1;
 
-        Ok(record)
+        Ok(observables)
     }
 
     /// Update the event pool based on the configuration and current state.

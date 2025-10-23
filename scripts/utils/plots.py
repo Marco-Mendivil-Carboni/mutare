@@ -4,7 +4,7 @@ from matplotlib.figure import Figure
 from typing import List
 
 from .exec import SimJob
-from .results import collect_sim_jobs_avg_results
+from .analysis import collect_sim_jobs_avg_analysis
 
 mpl.use("pdf")
 
@@ -34,10 +34,10 @@ colors = [
 
 
 def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
-    sim_jobs_avg_results = collect_sim_jobs_avg_results(sim_jobs)
-    print(sim_jobs_avg_results.to_string())
+    sim_jobs_avg_analysis = collect_sim_jobs_avg_analysis(sim_jobs)
+    print(sim_jobs_avg_analysis.to_string())
 
-    with_mut = sim_jobs_avg_results["with_mut"]
+    with_mut = sim_jobs_avg_analysis["with_mut"]
 
     fig_1 = Figure(figsize=(16.0 * cm, 10.0 * cm))
     ax_1 = fig_1.add_subplot(1, 1, 1)
@@ -55,15 +55,15 @@ def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
     ax_3.set_xlabel("$p_{\\phi}(0)_i$")
     ax_3.set_ylabel("$\\langle p_{\\phi}(0)\\rangle$")
 
-    for avg_results, color, label in [
-        (sim_jobs_avg_results[~with_mut], colors[7], "fixed"),
-        (sim_jobs_avg_results[with_mut], colors[1], "with mutations"),
+    for avg_analysis, color, label in [
+        (sim_jobs_avg_analysis[~with_mut], colors[7], "fixed"),
+        (sim_jobs_avg_analysis[with_mut], colors[1], "with mutations"),
     ]:
         ax_1.errorbar(
-            avg_results[("growth_rate", "mean")],
-            avg_results[("extinct_rate", "mean")],
-            xerr=avg_results[("growth_rate", "sem")],
-            yerr=avg_results[("extinct_rate", "sem")],
+            avg_analysis[("growth_rate", "mean")],
+            avg_analysis[("extinct_rate", "mean")],
+            xerr=avg_analysis[("growth_rate", "sem")],
+            yerr=avg_analysis[("extinct_rate", "sem")],
             c=color,
             ls=":",
             marker="o",
@@ -71,14 +71,14 @@ def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
             label=label,
         )
         ax_1.axvline(
-            avg_results[("growth_rate", "mean")].mean(),
+            avg_analysis[("growth_rate", "mean")].mean(),
             c=color,
             ls=":",
             lw=1,
             alpha=0.5,
         )
         ax_1.axhline(
-            avg_results[("extinct_rate", "mean")].mean(),
+            avg_analysis[("extinct_rate", "mean")].mean(),
             c=color,
             ls=":",
             lw=1,
@@ -86,9 +86,9 @@ def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
         )
 
         ax_2.errorbar(
-            avg_results["strat_phe_0"],
-            avg_results[("growth_rate", "mean")],
-            yerr=avg_results[("growth_rate", "sem")],
+            avg_analysis["strat_phe_0"],
+            avg_analysis[("growth_rate", "mean")],
+            yerr=avg_analysis[("growth_rate", "sem")],
             c=color,
             ls=":",
             marker="o",
@@ -97,9 +97,9 @@ def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
         )
 
         ax_3.errorbar(
-            avg_results["strat_phe_0"],
-            avg_results[("avg_strat_phe_0", "mean")],
-            yerr=avg_results[("std_dev_strat_phe", "mean")],
+            avg_analysis["strat_phe_0"],
+            avg_analysis[("avg_strat_phe_0", "mean")],
+            yerr=avg_analysis[("std_dev_strat_phe", "mean")],
             c=color,
             ls=":",
             marker="o",

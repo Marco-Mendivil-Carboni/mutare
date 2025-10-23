@@ -75,7 +75,7 @@ impl Manager {
         Ok(())
     }
 
-    /// Analyze all output files from all simulation runs and save analysis results.
+    /// Analyze all output files from all simulation runs and save the analysis.
     pub fn analyze_sim(&self) -> Result<()> {
         let n_runs = self.count_run_dirs().context("failed to count run dirs")?;
         for run_idx in 0..n_runs {
@@ -91,8 +91,8 @@ impl Manager {
             }
 
             analyzer
-                .save_results(self.results_file(run_idx))
-                .context("failed to save results")?;
+                .analyze(self.analysis_file(run_idx))
+                .context("failed to save analysis")?;
 
             let run_dir = self.run_dir(run_idx);
             log::info!("analyzed {run_dir:?}");
@@ -147,7 +147,7 @@ impl Manager {
             .join(format!("output-{file_idx:04}.msgpack"))
     }
 
-    fn results_file(&self, run_idx: usize) -> PathBuf {
-        self.run_dir(run_idx).join("results.msgpack")
+    fn analysis_file(&self, run_idx: usize) -> PathBuf {
+        self.run_dir(run_idx).join("analysis.msgpack")
     }
 }

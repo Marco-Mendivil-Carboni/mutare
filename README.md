@@ -14,14 +14,16 @@
 - The offspring's phenotype is sampled from the parent's phenotypic strategy.
 - The offspring inherits the parent's phenotypic strategy, but with probability `prob_mut` it suffers a random mutation and changes completely.
 - At every simulation step, the population is capped at its initial size and reinitialized if extinction is reached.
-- Each output file contains `steps_per_file` records, and the state is saved every `steps_per_save` steps.
 
-From these output files `mutare` can also compute the following observables:
-- The relative change in the number of agents.
-- The probability of extinction.
-- The probability of each environment.
-- The average phenotypic strategy across agents.
-- The standard deviation of the phenotypic strategy across agents.
+During the simulation, every `steps_per_save` steps, the following observables are computed and saved:
+- Current simulation time
+- Time until the next event
+- Instantaneous growth rate
+- Number of extinctions so far
+- Average phenotypic strategy
+- Standard deviation of the phenotypic strategy
+
+Every `steps_per_file` steps, the simulation is stopped and a new output file is written to disk.
 
 ---
 

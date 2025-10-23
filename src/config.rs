@@ -90,10 +90,10 @@ impl Config {
 
         check_vec(&init.strat_phe, model.n_phe).context("invalid phenotypic strategy")?;
 
-        check_num(output.steps_per_file, 0..=1_048_576)
+        check_num(output.steps_per_file, 64..=1_048_576)
             .context("invalid number of steps per output file")?;
 
-        check_num(output.steps_per_save, 256..)
+        check_num(output.steps_per_save, 64..=output.steps_per_file)
             .context("invalid number of steps per saved record")?;
 
         Ok(())
