@@ -1,4 +1,4 @@
-//! Simulation analyzer and observables.
+//! Simulation analysis.
 
 use crate::config::Config;
 use crate::types::{Event, Observables, State};
@@ -10,22 +10,6 @@ use std::{
     io::{BufReader, BufWriter},
     path::Path,
 };
-
-/// Simulation analysis results.
-#[derive(Serialize)]
-pub struct Analysis {
-    /// Mean population growth rate.
-    pub growth_rate: f64,
-
-    /// Total extinction rate.
-    pub extinct_rate: f64,
-
-    /// Mean average phenotypic strategy.
-    pub avg_strat_phe: Vec<f64>,
-
-    /// Mean standard deviation of the phenotypic strategy.
-    pub std_dev_strat_phe: f64,
-}
 
 /// Calculate simulation observables.
 pub fn calc_observables(
@@ -70,6 +54,22 @@ pub fn calc_observables(
         avg_strat_phe,
         std_dev_strat_phe,
     }
+}
+
+/// Simulation analysis results.
+#[derive(Serialize)]
+pub struct Analysis {
+    /// Mean population growth rate.
+    pub growth_rate: f64,
+
+    /// Total extinction rate.
+    pub extinct_rate: f64,
+
+    /// Mean average phenotypic strategy.
+    pub avg_strat_phe: Vec<f64>,
+
+    /// Mean standard deviation of the phenotypic strategy.
+    pub std_dev_strat_phe: f64,
 }
 
 /// Simulation analyzer.

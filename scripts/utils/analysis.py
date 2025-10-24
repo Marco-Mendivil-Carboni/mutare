@@ -6,24 +6,24 @@ from typing import TypedDict, Dict, List, cast
 from .exec import SimJob
 
 
-class Observables(TypedDict):
+class Analysis(TypedDict):
     growth_rate: float
     extinct_rate: int
     avg_strat_phe: List[float]
     std_dev_strat_phe: float
 
 
-def read_analysis(sim_dir: Path, run_idx: int) -> Observables:
+def read_analysis(sim_dir: Path, run_idx: int) -> Analysis:
     file_path = sim_dir / f"run-{run_idx:04}/analysis.msgpack"
     with file_path.open("rb") as file:
-        avg_observables = msgpack.unpack(file)
-    return cast(Observables, avg_observables)
+        analysis = msgpack.unpack(file)
+    return cast(Analysis, analysis)
 
 
-def collect_sim_jobs_avg_observables(sim_jobs: List[SimJob]) -> pd.DataFrame:
-    sim_jobs_avg_observables = []
+def collect_avg_analyses(sim_jobs: List[SimJob]) -> pd.DataFrame:
+    avg_analyses = []
     for sim_job in sim_jobs:
-        sim_job_avg_observables = []
+        analyses = []
         for run_idx in range(sim_job.run_options.n_runs):
             analysis = read_analysis(sim_job.sim_dir, run_idx)
             analysis = cast(Dict, analysis)
@@ -31,22 +31,22 @@ def collect_sim_jobs_avg_observables(sim_jobs: List[SimJob]) -> pd.DataFrame:
             analysis.pop("avg_strat_phe")
             analysis = pd.DataFrame(analysis, index=[run_idx])
 
-            sim_job_avg_observables.append(analysis)
+            analyses.append(analysis)
 
-        sim_job_avg_observables = pd.concat(sim_job_avg_observables)
+        analyses = pd.concat(analyses)
 
-        job_avg_analysis = []
-        for column in sim_job_avg_observables.columns:
-            job_avg_analysis.append(sim_job_avg_observables[column].mean())
-            job_avg_analysis.append(sim_job_avg_observables[column].sem())
-        job_avg_analysis = pd.DataFrame([job_avg_analysis])
-        job_avg_analysis.columns = pd.MultiIndex.from_product(
-            [sim_job_avg_observables.columns, ["mean", "sem"]]
+        avg_analysis = []
+        for column in analyses.columns:
+            avg_analysis.append(analyses[column].mean())
+            avg_analysis.append(analyses[column].sem())
+        avg_analysis = pd.DataFrame([avg_analysis])
+        avg_analysis.columns = pd.MultiIndex.from_product(
+            [analyses.columns, ["mean", "sem"]]
         )
 
-        job_avg_analysis["with_mut"] = sim_job.config["model"]["prob_mut"] > 0.0
-        job_avg_analysis["strat_phe_0"] = sim_job.config["init"]["strat_phe"][0]
+        avg_analysis["with_mut"] = sim_job.config["model"]["prob_mut"] > 0.0
+        avg_analysis["strat_phe_0"] = sim_job.config["init"]["strat_phe"][0]
 
-        sim_jobs_avg_observables.append(job_avg_analysis)
+        avg_analyses.append(avg_analysis)
 
-    return pd.concat(sim_jobs_avg_observables, ignore_index=True)
+    return pd.concat(avg_analyses, ignore_index=True)

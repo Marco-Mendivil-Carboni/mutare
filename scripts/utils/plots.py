@@ -4,7 +4,7 @@ from matplotlib.figure import Figure
 from typing import List
 
 from .exec import SimJob
-from .analysis import collect_sim_jobs_avg_observables
+from .analysis import collect_avg_analyses
 
 mpl.use("pdf")
 
@@ -37,10 +37,10 @@ colors = [
 
 
 def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
-    sim_jobs_avg_analysis = collect_sim_jobs_avg_observables(sim_jobs)
-    print(sim_jobs_avg_analysis.to_string())
+    avg_analyses = collect_avg_analyses(sim_jobs)
+    print(avg_analyses.to_string())
 
-    with_mut = sim_jobs_avg_analysis["with_mut"]
+    with_mut = avg_analyses["with_mut"]
 
     fig_1 = Figure(figsize=(16.0 * cm, 10.0 * cm))
     ax_1 = fig_1.add_subplot(1, 1, 1)
@@ -59,8 +59,8 @@ def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
     ax_3.set_ylabel("$\\langle p_{\\phi}(0)\\rangle$")
 
     for avg_analysis, color, label in [
-        (sim_jobs_avg_analysis[~with_mut], colors[7], "fixed"),
-        (sim_jobs_avg_analysis[with_mut], colors[1], "with mutations"),
+        (avg_analyses[~with_mut], colors[7], "fixed"),
+        (avg_analyses[with_mut], colors[1], "with mutations"),
     ]:
         ax_1.errorbar(
             avg_analysis[("growth_rate", "mean")],

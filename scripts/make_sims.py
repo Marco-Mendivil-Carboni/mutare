@@ -21,10 +21,10 @@ if __name__ == "__main__":
                 "rates_trans": [[-1.0, 1.0], [1.0, -1.0]],
                 "rates_birth": [[1.2, 0.0], [0.0, 0.9]],
                 "rates_death": [[0.0, 1.6], [1.0, 0.0]],
-                "prob_mut": 0.0018,
+                "prob_mut": 0.0016,
             },
             "init": {
-                "n_agt": 240,
+                "n_agt": 260,
                 "strat_phe": [strat_phe_0, 1 - strat_phe_0],
             },
             "output": {
