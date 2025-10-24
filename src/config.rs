@@ -50,7 +50,7 @@ pub struct OutputParams {
     /// Number of steps per output file.
     pub steps_per_file: usize,
 
-    /// Number of steps per saved record.
+    /// Number of steps per saved observables.
     pub steps_per_save: usize,
 }
 
@@ -94,7 +94,7 @@ impl Config {
             .context("invalid number of steps per output file")?;
 
         check_num(output.steps_per_save, 64..=output.steps_per_file)
-            .context("invalid number of steps per saved record")?;
+            .context("invalid number of steps per saved observables")?;
 
         Ok(())
     }

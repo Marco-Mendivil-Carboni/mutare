@@ -4,7 +4,7 @@ from matplotlib.figure import Figure
 from typing import List
 
 from .exec import SimJob
-from .analysis import collect_sim_jobs_avg_analysis
+from .analysis import collect_sim_jobs_avg_observables
 
 mpl.use("pdf")
 
@@ -34,7 +34,7 @@ colors = [
 
 
 def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
-    sim_jobs_avg_analysis = collect_sim_jobs_avg_analysis(sim_jobs)
+    sim_jobs_avg_analysis = collect_sim_jobs_avg_observables(sim_jobs)
     print(sim_jobs_avg_analysis.to_string())
 
     with_mut = sim_jobs_avg_analysis["with_mut"]
@@ -50,7 +50,7 @@ def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
     ax_2.set_xlabel("$p_{\\phi}(0)_i$")
     ax_2.set_ylabel("$\\langle\\mu\\rangle$")
 
-    fig_3 = Figure(figsize=(16.0 * cm, 10.0 * cm))
+    fig_3 = Figure(figsize=(12.0 * cm, 10.0 * cm))
     ax_3 = fig_3.add_subplot(1, 1, 1)
     ax_3.set_xlabel("$p_{\\phi}(0)_i$")
     ax_3.set_ylabel("$\\langle p_{\\phi}(0)\\rangle$")

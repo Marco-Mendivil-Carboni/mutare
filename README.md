@@ -18,7 +18,7 @@
 During the simulation, every `steps_per_save` steps, the following observables are computed and saved:
 - Current simulation time
 - Time until the next event
-- Instantaneous growth rate
+- Instantaneous population growth rate
 - Number of extinctions so far
 - Average phenotypic strategy
 - Standard deviation of the phenotypic strategy

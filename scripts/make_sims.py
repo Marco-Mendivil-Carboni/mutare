@@ -29,7 +29,7 @@ if __name__ == "__main__":
             },
             "output": {
                 "steps_per_file": 1_048_576,
-                "steps_per_save": 256,
+                "steps_per_save": 64,
             },
         }
 

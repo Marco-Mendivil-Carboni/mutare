@@ -63,7 +63,7 @@ pub struct Observables {
     /// Time until the next event.
     pub time_step: f64,
 
-    /// Instantaneous growth rate.
+    /// Instantaneous population growth rate.
     pub growth_rate: f64,
 
     /// Number of extinctions so far.

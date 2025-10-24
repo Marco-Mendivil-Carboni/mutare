@@ -4,11 +4,28 @@ use crate::config::Config;
 use crate::types::{Event, Observables, State};
 use anyhow::{Context, Result};
 use rmp_serde::{decode, encode};
+use serde::Serialize;
 use std::{
     fs::File,
     io::{BufReader, BufWriter},
     path::Path,
 };
+
+/// ...
+#[derive(Serialize)]
+pub struct Analysis {
+    /// Mean population growth rate.
+    pub growth_rate: f64,
+
+    /// Extinction rate.
+    pub extinct_rate: f64,
+
+    /// Mean average phenotypic strategy.
+    pub avg_strat_phe: Vec<f64>,
+
+    /// Mean standard deviation of the phenotypic strategy.
+    pub std_dev_strat_phe: f64,
+}
 
 pub fn calc_observables(
     state: &State,
@@ -109,51 +126,27 @@ impl Analyzer {
             .iter()
             .map(|obs| obs.time_step)
             .collect();
-        let growth_rates: Vec<_> = self
-            .observables_vec
-            .iter()
-            .map(|obs| obs.growth_rate)
-            .collect();
-        let std_dev_strat_phes: Vec<_> = self
-            .observables_vec
-            .iter()
-            .map(|obs| obs.std_dev_strat_phe)
-            .collect();
 
-        let analysis = Observables {
-            time: last.time,
-            time_step: average(&time_steps),
-            growth_rate: weighted_average(&growth_rates, &time_steps),
-            n_extinct: last.n_extinct,
+        let weighted = |f: &dyn Fn(&Observables) -> f64| {
+            weighted_average(
+                &self.observables_vec.iter().map(f).collect::<Vec<_>>(),
+                &time_steps,
+            )
+        };
+
+        let analysis = Analysis {
+            growth_rate: weighted(&|o| o.growth_rate),
+            extinct_rate: last.n_extinct as f64 / last.time,
             avg_strat_phe: (0..self.cfg.model.n_phe)
-                .collect::<Vec<_>>()
-                .iter()
-                .map(|&phe| {
-                    weighted_average(
-                        &self
-                            .observables_vec
-                            .iter()
-                            .map(|obs| obs.avg_strat_phe[phe])
-                            .collect::<Vec<_>>(),
-                        &time_steps,
-                    )
-                })
+                .map(|i| weighted(&|o| o.avg_strat_phe[i]))
                 .collect(),
-            std_dev_strat_phe: weighted_average(&std_dev_strat_phes, &time_steps),
+            std_dev_strat_phe: weighted(&|o| o.std_dev_strat_phe),
         };
 
         encode::write_named(&mut writer, &analysis).context("failed to serialize analysis")?;
 
         Ok(())
     }
-}
-
-/// Compute the arithmetic average of a slice of values.
-fn average(values: &[f64]) -> f64 {
-    if values.is_empty() {
-        return f64::NAN;
-    }
-    values.iter().sum::<f64>() / values.len() as f64
 }
 
 /// Compute the weighted average of a slice of values.
