@@ -32,6 +32,9 @@ colors = [
     "#15992c",
 ]
 
+# errorbar_style = dict(ls=":", marker="o", markersize=2)
+# ax_line_style = dict(ls=":", lw=1.0, alpha=0.5)
+
 
 def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
     sim_jobs_avg_analysis = collect_sim_jobs_avg_observables(sim_jobs)

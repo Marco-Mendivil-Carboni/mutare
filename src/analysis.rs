@@ -11,13 +11,13 @@ use std::{
     path::Path,
 };
 
-/// ...
+/// Simulation analysis results.
 #[derive(Serialize)]
 pub struct Analysis {
     /// Mean population growth rate.
     pub growth_rate: f64,
 
-    /// Extinction rate.
+    /// Total extinction rate.
     pub extinct_rate: f64,
 
     /// Mean average phenotypic strategy.
@@ -27,6 +27,7 @@ pub struct Analysis {
     pub std_dev_strat_phe: f64,
 }
 
+/// Calculate simulation observables.
 pub fn calc_observables(
     state: &State,
     event: &Event,
@@ -73,11 +74,12 @@ pub fn calc_observables(
 
 /// Simulation analyzer.
 ///
-/// Computes and manages a set of observables.
+/// Provides methods to read the simulation output files and analyze them.
 pub struct Analyzer {
+    /// Simulation configuration parameters.
     cfg: Config,
-    /// Vector of observables.
-    observables_vec: Vec<Observables>,
+    /// Vector of all the simulation observables.
+    all_observables: Vec<Observables>,
 }
 
 impl Analyzer {
@@ -85,28 +87,24 @@ impl Analyzer {
     pub fn new(cfg: Config) -> Self {
         Self {
             cfg,
-            observables_vec: Vec::new(),
+            all_observables: Vec::new(),
         }
     }
 
-    /// Read simulation output file and update all observables.
+    /// Read simulation output file and add it to the analysis.
     pub fn add_output_file<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
         let file = file.as_ref();
         let file = File::open(file).with_context(|| format!("failed to open {file:?}"))?;
         let mut reader = BufReader::new(file);
 
-        // ... in the file.
+        // Read and collect all the observables in the file.
+        use decode::Error::InvalidMarkerRead;
+        use std::io::ErrorKind::UnexpectedEof;
         loop {
             match decode::from_read(&mut reader) {
-                Ok(observables) => {
-                    self.observables_vec.push(observables);
-                }
-                Err(decode::Error::InvalidMarkerRead(err))
-                    if err.kind() == std::io::ErrorKind::UnexpectedEof =>
-                {
-                    break;
-                }
-                Err(err) => return Err(err).context("failed to deserialize record"),
+                Ok(observables) => self.all_observables.push(observables),
+                Err(InvalidMarkerRead(error)) if error.kind() == UnexpectedEof => break,
+                Err(error) => return Err(error).context("failed to deserialize observables"),
             }
         }
 
@@ -119,28 +117,31 @@ impl Analyzer {
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
         let mut writer = BufWriter::new(file);
 
-        // ...
-        let last = self.observables_vec.last().context("...")?;
-        let time_steps: Vec<_> = self
-            .observables_vec
+        let last_observables = self
+            .all_observables
+            .last()
+            .context("failed to get last observables")?;
+
+        let time_steps = self
+            .all_observables
             .iter()
             .map(|obs| obs.time_step)
-            .collect();
+            .collect::<Vec<_>>();
 
-        let weighted = |f: &dyn Fn(&Observables) -> f64| {
+        let obs_weighted_average = |f: &dyn Fn(&Observables) -> f64| {
             weighted_average(
-                &self.observables_vec.iter().map(f).collect::<Vec<_>>(),
+                &self.all_observables.iter().map(f).collect::<Vec<_>>(),
                 &time_steps,
             )
         };
 
         let analysis = Analysis {
-            growth_rate: weighted(&|o| o.growth_rate),
-            extinct_rate: last.n_extinct as f64 / last.time,
+            growth_rate: obs_weighted_average(&|obs| obs.growth_rate),
+            extinct_rate: last_observables.n_extinct as f64 / last_observables.time,
             avg_strat_phe: (0..self.cfg.model.n_phe)
-                .map(|i| weighted(&|o| o.avg_strat_phe[i]))
+                .map(|phe| obs_weighted_average(&|obs| obs.avg_strat_phe[phe]))
                 .collect(),
-            std_dev_strat_phe: weighted(&|o| o.std_dev_strat_phe),
+            std_dev_strat_phe: obs_weighted_average(&|obs| obs.std_dev_strat_phe),
         };
 
         encode::write_named(&mut writer, &analysis).context("failed to serialize analysis")?;

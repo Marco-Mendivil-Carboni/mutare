@@ -15,7 +15,7 @@ use std::{
     path::Path,
 };
 
-/// Collection of all possible events and their associated rates at a certain instant.
+/// Collection of all possible events and their associated rates at a certain step.
 #[derive(Default)]
 pub struct EventPool {
     /// Vector of possible events.
@@ -89,7 +89,7 @@ impl Engine {
         })
     }
 
-    /// Perform the simulation and save the output records to a binary file.
+    /// Perform the simulation and save the simulation observables to a binary file.
     pub fn perform_simulation<P: AsRef<Path>>(&mut self, file: P) -> Result<()> {
         let file = file.as_ref();
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
@@ -98,12 +98,13 @@ impl Engine {
         let mut event_pool = EventPool::default();
 
         for _ in 0..self.cfg.output.steps_per_file {
-            let record = self
+            let observables = self
                 .perform_step(&mut event_pool)
                 .context("failed to perform step")?;
 
-            if let Some(record) = record {
-                encode::write(&mut writer, &record).context("failed to serialize record")?;
+            if let Some(observables) = observables {
+                encode::write(&mut writer, &observables)
+                    .context("failed to serialize observables")?;
             }
         }
 
@@ -144,7 +145,7 @@ impl Engine {
         Ok(agents)
     }
 
-    /// Perform a single simulation step and return ...
+    /// Perform a single simulation step and optionally return the simulation observables.
     fn perform_step(&mut self, event_pool: &mut EventPool) -> Result<Option<Observables>> {
         // Create event distribution.
         self.update_event_pool(event_pool);
@@ -157,7 +158,7 @@ impl Engine {
         let total_rate = event_dist.total_weight();
         let time_step = Exp::new(total_rate)?.sample(&mut self.rng);
 
-        // ...
+        // Calculate simulation observables.
         let observables = (self.step % self.cfg.output.steps_per_save == 0)
             .then(|| calc_observables(&self.state, event, time_step, self.n_extinct));
 
@@ -176,10 +177,12 @@ impl Engine {
             }
         }
 
+        // Update number of extinctions so far.
         if self.state.agents.len() == 0 {
             self.n_extinct += 1;
         }
 
+        // Normalize population size.
         self.normalize_population()
             .context("failed to normalize population size")?;
 
