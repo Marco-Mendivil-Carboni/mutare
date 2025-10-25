@@ -106,7 +106,7 @@ class JobResult(Enum):
 
 def execute_sim_job(sim_job: SimJob) -> JobResult:
     try:
-        print_process_msg(f"starting job:\n{sim_job}")
+        print_process_msg(f"starting job: {sim_job.sim_dir}")
 
         with open(sim_job.sim_dir / ".lock", "w") as lock_file:
             fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -121,7 +121,7 @@ def execute_sim_job(sim_job: SimJob) -> JobResult:
         return JobResult.STOPPED
 
     except Exception as exception:
-        print_process_msg(f"job failed:\n{exception}")
+        print_process_msg(f"job failed: {exception}")
         return JobResult.FAILED
 
 
