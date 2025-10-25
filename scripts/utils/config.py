@@ -2,7 +2,7 @@ import toml
 from pathlib import Path
 import hashlib
 import json
-from typing import TypedDict, List, cast
+from typing import TypedDict, List, NotRequired, cast
 
 
 class ModelParams(TypedDict):
@@ -15,8 +15,8 @@ class ModelParams(TypedDict):
 
 
 class InitParams(TypedDict):
-    n_agt: int
-    strat_phe: List[float]
+    n_agents: int
+    strat_phe: NotRequired[List[float]]
 
 
 class OutputParams(TypedDict):

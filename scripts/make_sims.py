@@ -10,40 +10,34 @@ from utils.plots import make_plots
 if __name__ == "__main__":
     base_dir = Path("simulations/")
 
+    config: Config = {
+        "model": {
+            "n_env": 2,
+            "n_phe": 2,
+            "rates_trans": [[-1.0, 1.0], [1.0, -1.0]],
+            "rates_birth": [[1.2, 0.0], [0.0, 0.9]],
+            "rates_death": [[0.0, 1.6], [1.0, 0.0]],
+            "prob_mut": 0.002,
+        },
+        "init": {"n_agents": 240},
+        "output": {"steps_per_file": 1_048_576, "steps_per_save": 64},
+    }
+
+    run_options = RunOptions(clean=False, n_runs=4, n_files=64, analyze=True)
+
     sim_jobs: List[SimJob] = []
 
+    sim_jobs.append(SimJob(base_dir, config, run_options))
+
     strat_phe_0_list = [(i + 1) / 16 for i in range(16)]
+
     for strat_phe_0 in strat_phe_0_list:
-        config: Config = {
-            "model": {
-                "n_env": 2,
-                "n_phe": 2,
-                "rates_trans": [[-1.0, 1.0], [1.0, -1.0]],
-                "rates_birth": [[1.2, 0.0], [0.0, 0.9]],
-                "rates_death": [[0.0, 1.6], [1.0, 0.0]],
-                "prob_mut": 0.0016,
-            },
-            "init": {
-                "n_agt": 260,
-                "strat_phe": [strat_phe_0, 1 - strat_phe_0],
-            },
-            "output": {
-                "steps_per_file": 1_048_576,
-                "steps_per_save": 64,
-            },
-        }
-
-        run_options = RunOptions(
-            clean=False,
-            n_runs=4,
-            n_files=64,
-            analyze=True,
-        )
-
-        sim_jobs.append(SimJob(base_dir, config, run_options))
+        config["init"]["strat_phe"] = [strat_phe_0, 1 - strat_phe_0]
 
         config["model"]["prob_mut"] = 0.0
+        sim_jobs.append(SimJob(base_dir, config, run_options))
 
+        config["model"]["prob_mut"] = 0.002
         sim_jobs.append(SimJob(base_dir, config, run_options))
 
     execute_sim_jobs(sim_jobs)

@@ -25,8 +25,8 @@ pub fn calc_observables(
     } / (state.agents.len() as f64 * time_step);
 
     let mut avg_strat_phe = vec![0.0; state.agents[0].strat_phe().len()];
-    for agt in &state.agents {
-        for (sum, &ele) in avg_strat_phe.iter_mut().zip(agt.strat_phe()) {
+    for agent in &state.agents {
+        for (sum, &ele) in avg_strat_phe.iter_mut().zip(agent.strat_phe()) {
             *sum += ele;
         }
     }
@@ -35,9 +35,9 @@ pub fn calc_observables(
         .for_each(|ele| *ele /= state.agents.len() as f64);
 
     let mut std_dev_strat_phe = 0.0;
-    for agt in &state.agents {
+    for agent in &state.agents {
         let mut variation = 0.0;
-        for (ele, avg_ele) in agt.strat_phe().iter().zip(&avg_strat_phe) {
+        for (ele, avg_ele) in agent.strat_phe().iter().zip(&avg_strat_phe) {
             variation += (ele - avg_ele).abs();
         }
         variation /= 2.0;
@@ -128,6 +128,10 @@ impl Analyzer {
             .map(|obs| obs.time_step)
             .collect::<Vec<_>>();
 
+        let obs_average = |f: &dyn Fn(&Observables) -> f64| {
+            average(&self.all_observables.iter().map(f).collect::<Vec<_>>())
+        };
+
         let obs_weighted_average = |f: &dyn Fn(&Observables) -> f64| {
             weighted_average(
                 &self.all_observables.iter().map(f).collect::<Vec<_>>(),
@@ -139,15 +143,23 @@ impl Analyzer {
             growth_rate: obs_weighted_average(&|obs| obs.growth_rate),
             extinct_rate: last_observables.n_extinct as f64 / last_observables.time,
             avg_strat_phe: (0..self.cfg.model.n_phe)
-                .map(|phe| obs_weighted_average(&|obs| obs.avg_strat_phe[phe]))
+                .map(|phe| obs_average(&|obs| obs.avg_strat_phe[phe]))
                 .collect(),
-            std_dev_strat_phe: obs_weighted_average(&|obs| obs.std_dev_strat_phe),
+            std_dev_strat_phe: obs_average(&|obs| obs.std_dev_strat_phe),
         };
 
         encode::write_named(&mut writer, &analysis).context("failed to serialize analysis")?;
 
         Ok(())
     }
+}
+
+/// Compute the arithmetic average of a slice of values.
+fn average(values: &[f64]) -> f64 {
+    if values.is_empty() {
+        return f64::NAN;
+    }
+    values.iter().sum::<f64>() / values.len() as f64
 }
 
 /// Compute the weighted average of a slice of values.

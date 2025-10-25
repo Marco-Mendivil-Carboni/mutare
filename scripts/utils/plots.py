@@ -1,7 +1,7 @@
 from pathlib import Path
 import matplotlib as mpl
 from matplotlib.figure import Figure
-from typing import List
+from typing import Dict, List, Any
 
 from .exec import SimJob
 from .analysis import collect_avg_analyses
@@ -32,83 +32,100 @@ colors = [
     "#15992c",
 ]
 
-# errorbar_style = dict(ls=":", marker="o", markersize=2)
-# ax_line_style = dict(ls=":", lw=1.0, alpha=0.5)
+errorbar_style: Dict[str, Any] = dict(ls=":", marker="o", markersize=2)
+ax_line_style: Dict[str, Any] = dict(ls=":", lw=1.0, alpha=0.5)
 
 
 def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
     avg_analyses = collect_avg_analyses(sim_jobs)
     print(avg_analyses.to_string())
 
-    with_mut = avg_analyses["with_mut"]
+    sim_type = avg_analyses["sim_type"]
 
     fig_1 = Figure(figsize=(16.0 * cm, 10.0 * cm))
-    ax_1 = fig_1.add_subplot(1, 1, 1)
+    ax_1 = fig_1.add_subplot()
     ax_1.set_xlabel("$\\langle\\mu\\rangle$")
     ax_1.set_ylabel("$r_e$")
     ax_1.set_yscale("log")
 
     fig_2 = Figure(figsize=(16.0 * cm, 10.0 * cm))
-    ax_2 = fig_2.add_subplot(1, 1, 1)
+    ax_2 = fig_2.add_subplot()
     ax_2.set_xlabel("$p_{\\phi}(0)_i$")
     ax_2.set_ylabel("$\\langle\\mu\\rangle$")
 
-    fig_3 = Figure(figsize=(12.0 * cm, 10.0 * cm))
-    ax_3 = fig_3.add_subplot(1, 1, 1)
+    fig_3 = Figure(figsize=(16.0 * cm, 10.0 * cm))
+    ax_3 = fig_3.add_subplot()
     ax_3.set_xlabel("$p_{\\phi}(0)_i$")
     ax_3.set_ylabel("$\\langle p_{\\phi}(0)\\rangle$")
 
-    for avg_analysis, color, label in [
-        (avg_analyses[~with_mut], colors[7], "fixed"),
-        (avg_analyses[with_mut], colors[1], "with mutations"),
+    for avg_analyses, color, label in [
+        (avg_analyses[sim_type == "fixed"], colors[1], "fixed"),
+        (avg_analyses[sim_type == "with mutations"], colors[7], "with mutations"),
+        (avg_analyses[sim_type == "random init"], colors[11], "random init"),
     ]:
         ax_1.errorbar(
-            avg_analysis[("growth_rate", "mean")],
-            avg_analysis[("extinct_rate", "mean")],
-            xerr=avg_analysis[("growth_rate", "sem")],
-            yerr=avg_analysis[("extinct_rate", "sem")],
+            avg_analyses[("growth_rate", "mean")],
+            avg_analyses[("extinct_rate", "mean")],
+            xerr=avg_analyses[("growth_rate", "sem")],
+            yerr=avg_analyses[("extinct_rate", "sem")],
             c=color,
-            ls=":",
-            marker="o",
-            markersize=2,
             label=label,
+            **errorbar_style,
         )
         ax_1.axvline(
-            avg_analysis[("growth_rate", "mean")].mean(),
+            avg_analyses[("growth_rate", "mean")].mean(),
             c=color,
-            ls=":",
-            lw=1,
-            alpha=0.5,
+            **ax_line_style,
         )
         ax_1.axhline(
-            avg_analysis[("extinct_rate", "mean")].mean(),
+            avg_analyses[("extinct_rate", "mean")].mean(),
             c=color,
-            ls=":",
-            lw=1,
-            alpha=0.5,
+            **ax_line_style,
         )
 
-        ax_2.errorbar(
-            avg_analysis["strat_phe_0"],
-            avg_analysis[("growth_rate", "mean")],
-            yerr=avg_analysis[("growth_rate", "sem")],
-            c=color,
-            ls=":",
-            marker="o",
-            markersize=2,
-            label=label,
-        )
+        if label != "random init":
+            ax_2.errorbar(
+                avg_analyses["strat_phe_0"],
+                avg_analyses[("growth_rate", "mean")],
+                yerr=avg_analyses[("growth_rate", "sem")],
+                c=color,
+                label=label,
+                **errorbar_style,
+            )
+        else:
+            for growth_rate_mean, growth_rate_sem in avg_analyses[
+                [("growth_rate", "mean"), ("growth_rate", "sem")]
+            ].itertuples(index=False):
+                ax_2.axhline(growth_rate_mean, c=color, label=label, ls=":")
+                ax_2.axhspan(
+                    growth_rate_mean + growth_rate_sem,
+                    growth_rate_mean - growth_rate_sem,
+                    color=color,
+                    lw=0.0,
+                    alpha=0.5,
+                )
 
-        ax_3.errorbar(
-            avg_analysis["strat_phe_0"],
-            avg_analysis[("avg_strat_phe_0", "mean")],
-            yerr=avg_analysis[("std_dev_strat_phe", "mean")],
-            c=color,
-            ls=":",
-            marker="o",
-            markersize=2,
-            label=label,
-        )
+        if label != "random init":
+            ax_3.errorbar(
+                avg_analyses["strat_phe_0"],
+                avg_analyses[("avg_strat_phe_0", "mean")],
+                yerr=avg_analyses[("std_dev_strat_phe", "mean")],
+                c=color,
+                label=label,
+                **errorbar_style,
+            )
+        else:
+            for avg_strat_phe_0, std_dev_strat_phe in avg_analyses[
+                [("avg_strat_phe_0", "mean"), ("std_dev_strat_phe", "mean")]
+            ].itertuples(index=False):
+                ax_3.axhline(avg_strat_phe_0, c=color, label=label, ls=":")
+                ax_3.axhspan(
+                    avg_strat_phe_0 + std_dev_strat_phe,
+                    avg_strat_phe_0 - std_dev_strat_phe,
+                    color=color,
+                    lw=0.0,
+                    alpha=0.5,
+                )
 
     ax_1.legend()
     fig_1.savefig(fig_dir / "extinct_rate.pdf")

@@ -18,7 +18,7 @@ fn basic_workflow() {
         + "prob_mut = 0.002\n"
         + "\n"
         + "[init]\n"
-        + "n_agt = 256\n"
+        + "n_agents = 240\n"
         + "strat_phe = [ 0.5, 0.5,]\n"
         + "\n"
         + "[output]\n"

@@ -38,10 +38,10 @@ pub struct ModelParams {
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct InitParams {
     /// Number of agents.
-    pub n_agt: usize,
+    pub n_agents: usize,
 
     /// Phenotypic strategy.
-    pub strat_phe: Vec<f64>,
+    pub strat_phe: Option<Vec<f64>>,
 }
 
 /// Output format parameters.
@@ -86,9 +86,11 @@ impl Config {
 
         check_num(model.prob_mut, 0.0..=1.0).context("invalid mutation probability")?;
 
-        check_num(init.n_agt, 1..=16_384).context("invalid number of agents")?;
+        check_num(init.n_agents, 1..=16_384).context("invalid number of agents")?;
 
-        check_vec(&init.strat_phe, model.n_phe).context("invalid phenotypic strategy")?;
+        if let Some(strat_phe) = &init.strat_phe {
+            check_vec(strat_phe, model.n_phe).context("invalid phenotypic strategy")?;
+        }
 
         check_num(output.steps_per_file, 64..=1_048_576)
             .context("invalid number of steps per output file")?;

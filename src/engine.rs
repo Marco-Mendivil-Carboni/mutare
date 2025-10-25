@@ -135,12 +135,24 @@ impl Engine {
 
     /// Generate random vector of agents.
     fn generate_random_agents(cfg: &Config, rng: &mut ChaCha12Rng) -> Result<Vec<Agent>> {
-        let mut agents = Vec::with_capacity(cfg.init.n_agt);
-        let phe_dist = WeightedIndex::new(&cfg.init.strat_phe)?;
-        for _ in 0..cfg.init.n_agt {
-            let phe = phe_dist.sample(rng);
-            let prob_phe = cfg.init.strat_phe.clone();
-            agents.push(Agent::new(phe, prob_phe));
+        let mut agents = Vec::with_capacity(cfg.init.n_agents);
+        if let Some(strat_phe) = &cfg.init.strat_phe {
+            let phe_dist = WeightedIndex::new(strat_phe)?;
+            for _ in 0..cfg.init.n_agents {
+                let phe = phe_dist.sample(rng);
+                let strat_phe = strat_phe.clone();
+                agents.push(Agent::new(phe, strat_phe));
+            }
+        } else {
+            for _ in 0..cfg.init.n_agents {
+                let phe = rng.random_range(0..cfg.model.n_phe);
+                let mut strat_phe: Vec<_> = (0..cfg.model.n_phe)
+                    .map(|_| rng.random_range(0.0..1.0))
+                    .collect();
+                let sum: f64 = strat_phe.iter().sum();
+                strat_phe.iter_mut().for_each(|ele| *ele /= sum);
+                agents.push(Agent::new(phe, strat_phe));
+            }
         }
         Ok(agents)
     }
@@ -241,8 +253,8 @@ impl Engine {
 
     /// Normalize population size.
     fn normalize_population(&mut self) -> Result<()> {
-        let n_agt = self.state.agents.len();
-        if n_agt == 0 {
+        let n_agents = self.state.agents.len();
+        if n_agents == 0 {
             // Extinction: generate a new random vector of agents.
             self.state.agents = Engine::generate_random_agents(&self.cfg, &mut self.rng)
                 .context("failed to generate random agents")?;
@@ -250,18 +262,18 @@ impl Engine {
             return Ok(());
         }
 
-        let diff = n_agt as i32 - self.cfg.init.n_agt as i32;
+        let diff = n_agents as i32 - self.cfg.init.n_agents as i32;
         if diff > 0 {
             // Too many agents: delete excess agents.
             let excess = diff as usize;
 
             // Randomly pick excess agents to delete.
-            let mut i_agt_del = (0..n_agt).choose_multiple(&mut self.rng, excess);
+            let mut i_agents_del = (0..n_agents).choose_multiple(&mut self.rng, excess);
 
             // Sort in reverse to safely remove by index.
-            i_agt_del.sort_by(|a, b| b.cmp(a));
-            for i_agt in i_agt_del {
-                self.state.agents.swap_remove(i_agt);
+            i_agents_del.sort_by(|a, b| b.cmp(a));
+            for i_agent in i_agents_del {
+                self.state.agents.swap_remove(i_agent);
             }
         }
 

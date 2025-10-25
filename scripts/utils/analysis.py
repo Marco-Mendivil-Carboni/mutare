@@ -44,8 +44,15 @@ def collect_avg_analyses(sim_jobs: List[SimJob]) -> pd.DataFrame:
             [analyses.columns, ["mean", "sem"]]
         )
 
-        avg_analysis["with_mut"] = sim_job.config["model"]["prob_mut"] > 0.0
-        avg_analysis["strat_phe_0"] = sim_job.config["init"]["strat_phe"][0]
+        strat_phe = sim_job.config["init"].get("strat_phe")
+        if strat_phe is not None:
+            avg_analysis["strat_phe_0"] = strat_phe[0]
+            if sim_job.config["model"]["prob_mut"] > 0.0:
+                avg_analysis["sim_type"] = "with mutations"
+            else:
+                avg_analysis["sim_type"] = "fixed"
+        else:
+            avg_analysis["sim_type"] = "random init"
 
         avg_analyses.append(avg_analysis)
 
