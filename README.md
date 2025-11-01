@@ -72,6 +72,7 @@ strat_phe = [ 0.5, 0.5,]
 [output]
 steps_per_file = 65536
 steps_per_save = 256
+hist_bins = 16
 
 ```
 

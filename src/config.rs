@@ -52,6 +52,9 @@ pub struct OutputParams {
 
     /// Number of steps per saved observables.
     pub steps_per_save: usize,
+
+    /// Number of histogram bins.
+    pub hist_bins: usize,
 }
 
 impl Config {
@@ -92,11 +95,13 @@ impl Config {
             check_vec(strat_phe, model.n_phe).context("invalid phenotypic strategy")?;
         }
 
-        check_num(output.steps_per_file, 64..=1_048_576)
+        check_num(output.steps_per_file, 1_024..=1_048_576)
             .context("invalid number of steps per output file")?;
 
         check_num(output.steps_per_save, 64..=output.steps_per_file)
             .context("invalid number of steps per saved observables")?;
+
+        check_num(output.hist_bins, 1..=64).context("invalid number of histogram bins")?;
 
         Ok(())
     }

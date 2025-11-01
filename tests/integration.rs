@@ -23,7 +23,8 @@ fn basic_workflow() {
         + "\n"
         + "[output]\n"
         + "steps_per_file = 65536\n"
-        + "steps_per_save = 256\n";
+        + "steps_per_save = 256\n"
+        + "hist_bins = 16\n";
 
     fs::write(&config_path, config_contents).expect("failed to write config file");
 

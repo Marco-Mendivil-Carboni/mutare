@@ -13,26 +13,28 @@ use std::{
 
 /// Calculate simulation observables.
 pub fn calc_observables(
+    cfg: &Config,
     state: &State,
     event: &Event,
     time_step: f64,
     n_extinct: usize,
 ) -> Observables {
+    let n_phe = cfg.model.n_phe;
+    let n_agents = state.agents.len() as f64;
+
     let growth_rate = match event {
         Event::Replication { .. } => 1.0,
         Event::Death { .. } => -1.0,
         _ => 0.0,
-    } / (state.agents.len() as f64 * time_step);
+    } / (n_agents * time_step);
 
-    let mut avg_strat_phe = vec![0.0; state.agents[0].strat_phe().len()];
+    let mut avg_strat_phe = vec![0.0; n_phe];
     for agent in &state.agents {
         for (sum, &ele) in avg_strat_phe.iter_mut().zip(agent.strat_phe()) {
             *sum += ele;
         }
     }
-    avg_strat_phe
-        .iter_mut()
-        .for_each(|ele| *ele /= state.agents.len() as f64);
+    avg_strat_phe.iter_mut().for_each(|ele| *ele /= n_agents);
 
     let mut std_dev_strat_phe = 0.0;
     for agent in &state.agents {
@@ -43,8 +45,21 @@ pub fn calc_observables(
         variation /= 2.0;
         std_dev_strat_phe += variation * variation;
     }
-    std_dev_strat_phe /= state.agents.len() as f64;
+    std_dev_strat_phe /= n_agents;
     std_dev_strat_phe = std_dev_strat_phe.sqrt();
+
+    let hist_bins = cfg.output.hist_bins;
+
+    let mut dist_strat_phe = vec![vec![0.0; hist_bins]; n_phe];
+    for agent in &state.agents {
+        for (phe, ele) in agent.strat_phe().iter().enumerate() {
+            let bin = ((ele * hist_bins as f64) as usize).min(hist_bins - 1);
+            dist_strat_phe[phe][bin] += 1.0;
+        }
+    }
+    dist_strat_phe.iter_mut().for_each(|row| {
+        row.iter_mut().for_each(|ele| *ele /= n_agents);
+    });
 
     Observables {
         time: state.time,
@@ -53,6 +68,7 @@ pub fn calc_observables(
         n_extinct,
         avg_strat_phe,
         std_dev_strat_phe,
+        dist_strat_phe,
     }
 }
 
@@ -70,6 +86,9 @@ pub struct Analysis {
 
     /// Mean standard deviation of the phenotypic strategy.
     pub std_dev_strat_phe: f64,
+
+    /// Mean distribution of phenotypic strategies.
+    pub dist_strat_phe: Vec<Vec<f64>>,
 }
 
 /// Simulation analyzer.
@@ -128,10 +147,6 @@ impl Analyzer {
             .map(|obs| obs.time_step)
             .collect::<Vec<_>>();
 
-        let obs_average = |f: &dyn Fn(&Observables) -> f64| {
-            average(&self.all_observables.iter().map(f).collect::<Vec<_>>())
-        };
-
         let obs_weighted_average = |f: &dyn Fn(&Observables) -> f64| {
             weighted_average(
                 &self.all_observables.iter().map(f).collect::<Vec<_>>(),
@@ -143,23 +158,22 @@ impl Analyzer {
             growth_rate: obs_weighted_average(&|obs| obs.growth_rate),
             extinct_rate: last_observables.n_extinct as f64 / last_observables.time,
             avg_strat_phe: (0..self.cfg.model.n_phe)
-                .map(|phe| obs_average(&|obs| obs.avg_strat_phe[phe]))
+                .map(|phe| obs_weighted_average(&|obs| obs.avg_strat_phe[phe]))
                 .collect(),
-            std_dev_strat_phe: obs_average(&|obs| obs.std_dev_strat_phe),
+            std_dev_strat_phe: obs_weighted_average(&|obs| obs.std_dev_strat_phe),
+            dist_strat_phe: (0..self.cfg.model.n_phe)
+                .map(|phe| {
+                    (0..self.cfg.output.hist_bins)
+                        .map(|bin| obs_weighted_average(&|obs| obs.dist_strat_phe[phe][bin]))
+                        .collect()
+                })
+                .collect(),
         };
 
         encode::write_named(&mut writer, &analysis).context("failed to serialize analysis")?;
 
         Ok(())
     }
-}
-
-/// Compute the arithmetic average of a slice of values.
-fn average(values: &[f64]) -> f64 {
-    if values.is_empty() {
-        return f64::NAN;
-    }
-    values.iter().sum::<f64>() / values.len() as f64
 }
 
 /// Compute the weighted average of a slice of values.

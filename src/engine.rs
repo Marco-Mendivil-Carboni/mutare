@@ -172,7 +172,7 @@ impl Engine {
 
         // Calculate simulation observables.
         let observables = (self.step % self.cfg.output.steps_per_save == 0)
-            .then(|| calc_observables(&self.state, event, time_step, self.n_extinct));
+            .then(|| calc_observables(&self.cfg, &self.state, event, time_step, self.n_extinct));
 
         // Update simulation state.
         self.state.time += time_step;
