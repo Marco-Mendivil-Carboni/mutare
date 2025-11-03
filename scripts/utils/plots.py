@@ -2,6 +2,7 @@ from pathlib import Path
 import matplotlib as mpl
 import numpy as np
 from matplotlib.figure import Figure
+import matplotlib.colors as mcolors
 from typing import Dict, List, Any
 
 from .exec import SimJob
@@ -64,8 +65,16 @@ def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
     ax_4.set_xlabel("$p_{\\phi}(0)_i$")
     ax_4.set_ylabel("$p_{\\phi}(0)$")
 
-    heatmap = list()
     max_mu_strat: Any = None
+    heatmap = list()
+    hist_bins = len(
+        [
+            col
+            for col in avg_analyses.columns
+            if "dist_strat_phe_0_" in col[0] and "mean" in col[1]
+        ]
+    )
+    cmap = mcolors.LinearSegmentedColormap.from_list("custom", ["white", colors[1]])
 
     for avg_analyses, color, label in [
         (avg_analyses[sim_type == "fixed"], colors[1], "fixed"),
@@ -143,13 +152,11 @@ def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
                     **fill_style,
                 )
         if label == "with mutations":
-            # fix the following line
-            for bin in reversed(range(24)):
+            for bin in reversed(range(hist_bins)):
                 heatmap.append(avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")])
 
     heatmap = np.array([heatmap])
-    # fix the following line, remove [0] and addhoc extent.
-    im = ax_4.imshow(heatmap[0], cmap="coolwarm", extent=(1 / 24, 1, 0.0, 1.0))
+    im = ax_4.imshow(heatmap[0], cmap=cmap, extent=(1.0 / hist_bins, 1.0, 0.0, 1.0))
 
     cbar = fig_4.colorbar(im, ax=ax_4, aspect=64, pad=1 / 64)
     cbar.ax.set_ylabel("$p(p_{\\phi}(0))$")

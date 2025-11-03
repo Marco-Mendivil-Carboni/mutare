@@ -60,4 +60,6 @@ def collect_avg_analyses(sim_jobs: List[SimJob]) -> pd.DataFrame:
 
         avg_analyses.append(avg_analysis)
 
+    print("analyses collected")
+
     return pd.concat(avg_analyses, ignore_index=True)

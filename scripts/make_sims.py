@@ -28,23 +28,30 @@ def make_sims_and_plots(base_dir: Path, base_config: Config, run_options: RunOpt
 
     execute_sim_jobs(sim_jobs)
 
-    make_plots(sim_jobs, base_dir)
+    fig_dir = Path("plots") / base_dir
+    fig_dir.mkdir(parents=True, exist_ok=True)
+
+    make_plots(sim_jobs, fig_dir)
 
 
 if __name__ == "__main__":
-    base_dir = Path("simulations/default/")
+    base_dir = Path("simulations/biological/")
 
     base_config: Config = {
         "model": {
             "n_env": 2,
             "n_phe": 2,
             "rates_trans": [[-1.0, 1.0], [1.0, -1.0]],
-            "rates_birth": [[1.2, 0.2], [0.2, 1.0]],
-            "rates_death": [[0.2, 1.6], [1.0, 0.2]],
+            "rates_birth": [[1.2, 0.6], [0.6, 0.4]],
+            "rates_death": [[0.4, 0.2], [1.0, 0.4]],
             "prob_mut": 0.002,
         },
-        "init": {"n_agents": 260},
-        "output": {"steps_per_file": 1_048_576, "steps_per_save": 64, "hist_bins": 24},
+        "init": {"n_agents": 240},
+        "output": {
+            "steps_per_file": 1_048_576,
+            "steps_per_save": 256,
+            "hist_bins": 16,
+        },
     }
 
     run_options = RunOptions(clean=False, n_runs=4, n_files=64, analyze=True)
