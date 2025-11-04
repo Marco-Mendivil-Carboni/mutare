@@ -42,8 +42,8 @@ if __name__ == "__main__":
             "n_env": 2,
             "n_phe": 2,
             "rates_trans": [[-1.0, 1.0], [1.0, -1.0]],
-            "rates_birth": [[1.2, 0.0], [0.0, 0.8]],
-            "rates_death": [[0.0, 1.0], [1.0, 0.0]],
+            "rates_birth": [[1.2, 0.0], [0.0, 0.9]],
+            "rates_death": [[0.0, 1.6], [1.0, 0.0]],
             "prob_mut": 0.002,
         },
         "init": {"n_agents": 240},
@@ -54,7 +54,12 @@ if __name__ == "__main__":
         },
     }
 
-    run_options = RunOptions(clean=False, n_runs=2, n_files=16, analyze=True)
+    run_options = RunOptions(
+        clean=False,
+        n_runs=4,
+        n_files=64,
+        analyze=True,
+    )
 
     make_sims(base_dir, base_config, run_options)
 
@@ -77,6 +82,11 @@ if __name__ == "__main__":
     #     },
     # }
 
-    # run_options = RunOptions(clean=False, n_runs=4, n_files=64, analyze=True)
+    # run_options = RunOptions(
+    #     clean=False,
+    #     n_runs=4,
+    #     n_files=64,
+    #     analyze=True,
+    # )
 
     # make_sims(base_dir, base_config, run_options)
