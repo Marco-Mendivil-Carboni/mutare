@@ -8,8 +8,6 @@
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{setspace}
 
-\usepackage[spanish]{babel}
-
 \usepackage{mathtools,amssymb}
 
 \usepackage{graphicx}
@@ -20,7 +18,7 @@
 
 \setstretch{1.15}
 
-\title{Notes on project ``mutare''}
+\title{Notes on project mutare''}
 \author{Marco Mendívil Carboni}
 
 \begin{document}
@@ -33,17 +31,90 @@ It is known...
 
 \section{The model: a Markov process}
 
-To study 
+To study...
+
+mutare simulates a stochastic agent-based model of adaptation in uncertain environments with the following characteristics:
+\begin{itemize}
+    \item The environment is a discrete variable with n env possible values and follows a Markov chain defined by the transition rates rates trans.
+    \item Each agent carries a phenotype, a discrete variable with n phe possible values, and a phenotypic strategy, a distribution over phenotypes.
+    \item Agents may duplicate or die according to environment and phenotype specific rates (rates birth and rates death).
+    \item The offspring's phenotype is sampled from the parent's phenotypic strategy.
+    \item The offspring inherits the parent's phenotypic strategy, but with probability prob mut it suffers a random mutation and changes completely.
+    \item At every simulation step, the population is capped at its initial size (n agents) and reinitialized if extinction is reached.
+    \item Initially, if strat phe is set, all agents will share that same strategy; otherwise, they will each have a random strategy.
+\end{itemize}
+
+During the simulation, every steps per save steps, the following observables are computed and saved:
+\begin{itemize}
+    \item Current simulation time
+    \item Time until the next event
+    \item Instantaneous population growth rate
+    \item Number of extinctions so far
+    \item Average phenotypic strategy
+    \item Standard deviation of the phenotypic strategy
+\end{itemize}
+
+Every steps per file steps, the simulation is stopped and a new output file is written to disk.
+
 
 \begin{equation}
     ...
 \end{equation}
 
-% \begin{figure}[p]
-%     \centering
-%     \includegraphics{plots/.../....pdf}
-%     \caption{...}
-%     \label{fig:...}
-% \end{figure}
+\begin{figure}[p]
+    \centering
+    \includegraphics{../plots/simulations/default/extinct_rate.pdf}
+    \caption{Extinction rate as a function of growth rate for the default parameters.}
+    \label{fig:extinct_rate_default}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \includegraphics{../plots/simulations/default/growth_rate.pdf}
+    \caption{Growth rate as a function of the initial strategy for the default parameters.}
+    \label{fig:growth_rate_default}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \includegraphics{../plots/simulations/default/avg_strat_phe.pdf}
+    \caption{Average strategy as a function of the initial strategy for the default parameters.}
+    \label{fig:avg_strat_phe_default}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \includegraphics{../plots/simulations/default/dist_strat_phe.pdf}
+    \caption{Strategy distribution as a function of the initial strategy for the default parameters.}
+    \label{fig:dist_strat_phe_default}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \includegraphics{../plots/simulations/biological/extinct_rate.pdf}
+    \caption{Extinction rate as a function of growth rate for the biological parameters.}
+    \label{fig:extinct_rate_biological}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \includegraphics{../plots/simulations/biological/growth_rate.pdf}
+    \caption{Growth rate as a function of the initial strategy for the biological parameters.}
+    \label{fig:growth_rate_biological}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \includegraphics{../plots/simulations/biological/avg_strat_phe.pdf}
+    \caption{Average strategy as a function of the initial strategy for the biological parameters.}
+    \label{fig:avg_strat_phe_biological}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \includegraphics{../plots/simulations/biological/dist_strat_phe.pdf}
+    \caption{Strategy distribution as a function of the initial strategy for the biological parameters.}
+    \label{fig:dist_strat_phe_biological}
+\end{figure}
 
 \end{document}
