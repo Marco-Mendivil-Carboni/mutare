@@ -63,30 +63,30 @@ if __name__ == "__main__":
 
     make_sims(base_dir, base_config, run_options)
 
-    # base_dir = Path("simulations/more_noise/")
+    base_dir = Path("simulations/biological/")
 
-    # base_config: Config = {
-    #     "model": {
-    #         "n_env": 2,
-    #         "n_phe": 2,
-    #         "rates_trans": [[-1.0, 1.0], [1.0, -1.0]],
-    #         "rates_birth": [[1.4, 0.2], [0.2, 1.0]],
-    #         "rates_death": [[0.2, 1.6], [1.2, 0.2]],
-    #         "prob_mut": 0.002,
-    #     },
-    #     "init": {"n_agents": 240},
-    #     "output": {
-    #         "steps_per_file": 1_048_576,
-    #         "steps_per_save": 256,
-    #         "hist_bins": 16,
-    #     },
-    # }
+    base_config: Config = {
+        "model": {
+            "n_env": 2,
+            "n_phe": 2,
+            "rates_trans": [[-1.0, 1.0], [1.0, -1.0]],
+            "rates_birth": [[1.0, 0.2], [0.0, 0.0]],
+            "rates_death": [[0.0, 0.0], [1.0, 0.1]],
+            "prob_mut": 0.001,
+        },
+        "init": {"n_agents": 100},
+        "output": {
+            "steps_per_file": 1_048_576,
+            "steps_per_save": 256,
+            "hist_bins": 16,
+        },
+    }
 
-    # run_options = RunOptions(
-    #     clean=False,
-    #     n_runs=4,
-    #     n_files=64,
-    #     analyze=True,
-    # )
+    run_options = RunOptions(
+        clean=False,
+        n_runs=4,
+        n_files=64,
+        analyze=True,
+    )
 
-    # make_sims(base_dir, base_config, run_options)
+    make_sims(base_dir, base_config, run_options)

@@ -156,7 +156,14 @@ def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
                 heatmap.append(avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")])
 
     heatmap = np.array([heatmap])
-    im = ax_4.imshow(heatmap[0], cmap=cmap, extent=(1.0 / hist_bins, 1.0, 0.0, 1.0))
+    im = ax_4.imshow(
+        heatmap[0],
+        cmap=cmap,
+        vmin=0.0,
+        vmax=1.0,
+        # fix this... use pcolormesh
+        extent=(0.5 / hist_bins, 1.0 - 0.5 / hist_bins, 0.0, 1.0),
+    )
 
     cbar = fig_4.colorbar(im, ax=ax_4, aspect=64, pad=1 / 64)
     cbar.ax.set_ylabel("$p(p_{\\phi}(0))$")
