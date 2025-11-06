@@ -37,7 +37,7 @@ The purpose of this work is to investigate, through numerical simulations, how a
 
 We consider a population with an initial number of agents $N_0$ evolving in an environment that fluctuates randomly over time. The \emph{environment} is modeled as a discrete variable with $n_{\text{env}}$ possible states, denoted by $e\in\{0,\dots,n_{\text{env}}-1\}$, which evolve according to a continuous-time Markov chain with transition rates $\omega_t(e,e')$ between states $e$ and $e'$.
 
-Each agent is characterized by a \emph{phenotype} $\phi\in\{0,\dots,n_{\text{phe}}-1\}$ and a \emph{phenotypic strategy} $s(\phi)$, which represents a probability distribution over the possible phenotypes:
+Each agent is characterized by a \emph{phenotype} $\phi\in\{0,\dots,n_{\text{phe}}-1\}$ and a \emph{phenotypic strategy} $s(\phi)$, which represents a probability distribution (see \autoref{eq:phenotypic_strategy}) over the possible phenotypes:
 \begin{equation} \label{eq:phenotypic_strategy}
     \sum_{\phi=0}^{n_{\text{phe}}-1}s(\phi) = 1.
 \end{equation}
@@ -75,50 +75,50 @@ In \autoref{fig:extinct_rate_biological}, \autoref{fig:growth_rate_biological}, 
 
 \begin{figure}[p]
     \centering
-    \includegraphics{../plots/simulations/default/extinct_rate.pdf}
     \caption{Extinction rate as a function of growth rate for the default parameters.} \label{fig:extinct_rate_default}
+    \includegraphics{../plots/simulations/default/extinct_rate.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \includegraphics{../plots/simulations/default/growth_rate.pdf}
     \caption{Growth rate as a function of the initial strategy for the default parameters.} \label{fig:growth_rate_default}
+    \includegraphics{../plots/simulations/default/growth_rate.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \includegraphics{../plots/simulations/default/avg_strat_phe.pdf}
     \caption{Average strategy as a function of the initial strategy for the default parameters.} \label{fig:avg_strat_phe_default}
+    \includegraphics{../plots/simulations/default/avg_strat_phe.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \includegraphics{../plots/simulations/default/dist_strat_phe.pdf}
     \caption{Strategy distribution as a function of the initial strategy for the default parameters.} \label{fig:dist_strat_phe_default}
+    \includegraphics{../plots/simulations/default/dist_strat_phe.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \includegraphics{../plots/simulations/biological/extinct_rate.pdf}
     \caption{Extinction rate as a function of growth rate for the biological parameters.} \label{fig:extinct_rate_biological}
+    \includegraphics{../plots/simulations/biological/extinct_rate.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \includegraphics{../plots/simulations/biological/growth_rate.pdf}
     \caption{Growth rate as a function of the initial strategy for the biological parameters.} \label{fig:growth_rate_biological}
+    \includegraphics{../plots/simulations/biological/growth_rate.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \includegraphics{../plots/simulations/biological/avg_strat_phe.pdf}
     \caption{Average strategy as a function of the initial strategy for the biological parameters.} \label{fig:avg_strat_phe_biological}
+    \includegraphics{../plots/simulations/biological/avg_strat_phe.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \includegraphics{../plots/simulations/biological/dist_strat_phe.pdf}
     \caption{Strategy distribution as a function of the initial strategy for the biological parameters.} \label{fig:dist_strat_phe_biological}
+    \includegraphics{../plots/simulations/biological/dist_strat_phe.pdf}
 \end{figure}
 
 \end{document}
