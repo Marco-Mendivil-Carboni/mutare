@@ -18,103 +18,107 @@
 
 \setstretch{1.15}
 
-\title{Notes on project mutare''}
+\title{Notes on project \emph{mutare}}
 \author{Marco Mendívil Carboni}
 
 \begin{document}
 
 \maketitle
 
-\section{Introduction and objectives}
+\section{Introduction and objectives} \label{sec:introduction}
 
-It is known...
+Adaptation in fluctuating environments is a central problem in evolutionary biology. Natural populations rarely experience constant conditions: rather, they face environments that change unpredictably over time, often on ecological or evolutionary timescales. In such contexts, the success of a population depends not only on the intrinsic fitness of individual phenotypes but also on their ability to persist and reproduce across variable conditions.
 
-\section{The model: a Markov process}
+A classical view of evolution suggests that populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$ (also called fitness). However, when environmental fluctuations are strong and extinction risk is non-negligible, selection may favor strategies that sacrifice some fitness in exchange for a lower extinction rate $r_e$.
 
-To study...
+The purpose of this work is to investigate, through numerical simulations, how adaptation in uncertain environments gives rise to phenotypic diversity and whether the strategies that emerge correspond to those of maximal fitness or to safer, more resilient alternatives. The tool \emph{mutare} provides a framework to simulate and analyze such evolutionary dynamics with a simple stochastic model that we will describe in the next section.
 
-mutare simulates a stochastic agent-based model of adaptation in uncertain environments with the following characteristics:
-\begin{itemize}
-    \item The environment is a discrete variable with n env possible values and follows a Markov chain defined by the transition rates rates trans.
-    \item Each agent carries a phenotype, a discrete variable with n phe possible values, and a phenotypic strategy, a distribution over phenotypes.
-    \item Agents may duplicate or die according to environment and phenotype specific rates (rates birth and rates death).
-    \item The offspring's phenotype is sampled from the parent's phenotypic strategy.
-    \item The offspring inherits the parent's phenotypic strategy, but with probability prob mut it suffers a random mutation and changes completely.
-    \item At every simulation step, the population is capped at its initial size (n agents) and reinitialized if extinction is reached.
-    \item Initially, if strat phe is set, all agents will share that same strategy; otherwise, they will each have a random strategy.
-\end{itemize}
+\section{The model: a Markov process} \label{sec:model}
 
-During the simulation, every steps per save steps, the following observables are computed and saved:
-\begin{itemize}
-    \item Current simulation time
-    \item Time until the next event
-    \item Instantaneous population growth rate
-    \item Number of extinctions so far
-    \item Average phenotypic strategy
-    \item Standard deviation of the phenotypic strategy
-\end{itemize}
+We consider a population with an initial number of agents $N_0$ evolving in an environment that fluctuates randomly over time. The \emph{environment} is modeled as a discrete variable with $n_{\text{env}}$ possible states, denoted by $e\in\{0,\dots,n_{\text{env}}-1\}$, which evolve according to a continuous-time Markov chain with transition rates $\omega_t(e,e')$ between states $e$ and $e'$.
 
-Every steps per file steps, the simulation is stopped and a new output file is written to disk.
-
-
-\begin{equation}
-    ...
+Each agent is characterized by a \emph{phenotype} $\phi\in\{0,\dots,n_{\text{phe}}-1\}$ and a \emph{phenotypic strategy} $s(\phi)$, which represents a probability distribution over the possible phenotypes:
+\begin{equation} \label{eq:phenotypic_strategy}
+    \sum_{\phi=0}^{n_{\text{phe}}-1}s(\phi) = 1.
 \end{equation}
+The phenotypic strategy determines the phenotype of the offspring, introducing a mechanism for stochastic phenotype switching between generations.
+
+Population dynamics occur through stochastic birth and death processes that depend on both the current environment and the phenotype of the agent. The matrices $\omega_b(e,\phi)$ and $\omega_d(e,\phi)$ denote the birth and death rates of phenotype $\phi$ in environment $e$, respectively. The net growth rate in a given environment thus depends on the phenotypic composition of the population.
+
+When an agent reproduces, its offspring inherits the parent's phenotypic strategy $s(\phi)$, but with probability $p_{\text{mut}}$ a mutation occurs, leading to a new random strategy. This mechanism allows for evolutionary exploration of the space of possible strategies.
+
+An important aspect of the model is that the total population is limited to its initial size $N_0$: whenever reproduction events cause this number to be exceeded, an agent is randomly removed, preventing unbounded growth (a mechanism more or less analogous to an ecological carrying capacity). If the population goes extinct, it is reinitialized, allowing for long-term statistical characterization of the dynamics.
+
+During the simulation, several observables are tracked, including the average population growth rate, extinction frequency, and the distribution of phenotypic strategies. These quantities provide insight into whether evolution favors the maximization of mean fitness, the minimization of extinction risk, or the emergence of mixed strategies balancing both goals.
+
+\section{Results: phenotipic diversity and safe strategies} \label{sec:results}
+
+In \autoref{fig:extinct_rate_default}, \autoref{fig:growth_rate_default}, \autoref{fig:avg_strat_phe_default} and \autoref{fig:dist_strat_phe_default} we show the results for the following \emph{default} parameters:
+\begin{itemize}
+    \item $n_{\text{env}}=2$, $n_{\text{phe}}=2$
+    \item $\omega_t(e,e')=\begin{pmatrix}-1.0&+1.0\\+1.0&-1.0\end{pmatrix}$
+    \item $\omega_b(e,\phi)=\begin{pmatrix}1.2&0.0\\0.0&0.9\end{pmatrix}$
+    \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&1.6\\1.0&0.0\end{pmatrix}$
+    \item $p_{\text{mut}}=0.002$
+    \item $N_0=240$
+\end{itemize}
+
+In \autoref{fig:extinct_rate_biological}, \autoref{fig:growth_rate_biological}, \autoref{fig:avg_strat_phe_biological} and \autoref{fig:dist_strat_phe_biological} we show the results for the following \emph{biological} parameters:
+\begin{itemize}
+    \item $n_{\text{env}}=2$, $n_{\text{phe}}=2$
+    \item $\omega_t(e,e')=\begin{pmatrix}-1.0&+1.0\\+1.0&-1.0\end{pmatrix}$
+    \item $\omega_b(e,\phi)=\begin{pmatrix}1.0&0.2\\0.0&0.0\end{pmatrix}$
+    \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&0.0\\1.0&0.1\end{pmatrix}$
+    \item $p_{\text{mut}}=0.001$
+    \item $N_0=100$
+\end{itemize}
 
 \begin{figure}[p]
     \centering
     \includegraphics{../plots/simulations/default/extinct_rate.pdf}
-    \caption{Extinction rate as a function of growth rate for the default parameters.}
-    \label{fig:extinct_rate_default}
+    \caption{Extinction rate as a function of growth rate for the default parameters.} \label{fig:extinct_rate_default}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \includegraphics{../plots/simulations/default/growth_rate.pdf}
-    \caption{Growth rate as a function of the initial strategy for the default parameters.}
-    \label{fig:growth_rate_default}
+    \caption{Growth rate as a function of the initial strategy for the default parameters.} \label{fig:growth_rate_default}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \includegraphics{../plots/simulations/default/avg_strat_phe.pdf}
-    \caption{Average strategy as a function of the initial strategy for the default parameters.}
-    \label{fig:avg_strat_phe_default}
+    \caption{Average strategy as a function of the initial strategy for the default parameters.} \label{fig:avg_strat_phe_default}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \includegraphics{../plots/simulations/default/dist_strat_phe.pdf}
-    \caption{Strategy distribution as a function of the initial strategy for the default parameters.}
-    \label{fig:dist_strat_phe_default}
+    \caption{Strategy distribution as a function of the initial strategy for the default parameters.} \label{fig:dist_strat_phe_default}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \includegraphics{../plots/simulations/biological/extinct_rate.pdf}
-    \caption{Extinction rate as a function of growth rate for the biological parameters.}
-    \label{fig:extinct_rate_biological}
+    \caption{Extinction rate as a function of growth rate for the biological parameters.} \label{fig:extinct_rate_biological}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \includegraphics{../plots/simulations/biological/growth_rate.pdf}
-    \caption{Growth rate as a function of the initial strategy for the biological parameters.}
-    \label{fig:growth_rate_biological}
+    \caption{Growth rate as a function of the initial strategy for the biological parameters.} \label{fig:growth_rate_biological}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \includegraphics{../plots/simulations/biological/avg_strat_phe.pdf}
-    \caption{Average strategy as a function of the initial strategy for the biological parameters.}
-    \label{fig:avg_strat_phe_biological}
+    \caption{Average strategy as a function of the initial strategy for the biological parameters.} \label{fig:avg_strat_phe_biological}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \includegraphics{../plots/simulations/biological/dist_strat_phe.pdf}
-    \caption{Strategy distribution as a function of the initial strategy for the biological parameters.}
-    \label{fig:dist_strat_phe_biological}
+    \caption{Strategy distribution as a function of the initial strategy for the biological parameters.} \label{fig:dist_strat_phe_biological}
 \end{figure}
 
 \end{document}

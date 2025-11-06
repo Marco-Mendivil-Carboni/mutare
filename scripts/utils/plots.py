@@ -55,7 +55,7 @@ def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
     ax_2.set_xlabel("$s(0)_i$")
     ax_2.set_ylabel("$\\langle\\mu\\rangle$")
 
-    fig_3 = Figure(figsize=(12.0 * CM, 10.0 * CM))
+    fig_3 = Figure(figsize=(16.0 * CM, 10.0 * CM))
     ax_3 = fig_3.add_subplot()
     ax_3.set_xlabel("$s(0)_i$")
     ax_3.set_ylabel("$\\langle s(0)\\rangle$")
