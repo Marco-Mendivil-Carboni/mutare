@@ -35,7 +35,7 @@ def make_sims(base_dir: Path, base_config: Config, run_options: RunOptions):
 
 
 if __name__ == "__main__":
-    sims_dir = Path("simulations")
+    sims_dir = Path("sims")
 
     default_dir = sims_dir / "default"
 
@@ -75,10 +75,10 @@ if __name__ == "__main__":
 
     make_sims(biological_dir, biological_config, run_options)
 
-    # extended_dir = sims_dir / "extended"
+    extended_dir = sims_dir / "extended"
 
-    # extended_config = deepcopy(default_config)
-    # extended_config["model"]["prob_mut"] = 0.001
-    # extended_config["init"]["n_agents"] = 960
+    extended_config = deepcopy(default_config)
+    extended_config["model"]["prob_mut"] = 0.001
+    extended_config["init"]["n_agents"] = 960
 
-    # make_sims(extended_dir, extended_config, run_options)
+    make_sims(extended_dir, extended_config, run_options)

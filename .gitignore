@@ -1,8 +1,10 @@
 /target
+
 .venv
 __pycache__
 
-simulations
+/sims
 
-*.gz
 *.pdf
+
+build

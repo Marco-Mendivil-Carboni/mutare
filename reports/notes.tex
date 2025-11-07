@@ -3,6 +3,9 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 
+\usepackage[backend=biber]{biblatex}
+\addbibresource{references.bib}
+
 \usepackage{lmodern}
 
 \usepackage[margin=2.5cm]{geometry}
@@ -12,7 +15,6 @@
 
 \usepackage{graphicx}
 \usepackage{xcolor}
-\usepackage{tikz}
 
 \usepackage[hidelinks,pdfusetitle]{hyperref}
 
@@ -27,7 +29,7 @@
 
 \section{Introduction and objectives} \label{sec:introduction}
 
-Adaptation in fluctuating environments is a central problem in evolutionary biology. Natural populations rarely experience constant conditions: rather, they face environments that change unpredictably over time, often on ecological or evolutionary timescales. In such contexts, the success of a population depends not only on the intrinsic fitness of individual phenotypes but also on their ability to persist and reproduce across variable conditions.
+Adaptation in fluctuating environments is a central problem in evolutionary biology \cite{dinisPhaseTransitionsOptimal2020}. Natural populations rarely experience constant conditions: rather, they face environments that change unpredictably over time, often on ecological or evolutionary timescales. In such contexts, the success of a population depends not only on the intrinsic fitness of individual phenotypes but also on their ability to persist and reproduce across variable conditions.
 
 A classical view of evolution suggests that populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$ (also called fitness). However, when environmental fluctuations are strong and extinction risk is non-negligible, selection may favor strategies that sacrifice some fitness in exchange for a lower extinction rate $r_e$.
 
@@ -76,49 +78,51 @@ In \autoref{fig:extinct_rate_biological}, \autoref{fig:growth_rate_biological}, 
 \begin{figure}[p]
     \centering
     \caption{Extinction rate as a function of growth rate for the default parameters.} \label{fig:extinct_rate_default}
-    \includegraphics{../plots/simulations/default/extinct_rate.pdf}
+    \includegraphics{../plots/sims/default/extinct_rate.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \caption{Growth rate as a function of the initial strategy for the default parameters.} \label{fig:growth_rate_default}
-    \includegraphics{../plots/simulations/default/growth_rate.pdf}
+    \includegraphics{../plots/sims/default/growth_rate.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \caption{Average strategy as a function of the initial strategy for the default parameters.} \label{fig:avg_strat_phe_default}
-    \includegraphics{../plots/simulations/default/avg_strat_phe.pdf}
+    \includegraphics{../plots/sims/default/avg_strat_phe.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \caption{Strategy distribution as a function of the initial strategy for the default parameters.} \label{fig:dist_strat_phe_default}
-    \includegraphics{../plots/simulations/default/dist_strat_phe.pdf}
+    \includegraphics{../plots/sims/default/dist_strat_phe.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \caption{Extinction rate as a function of growth rate for the biological parameters.} \label{fig:extinct_rate_biological}
-    \includegraphics{../plots/simulations/biological/extinct_rate.pdf}
+    \includegraphics{../plots/sims/biological/extinct_rate.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \caption{Growth rate as a function of the initial strategy for the biological parameters.} \label{fig:growth_rate_biological}
-    \includegraphics{../plots/simulations/biological/growth_rate.pdf}
+    \includegraphics{../plots/sims/biological/growth_rate.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \caption{Average strategy as a function of the initial strategy for the biological parameters.} \label{fig:avg_strat_phe_biological}
-    \includegraphics{../plots/simulations/biological/avg_strat_phe.pdf}
+    \includegraphics{../plots/sims/biological/avg_strat_phe.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
     \caption{Strategy distribution as a function of the initial strategy for the biological parameters.} \label{fig:dist_strat_phe_biological}
-    \includegraphics{../plots/simulations/biological/dist_strat_phe.pdf}
+    \includegraphics{../plots/sims/biological/dist_strat_phe.pdf}
 \end{figure}
+
+\printbibliography
 
 \end{document}
