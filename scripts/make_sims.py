@@ -2,36 +2,16 @@
 
 from pathlib import Path
 from copy import deepcopy
-from typing import List
 
 from utils.config import Config
-from utils.exec import RunOptions, SimJob, execute_sim_jobs
-from utils.plots import make_strat_phe_plots
+from utils.exec import RunOptions, SimJob, create_strat_phe_jobs, execute_sim_jobs
+from utils.plots import plot_strat_phe_jobs
 
 
-def make_strat_phe_sims(base_dir: Path, base_config: Config, run_options: RunOptions):
-    sim_jobs: List[SimJob] = []
-
-    sim_jobs.append(SimJob(base_dir, base_config, run_options))
-
-    config = deepcopy(base_config)
-    strat_phe_0_values = [(i + 1) / 16 for i in range(15)]
-
-    for strat_phe_0 in strat_phe_0_values:
-        config["init"]["strat_phe"] = [strat_phe_0, 1 - strat_phe_0]
-
-        config["model"]["prob_mut"] = 0.0
-        sim_jobs.append(SimJob(base_dir, config, run_options))
-
-        config["model"]["prob_mut"] = base_config["model"]["prob_mut"]
-        sim_jobs.append(SimJob(base_dir, config, run_options))
-
-    execute_sim_jobs(sim_jobs)
-
-    fig_dir = Path("plots") / base_dir
-    fig_dir.mkdir(parents=True, exist_ok=True)
-
-    make_strat_phe_plots(sim_jobs, fig_dir)
+def make_strat_phe_sims(sim_job: SimJob) -> None:
+    strat_phe_jobs = create_strat_phe_jobs(sim_job, 16)
+    execute_sim_jobs(strat_phe_jobs)
+    plot_strat_phe_jobs(strat_phe_jobs, "plots" / sim_job.base_dir)
 
 
 if __name__ == "__main__":
@@ -63,7 +43,7 @@ if __name__ == "__main__":
         analyze=True,
     )
 
-    make_strat_phe_sims(default_dir, default_config, run_options)
+    make_strat_phe_sims(SimJob(default_dir, default_config, run_options))
 
     biological_dir = sims_dir / "biological"
 
@@ -71,11 +51,11 @@ if __name__ == "__main__":
     biological_config["model"]["rates_birth"] = [[1.0, 0.2], [0.0, 0.0]]
     biological_config["model"]["rates_death"] = [[0.0, 0.0], [1.0, 0.1]]
 
-    make_strat_phe_sims(biological_dir, biological_config, run_options)
+    make_strat_phe_sims(SimJob(biological_dir, biological_config, run_options))
 
     extended_dir = sims_dir / "extended"
 
     extended_config = deepcopy(biological_config)
     extended_config["init"]["n_agents"] = 1000
 
-    make_strat_phe_sims(extended_dir, extended_config, run_options)
+    make_strat_phe_sims(SimJob(extended_dir, extended_config, run_options))

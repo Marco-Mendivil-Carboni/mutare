@@ -98,6 +98,28 @@ class SimJob:
         self.run_options = deepcopy(self.run_options)
 
 
+def create_strat_phe_jobs(sim_job: SimJob, n_values: int) -> List[SimJob]:
+    sim_jobs: List[SimJob] = []
+    sim_jobs.append(sim_job)
+
+    base_dir = sim_job.base_dir
+    config = deepcopy(sim_job.config)
+    run_options = sim_job.run_options
+
+    strat_phe_0_values = [(i + 1) / n_values for i in range(n_values - 1)]
+
+    for strat_phe_0 in strat_phe_0_values:
+        config["init"]["strat_phe"] = [strat_phe_0, 1 - strat_phe_0]
+
+        config["model"]["prob_mut"] = 0.0
+        sim_jobs.append(SimJob(base_dir, config, run_options))
+
+        config["model"]["prob_mut"] = sim_job.config["model"]["prob_mut"]
+        sim_jobs.append(SimJob(base_dir, config, run_options))
+
+    return sim_jobs
+
+
 class JobResult(Enum):
     FINISHED = auto()
     STOPPED = auto()

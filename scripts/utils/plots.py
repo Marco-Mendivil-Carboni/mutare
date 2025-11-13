@@ -39,8 +39,8 @@ FILL_STYLE: Dict[str, Any] = dict(lw=0.0, alpha=0.5)
 LINE_STYLE: Dict[str, Any] = dict(ls=":", lw=1.0, alpha=0.5)
 
 
-def make_strat_phe_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
-    avg_analyses = collect_avg_analyses(sim_jobs)
+def plot_strat_phe_jobs(strat_phe_jobs: List[SimJob], fig_dir: Path) -> None:
+    avg_analyses = collect_avg_analyses(strat_phe_jobs)
 
     sim_type = avg_analyses["sim_type"]
 
@@ -189,6 +189,8 @@ def make_strat_phe_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
 
     cbar = fig_4.colorbar(im, cax=ax_4_c, aspect=64)
     cbar.ax.set_ylabel("$p(s(0))$")
+
+    fig_dir.mkdir(parents=True, exist_ok=True)
 
     ax_1.legend()
     fig_1.savefig(fig_dir / "extinct_rate.pdf")
