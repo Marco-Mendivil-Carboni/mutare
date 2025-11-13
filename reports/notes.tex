@@ -59,20 +59,23 @@ In \autoref{fig:extinct_rate_default}, \autoref{fig:growth_rate_default}, \autor
 \begin{itemize}
     \item $n_{\text{env}}=2$, $n_{\text{phe}}=2$
     \item $\omega_t(e,e')=\begin{pmatrix}-1.0&+1.0\\+1.0&-1.0\end{pmatrix}$
-    \item $\omega_b(e,\phi)=\begin{pmatrix}1.2&0.0\\0.0&0.9\end{pmatrix}$
-    \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&1.6\\1.0&0.0\end{pmatrix}$
-    \item $p_{\text{mut}}=0.002$
-    \item $N_0=240$
-\end{itemize}
-
-In \autoref{fig:extinct_rate_biological}, \autoref{fig:growth_rate_biological}, \autoref{fig:avg_strat_phe_biological} and \autoref{fig:dist_strat_phe_biological} we show the results for the following \emph{biological} parameters:
-\begin{itemize}
-    \item $n_{\text{env}}=2$, $n_{\text{phe}}=2$
-    \item $\omega_t(e,e')=\begin{pmatrix}-1.0&+1.0\\+1.0&-1.0\end{pmatrix}$
-    \item $\omega_b(e,\phi)=\begin{pmatrix}1.0&0.2\\0.0&0.0\end{pmatrix}$
-    \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&0.0\\1.0&0.1\end{pmatrix}$
+    \item $\omega_b(e,\phi)=\begin{pmatrix}1.2&0.0\\0.0&0.8\end{pmatrix}$
+    \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&1.0\\1.0&0.0\end{pmatrix}$
     \item $p_{\text{mut}}=0.001$
     \item $N_0=100$
+\end{itemize}
+
+In \autoref{fig:extinct_rate_biological}, \autoref{fig:growth_rate_biological}, \autoref{fig:avg_strat_phe_biological} and \autoref{fig:dist_strat_phe_biological} we show the results for the \emph{biological} parameters:
+\begin{itemize}
+    \item $\omega_b(e,\phi)=\begin{pmatrix}1.0&0.2\\0.0&0.0\end{pmatrix}$
+    \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&0.0\\1.0&0.1\end{pmatrix}$
+    \item The rest of the parameters have the same values as in the \emph{default} parameters.
+\end{itemize}
+
+In \autoref{fig:extinct_rate_extended}, \autoref{fig:growth_rate_extended}, \autoref{fig:avg_strat_phe_extended} and \autoref{fig:dist_strat_phe_extended} we show the results for the \emph{extended} parameters:
+\begin{itemize}
+    \item $N_0=1000$
+    \item The rest of the parameters have the same values as in the \emph{biological} parameters.
 \end{itemize}
 
 \begin{figure}[p]
@@ -121,6 +124,12 @@ In \autoref{fig:extinct_rate_biological}, \autoref{fig:growth_rate_biological}, 
     \centering
     \caption{Strategy distribution as a function of the initial strategy for the biological parameters.} \label{fig:dist_strat_phe_biological}
     \includegraphics{../plots/sims/biological/dist_strat_phe.pdf}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \caption{Extinction rate as a function of growth rate for the extended parameters.} \label{fig:extinct_rate_extended}
+    \includegraphics{../plots/sims/extended/extinct_rate.pdf}
 \end{figure}
 
 \begin{figure}[p]

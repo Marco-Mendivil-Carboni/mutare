@@ -6,10 +6,10 @@ from typing import List
 
 from utils.config import Config
 from utils.exec import RunOptions, SimJob, execute_sim_jobs
-from utils.plots import make_plots
+from utils.plots import make_strat_phe_plots
 
 
-def make_sims(base_dir: Path, base_config: Config, run_options: RunOptions):
+def make_strat_phe_sims(base_dir: Path, base_config: Config, run_options: RunOptions):
     sim_jobs: List[SimJob] = []
 
     sim_jobs.append(SimJob(base_dir, base_config, run_options))
@@ -31,7 +31,7 @@ def make_sims(base_dir: Path, base_config: Config, run_options: RunOptions):
     fig_dir = Path("plots") / base_dir
     fig_dir.mkdir(parents=True, exist_ok=True)
 
-    make_plots(sim_jobs, fig_dir)
+    make_strat_phe_plots(sim_jobs, fig_dir)
 
 
 if __name__ == "__main__":
@@ -44,11 +44,11 @@ if __name__ == "__main__":
             "n_env": 2,
             "n_phe": 2,
             "rates_trans": [[-1.0, 1.0], [1.0, -1.0]],
-            "rates_birth": [[1.2, 0.0], [0.0, 0.9]],
-            "rates_death": [[0.0, 1.6], [1.0, 0.0]],
-            "prob_mut": 0.002,
+            "rates_birth": [[1.2, 0.0], [0.0, 0.8]],
+            "rates_death": [[0.0, 1.0], [1.0, 0.0]],
+            "prob_mut": 0.001,
         },
-        "init": {"n_agents": 240},
+        "init": {"n_agents": 100},
         "output": {
             "steps_per_file": 1_048_576,
             "steps_per_save": 256,
@@ -63,22 +63,19 @@ if __name__ == "__main__":
         analyze=True,
     )
 
-    make_sims(default_dir, default_config, run_options)
+    make_strat_phe_sims(default_dir, default_config, run_options)
 
     biological_dir = sims_dir / "biological"
 
     biological_config = deepcopy(default_config)
     biological_config["model"]["rates_birth"] = [[1.0, 0.2], [0.0, 0.0]]
     biological_config["model"]["rates_death"] = [[0.0, 0.0], [1.0, 0.1]]
-    biological_config["model"]["prob_mut"] = 0.001
-    biological_config["init"]["n_agents"] = 100
 
-    make_sims(biological_dir, biological_config, run_options)
+    make_strat_phe_sims(biological_dir, biological_config, run_options)
 
     extended_dir = sims_dir / "extended"
 
-    extended_config = deepcopy(default_config)
-    extended_config["model"]["prob_mut"] = 0.001
-    extended_config["init"]["n_agents"] = 960
+    extended_config = deepcopy(biological_config)
+    extended_config["init"]["n_agents"] = 1000
 
-    make_sims(extended_dir, extended_config, run_options)
+    make_strat_phe_sims(extended_dir, extended_config, run_options)

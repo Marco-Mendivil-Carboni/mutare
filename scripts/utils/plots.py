@@ -6,7 +6,7 @@ import matplotlib.colors as colors
 from typing import Dict, List, Any
 
 from .exec import SimJob
-from .analysis import collect_avg_analyses
+from .analysis import collect_avg_analyses, SimType
 
 mpl.use("pdf")
 
@@ -39,7 +39,7 @@ FILL_STYLE: Dict[str, Any] = dict(lw=0.0, alpha=0.5)
 LINE_STYLE: Dict[str, Any] = dict(ls=":", lw=1.0, alpha=0.5)
 
 
-def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
+def make_strat_phe_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
     avg_analyses = collect_avg_analyses(sim_jobs)
 
     sim_type = avg_analyses["sim_type"]
@@ -85,9 +85,9 @@ def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
     cmap = colors.LinearSegmentedColormap.from_list("custom", ["white", COLORS[1]])
 
     for avg_analyses, color, label in [
-        (avg_analyses[sim_type == "fixed"], COLORS[1], "fixed"),
-        (avg_analyses[sim_type == "with mutations"], COLORS[7], "with mutations"),
-        (avg_analyses[sim_type == "random init"], COLORS[11], "random init"),
+        (avg_analyses[sim_type == SimType.FIXED], COLORS[1], "fixed strat"),
+        (avg_analyses[sim_type == SimType.EVOL], COLORS[7], "evolutive"),
+        (avg_analyses[sim_type == SimType.RANDOM], COLORS[11], "random init"),
     ]:
         ax_1.errorbar(
             avg_analyses[("growth_rate", "mean")],
@@ -105,7 +105,7 @@ def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
             avg_analyses[("extinct_rate", "mean")].mean(), c=color, **LINE_STYLE
         )
 
-        if label == "fixed":
+        if label == "fixed strat":
             max_mu_strat = avg_analyses["strat_phe_0"][
                 avg_analyses[("growth_rate", "mean")].idxmax()
             ]
@@ -160,7 +160,7 @@ def make_plots(sim_jobs: List[SimJob], fig_dir: Path) -> None:
                     **FILL_STYLE,
                 )
 
-        if label == "with mutations":
+        if label == "evolutive":
             hm_x.append(avg_analyses["strat_phe_0"])
             for bin in range(hist_bins):
                 hm_z1.append(avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")])

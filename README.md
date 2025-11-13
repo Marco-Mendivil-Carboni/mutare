@@ -61,12 +61,12 @@ Here is an example config file:
 n_env = 2
 n_phe = 2
 rates_trans = [ [ -1.0, 1.0,], [ 1.0, -1.0,],]
-rates_birth = [ [ 1.2, 0.0,], [ 0.0, 0.9,],]
-rates_death = [ [ 0.0, 1.6,], [ 1.0, 0.0,],]
-prob_mut = 0.002
+rates_birth = [ [ 1.2, 0.0,], [ 0.0, 0.8,],]
+rates_death = [ [ 0.0, 1.0,], [ 1.0, 0.0,],]
+prob_mut = 0.001
 
 [init]
-n_agents = 240
+n_agents = 100
 strat_phe = [ 0.5, 0.5,]
 
 [output]
