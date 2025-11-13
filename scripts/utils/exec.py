@@ -93,9 +93,12 @@ class SimJob:
     run_options: RunOptions
 
     def __post_init__(self):
-        self.sim_dir = hash_sim_dir(self.base_dir, self.config)
         self.config = deepcopy(self.config)
         self.run_options = deepcopy(self.run_options)
+
+    @property
+    def sim_dir(self) -> Path:
+        return hash_sim_dir(self.base_dir, self.config)
 
 
 def create_strat_phe_jobs(sim_job: SimJob, n_values: int) -> List[SimJob]:

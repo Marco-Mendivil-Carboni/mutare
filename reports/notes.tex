@@ -55,7 +55,7 @@ During the simulation, several observables are tracked, including the average po
 
 \section{Results: phenotipic diversity and safe strategies} \label{sec:results}
 
-In \autoref{fig:extinct_rate_default}, \autoref{fig:growth_rate_default}, \autoref{fig:avg_strat_phe_default} and \autoref{fig:dist_strat_phe_default} we show the results for the following \emph{default} parameters:
+In \autoref{fig:extinct_rate_symmetric}, \autoref{fig:growth_rate_symmetric}, \autoref{fig:avg_strat_phe_symmetric} and \autoref{fig:dist_strat_phe_symmetric} we show the results for the following \emph{symmetric} parameters:
 \begin{itemize}
     \item $n_{\text{env}}=2$, $n_{\text{phe}}=2$
     \item $\omega_t(e,e')=\begin{pmatrix}-1.0&+1.0\\+1.0&-1.0\end{pmatrix}$
@@ -65,65 +65,65 @@ In \autoref{fig:extinct_rate_default}, \autoref{fig:growth_rate_default}, \autor
     \item $N_0=100$
 \end{itemize}
 
-In \autoref{fig:extinct_rate_biological}, \autoref{fig:growth_rate_biological}, \autoref{fig:avg_strat_phe_biological} and \autoref{fig:dist_strat_phe_biological} we show the results for the \emph{biological} parameters:
+In \autoref{fig:extinct_rate_asymmetric}, \autoref{fig:growth_rate_asymmetric}, \autoref{fig:avg_strat_phe_asymmetric} and \autoref{fig:dist_strat_phe_asymmetric} we show the results for the \emph{asymmetric} parameters:
 \begin{itemize}
     \item $\omega_b(e,\phi)=\begin{pmatrix}1.0&0.2\\0.0&0.0\end{pmatrix}$
     \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&0.0\\1.0&0.1\end{pmatrix}$
-    \item The rest of the parameters have the same values as in the \emph{default} parameters.
+    \item The rest of the parameters have the same values as in the \emph{symmetric} parameters.
 \end{itemize}
 
 In \autoref{fig:extinct_rate_extended}, \autoref{fig:growth_rate_extended}, \autoref{fig:avg_strat_phe_extended} and \autoref{fig:dist_strat_phe_extended} we show the results for the \emph{extended} parameters:
 \begin{itemize}
     \item $N_0=1000$
-    \item The rest of the parameters have the same values as in the \emph{biological} parameters.
+    \item The rest of the parameters have the same values as in the \emph{asymmetric} parameters.
 \end{itemize}
 
 \begin{figure}[p]
     \centering
-    \caption{Extinction rate as a function of growth rate for the default parameters.} \label{fig:extinct_rate_default}
-    \includegraphics{../plots/sims/default/extinct_rate.pdf}
+    \caption{Extinction rate as a function of growth rate for the symmetric parameters.} \label{fig:extinct_rate_symmetric}
+    \includegraphics{../plots/sims/symmetric/extinct_rate.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \caption{Growth rate as a function of the initial strategy for the default parameters.} \label{fig:growth_rate_default}
-    \includegraphics{../plots/sims/default/growth_rate.pdf}
+    \caption{Growth rate as a function of the initial strategy for the symmetric parameters.} \label{fig:growth_rate_symmetric}
+    \includegraphics{../plots/sims/symmetric/growth_rate.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \caption{Average strategy as a function of the initial strategy for the default parameters.} \label{fig:avg_strat_phe_default}
-    \includegraphics{../plots/sims/default/avg_strat_phe.pdf}
+    \caption{Average strategy as a function of the initial strategy for the symmetric parameters.} \label{fig:avg_strat_phe_symmetric}
+    \includegraphics{../plots/sims/symmetric/avg_strat_phe.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \caption{Strategy distribution as a function of the initial strategy for the default parameters.} \label{fig:dist_strat_phe_default}
-    \includegraphics{../plots/sims/default/dist_strat_phe.pdf}
+    \caption{Strategy distribution as a function of the initial strategy for the symmetric parameters.} \label{fig:dist_strat_phe_symmetric}
+    \includegraphics{../plots/sims/symmetric/dist_strat_phe.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \caption{Extinction rate as a function of growth rate for the biological parameters.} \label{fig:extinct_rate_biological}
-    \includegraphics{../plots/sims/biological/extinct_rate.pdf}
+    \caption{Extinction rate as a function of growth rate for the asymmetric parameters.} \label{fig:extinct_rate_asymmetric}
+    \includegraphics{../plots/sims/asymmetric/extinct_rate.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \caption{Growth rate as a function of the initial strategy for the biological parameters.} \label{fig:growth_rate_biological}
-    \includegraphics{../plots/sims/biological/growth_rate.pdf}
+    \caption{Growth rate as a function of the initial strategy for the asymmetric parameters.} \label{fig:growth_rate_asymmetric}
+    \includegraphics{../plots/sims/asymmetric/growth_rate.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \caption{Average strategy as a function of the initial strategy for the biological parameters.} \label{fig:avg_strat_phe_biological}
-    \includegraphics{../plots/sims/biological/avg_strat_phe.pdf}
+    \caption{Average strategy as a function of the initial strategy for the asymmetric parameters.} \label{fig:avg_strat_phe_asymmetric}
+    \includegraphics{../plots/sims/asymmetric/avg_strat_phe.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \caption{Strategy distribution as a function of the initial strategy for the biological parameters.} \label{fig:dist_strat_phe_biological}
-    \includegraphics{../plots/sims/biological/dist_strat_phe.pdf}
+    \caption{Strategy distribution as a function of the initial strategy for the asymmetric parameters.} \label{fig:dist_strat_phe_asymmetric}
+    \includegraphics{../plots/sims/asymmetric/dist_strat_phe.pdf}
 \end{figure}
 
 \begin{figure}[p]

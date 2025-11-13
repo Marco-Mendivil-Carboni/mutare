@@ -3,8 +3,8 @@
 from pathlib import Path
 from copy import deepcopy
 
-from utils.config import Config
-from utils.exec import RunOptions, SimJob, create_strat_phe_jobs, execute_sim_jobs
+from utils.exec import RunOptions, SimJob, execute_sim_jobs
+from utils.exec import create_strat_phe_jobs
 from utils.plots import plot_strat_phe_jobs
 
 
@@ -17,45 +17,58 @@ def make_strat_phe_sims(sim_job: SimJob) -> None:
 if __name__ == "__main__":
     sims_dir = Path("sims")
 
-    default_dir = sims_dir / "default"
-
-    default_config: Config = {
-        "model": {
-            "n_env": 2,
-            "n_phe": 2,
-            "rates_trans": [[-1.0, 1.0], [1.0, -1.0]],
-            "rates_birth": [[1.2, 0.0], [0.0, 0.8]],
-            "rates_death": [[0.0, 1.0], [1.0, 0.0]],
-            "prob_mut": 0.001,
+    symmetric_sim_job = SimJob(
+        base_dir=sims_dir / "symmetric",
+        config={
+            "model": {
+                "n_env": 2,
+                "n_phe": 2,
+                "rates_trans": [
+                    [-1.0, 1.0],
+                    [1.0, -1.0],
+                ],
+                "rates_birth": [
+                    [1.2, 0.0],
+                    [0.0, 0.8],
+                ],
+                "rates_death": [
+                    [0.0, 1.0],
+                    [1.0, 0.0],
+                ],
+                "prob_mut": 0.001,
+            },
+            "init": {"n_agents": 100},
+            "output": {
+                "steps_per_file": 1_048_576,
+                "steps_per_save": 512,
+                "hist_bins": 16,
+            },
         },
-        "init": {"n_agents": 100},
-        "output": {
-            "steps_per_file": 1_048_576,
-            "steps_per_save": 256,
-            "hist_bins": 16,
-        },
-    }
-
-    run_options = RunOptions(
-        clean=False,
-        n_runs=4,
-        n_files=96,
-        analyze=True,
+        run_options=RunOptions(
+            clean=False,
+            n_runs=4,
+            n_files=16,
+            analyze=True,
+        ),
     )
 
-    make_strat_phe_sims(SimJob(default_dir, default_config, run_options))
+    make_strat_phe_sims(symmetric_sim_job)
 
-    biological_dir = sims_dir / "biological"
+    asymmetric_sim_job = deepcopy(symmetric_sim_job)
+    asymmetric_sim_job.base_dir = sims_dir / "asymmetric"
+    asymmetric_sim_job.config["model"]["rates_birth"] = [
+        [1.0, 0.2],
+        [0.0, 0.0],
+    ]
+    asymmetric_sim_job.config["model"]["rates_death"] = [
+        [0.0, 0.0],
+        [1.0, 0.1],
+    ]
 
-    biological_config = deepcopy(default_config)
-    biological_config["model"]["rates_birth"] = [[1.0, 0.2], [0.0, 0.0]]
-    biological_config["model"]["rates_death"] = [[0.0, 0.0], [1.0, 0.1]]
+    make_strat_phe_sims(asymmetric_sim_job)
 
-    make_strat_phe_sims(SimJob(biological_dir, biological_config, run_options))
+    extended_sim_job = deepcopy(asymmetric_sim_job)
+    extended_sim_job.base_dir = sims_dir / "extended"
+    extended_sim_job.config["init"]["n_agents"] = 1000
 
-    extended_dir = sims_dir / "extended"
-
-    extended_config = deepcopy(biological_config)
-    extended_config["init"]["n_agents"] = 1000
-
-    make_strat_phe_sims(SimJob(extended_dir, extended_config, run_options))
+    make_strat_phe_sims(extended_sim_job)
