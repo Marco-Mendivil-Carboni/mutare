@@ -65,6 +65,8 @@ def collect_avg_analyses(sim_jobs: List[SimJob]) -> pd.DataFrame:
         else:
             avg_analysis["sim_type"] = SimType.RANDOM
 
+        avg_analysis["prob_mut"] = sim_job.config["model"]["prob_mut"]
+
         avg_analyses.append(avg_analysis)
 
     print("analyses collected")

@@ -11,7 +11,7 @@ from .analysis import collect_avg_analyses, SimType
 mpl.use("pdf")
 
 mpl.rcParams["text.usetex"] = True
-mpl.rcParams["text.latex.preamble"] = "\\usepackage{lmodern}"
+mpl.rcParams["text.latex.preamble"] = "\\usepackage{lmodern}\\usepackage{mathtools}"
 mpl.rcParams["font.family"] = "lmodern"
 mpl.rcParams["font.size"] = 11
 
@@ -79,9 +79,6 @@ def plot_strat_phe_jobs(strat_phe_jobs: List[SimJob], fig_dir: Path) -> None:
             if "dist_strat_phe_0_" in col[0] and "mean" in col[1]
         ]
     )
-    hm_x = list()
-    hm_z1 = list()
-    hm_z2 = list()
     cmap = colors.LinearSegmentedColormap.from_list("custom", ["white", COLORS[1]])
 
     for avg_analyses, color, label in [
@@ -161,34 +158,37 @@ def plot_strat_phe_jobs(strat_phe_jobs: List[SimJob], fig_dir: Path) -> None:
                 )
 
         if label == "evolutive":
-            hm_x.append(avg_analyses["strat_phe_0"])
+            hm_x = avg_analyses["strat_phe_0"].to_list()
+            hm_z1 = list()
             for bin in range(hist_bins):
-                hm_z1.append(avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")])
+                hm_z1.append(
+                    avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")].to_list(),
+                )
+            im = ax_4_l.pcolormesh(
+                hm_x,
+                [(i + 0.5) / hist_bins for i in range(hist_bins)],
+                hm_z1,
+                cmap=cmap,
+                vmin=0.0,
+                vmax=1.0,
+                shading="nearest",
+            )
+            cbar = fig_4.colorbar(im, cax=ax_4_c, aspect=64)
+            cbar.ax.set_ylabel("$p(s(0))$")
         elif label == "random init":
+            hm_z2 = list()
             for bin in range(hist_bins):
-                hm_z2.append(avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")])
-
-    im = ax_4_l.pcolormesh(
-        hm_x,
-        [(i + 0.5) / hist_bins for i in range(hist_bins)],
-        hm_z1,
-        cmap=cmap,
-        vmin=0.0,
-        vmax=1.0,
-        shading="nearest",
-    )
-
-    _ = ax_4_r.pcolormesh(
-        [0.0, 1.0],
-        [i / hist_bins for i in range(hist_bins + 1)],
-        hm_z2,
-        cmap=cmap,
-        vmin=0.0,
-        vmax=1.0,
-    )
-
-    cbar = fig_4.colorbar(im, cax=ax_4_c, aspect=64)
-    cbar.ax.set_ylabel("$p(s(0))$")
+                hm_z2.append(
+                    avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")].to_list(),
+                )
+            ax_4_r.pcolormesh(
+                [0.0, 1.0],
+                [i / hist_bins for i in range(hist_bins + 1)],
+                hm_z2,
+                cmap=cmap,
+                vmin=0.0,
+                vmax=1.0,
+            )
 
     fig_dir.mkdir(parents=True, exist_ok=True)
 
@@ -205,6 +205,110 @@ def plot_strat_phe_jobs(strat_phe_jobs: List[SimJob], fig_dir: Path) -> None:
 
     ax_4_l.axhline(max_mu_strat, color="gray", ls="-.")
     ax_4_r.axhline(max_mu_strat, color="gray", ls="-.")
+    fig_4.savefig(fig_dir / "dist_strat_phe.pdf")
+
+    print("plots made")
+
+
+def plot_prob_mut_jobs(strat_phe_jobs: List[SimJob], fig_dir: Path) -> None:
+    avg_analyses = collect_avg_analyses(strat_phe_jobs)
+
+    fig_1 = Figure(figsize=(16.0 * CM, 10.0 * CM))
+    ax_1 = fig_1.add_subplot()
+    ax_1.set_xlabel("$p_{\\text{mut}}$")
+    ax_1.set_ylabel("$r_e$")
+    ax_1.set_xscale("log")
+    ax_1.set_yscale("log")
+
+    fig_2 = Figure(figsize=(16.0 * CM, 10.0 * CM))
+    ax_2 = fig_2.add_subplot()
+    ax_2.set_xlabel("$p_{\\text{mut}}$")
+    ax_2.set_ylabel("$\\langle\\mu\\rangle$")
+    ax_2.set_xscale("log")
+
+    fig_3 = Figure(figsize=(16.0 * CM, 10.0 * CM))
+    ax_3 = fig_3.add_subplot()
+    ax_3.set_xlabel("$p_{\\text{mut}}$")
+    ax_3.set_ylabel("$\\langle s(0)\\rangle$")
+    ax_3.set_xscale("log")
+
+    fig_4 = Figure(figsize=(16.0 * CM, 10.0 * CM))
+    gs = gridspec.GridSpec(1, 2, figure=fig_4, width_ratios=[64, 1], wspace=0)
+    ax_4 = fig_4.add_subplot(gs[0, 0])
+    ax_4_c = fig_4.add_subplot(gs[0, 1])
+    ax_4.set_xlabel("$p_{\\text{mut}}$")
+    ax_4.set_ylabel("$s(0)$")
+    ax_4.set_xscale("log")
+
+    hist_bins = len(
+        [
+            col
+            for col in avg_analyses.columns
+            if "dist_strat_phe_0_" in col[0] and "mean" in col[1]
+        ]
+    )
+    cmap = colors.LinearSegmentedColormap.from_list("custom", ["white", COLORS[1]])
+
+    ax_1.errorbar(
+        avg_analyses["prob_mut"],
+        avg_analyses[("extinct_rate", "mean")],
+        yerr=avg_analyses[("extinct_rate", "sem")],
+        c=COLORS[11],
+        **PLOT_STYLE,
+    )
+
+    ax_2.errorbar(
+        avg_analyses["prob_mut"],
+        avg_analyses[("growth_rate", "mean")],
+        yerr=avg_analyses[("growth_rate", "sem")],
+        c=COLORS[11],
+        **PLOT_STYLE,
+    )
+
+    ax_3.plot(
+        avg_analyses["prob_mut"],
+        avg_analyses[("avg_strat_phe_0", "mean")],
+        c=COLORS[11],
+        **PLOT_STYLE,
+    )
+    ax_3.fill_between(
+        avg_analyses["prob_mut"],
+        avg_analyses[("avg_strat_phe_0", "mean")]
+        - avg_analyses[("std_dev_strat_phe", "mean")],
+        avg_analyses[("avg_strat_phe_0", "mean")]
+        + avg_analyses[("std_dev_strat_phe", "mean")],
+        color=COLORS[11],
+        **FILL_STYLE,
+    )
+
+    hm_x = avg_analyses["prob_mut"].to_list()
+    hm_z = list()
+    for bin in range(hist_bins):
+        hm_z.append(
+            avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")].to_list(),
+        )
+    im = ax_4.pcolormesh(
+        hm_x,
+        [(i + 0.5) / hist_bins for i in range(hist_bins)],
+        hm_z,
+        cmap=cmap,
+        vmin=0.0,
+        vmax=1.0,
+        shading="nearest",
+    )
+    ax_4.set_xlim(hm_x[0], hm_x[-1])
+
+    cbar = fig_4.colorbar(im, cax=ax_4_c, aspect=64)
+    cbar.ax.set_ylabel("$p(s(0))$")
+
+    fig_dir.mkdir(parents=True, exist_ok=True)
+
+    fig_1.savefig(fig_dir / "extinct_rate.pdf")
+
+    fig_2.savefig(fig_dir / "growth_rate.pdf")
+
+    fig_3.savefig(fig_dir / "avg_strat_phe.pdf")
+
     fig_4.savefig(fig_dir / "dist_strat_phe.pdf")
 
     print("plots made")

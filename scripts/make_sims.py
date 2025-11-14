@@ -4,14 +4,20 @@ from pathlib import Path
 from copy import deepcopy
 
 from utils.exec import RunOptions, SimJob, execute_sim_jobs
-from utils.exec import create_strat_phe_jobs
-from utils.plots import plot_strat_phe_jobs
+from utils.exec import create_strat_phe_jobs, create_prob_mut_jobs
+from utils.plots import plot_strat_phe_jobs, plot_prob_mut_jobs
 
 
 def make_strat_phe_sims(sim_job: SimJob) -> None:
     strat_phe_jobs = create_strat_phe_jobs(sim_job, 16)
     execute_sim_jobs(strat_phe_jobs)
     plot_strat_phe_jobs(strat_phe_jobs, "plots" / sim_job.base_dir)
+
+
+def make_prob_mut_sims(sim_job: SimJob) -> None:
+    strat_phe_jobs = create_prob_mut_jobs(sim_job, 16)
+    execute_sim_jobs(strat_phe_jobs)
+    plot_prob_mut_jobs(strat_phe_jobs, "plots" / sim_job.base_dir)
 
 
 if __name__ == "__main__":
@@ -72,3 +78,9 @@ if __name__ == "__main__":
     extended_sim_job.config["init"]["n_agents"] = 1000
 
     make_strat_phe_sims(extended_sim_job)
+
+    prob_mut_job = deepcopy(symmetric_sim_job)
+    prob_mut_job.base_dir = sims_dir / "prob_mut"
+    prob_mut_job.config["model"]["prob_mut"] = 1e-8
+
+    make_prob_mut_sims(prob_mut_job)
