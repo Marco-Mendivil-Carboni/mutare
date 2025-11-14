@@ -47,7 +47,7 @@ if __name__ == "__main__":
         run_options=RunOptions(
             clean=False,
             n_runs=4,
-            n_files=16,
+            n_files=128,
             analyze=True,
         ),
     )
