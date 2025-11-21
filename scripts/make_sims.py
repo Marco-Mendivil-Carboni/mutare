@@ -1,23 +1,33 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
 from pathlib import Path
+import numpy as np
 from copy import deepcopy
 
-from utils.exec import RunOptions, SimJob, execute_sim_jobs
-from utils.exec import create_strat_phe_jobs, create_prob_mut_jobs
-from utils.plots import plot_strat_phe_jobs, plot_prob_mut_jobs
+from utils.exec import RunOptions, SimJob, create_sim_jobs, execute_sim_jobs
+from utils.plots import plot_sim_jobs
 
 
-def make_strat_phe_sims(sim_job: SimJob) -> None:
-    strat_phe_jobs = create_strat_phe_jobs(sim_job, 16)
-    execute_sim_jobs(strat_phe_jobs)
-    plot_strat_phe_jobs(strat_phe_jobs, "plots" / sim_job.base_dir)
-
-
-def make_prob_mut_sims(sim_job: SimJob) -> None:
-    strat_phe_jobs = create_prob_mut_jobs(sim_job, 16)
-    execute_sim_jobs(strat_phe_jobs)
-    plot_prob_mut_jobs(strat_phe_jobs, "plots" / sim_job.base_dir)
+def make_sims(
+    init_sim_job: SimJob,
+    strat_phe_sweep: bool,
+    prob_mut_sweep: bool,
+    n_agents_sweep: bool,
+) -> None:
+    sim_jobs = create_sim_jobs(
+        init_sim_job,
+        strat_phe_0_values=np.linspace(start=1 / 16, stop=15 / 16, num=15).tolist()
+        if strat_phe_sweep
+        else [],
+        prob_mut_values=np.logspace(start=-8, stop=0, num=17).tolist()
+        if prob_mut_sweep
+        else [],
+        n_agents_values=np.logspace(start=1, stop=3, num=9).tolist()
+        if n_agents_sweep
+        else [],
+    )
+    execute_sim_jobs(sim_jobs)
+    plot_sim_jobs(sim_jobs)
 
 
 if __name__ == "__main__":
@@ -52,13 +62,18 @@ if __name__ == "__main__":
         },
         run_options=RunOptions(
             clean=False,
-            n_runs=4,
-            n_files=128,
-            analyze=True,
+            n_runs=4,  # 16
+            n_files=128,  # 64
+            analyze=False,  # True
         ),
     )
 
-    make_strat_phe_sims(symmetric_sim_job)
+    make_sims(
+        init_sim_job=symmetric_sim_job,
+        strat_phe_sweep=True,
+        prob_mut_sweep=False,  # True
+        n_agents_sweep=False,  # True
+    )
 
     asymmetric_sim_job = deepcopy(symmetric_sim_job)
     asymmetric_sim_job.base_dir = sims_dir / "asymmetric"
@@ -71,16 +86,20 @@ if __name__ == "__main__":
         [1.0, 0.1],
     ]
 
-    make_strat_phe_sims(asymmetric_sim_job)
+    make_sims(
+        init_sim_job=asymmetric_sim_job,
+        strat_phe_sweep=True,
+        prob_mut_sweep=False,  # True
+        n_agents_sweep=False,  # True
+    )
 
     extended_sim_job = deepcopy(asymmetric_sim_job)
     extended_sim_job.base_dir = sims_dir / "extended"
     extended_sim_job.config["init"]["n_agents"] = 1000
 
-    make_strat_phe_sims(extended_sim_job)
-
-    prob_mut_job = deepcopy(symmetric_sim_job)
-    prob_mut_job.base_dir = sims_dir / "prob_mut"
-    prob_mut_job.config["model"]["prob_mut"] = 1e-8
-
-    make_prob_mut_sims(prob_mut_job)
+    make_sims(
+        init_sim_job=symmetric_sim_job,
+        strat_phe_sweep=True,
+        prob_mut_sweep=False,
+        n_agents_sweep=False,
+    )

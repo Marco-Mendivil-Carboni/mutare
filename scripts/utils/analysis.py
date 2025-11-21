@@ -55,6 +55,9 @@ def collect_avg_analyses(sim_jobs: List[SimJob]) -> pd.DataFrame:
             [analyses.columns, ["mean", "sem"]]
         )
 
+        avg_analysis["prob_mut"] = sim_job.config["model"]["prob_mut"]
+        avg_analysis["n_agents"] = sim_job.config["init"]["n_agents"]
+
         strat_phe = sim_job.config["init"].get("strat_phe")
         if strat_phe is not None:
             avg_analysis["strat_phe_0"] = strat_phe[0]
@@ -64,8 +67,6 @@ def collect_avg_analyses(sim_jobs: List[SimJob]) -> pd.DataFrame:
                 avg_analysis["sim_type"] = SimType.FIXED
         else:
             avg_analysis["sim_type"] = SimType.RANDOM
-
-        avg_analysis["prob_mut"] = sim_job.config["model"]["prob_mut"]
 
         avg_analyses.append(avg_analysis)
 

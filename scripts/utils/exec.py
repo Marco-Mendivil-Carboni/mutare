@@ -101,36 +101,37 @@ class SimJob:
         return hash_sim_dir(self.base_dir, self.config)
 
 
-def create_strat_phe_jobs(sim_job: SimJob, n_values: int) -> List[SimJob]:
-    sim_jobs = [sim_job]
+def create_sim_jobs(
+    init_sim_job: SimJob,
+    strat_phe_0_values: List[float],
+    prob_mut_values: List[float],
+    n_agents_values: List[int],
+) -> List[SimJob]:
+    base_dir = init_sim_job.base_dir
+    run_options = init_sim_job.run_options
 
-    config = deepcopy(sim_job.config)
-    strat_phe_0_values = [(i + 1) / n_values for i in range(n_values - 1)]
+    sim_jobs = [init_sim_job]
 
     for strat_phe_0 in strat_phe_0_values:
+        config = deepcopy(init_sim_job.config)
         config["init"]["strat_phe"] = [strat_phe_0, 1 - strat_phe_0]
-
+        sim_jobs.append(SimJob(base_dir, config, run_options))
         config["model"]["prob_mut"] = 0.0
-        sim_jobs.append(SimJob(sim_job.base_dir, config, sim_job.run_options))
-
-        config["model"]["prob_mut"] = sim_job.config["model"]["prob_mut"]
-        sim_jobs.append(SimJob(sim_job.base_dir, config, sim_job.run_options))
-
-    return sim_jobs
-
-
-def create_prob_mut_jobs(sim_job: SimJob, n_values: int) -> List[SimJob]:
-    sim_jobs: List[SimJob] = []
-
-    config = deepcopy(sim_job.config)
-    prob_mut_values = [
-        sim_job.config["model"]["prob_mut"] ** (1 - i / n_values)
-        for i in range(n_values + 1)
-    ]
+        sim_jobs.append(SimJob(base_dir, config, run_options))
 
     for prob_mut in prob_mut_values:
+        if prob_mut == init_sim_job.config["model"]["prob_mut"]:
+            continue
+        config = deepcopy(init_sim_job.config)
         config["model"]["prob_mut"] = prob_mut
-        sim_jobs.append(SimJob(sim_job.base_dir, config, sim_job.run_options))
+        sim_jobs.append(SimJob(base_dir, config, run_options))
+
+    for n_agents in n_agents_values:
+        if n_agents == init_sim_job.config["init"]["n_agents"]:
+            continue
+        config = deepcopy(init_sim_job.config)
+        config["init"]["n_agents"] = n_agents
+        sim_jobs.append(SimJob(base_dir, config, run_options))
 
     return sim_jobs
 
