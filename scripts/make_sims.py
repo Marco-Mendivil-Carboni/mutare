@@ -14,17 +14,14 @@ def make_sims(
     prob_mut_sweep: bool,
     n_agents_sweep: bool,
 ) -> None:
+    strat_phe_0_values = np.linspace(start=1 / 16, stop=15 / 16, num=15)
+    prob_mut_values = np.logspace(start=-8, stop=0, num=17)
+    n_agents_values = np.logspace(start=1.5, stop=3.5, num=9).round().astype(int)
     sim_jobs = create_sim_jobs(
         init_sim_job,
-        strat_phe_0_values=np.linspace(start=1 / 16, stop=15 / 16, num=15).tolist()
-        if strat_phe_sweep
-        else [],
-        prob_mut_values=np.logspace(start=-8, stop=0, num=17).tolist()
-        if prob_mut_sweep
-        else [],
-        n_agents_values=np.logspace(start=1, stop=3, num=9).tolist()
-        if n_agents_sweep
-        else [],
+        strat_phe_0_values.tolist() if strat_phe_sweep else [],
+        prob_mut_values.tolist() if prob_mut_sweep else [],
+        n_agents_values.tolist() if n_agents_sweep else [],
     )
     execute_sim_jobs(sim_jobs)
     plot_sim_jobs(sim_jobs)
