@@ -56,23 +56,23 @@ if __name__ == "__main__":
             "init": {"n_agents": 100},
             "output": {
                 "steps_per_file": 1_048_576,
-                "steps_per_save": 512,
+                "steps_per_save": 1_024,
                 "hist_bins": 16,
             },
         },
         run_options=RunOptions(
             clean=False,
-            n_runs=4,  # 16
-            n_files=128,  # 64
-            analyze=False,  # True
+            n_runs=16,
+            n_files=64,
+            analyze=True,
         ),
     )
 
     make_sims(
         init_sim_job=symmetric_sim_job,
         strat_phe_sweep=True,
-        prob_mut_sweep=False,  # True
-        n_agents_sweep=False,  # True
+        prob_mut_sweep=True,
+        n_agents_sweep=True,
     )
 
     asymmetric_sim_job = deepcopy(symmetric_sim_job)
@@ -89,8 +89,8 @@ if __name__ == "__main__":
     make_sims(
         init_sim_job=asymmetric_sim_job,
         strat_phe_sweep=True,
-        prob_mut_sweep=False,  # True
-        n_agents_sweep=False,  # True
+        prob_mut_sweep=True,
+        n_agents_sweep=True,
     )
 
     extended_sim_job = deepcopy(asymmetric_sim_job)
