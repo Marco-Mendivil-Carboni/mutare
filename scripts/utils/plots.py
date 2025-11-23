@@ -57,6 +57,8 @@ def plot_sim_jobs(sim_jobs: List[SimJob]) -> None:
 
     generate_prob_mut_plots(init_sim_job, avg_analyses, n_hist_bins)
 
+    print("plots made")
+
 
 def generate_strat_phe_plots(
     init_sim_job: SimJob, avg_analyses: pd.DataFrame, n_hist_bins: int
@@ -68,6 +70,8 @@ def generate_strat_phe_plots(
         )
         & (avg_analyses["n_agents"] == init_sim_job.config["init"]["n_agents"])
     ]
+    if len(avg_analyses) < 2:
+        return
 
     fig_1 = Figure(figsize=FIGSIZE)
     ax_1 = fig_1.add_subplot()
@@ -236,6 +240,8 @@ def generate_prob_mut_plots(
         (avg_analyses["sim_type"] == SimType.RANDOM)
         & (avg_analyses["n_agents"] == init_sim_job.config["init"]["n_agents"])
     ]
+    if len(avg_analyses) < 2:
+        return
 
     fig_1 = Figure(figsize=FIGSIZE)
     ax_1 = fig_1.add_subplot()
@@ -324,5 +330,3 @@ def generate_prob_mut_plots(
     fig_3.savefig(fig_dir / "avg_strat_phe.pdf")
 
     fig_4.savefig(fig_dir / "dist_strat_phe.pdf")
-
-    print("plots made")

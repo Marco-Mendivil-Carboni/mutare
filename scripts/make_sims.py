@@ -98,7 +98,7 @@ if __name__ == "__main__":
     extended_sim_job.config["init"]["n_agents"] = 1000
 
     make_sims(
-        init_sim_job=symmetric_sim_job,
+        init_sim_job=extended_sim_job,
         strat_phe_sweep=True,
         prob_mut_sweep=False,
         n_agents_sweep=False,
