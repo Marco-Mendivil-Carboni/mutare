@@ -13,10 +13,11 @@ mpl.use("pdf")
 mpl.rcParams["text.usetex"] = True
 mpl.rcParams["text.latex.preamble"] = "\\usepackage{lmodern}\\usepackage{mathtools}"
 mpl.rcParams["font.family"] = "lmodern"
-mpl.rcParams["font.size"] = 11
+mpl.rcParams["font.size"] = 10
 
 CM = 1 / 2.54
-FIGSIZE = (9.0 * CM, 6.0 * CM)
+
+FIGSIZE = (8.0 * CM, 4.94 * CM)
 
 mpl.rcParams["figure.constrained_layout.use"] = True
 
@@ -45,7 +46,7 @@ CMAP = colors.LinearSegmentedColormap.from_list("custom", ["white", COLORS[1]])
 def plot_sim_jobs(sim_jobs: List[SimJob]) -> None:
     init_sim_job = sim_jobs[0]
     avg_analyses = collect_avg_analyses(sim_jobs)
-    n_hist_bins = len(
+    hist_bins = len(
         [
             col
             for col in avg_analyses.columns
@@ -53,15 +54,15 @@ def plot_sim_jobs(sim_jobs: List[SimJob]) -> None:
         ]
     )
 
-    generate_strat_phe_plots(init_sim_job, avg_analyses, n_hist_bins)
+    generate_strat_phe_plots(init_sim_job, avg_analyses, hist_bins)
 
-    generate_prob_mut_plots(init_sim_job, avg_analyses, n_hist_bins)
+    generate_prob_mut_plots(init_sim_job, avg_analyses, hist_bins)
 
     print("plots made")
 
 
 def generate_strat_phe_plots(
-    init_sim_job: SimJob, avg_analyses: pd.DataFrame, n_hist_bins: int
+    init_sim_job: SimJob, avg_analyses: pd.DataFrame, hist_bins: int
 ) -> None:
     avg_analyses = avg_analyses[
         (
@@ -77,7 +78,7 @@ def generate_strat_phe_plots(
 
     fig_1 = Figure(figsize=FIGSIZE)
     ax_1 = fig_1.add_subplot()
-    ax_1.set_xlabel("$\\langle\\mu\\rangle$")
+    ax_1.set_xlabel("$s(0)_i$")
     ax_1.set_ylabel("$r_e$")
     ax_1.set_yscale("log")
 
@@ -102,35 +103,50 @@ def generate_strat_phe_plots(
     ax_4_r.set_xticks([])
     ax_4_r.set_yticks([])
 
+    fig_5 = Figure(figsize=FIGSIZE)
+    ax_5 = fig_5.add_subplot()
+    ax_5.set_xlabel("$\\langle\\mu\\rangle$")
+    ax_5.set_ylabel("$r_e$")
+    ax_5.set_yscale("log")
+
     sim_type = avg_analyses["sim_type"]
 
-    max_mu_strat: Any = None
+    min_extinct_strat: Any = None
+    max_growth_strat: Any = None
 
     for avg_analyses, color, label in [
         (avg_analyses[sim_type == SimType.FIXED], COLORS[1], "fixed strat"),
         (avg_analyses[sim_type == SimType.EVOL], COLORS[7], "evolutive"),
         (avg_analyses[sim_type == SimType.RANDOM], COLORS[11], "random init"),
     ]:
-        ax_1.errorbar(
-            avg_analyses[("growth_rate", "mean")],
-            avg_analyses[("extinct_rate", "mean")],
-            xerr=avg_analyses[("growth_rate", "sem")],
-            yerr=avg_analyses[("extinct_rate", "sem")],
-            c=color,
-            label=label,
-            **PLOT_STYLE,
-        )
-        ax_1.axvline(
-            avg_analyses[("growth_rate", "mean")].mean(), c=color, **LINE_STYLE
-        )
-        ax_1.axhline(
-            avg_analyses[("extinct_rate", "mean")].mean(), c=color, **LINE_STYLE
-        )
-
         if label == "fixed strat":
-            max_mu_strat = avg_analyses["strat_phe_0"][
+            max_growth_strat = avg_analyses["strat_phe_0"][
                 avg_analyses[("growth_rate", "mean")].idxmax()
             ]
+            min_extinct_strat = avg_analyses["strat_phe_0"][
+                avg_analyses[("extinct_rate", "mean")].idxmin()
+            ]
+
+        if label == "random init":
+            for extinct_rate_mean, extinct_rate_sem in avg_analyses[
+                [("extinct_rate", "mean"), ("extinct_rate", "sem")]
+            ].itertuples(index=False):
+                ax_1.axhline(extinct_rate_mean, c=color, label=label, ls=":")
+                ax_1.axhspan(
+                    extinct_rate_mean + extinct_rate_sem,
+                    extinct_rate_mean - extinct_rate_sem,
+                    color=color,
+                    **FILL_STYLE,
+                )
+        else:
+            ax_1.errorbar(
+                avg_analyses["strat_phe_0"],
+                avg_analyses[("extinct_rate", "mean")],
+                yerr=avg_analyses[("extinct_rate", "sem")],
+                c=color,
+                label=label,
+                **PLOT_STYLE,
+            )
 
         if label == "random init":
             for growth_rate_mean, growth_rate_sem in avg_analyses[
@@ -186,57 +202,86 @@ def generate_strat_phe_plots(
         if label == "evolutive":
             hm_x = avg_analyses["strat_phe_0"].tolist()
             hm_z1 = list()
-            for bin in range(n_hist_bins):
+            for bin in range(hist_bins):
                 hm_z1.append(
-                    avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")].tolist(),
+                    (
+                        hist_bins * avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")]
+                    ).tolist()
                 )
             im = ax_4_l.pcolormesh(
                 hm_x,
-                [(i + 0.5) / n_hist_bins for i in range(n_hist_bins)],
+                [(i + 0.5) / hist_bins for i in range(hist_bins)],
                 hm_z1,
                 cmap=CMAP,
-                vmin=0.0,
-                vmax=1.0,
+                vmin=0,
+                vmax=hist_bins,
                 shading="nearest",
             )
             cbar = fig_4.colorbar(im, cax=ax_4_c, aspect=64)
             cbar.ax.set_ylabel("$p(s(0))$")
         elif label == "random init":
             hm_z2 = list()
-            for bin in range(n_hist_bins):
+            for bin in range(hist_bins):
                 hm_z2.append(
-                    avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")].tolist(),
+                    (
+                        hist_bins * avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")]
+                    ).tolist()
                 )
             ax_4_r.pcolormesh(
                 [0.0, 1.0],
-                [i / n_hist_bins for i in range(n_hist_bins + 1)],
+                [i / hist_bins for i in range(hist_bins + 1)],
                 hm_z2,
                 cmap=CMAP,
-                vmin=0.0,
-                vmax=1.0,
+                vmin=0,
+                vmax=hist_bins,
             )
+
+        ax_5.errorbar(
+            avg_analyses[("growth_rate", "mean")],
+            avg_analyses[("extinct_rate", "mean")],
+            xerr=avg_analyses[("growth_rate", "sem")],
+            yerr=avg_analyses[("extinct_rate", "sem")],
+            c=color,
+            label=label,
+            **PLOT_STYLE,
+        )
+        ax_5.axvline(
+            avg_analyses[("growth_rate", "mean")].mean(), c=color, **LINE_STYLE
+        )
+        ax_5.axhline(
+            avg_analyses[("extinct_rate", "mean")].mean(), c=color, **LINE_STYLE
+        )
 
     fig_dir = init_sim_job.base_dir / "plots" / "strat_phe"
     fig_dir.mkdir(parents=True, exist_ok=True)
 
     ax_1.legend()
+    ax_1.axvline(max_growth_strat, color="gray", ls="-.")
+    ax_1.axvline(min_extinct_strat, color="gray", ls=":")
     fig_1.savefig(fig_dir / "extinct_rate.pdf")
 
-    ax_2.axvline(max_mu_strat, color="gray", ls="-.")
+    ax_2.axvline(max_growth_strat, color="gray", ls="-.")
+    ax_2.axvline(min_extinct_strat, color="gray", ls=":")
     ax_2.legend()
     fig_2.savefig(fig_dir / "growth_rate.pdf")
 
-    ax_3.axhline(max_mu_strat, color="gray", ls="-.")
+    ax_3.axhline(max_growth_strat, color="gray", ls="-.")
+    ax_3.axhline(min_extinct_strat, color="gray", ls=":")
     ax_3.legend()
     fig_3.savefig(fig_dir / "avg_strat_phe.pdf")
 
-    ax_4_l.axhline(max_mu_strat, color="gray", ls="-.")
-    ax_4_r.axhline(max_mu_strat, color="gray", ls="-.")
+    ax_4_l.axhline(max_growth_strat, color="gray", ls="-.")
+    ax_4_r.axhline(max_growth_strat, color="gray", ls="-.")
+    ax_4_l.axhline(min_extinct_strat, color="gray", ls=":")
+    ax_4_r.axhline(min_extinct_strat, color="gray", ls=":")
     fig_4.savefig(fig_dir / "dist_strat_phe.pdf")
+
+    ax_5.legend()
+    fig_5.savefig(fig_dir / "rates.pdf")
 
 
 def generate_prob_mut_plots(
-    init_sim_job: SimJob, avg_analyses: pd.DataFrame, n_hist_bins: int
+    init_sim_job: SimJob, avg_analyses: pd.DataFrame, hist_bins: int
 ) -> None:
     avg_analyses = avg_analyses[
         (avg_analyses["sim_type"] == SimType.RANDOM)
@@ -274,6 +319,12 @@ def generate_prob_mut_plots(
     ax_4.set_ylabel("$s(0)$")
     ax_4.set_xscale("log")
 
+    fig_5 = Figure(figsize=FIGSIZE)
+    ax_5 = fig_5.add_subplot()
+    ax_5.set_xlabel("$\\langle\\mu\\rangle$")
+    ax_5.set_ylabel("$r_e$")
+    ax_5.set_yscale("log")
+
     ax_1.errorbar(
         avg_analyses["prob_mut"],
         avg_analyses[("extinct_rate", "mean")],
@@ -308,21 +359,32 @@ def generate_prob_mut_plots(
 
     hm_x = avg_analyses["prob_mut"].tolist()
     hm_z = list()
-    for bin in range(n_hist_bins):
-        hm_z.append(avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")].tolist())
+    for bin in range(hist_bins):
+        hm_z.append(
+            (hist_bins * avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")]).tolist()
+        )
     im = ax_4.pcolormesh(
         hm_x,
-        [(i + 0.5) / n_hist_bins for i in range(n_hist_bins)],
+        [(i + 0.5) / hist_bins for i in range(hist_bins)],
         hm_z,
         cmap=CMAP,
-        vmin=0.0,
-        vmax=1.0,
+        vmin=0,
+        vmax=hist_bins,
         shading="nearest",
     )
     ax_4.set_xlim(hm_x[0], hm_x[-1])
 
     cbar = fig_4.colorbar(im, cax=ax_4_c, aspect=64)
     cbar.ax.set_ylabel("$p(s(0))$")
+
+    ax_5.errorbar(
+        avg_analyses[("growth_rate", "mean")],
+        avg_analyses[("extinct_rate", "mean")],
+        xerr=avg_analyses[("growth_rate", "sem")],
+        yerr=avg_analyses[("extinct_rate", "sem")],
+        c=COLORS[11],
+        **PLOT_STYLE,
+    )
 
     fig_dir = init_sim_job.base_dir / "plots" / "prob_mut"
     fig_dir.mkdir(parents=True, exist_ok=True)
@@ -334,3 +396,5 @@ def generate_prob_mut_plots(
     fig_3.savefig(fig_dir / "avg_strat_phe.pdf")
 
     fig_4.savefig(fig_dir / "dist_strat_phe.pdf")
+
+    fig_5.savefig(fig_dir / "rates.pdf")

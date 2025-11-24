@@ -1,4 +1,4 @@
-\documentclass[a4paper,11pt]{article}
+\documentclass[a4paper,10pt,twocolumn]{article}
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -8,8 +8,7 @@
 
 \usepackage{lmodern}
 
-\usepackage[margin=2.5cm]{geometry}
-\usepackage{setspace}
+\usepackage[margin=2cm]{geometry}
 
 \usepackage{mathtools,amssymb}
 
@@ -17,8 +16,6 @@
 \usepackage{xcolor}
 
 \usepackage[hidelinks,pdfusetitle]{hyperref}
-
-\setstretch{1.15}
 
 \title{Notes on project \emph{mutare}}
 \author{Marco Mendívil Carboni}
@@ -51,11 +48,11 @@ When an agent reproduces, its offspring inherits the parent's phenotypic strateg
 
 An important aspect of the model is that the total population is limited to its initial size $N_0$: whenever reproduction events cause this number to be exceeded, an agent is randomly removed, preventing unbounded growth (a mechanism more or less analogous to an ecological carrying capacity). If the population goes extinct, it is reinitialized, allowing for long-term statistical characterization of the dynamics.
 
-During the simulation, several observables are tracked, including the average population growth rate, extinction frequency, and the distribution of phenotypic strategies. These quantities provide insight into whether evolution favors the maximization of mean fitness, the minimization of extinction risk, or the emergence of mixed strategies balancing both goals.
+During the simulation, several observables are measured , including the average population growth rate $\langle\mu\rangle$, the extinction rate $r_e$, and the distribution of phenotypic strategies $p(s(0))$. These quantities provide insight into whether evolution favors the maximization of mean fitness, the minimization of extinction risk, or the emergence of mixed strategies balancing both goals.
 
 \section{Results: phenotipic diversity and safe strategies} \label{sec:results}
 
-In \autoref{fig:extinct_rate_symmetric}, \autoref{fig:growth_rate_symmetric}, \autoref{fig:avg_strat_phe_symmetric} and \autoref{fig:dist_strat_phe_symmetric} we show the results for the following \emph{symmetric} parameters:
+First we will consider the following \emph{symmetric} parameters:
 \begin{itemize}
     \item $n_{\text{env}}=2$, $n_{\text{phe}}=2$
     \item $\omega_t(e,e')=\begin{pmatrix}-1.0&+1.0\\+1.0&-1.0\end{pmatrix}$
@@ -64,117 +61,60 @@ In \autoref{fig:extinct_rate_symmetric}, \autoref{fig:growth_rate_symmetric}, \a
     \item $p_{\text{mut}}=0.001$
     \item $N_0=100$
 \end{itemize}
+In \autoref{fig:symmetric_strat_phe} we show the results of the simulations with this parameters for different initial strategies.
 
-In \autoref{fig:extinct_rate_asymmetric}, \autoref{fig:growth_rate_asymmetric}, \autoref{fig:avg_strat_phe_asymmetric} and \autoref{fig:dist_strat_phe_asymmetric} we show the results for the \emph{asymmetric} parameters:
+\begin{figure}[p]
+    \centering
+    \caption{Results for the symmetric parameters.} \label{fig:symmetric_strat_phe}
+    \includegraphics{../sims/symmetric/plots/strat_phe/extinct_rate.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe/growth_rate.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe/avg_strat_phe.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe/dist_strat_phe.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe/rates.pdf}
+\end{figure}
+
+\begin{figure}[p]
+    \centering
+    \caption{Results for the symmetric parameters.} \label{fig:symmetric_prob_mut}
+    \includegraphics{../sims/symmetric/plots/prob_mut/extinct_rate.pdf}
+    \includegraphics{../sims/symmetric/plots/prob_mut/growth_rate.pdf}
+    \includegraphics{../sims/symmetric/plots/prob_mut/avg_strat_phe.pdf}
+    \includegraphics{../sims/symmetric/plots/prob_mut/dist_strat_phe.pdf}
+    \includegraphics{../sims/symmetric/plots/prob_mut/rates.pdf}
+\end{figure}
+
+In \autoref{fig:results_asymmetric} we show the results for the \emph{asymmetric} parameters:
 \begin{itemize}
     \item $\omega_b(e,\phi)=\begin{pmatrix}1.0&0.2\\0.0&0.0\end{pmatrix}$
     \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&0.0\\1.0&0.1\end{pmatrix}$
     \item The rest of the parameters have the same values as in the \emph{symmetric} parameters.
 \end{itemize}
 
-In \autoref{fig:extinct_rate_extended}, \autoref{fig:growth_rate_extended}, \autoref{fig:avg_strat_phe_extended} and \autoref{fig:dist_strat_phe_extended} we show the results for the \emph{extended} parameters:
-\begin{itemize}
-    \item $N_0=1000$
-    \item The rest of the parameters have the same values as in the \emph{asymmetric} parameters.
-\end{itemize}
+% In \autoref{fig:results_extended} we show the results for the \emph{extended} parameters:
+% \begin{itemize}
+%     \item $N_0=1000$
+%     \item The rest of the parameters have the same values as in the \emph{asymmetric} parameters.
+% \end{itemize}
 
 \begin{figure}[p]
     \centering
-    \caption{Extinction rate as a function of growth rate for the symmetric parameters.} \label{fig:extinct_rate_symmetric}
-    \includegraphics{../sims/symmetric/plots/strat_phe/extinct_rate.pdf}
-\end{figure}
-
-\begin{figure}[p]
-    \centering
-    \caption{Growth rate as a function of the initial strategy for the symmetric parameters.} \label{fig:growth_rate_symmetric}
-    \includegraphics{../sims/symmetric/plots/strat_phe/growth_rate.pdf}
-\end{figure}
-
-\begin{figure}[p]
-    \centering
-    \caption{Average strategy as a function of the initial strategy for the symmetric parameters.} \label{fig:avg_strat_phe_symmetric}
-    \includegraphics{../sims/symmetric/plots/strat_phe/avg_strat_phe.pdf}
-\end{figure}
-
-\begin{figure}[p]
-    \centering
-    \caption{Strategy distribution as a function of the initial strategy for the symmetric parameters.} \label{fig:dist_strat_phe_symmetric}
-    \includegraphics{../sims/symmetric/plots/strat_phe/dist_strat_phe.pdf}
-\end{figure}
-
-\begin{figure}[p]
-    \centering
-    \caption{Extinction rate as a function of growth rate for the asymmetric parameters.} \label{fig:extinct_rate_asymmetric}
+    \caption{Results for the asymmetric parameters.} \label{fig:results_asymmetric}
     \includegraphics{../sims/asymmetric/plots/strat_phe/extinct_rate.pdf}
-\end{figure}
-
-\begin{figure}[p]
-    \centering
-    \caption{Growth rate as a function of the initial strategy for the asymmetric parameters.} \label{fig:growth_rate_asymmetric}
     \includegraphics{../sims/asymmetric/plots/strat_phe/growth_rate.pdf}
-\end{figure}
-
-\begin{figure}[p]
-    \centering
-    \caption{Average strategy as a function of the initial strategy for the asymmetric parameters.} \label{fig:avg_strat_phe_asymmetric}
     \includegraphics{../sims/asymmetric/plots/strat_phe/avg_strat_phe.pdf}
-\end{figure}
-
-\begin{figure}[p]
-    \centering
-    \caption{Strategy distribution as a function of the initial strategy for the asymmetric parameters.} \label{fig:dist_strat_phe_asymmetric}
     \includegraphics{../sims/asymmetric/plots/strat_phe/dist_strat_phe.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe/rates.pdf}
 \end{figure}
 
 \begin{figure}[p]
     \centering
-    \caption{Extinction rate as a function of growth rate for the extended parameters.} \label{fig:extinct_rate_extended}
-    \includegraphics{../sims/extended/plots/strat_phe/extinct_rate.pdf}
+    \caption{Results for the asymmetric parameters.} \label{fig:results_asymmetric_}
+    \includegraphics{../sims/asymmetric/plots/prob_mut/extinct_rate.pdf}
+    \includegraphics{../sims/asymmetric/plots/prob_mut/growth_rate.pdf}
+    \includegraphics{../sims/asymmetric/plots/prob_mut/avg_strat_phe.pdf}
+    \includegraphics{../sims/asymmetric/plots/prob_mut/dist_strat_phe.pdf}
+    \includegraphics{../sims/asymmetric/plots/prob_mut/rates.pdf}
 \end{figure}
-
-\begin{figure}[p]
-    \centering
-    \caption{Growth rate as a function of the initial strategy for the extended parameters.} \label{fig:growth_rate_extended}
-    \includegraphics{../sims/extended/plots/strat_phe/growth_rate.pdf}
-\end{figure}
-
-\begin{figure}[p]
-    \centering
-    \caption{Average strategy as a function of the initial strategy for the extended parameters.} \label{fig:avg_strat_phe_extended}
-    \includegraphics{../sims/extended/plots/strat_phe/avg_strat_phe.pdf}
-\end{figure}
-
-\begin{figure}[p]
-    \centering
-    \caption{Strategy distribution as a function of the initial strategy for the extended parameters.} \label{fig:dist_strat_phe_extended}
-    \includegraphics{../sims/extended/plots/strat_phe/dist_strat_phe.pdf}
-\end{figure}
-
-% And finally in \autoref{fig:extinct_rate_prob_mut}, \autoref{fig:growth_rate_prob_mut}, \autoref{fig:avg_strat_phe_prob_mut} and \autoref{fig:dist_strat_phe_prob_mut} we show some other results for the \emph{symmetric} parameters (modifying the mutation probability).
-
-% \begin{figure}[p]
-%     \centering
-%     \caption{Extinction rate as a function of the mutation probability for the symmetric parameters.} \label{fig:extinct_rate_prob_mut}
-%     \includegraphics{../sims/symmetric/plots/prob_mut/extinct_rate.pdf}
-% \end{figure}
-
-% \begin{figure}[p]
-%     \centering
-%     \caption{Growth rate as a function of the mutation probability for the symmetric parameters.} \label{fig:growth_rate_prob_mut}
-%     \includegraphics{../sims/symmetric/plots/prob_mut/growth_rate.pdf}
-% \end{figure}
-
-% \begin{figure}[p]
-%     \centering
-%     \caption{Average strategy as a function of the mutation probability for the symmetric parameters.} \label{fig:avg_strat_phe_prob_mut}
-%     \includegraphics{../sims/symmetric/plots/prob_mut/avg_strat_phe.pdf}
-% \end{figure}
-
-% \begin{figure}[p]
-%     \centering
-%     \caption{Strategy distribution as a function of the mutation probability for the symmetric parameters.} \label{fig:dist_strat_phe_prob_mut}
-%     \includegraphics{../sims/symmetric/plots/prob_mut/dist_strat_phe.pdf}
-% \end{figure}
 
 \printbibliography
 
