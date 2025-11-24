@@ -17,7 +17,7 @@ mpl.rcParams["font.size"] = 10
 
 CM = 1 / 2.54
 
-FIGSIZE = (8.0 * CM, 4.94 * CM)
+FIGSIZE = (8.0 * CM, 5.0 * CM)
 
 mpl.rcParams["figure.constrained_layout.use"] = True
 
@@ -41,24 +41,6 @@ FILL_STYLE: Dict[str, Any] = dict(lw=0.0, alpha=0.5)
 LINE_STYLE: Dict[str, Any] = dict(ls=":", lw=1.0, alpha=0.5)
 
 CMAP = colors.LinearSegmentedColormap.from_list("custom", ["white", COLORS[1]])
-
-
-def plot_sim_jobs(sim_jobs: List[SimJob]) -> None:
-    init_sim_job = sim_jobs[0]
-    avg_analyses = collect_avg_analyses(sim_jobs)
-    hist_bins = len(
-        [
-            col
-            for col in avg_analyses.columns
-            if "dist_strat_phe_0_" in col[0] and "mean" in col[1]
-        ]
-    )
-
-    generate_strat_phe_plots(init_sim_job, avg_analyses, hist_bins)
-
-    generate_prob_mut_plots(init_sim_job, avg_analyses, hist_bins)
-
-    print("plots made")
 
 
 def generate_strat_phe_plots(
@@ -398,3 +380,21 @@ def generate_prob_mut_plots(
     fig_4.savefig(fig_dir / "dist_strat_phe.pdf")
 
     fig_5.savefig(fig_dir / "rates.pdf")
+
+
+def plot_sim_jobs(sim_jobs: List[SimJob]) -> None:
+    init_sim_job = sim_jobs[0]
+    avg_analyses = collect_avg_analyses(sim_jobs)
+    hist_bins = len(
+        [
+            col
+            for col in avg_analyses.columns
+            if "dist_strat_phe_0_" in col[0] and "mean" in col[1]
+        ]
+    )
+
+    generate_strat_phe_plots(init_sim_job, avg_analyses, hist_bins)
+
+    generate_prob_mut_plots(init_sim_job, avg_analyses, hist_bins)
+
+    print("plots made")
