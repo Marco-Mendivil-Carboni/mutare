@@ -73,6 +73,8 @@ def generate_strat_phe_plots(
     if len(avg_analyses) < 2:
         return
 
+    avg_analyses = avg_analyses.sort_values("strat_phe_0")
+
     fig_1 = Figure(figsize=FIGSIZE)
     ax_1 = fig_1.add_subplot()
     ax_1.set_xlabel("$\\langle\\mu\\rangle$")
@@ -242,6 +244,8 @@ def generate_prob_mut_plots(
     ]
     if len(avg_analyses) < 2:
         return
+
+    avg_analyses = avg_analyses.sort_values("prob_mut")
 
     fig_1 = Figure(figsize=FIGSIZE)
     ax_1 = fig_1.add_subplot()
