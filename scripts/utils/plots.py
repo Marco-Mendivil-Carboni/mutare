@@ -382,6 +382,126 @@ def generate_prob_mut_plots(
     fig_5.savefig(fig_dir / "rates.pdf")
 
 
+def generate_n_agents_plots(
+    init_sim_job: SimJob, avg_analyses: pd.DataFrame, hist_bins: int
+) -> None:
+    avg_analyses = avg_analyses[
+        (avg_analyses["sim_type"] == SimType.RANDOM)
+        & (avg_analyses["prob_mut"] == init_sim_job.config["model"]["prob_mut"])
+    ]
+    if len(avg_analyses) < 2:
+        return
+
+    avg_analyses = avg_analyses.sort_values("n_agents")
+
+    fig_1 = Figure(figsize=FIGSIZE)
+    ax_1 = fig_1.add_subplot()
+    ax_1.set_xlabel("$N_0$")
+    ax_1.set_ylabel("$r_e$")
+    ax_1.set_xscale("log")
+    ax_1.set_yscale("log")
+
+    fig_2 = Figure(figsize=FIGSIZE)
+    ax_2 = fig_2.add_subplot()
+    ax_2.set_xlabel("$N_0$")
+    ax_2.set_ylabel("$\\langle\\mu\\rangle$")
+    ax_2.set_xscale("log")
+
+    fig_3 = Figure(figsize=FIGSIZE)
+    ax_3 = fig_3.add_subplot()
+    ax_3.set_xlabel("$N_0$")
+    ax_3.set_ylabel("$\\langle s(0)\\rangle$")
+    ax_3.set_xscale("log")
+
+    fig_4 = Figure(figsize=FIGSIZE)
+    gs = gridspec.GridSpec(1, 2, figure=fig_4, width_ratios=[64, 1], wspace=0)
+    ax_4 = fig_4.add_subplot(gs[0, 0])
+    ax_4_c = fig_4.add_subplot(gs[0, 1])
+    ax_4.set_xlabel("$N_0$")
+    ax_4.set_ylabel("$s(0)$")
+    ax_4.set_xscale("log")
+
+    fig_5 = Figure(figsize=FIGSIZE)
+    ax_5 = fig_5.add_subplot()
+    ax_5.set_xlabel("$\\langle\\mu\\rangle$")
+    ax_5.set_ylabel("$r_e$")
+    ax_5.set_yscale("log")
+
+    ax_1.errorbar(
+        avg_analyses["n_agents"],
+        avg_analyses[("extinct_rate", "mean")],
+        yerr=avg_analyses[("extinct_rate", "sem")],
+        c=COLORS[11],
+        **PLOT_STYLE,
+    )
+
+    ax_2.errorbar(
+        avg_analyses["n_agents"],
+        avg_analyses[("growth_rate", "mean")],
+        yerr=avg_analyses[("growth_rate", "sem")],
+        c=COLORS[11],
+        **PLOT_STYLE,
+    )
+
+    ax_3.plot(
+        avg_analyses["n_agents"],
+        avg_analyses[("avg_strat_phe_0", "mean")],
+        c=COLORS[11],
+        **PLOT_STYLE,
+    )
+    ax_3.fill_between(
+        avg_analyses["n_agents"],
+        avg_analyses[("avg_strat_phe_0", "mean")]
+        - avg_analyses[("std_dev_strat_phe", "mean")],
+        avg_analyses[("avg_strat_phe_0", "mean")]
+        + avg_analyses[("std_dev_strat_phe", "mean")],
+        color=COLORS[11],
+        **FILL_STYLE,
+    )
+
+    hm_x = avg_analyses["n_agents"].tolist()
+    hm_z = list()
+    for bin in range(hist_bins):
+        hm_z.append(
+            (hist_bins * avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")]).tolist()
+        )
+    im = ax_4.pcolormesh(
+        hm_x,
+        [(i + 0.5) / hist_bins for i in range(hist_bins)],
+        hm_z,
+        cmap=CMAP,
+        vmin=0,
+        vmax=hist_bins,
+        shading="nearest",
+    )
+    ax_4.set_xlim(hm_x[0], hm_x[-1])
+
+    cbar = fig_4.colorbar(im, cax=ax_4_c, aspect=64)
+    cbar.ax.set_ylabel("$p(s(0))$")
+
+    ax_5.errorbar(
+        avg_analyses[("growth_rate", "mean")],
+        avg_analyses[("extinct_rate", "mean")],
+        xerr=avg_analyses[("growth_rate", "sem")],
+        yerr=avg_analyses[("extinct_rate", "sem")],
+        c=COLORS[11],
+        **PLOT_STYLE,
+    )
+
+    fig_dir = init_sim_job.base_dir / "plots" / "n_agents"
+    fig_dir.mkdir(parents=True, exist_ok=True)
+
+    fig_1.savefig(fig_dir / "extinct_rate.pdf")
+
+    fig_2.savefig(fig_dir / "growth_rate.pdf")
+
+    fig_3.savefig(fig_dir / "avg_strat_phe.pdf")
+
+    fig_4.savefig(fig_dir / "dist_strat_phe.pdf")
+
+    fig_5.savefig(fig_dir / "rates.pdf")
+
+
 def plot_sim_jobs(sim_jobs: List[SimJob]) -> None:
     init_sim_job = sim_jobs[0]
     avg_analyses = collect_avg_analyses(sim_jobs)
@@ -396,5 +516,7 @@ def plot_sim_jobs(sim_jobs: List[SimJob]) -> None:
     generate_strat_phe_plots(init_sim_job, avg_analyses, hist_bins)
 
     generate_prob_mut_plots(init_sim_job, avg_analyses, hist_bins)
+
+    generate_n_agents_plots(init_sim_job, avg_analyses, hist_bins)
 
     print("plots made")

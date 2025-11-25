@@ -54,7 +54,7 @@ We will consider two possible types of initial conditions, one in which all the 
 
 \section{Results: phenotipic diversity and safe strategies} \label{sec:results}
 
-First we will consider the following \emph{symmetric} parameters:
+In \autoref{fig:symmetric_strat_phe}, \autoref{fig:symmetric_prob_mut} and \autoref{fig:symmetric_n_agents} we show the results for the following \emph{symmetric} parameters:
 \begin{itemize}
     \item $n_{\text{env}}=2$, $n_{\text{phe}}=2$
     \item $\omega_t(e,e')=\begin{pmatrix}-1.0&+1.0\\+1.0&-1.0\end{pmatrix}$
@@ -63,7 +63,6 @@ First we will consider the following \emph{symmetric} parameters:
     \item $p_{\text{mut}}=0.001$
     \item $N_0=100$
 \end{itemize}
-In \autoref{fig:symmetric_strat_phe} we show the results of the simulations with this parameters for different initial strategies. And in \autoref{fig:symmetric_prob_mut} we show the results of some simulations with this same parameters but a varying mutation probability and a random initial condition.
 
 \begin{figure*}[p]
     \centering
@@ -85,13 +84,22 @@ In \autoref{fig:symmetric_strat_phe} we show the results of the simulations with
     \includegraphics{../sims/symmetric/plots/prob_mut/rates.pdf}
 \end{figure*}
 
-Next we will consider the following \emph{asymmetric} parameters:
+\begin{figure*}[p]
+    \centering
+    \caption{Results for the symmetric parameters.} \label{fig:symmetric_n_agents}
+    \includegraphics{../sims/symmetric/plots/n_agents/extinct_rate.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents/growth_rate.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents/avg_strat_phe.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents/dist_strat_phe.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents/rates.pdf}
+\end{figure*}
+
+In \autoref{fig:asymmetric_strat_phe}, \autoref{fig:asymmetric_prob_mut} and \autoref{fig:asymmetric_n_agents} we show the results for the following \emph{asymmetric} parameters:
 \begin{itemize}
     \item $\omega_b(e,\phi)=\begin{pmatrix}1.0&0.2\\0.0&0.0\end{pmatrix}$
     \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&0.0\\1.0&0.1\end{pmatrix}$
     \item The rest of the parameters have the same values as in the \emph{symmetric} parameters.
 \end{itemize}
-In \autoref{fig:asymmetric_strat_phe} we show the results of the simulations with this parameters for different initial strategies. And in \autoref{fig:asymmetric_prob_mut} we show the results of some simulations with this same parameters but a varying mutation probability and a random initial condition.
 
 \begin{figure*}[p]
     \centering
@@ -113,11 +121,31 @@ In \autoref{fig:asymmetric_strat_phe} we show the results of the simulations wit
     \includegraphics{../sims/asymmetric/plots/prob_mut/rates.pdf}
 \end{figure*}
 
-% In \autoref{fig:results_extended} we show the results for the \emph{extended} parameters:
-% \begin{itemize}
-%     \item $N_0=1000$
-%     \item The rest of the parameters have the same values as in the \emph{asymmetric} parameters.
-% \end{itemize}
+\begin{figure*}[p]
+    \centering
+    \caption{Results for the asymmetric parameters.} \label{fig:asymmetric_n_agents}
+    \includegraphics{../sims/asymmetric/plots/n_agents/extinct_rate.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents/growth_rate.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents/avg_strat_phe.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents/dist_strat_phe.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents/rates.pdf}
+\end{figure*}
+
+In \autoref{fig:extended_strat_phe} we show the results for the following \emph{extended} parameters:
+\begin{itemize}
+    \item $N_0=1000$
+    \item The rest of the parameters have the same values as in the \emph{asymmetric} parameters.
+\end{itemize}
+
+\begin{figure*}[p]
+    \centering
+    \caption{Results for the extended parameters.} \label{fig:extended_strat_phe}
+    \includegraphics{../sims/extended/plots/strat_phe/extinct_rate.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe/growth_rate.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe/avg_strat_phe.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe/dist_strat_phe.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe/rates.pdf}
+\end{figure*}
 
 \printbibliography
 
