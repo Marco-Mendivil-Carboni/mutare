@@ -1,6 +1,7 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
 from pathlib import Path
+from shutil import rmtree
 import numpy as np
 from copy import deepcopy
 
@@ -24,6 +25,17 @@ def make_sims(
         n_agents_values.tolist() if n_agents_sweep else [],
     )
     execute_sim_jobs(sim_jobs)
+
+    norm_sim_dirs = [sim_job.sim_dir.resolve() for sim_job in sim_jobs]
+    for entry in sim_jobs[0].base_dir.iterdir():
+        norm_entry = entry.resolve()
+        if norm_entry not in norm_sim_dirs:
+            print(f"removing {entry}")
+            if entry.is_dir():
+                rmtree(norm_entry)
+            else:
+                norm_entry.unlink()
+
     plot_sim_jobs(sim_jobs)
 
 
@@ -61,7 +73,7 @@ if __name__ == "__main__":
             clean=False,
             n_runs=16,
             n_files=64,
-            analyze=True,
+            analyze=False,
         ),
     )
 
