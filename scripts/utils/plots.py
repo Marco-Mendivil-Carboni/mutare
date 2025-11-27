@@ -144,6 +144,13 @@ def plot_errorbar_with_band(
         ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
 
 
+def count_hist_bins(avg_analyses: pd.DataFrame) -> int:
+    hist_bins = 0
+    while (f"dist_strat_phe_0_{hist_bins}", "mean") in avg_analyses.columns:
+        hist_bins += 1
+    return hist_bins
+
+
 def generate_heatmap_matrix(
     avg_analyses: pd.DataFrame, hist_bins: int
 ) -> list[list[float]]:
@@ -155,9 +162,40 @@ def generate_heatmap_matrix(
     return hm_z
 
 
-def generate_strat_phe_plots(
-    init_sim_job: SimJob, avg_analyses: pd.DataFrame, hist_bins: int
+def plot_main_heatmap(
+    fig: Figure, ax_main: Axes, ax_cbar: Axes, avg_analyses: pd.DataFrame, x_col: str
 ) -> None:
+    hist_bins = count_hist_bins(avg_analyses)
+    hm_x = avg_analyses[x_col].tolist()
+    hm_z = generate_heatmap_matrix(avg_analyses, hist_bins)
+    im = ax_main.pcolormesh(
+        hm_x,
+        [(i + 0.5) / hist_bins for i in range(hist_bins)],
+        hm_z,
+        cmap=CMAP,
+        vmin=0,
+        vmax=hist_bins,
+        shading="nearest",
+    )
+    ax_main.set_xlim(hm_x[0], hm_x[-1])
+    cbar = fig.colorbar(im, cax=ax_cbar, aspect=64)
+    cbar.ax.set_ylabel("$p(s(0))$")
+
+
+def plot_side_heatmap(ax_side: Axes, avg_analyses: pd.DataFrame) -> None:
+    hist_bins = count_hist_bins(avg_analyses)
+    hm_z = generate_heatmap_matrix(avg_analyses, hist_bins)
+    ax_side.pcolormesh(
+        [0.0, 1.0],
+        [i / hist_bins for i in range(hist_bins + 1)],
+        hm_z,
+        cmap=CMAP,
+        vmin=0,
+        vmax=hist_bins,
+    )
+
+
+def generate_strat_phe_plots(init_sim_job: SimJob, avg_analyses: pd.DataFrame) -> None:
     avg_analyses = avg_analyses[
         (
             (avg_analyses["prob_mut"] == init_sim_job.config["model"]["prob_mut"])
@@ -245,41 +283,9 @@ def generate_strat_phe_plots(
             )
 
         if sim_type == SimType.EVOL:
-            hm_x = avg_analyses["strat_phe_0"].tolist()
-            hm_z1 = list()
-            for bin in range(hist_bins):
-                hm_z1.append(
-                    (
-                        hist_bins * avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")]
-                    ).tolist()
-                )
-            im = ax_4_main.pcolormesh(
-                hm_x,
-                [(i + 0.5) / hist_bins for i in range(hist_bins)],
-                hm_z1,
-                cmap=CMAP,
-                vmin=0,
-                vmax=hist_bins,
-                shading="nearest",
-            )
-            cbar = fig_4.colorbar(im, cax=ax_4_cbar, aspect=64)
-            cbar.ax.set_ylabel("$p(s(0))$")
+            plot_main_heatmap(fig_4, ax_4_main, ax_4_cbar, avg_analyses, "strat_phe_0")
         elif sim_type == SimType.RANDOM:
-            hm_z2 = list()
-            for bin in range(hist_bins):
-                hm_z2.append(
-                    (
-                        hist_bins * avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")]
-                    ).tolist()
-                )
-            ax_4_side.pcolormesh(
-                [0.0, 1.0],
-                [i / hist_bins for i in range(hist_bins + 1)],
-                hm_z2,
-                cmap=CMAP,
-                vmin=0,
-                vmax=hist_bins,
-            )
+            plot_side_heatmap(ax_4_side, avg_analyses)
 
         plot_errorbar_with_band(
             ax_5, avg_analyses, "growth_rate", "extinct_rate", True, None
@@ -313,9 +319,7 @@ def generate_strat_phe_plots(
     fig_5.savefig(fig_dir / "rates.pdf")
 
 
-def generate_prob_mut_plots(
-    init_sim_job: SimJob, avg_analyses: pd.DataFrame, hist_bins: int
-) -> None:
+def generate_prob_mut_plots(init_sim_job: SimJob, avg_analyses: pd.DataFrame) -> None:
     avg_analyses = avg_analyses[
         (avg_analyses["sim_type"] == SimType.RANDOM)
         & (avg_analyses["n_agents"] == init_sim_job.config["init"]["n_agents"])
@@ -353,25 +357,7 @@ def generate_prob_mut_plots(
         ax_3, avg_analyses, "prob_mut", "avg_strat_phe_0", False, "std_dev_strat_phe"
     )
 
-    hm_x = avg_analyses["prob_mut"].tolist()
-    hm_z = list()
-    for bin in range(hist_bins):
-        hm_z.append(
-            (hist_bins * avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")]).tolist()
-        )
-    im = ax_4_main.pcolormesh(
-        hm_x,
-        [(i + 0.5) / hist_bins for i in range(hist_bins)],
-        hm_z,
-        cmap=CMAP,
-        vmin=0,
-        vmax=hist_bins,
-        shading="nearest",
-    )
-    ax_4_main.set_xlim(hm_x[0], hm_x[-1])
-
-    cbar = fig_4.colorbar(im, cax=ax_4_cbar, aspect=64)
-    cbar.ax.set_ylabel("$p(s(0))$")
+    plot_main_heatmap(fig_4, ax_4_main, ax_4_cbar, avg_analyses, "prob_mut")
 
     plot_errorbar_with_band(
         ax_5, avg_analyses, "growth_rate", "extinct_rate", True, None
@@ -391,9 +377,7 @@ def generate_prob_mut_plots(
     fig_5.savefig(fig_dir / "rates.pdf")
 
 
-def generate_n_agents_plots(
-    init_sim_job: SimJob, avg_analyses: pd.DataFrame, hist_bins: int
-) -> None:
+def generate_n_agents_plots(init_sim_job: SimJob, avg_analyses: pd.DataFrame) -> None:
     avg_analyses = avg_analyses[
         (avg_analyses["sim_type"] == SimType.RANDOM)
         & (avg_analyses["prob_mut"] == init_sim_job.config["model"]["prob_mut"])
@@ -431,25 +415,7 @@ def generate_n_agents_plots(
         ax_3, avg_analyses, "n_agents", "avg_strat_phe_0", False, "std_dev_strat_phe"
     )
 
-    hm_x = avg_analyses["n_agents"].tolist()
-    hm_z = list()
-    for bin in range(hist_bins):
-        hm_z.append(
-            (hist_bins * avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")]).tolist()
-        )
-    im = ax_4_main.pcolormesh(
-        hm_x,
-        [(i + 0.5) / hist_bins for i in range(hist_bins)],
-        hm_z,
-        cmap=CMAP,
-        vmin=0,
-        vmax=hist_bins,
-        shading="nearest",
-    )
-    ax_4_main.set_xlim(hm_x[0], hm_x[-1])
-
-    cbar = fig_4.colorbar(im, cax=ax_4_cbar, aspect=64)
-    cbar.ax.set_ylabel("$p(s(0))$")
+    plot_main_heatmap(fig_4, ax_4_main, ax_4_cbar, avg_analyses, "n_agents")
 
     plot_errorbar_with_band(
         ax_5, avg_analyses, "growth_rate", "extinct_rate", True, None
@@ -472,18 +438,9 @@ def generate_n_agents_plots(
 def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
     init_sim_job = sim_jobs[0]
     avg_analyses = collect_avg_analyses(sim_jobs)
-    hist_bins = len(
-        [
-            col
-            for col in avg_analyses.columns
-            if "dist_strat_phe_0_" in col[0] and "mean" in col[1]
-        ]
-    )
 
-    generate_strat_phe_plots(init_sim_job, avg_analyses, hist_bins)
-
-    generate_prob_mut_plots(init_sim_job, avg_analyses, hist_bins)
-
-    generate_n_agents_plots(init_sim_job, avg_analyses, hist_bins)
+    generate_strat_phe_plots(init_sim_job, avg_analyses)
+    generate_prob_mut_plots(init_sim_job, avg_analyses)
+    generate_n_agents_plots(init_sim_job, avg_analyses)
 
     print("plots made")
