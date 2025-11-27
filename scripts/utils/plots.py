@@ -167,15 +167,10 @@ def plot_main_heatmap(
 ) -> None:
     hist_bins = count_hist_bins(avg_analyses)
     hm_x = avg_analyses[x_col].tolist()
+    hm_y = [(i + 0.5) / hist_bins for i in range(hist_bins)]
     hm_z = generate_heatmap_matrix(avg_analyses, hist_bins)
     im = ax_main.pcolormesh(
-        hm_x,
-        [(i + 0.5) / hist_bins for i in range(hist_bins)],
-        hm_z,
-        cmap=CMAP,
-        vmin=0,
-        vmax=hist_bins,
-        shading="nearest",
+        hm_x, hm_y, hm_z, cmap=CMAP, vmin=0, vmax=hist_bins, shading="nearest"
     )
     ax_main.set_xlim(hm_x[0], hm_x[-1])
     cbar = fig.colorbar(im, cax=ax_cbar, aspect=64)
@@ -184,15 +179,10 @@ def plot_main_heatmap(
 
 def plot_side_heatmap(ax_side: Axes, avg_analyses: pd.DataFrame) -> None:
     hist_bins = count_hist_bins(avg_analyses)
+    hm_x = [0.0, 1.0]
+    hm_y = [i / hist_bins for i in range(hist_bins + 1)]
     hm_z = generate_heatmap_matrix(avg_analyses, hist_bins)
-    ax_side.pcolormesh(
-        [0.0, 1.0],
-        [i / hist_bins for i in range(hist_bins + 1)],
-        hm_z,
-        cmap=CMAP,
-        vmin=0,
-        vmax=hist_bins,
-    )
+    ax_side.pcolormesh(hm_x, hm_y, hm_z, cmap=CMAP, vmin=0, vmax=hist_bins)
 
 
 def generate_strat_phe_plots(init_sim_job: SimJob, avg_analyses: pd.DataFrame) -> None:
