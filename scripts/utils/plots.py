@@ -1,9 +1,10 @@
 import pandas as pd
 import matplotlib as mpl
 from matplotlib.figure import Figure
+from matplotlib.axes import Axes
 import matplotlib.gridspec as gridspec
 import matplotlib.colors as colors
-from typing import Dict, List, Any
+from typing import Dict, List, Tuple, Literal, Any, overload
 
 from .exec import SimJob
 from .analysis import collect_avg_analyses, SimType
@@ -43,6 +44,55 @@ LINE_STYLE: Dict[str, Any] = dict(ls=":", lw=1.0, alpha=0.5)
 CMAP = colors.LinearSegmentedColormap.from_list("custom", ["white", COLORS[1]])
 
 
+def create_standard_figure(
+    xlabel: str, ylabel: str, xscale: str = "linear", yscale: str = "linear"
+) -> Tuple[Figure, Axes]:
+    fig = Figure(figsize=FIGSIZE)
+    ax = fig.add_subplot()
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_xscale(xscale)
+    ax.set_yscale(yscale)
+    return fig, ax
+
+
+@overload
+def create_heatmap_figure(
+    xlabel: str, ylabel: str, panels: Literal[2], xscale: str = "linear"
+) -> Tuple[Figure, Axes, Axes]: ...
+@overload
+def create_heatmap_figure(
+    xlabel: str, ylabel: str, panels: Literal[3], xscale: str = "linear"
+) -> Tuple[Figure, Axes, Axes, Axes]: ...
+def create_heatmap_figure(
+    xlabel: str, ylabel: str, panels: int, xscale: str = "linear"
+):
+    fig = Figure(figsize=FIGSIZE)
+
+    if panels == 2:
+        gs = gridspec.GridSpec(1, 2, figure=fig, width_ratios=[64, 1], wspace=0)
+        ax_main = fig.add_subplot(gs[0, 0])
+        ax_cbar = fig.add_subplot(gs[0, 1])
+        ax_main.set_xlabel(xlabel)
+        ax_main.set_ylabel(ylabel)
+        ax_main.set_xscale(xscale)
+
+        return fig, ax_main, ax_cbar
+
+    elif panels == 3:
+        gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[64, 8, 1], wspace=0)
+        ax_main = fig.add_subplot(gs[0, 0])
+        ax_side = fig.add_subplot(gs[0, 1])
+        ax_cbar = fig.add_subplot(gs[0, 2])
+        ax_main.set_xlabel(xlabel)
+        ax_main.set_ylabel(ylabel)
+        ax_main.set_xscale(xscale)
+        ax_side.set_xticks([])
+        ax_side.set_yticks([])
+
+        return fig, ax_main, ax_side, ax_cbar
+
+
 def generate_strat_phe_plots(
     init_sim_job: SimJob, avg_analyses: pd.DataFrame, hist_bins: int
 ) -> None:
@@ -58,38 +108,26 @@ def generate_strat_phe_plots(
 
     avg_analyses = avg_analyses.sort_values("strat_phe_0")
 
-    fig_1 = Figure(figsize=FIGSIZE)
-    ax_1 = fig_1.add_subplot()
-    ax_1.set_xlabel("$s(0)_i$")
-    ax_1.set_ylabel("$r_e$")
-    ax_1.set_yscale("log")
+    fig_1, ax_1 = create_standard_figure(
+        xlabel="$s(0)_i$", ylabel="$r_e$", yscale="log"
+    )
 
-    fig_2 = Figure(figsize=FIGSIZE)
-    ax_2 = fig_2.add_subplot()
-    ax_2.set_xlabel("$s(0)_i$")
-    ax_2.set_ylabel("$\\langle\\mu\\rangle$")
+    fig_2, ax_2 = create_standard_figure(
+        xlabel="$s(0)_i$", ylabel="$\\langle\\mu\\rangle$"
+    )
 
-    fig_3 = Figure(figsize=FIGSIZE)
-    ax_3 = fig_3.add_subplot()
-    ax_3.set_xlabel("$s(0)_i$")
-    ax_3.set_ylabel("$\\langle s(0)\\rangle$")
+    fig_3, ax_3 = create_standard_figure(
+        xlabel="$s(0)_i$", ylabel="$\\langle s(0)\\rangle$"
+    )
 
-    fig_4 = Figure(figsize=FIGSIZE)
-    gs = gridspec.GridSpec(1, 3, figure=fig_4, width_ratios=[64, 8, 1], wspace=0)
-    ax_4_l = fig_4.add_subplot(gs[0, 0])
-    ax_4_r = fig_4.add_subplot(gs[0, 1])
-    ax_4_c = fig_4.add_subplot(gs[0, 2])
-    ax_4_l.set_ylabel("$s(0)$")
-    ax_4_l.set_xlabel("$s(0)_i$")
-    ax_4_r.set_xlabel("random init")
-    ax_4_r.set_xticks([])
-    ax_4_r.set_yticks([])
+    fig_4, ax_4_main, ax_4_side, ax_4_cbar = create_heatmap_figure(
+        xlabel="$s(0)_i$", ylabel="$s(0)$", panels=3
+    )
+    ax_4_side.set_xlabel("random init")
 
-    fig_5 = Figure(figsize=FIGSIZE)
-    ax_5 = fig_5.add_subplot()
-    ax_5.set_xlabel("$\\langle\\mu\\rangle$")
-    ax_5.set_ylabel("$r_e$")
-    ax_5.set_yscale("log")
+    fig_5, ax_5 = create_standard_figure(
+        xlabel="$\\langle\\mu\\rangle$", ylabel="$r_e$", yscale="log"
+    )
 
     sim_type = avg_analyses["sim_type"]
 
@@ -190,7 +228,7 @@ def generate_strat_phe_plots(
                         hist_bins * avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")]
                     ).tolist()
                 )
-            im = ax_4_l.pcolormesh(
+            im = ax_4_main.pcolormesh(
                 hm_x,
                 [(i + 0.5) / hist_bins for i in range(hist_bins)],
                 hm_z1,
@@ -199,7 +237,7 @@ def generate_strat_phe_plots(
                 vmax=hist_bins,
                 shading="nearest",
             )
-            cbar = fig_4.colorbar(im, cax=ax_4_c, aspect=64)
+            cbar = fig_4.colorbar(im, cax=ax_4_cbar, aspect=64)
             cbar.ax.set_ylabel("$p(s(0))$")
         elif label == "random init":
             hm_z2 = list()
@@ -209,7 +247,7 @@ def generate_strat_phe_plots(
                         hist_bins * avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")]
                     ).tolist()
                 )
-            ax_4_r.pcolormesh(
+            ax_4_side.pcolormesh(
                 [0.0, 1.0],
                 [i / hist_bins for i in range(hist_bins + 1)],
                 hm_z2,
@@ -252,10 +290,10 @@ def generate_strat_phe_plots(
     ax_3.legend()
     fig_3.savefig(fig_dir / "avg_strat_phe.pdf")
 
-    ax_4_l.axhline(max_growth_strat, color="gray", ls="-.")
-    ax_4_r.axhline(max_growth_strat, color="gray", ls="-.")
-    ax_4_l.axhline(min_extinct_strat, color="gray", ls=":")
-    ax_4_r.axhline(min_extinct_strat, color="gray", ls=":")
+    ax_4_main.axhline(max_growth_strat, color="gray", ls="-.")
+    ax_4_side.axhline(max_growth_strat, color="gray", ls="-.")
+    ax_4_main.axhline(min_extinct_strat, color="gray", ls=":")
+    ax_4_side.axhline(min_extinct_strat, color="gray", ls=":")
     fig_4.savefig(fig_dir / "dist_strat_phe.pdf")
 
     ax_5.legend()
@@ -274,38 +312,25 @@ def generate_prob_mut_plots(
 
     avg_analyses = avg_analyses.sort_values("prob_mut")
 
-    fig_1 = Figure(figsize=FIGSIZE)
-    ax_1 = fig_1.add_subplot()
-    ax_1.set_xlabel("$p_{\\text{mut}}$")
-    ax_1.set_ylabel("$r_e$")
-    ax_1.set_xscale("log")
-    ax_1.set_yscale("log")
+    fig_1, ax_1 = create_standard_figure(
+        xlabel="$p_{\\text{mut}}$", ylabel="$r_e$", xscale="log", yscale="log"
+    )
 
-    fig_2 = Figure(figsize=FIGSIZE)
-    ax_2 = fig_2.add_subplot()
-    ax_2.set_xlabel("$p_{\\text{mut}}$")
-    ax_2.set_ylabel("$\\langle\\mu\\rangle$")
-    ax_2.set_xscale("log")
+    fig_2, ax_2 = create_standard_figure(
+        xlabel="$p_{\\text{mut}}$", ylabel="$\\langle\\mu\\rangle$", xscale="log"
+    )
 
-    fig_3 = Figure(figsize=FIGSIZE)
-    ax_3 = fig_3.add_subplot()
-    ax_3.set_xlabel("$p_{\\text{mut}}$")
-    ax_3.set_ylabel("$\\langle s(0)\\rangle$")
-    ax_3.set_xscale("log")
+    fig_3, ax_3 = create_standard_figure(
+        xlabel="$p_{\\text{mut}}$", ylabel="$\\langle s(0)\\rangle$", xscale="log"
+    )
 
-    fig_4 = Figure(figsize=FIGSIZE)
-    gs = gridspec.GridSpec(1, 2, figure=fig_4, width_ratios=[64, 1], wspace=0)
-    ax_4 = fig_4.add_subplot(gs[0, 0])
-    ax_4_c = fig_4.add_subplot(gs[0, 1])
-    ax_4.set_xlabel("$p_{\\text{mut}}$")
-    ax_4.set_ylabel("$s(0)$")
-    ax_4.set_xscale("log")
+    fig_4, ax_4_main, ax_4_cbar = create_heatmap_figure(
+        xlabel="$p_{\\text{mut}}$", ylabel="$s(0)$", panels=2, xscale="log"
+    )
 
-    fig_5 = Figure(figsize=FIGSIZE)
-    ax_5 = fig_5.add_subplot()
-    ax_5.set_xlabel("$\\langle\\mu\\rangle$")
-    ax_5.set_ylabel("$r_e$")
-    ax_5.set_yscale("log")
+    fig_5, ax_5 = create_standard_figure(
+        xlabel="$\\langle\\mu\\rangle$", ylabel="$r_e$", yscale="log"
+    )
 
     ax_1.errorbar(
         avg_analyses["prob_mut"],
@@ -345,7 +370,7 @@ def generate_prob_mut_plots(
         hm_z.append(
             (hist_bins * avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")]).tolist()
         )
-    im = ax_4.pcolormesh(
+    im = ax_4_main.pcolormesh(
         hm_x,
         [(i + 0.5) / hist_bins for i in range(hist_bins)],
         hm_z,
@@ -354,9 +379,9 @@ def generate_prob_mut_plots(
         vmax=hist_bins,
         shading="nearest",
     )
-    ax_4.set_xlim(hm_x[0], hm_x[-1])
+    ax_4_main.set_xlim(hm_x[0], hm_x[-1])
 
-    cbar = fig_4.colorbar(im, cax=ax_4_c, aspect=64)
+    cbar = fig_4.colorbar(im, cax=ax_4_cbar, aspect=64)
     cbar.ax.set_ylabel("$p(s(0))$")
 
     ax_5.errorbar(
@@ -394,38 +419,25 @@ def generate_n_agents_plots(
 
     avg_analyses = avg_analyses.sort_values("n_agents")
 
-    fig_1 = Figure(figsize=FIGSIZE)
-    ax_1 = fig_1.add_subplot()
-    ax_1.set_xlabel("$N_0$")
-    ax_1.set_ylabel("$r_e$")
-    ax_1.set_xscale("log")
-    ax_1.set_yscale("log")
+    fig_1, ax_1 = create_standard_figure(
+        xlabel="$N_0$", ylabel="$r_e$", xscale="log", yscale="log"
+    )
 
-    fig_2 = Figure(figsize=FIGSIZE)
-    ax_2 = fig_2.add_subplot()
-    ax_2.set_xlabel("$N_0$")
-    ax_2.set_ylabel("$\\langle\\mu\\rangle$")
-    ax_2.set_xscale("log")
+    fig_2, ax_2 = create_standard_figure(
+        xlabel="$N_0$", ylabel="$\\langle\\mu\\rangle$", xscale="log"
+    )
 
-    fig_3 = Figure(figsize=FIGSIZE)
-    ax_3 = fig_3.add_subplot()
-    ax_3.set_xlabel("$N_0$")
-    ax_3.set_ylabel("$\\langle s(0)\\rangle$")
-    ax_3.set_xscale("log")
+    fig_3, ax_3 = create_standard_figure(
+        xlabel="$N_0$", ylabel="$\\langle s(0)\\rangle$", xscale="log"
+    )
 
-    fig_4 = Figure(figsize=FIGSIZE)
-    gs = gridspec.GridSpec(1, 2, figure=fig_4, width_ratios=[64, 1], wspace=0)
-    ax_4 = fig_4.add_subplot(gs[0, 0])
-    ax_4_c = fig_4.add_subplot(gs[0, 1])
-    ax_4.set_xlabel("$N_0$")
-    ax_4.set_ylabel("$s(0)$")
-    ax_4.set_xscale("log")
+    fig_4, ax_4_main, ax_4_cbar = create_heatmap_figure(
+        xlabel="$N_0$", ylabel="$s(0)$", panels=2, xscale="log"
+    )
 
-    fig_5 = Figure(figsize=FIGSIZE)
-    ax_5 = fig_5.add_subplot()
-    ax_5.set_xlabel("$\\langle\\mu\\rangle$")
-    ax_5.set_ylabel("$r_e$")
-    ax_5.set_yscale("log")
+    fig_5, ax_5 = create_standard_figure(
+        xlabel="$\\langle\\mu\\rangle$", ylabel="$r_e$", yscale="log"
+    )
 
     ax_1.errorbar(
         avg_analyses["n_agents"],
@@ -465,7 +477,7 @@ def generate_n_agents_plots(
         hm_z.append(
             (hist_bins * avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")]).tolist()
         )
-    im = ax_4.pcolormesh(
+    im = ax_4_main.pcolormesh(
         hm_x,
         [(i + 0.5) / hist_bins for i in range(hist_bins)],
         hm_z,
@@ -474,9 +486,9 @@ def generate_n_agents_plots(
         vmax=hist_bins,
         shading="nearest",
     )
-    ax_4.set_xlim(hm_x[0], hm_x[-1])
+    ax_4_main.set_xlim(hm_x[0], hm_x[-1])
 
-    cbar = fig_4.colorbar(im, cax=ax_4_c, aspect=64)
+    cbar = fig_4.colorbar(im, cax=ax_4_cbar, aspect=64)
     cbar.ax.set_ylabel("$p(s(0))$")
 
     ax_5.errorbar(
