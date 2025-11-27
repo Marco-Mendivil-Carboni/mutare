@@ -43,6 +43,17 @@ LINE_STYLE: Dict[str, Any] = dict(ls=":", lw=1.0, alpha=0.5)
 
 CMAP = colors.LinearSegmentedColormap.from_list("custom", ["white", COLORS[1]])
 
+SIM_COLORS: dict[SimType, str] = {
+    SimType.FIXED: COLORS[1],
+    SimType.EVOL: COLORS[7],
+    SimType.RANDOM: COLORS[11],
+}
+SIM_LABELS: dict[SimType, str] = {
+    SimType.FIXED: "fixed strat",
+    SimType.EVOL: "evolutive",
+    SimType.RANDOM: "random init",
+}
+
 
 def create_standard_figure(
     xlabel: str, ylabel: str, xscale: str = "linear", yscale: str = "linear"
@@ -93,18 +104,44 @@ def create_heatmap_figure(
         return fig, ax_main, ax_side, ax_cbar
 
 
+def get_sim_color_and_label(avg_analyses: pd.DataFrame) -> Tuple[str, str]:
+    sim_types = avg_analyses["sim_type"].unique()
+    if len(sim_types) != 1:
+        raise ValueError("sim_type not unique")
+    sim_type = sim_types[0]
+    return SIM_COLORS[sim_type], SIM_LABELS[sim_type]
+
+
 def plot_horizontal_bands(
     ax: Axes,
     avg_analyses: pd.DataFrame,
     mean_col: Tuple[str, str],
     span_col: Tuple[str, str],
-    color: str,
-    label: str | None,
 ) -> None:
+    color, label = get_sim_color_and_label(avg_analyses)
     for mean, span in avg_analyses[[mean_col, span_col]].itertuples(index=False):
         ax.axhline(mean, c=color, label=label, ls=":")
         ax.axhspan(mean + span, mean - span, color=color, **FILL_STYLE)
         label = None
+
+
+def plot_errorbar_with_band(
+    ax: Axes,
+    avg_analyses: pd.DataFrame,
+    x_col: str,
+    y_col: str,
+    use_xerr: bool,
+    y_span_col: str | None,
+) -> None:
+    color, label = get_sim_color_and_label(avg_analyses)
+    x = avg_analyses[(x_col, "mean")] if use_xerr else avg_analyses[x_col]
+    y = avg_analyses[(y_col, "mean")]
+    xerr = avg_analyses[(x_col, "sem")] if use_xerr else None
+    yerr = avg_analyses[(y_col, "sem")]
+    ax.errorbar(x, y, yerr, xerr, c=color, label=label, **PLOT_STYLE)
+    if y_span_col is not None:
+        y_span = avg_analyses[(y_span_col, "mean")]
+        ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
 
 
 def generate_strat_phe_plots(
@@ -143,17 +180,17 @@ def generate_strat_phe_plots(
         xlabel="$\\langle\\mu\\rangle$", ylabel="$r_e$", yscale="log"
     )
 
-    sim_type = avg_analyses["sim_type"]
+    sim_types = avg_analyses["sim_type"]
 
     min_extinct_strat: Any = None
     max_growth_strat: Any = None
 
-    for avg_analyses, color, label in [
-        (avg_analyses[sim_type == SimType.FIXED], COLORS[1], "fixed strat"),
-        (avg_analyses[sim_type == SimType.EVOL], COLORS[7], "evolutive"),
-        (avg_analyses[sim_type == SimType.RANDOM], COLORS[11], "random init"),
+    for avg_analyses, sim_type in [
+        (avg_analyses[sim_types == SimType.FIXED], SimType.FIXED),
+        (avg_analyses[sim_types == SimType.EVOL], SimType.EVOL),
+        (avg_analyses[sim_types == SimType.RANDOM], SimType.RANDOM),
     ]:
-        if label == "fixed strat":
+        if sim_type == SimType.FIXED:
             max_growth_strat = avg_analyses["strat_phe_0"][
                 avg_analyses[("growth_rate", "mean")].idxmax()
             ]
@@ -161,73 +198,42 @@ def generate_strat_phe_plots(
                 avg_analyses[("extinct_rate", "mean")].idxmin()
             ]
 
-        if label == "random init":
+        if sim_type == SimType.RANDOM:
             plot_horizontal_bands(
-                ax_1,
-                avg_analyses,
-                ("extinct_rate", "mean"),
-                ("extinct_rate", "sem"),
-                color,
-                label,
+                ax_1, avg_analyses, ("extinct_rate", "mean"), ("extinct_rate", "sem")
             )
         else:
-            ax_1.errorbar(
-                avg_analyses["strat_phe_0"],
-                avg_analyses[("extinct_rate", "mean")],
-                yerr=avg_analyses[("extinct_rate", "sem")],
-                c=color,
-                label=label,
-                **PLOT_STYLE,
+            plot_errorbar_with_band(
+                ax_1, avg_analyses, "strat_phe_0", "extinct_rate", False, None
             )
 
-        if label == "random init":
+        if sim_type == SimType.RANDOM:
             plot_horizontal_bands(
-                ax_2,
-                avg_analyses,
-                ("growth_rate", "mean"),
-                ("growth_rate", "sem"),
-                color,
-                label,
+                ax_2, avg_analyses, ("growth_rate", "mean"), ("growth_rate", "sem")
             )
         else:
-            ax_2.errorbar(
-                avg_analyses["strat_phe_0"],
-                avg_analyses[("growth_rate", "mean")],
-                yerr=avg_analyses[("growth_rate", "sem")],
-                c=color,
-                label=label,
-                **PLOT_STYLE,
+            plot_errorbar_with_band(
+                ax_2, avg_analyses, "strat_phe_0", "growth_rate", False, None
             )
 
-        if label == "random init":
+        if sim_type == SimType.RANDOM:
             plot_horizontal_bands(
                 ax_3,
                 avg_analyses,
                 ("avg_strat_phe_0", "mean"),
                 ("std_dev_strat_phe", "mean"),
-                color,
-                label,
             )
         else:
-            ax_3.errorbar(
-                avg_analyses["strat_phe_0"],
-                avg_analyses[("avg_strat_phe_0", "mean")],
-                yerr=avg_analyses[("avg_strat_phe_0", "sem")],
-                c=color,
-                label=label,
-                **PLOT_STYLE,
-            )
-            ax_3.fill_between(
-                avg_analyses["strat_phe_0"],
-                avg_analyses[("avg_strat_phe_0", "mean")]
-                - avg_analyses[("std_dev_strat_phe", "mean")],
-                avg_analyses[("avg_strat_phe_0", "mean")]
-                + avg_analyses[("std_dev_strat_phe", "mean")],
-                color=color,
-                **FILL_STYLE,
+            plot_errorbar_with_band(
+                ax_3,
+                avg_analyses,
+                "strat_phe_0",
+                "avg_strat_phe_0",
+                False,
+                "std_dev_strat_phe",
             )
 
-        if label == "evolutive":
+        if sim_type == SimType.EVOL:
             hm_x = avg_analyses["strat_phe_0"].tolist()
             hm_z1 = list()
             for bin in range(hist_bins):
@@ -247,7 +253,7 @@ def generate_strat_phe_plots(
             )
             cbar = fig_4.colorbar(im, cax=ax_4_cbar, aspect=64)
             cbar.ax.set_ylabel("$p(s(0))$")
-        elif label == "random init":
+        elif sim_type == SimType.RANDOM:
             hm_z2 = list()
             for bin in range(hist_bins):
                 hm_z2.append(
@@ -264,20 +270,8 @@ def generate_strat_phe_plots(
                 vmax=hist_bins,
             )
 
-        ax_5.errorbar(
-            avg_analyses[("growth_rate", "mean")],
-            avg_analyses[("extinct_rate", "mean")],
-            xerr=avg_analyses[("growth_rate", "sem")],
-            yerr=avg_analyses[("extinct_rate", "sem")],
-            c=color,
-            label=label,
-            **PLOT_STYLE,
-        )
-        ax_5.axvline(
-            avg_analyses[("growth_rate", "mean")].mean(), c=color, **LINE_STYLE
-        )
-        ax_5.axhline(
-            avg_analyses[("extinct_rate", "mean")].mean(), c=color, **LINE_STYLE
+        plot_errorbar_with_band(
+            ax_5, avg_analyses, "growth_rate", "extinct_rate", True, None
         )
 
     fig_dir = init_sim_job.base_dir / "plots" / "strat_phe"
@@ -340,37 +334,12 @@ def generate_prob_mut_plots(
         xlabel="$\\langle\\mu\\rangle$", ylabel="$r_e$", yscale="log"
     )
 
-    ax_1.errorbar(
-        avg_analyses["prob_mut"],
-        avg_analyses[("extinct_rate", "mean")],
-        yerr=avg_analyses[("extinct_rate", "sem")],
-        c=COLORS[11],
-        **PLOT_STYLE,
-    )
+    plot_errorbar_with_band(ax_1, avg_analyses, "prob_mut", "extinct_rate", False, None)
 
-    ax_2.errorbar(
-        avg_analyses["prob_mut"],
-        avg_analyses[("growth_rate", "mean")],
-        yerr=avg_analyses[("growth_rate", "sem")],
-        c=COLORS[11],
-        **PLOT_STYLE,
-    )
+    plot_errorbar_with_band(ax_2, avg_analyses, "prob_mut", "growth_rate", False, None)
 
-    ax_3.errorbar(
-        avg_analyses["prob_mut"],
-        avg_analyses[("avg_strat_phe_0", "mean")],
-        yerr=avg_analyses[("avg_strat_phe_0", "sem")],
-        c=COLORS[11],
-        **PLOT_STYLE,
-    )
-    ax_3.fill_between(
-        avg_analyses["prob_mut"],
-        avg_analyses[("avg_strat_phe_0", "mean")]
-        - avg_analyses[("std_dev_strat_phe", "mean")],
-        avg_analyses[("avg_strat_phe_0", "mean")]
-        + avg_analyses[("std_dev_strat_phe", "mean")],
-        color=COLORS[11],
-        **FILL_STYLE,
+    plot_errorbar_with_band(
+        ax_3, avg_analyses, "prob_mut", "avg_strat_phe_0", False, "std_dev_strat_phe"
     )
 
     hm_x = avg_analyses["prob_mut"].tolist()
@@ -393,13 +362,8 @@ def generate_prob_mut_plots(
     cbar = fig_4.colorbar(im, cax=ax_4_cbar, aspect=64)
     cbar.ax.set_ylabel("$p(s(0))$")
 
-    ax_5.errorbar(
-        avg_analyses[("growth_rate", "mean")],
-        avg_analyses[("extinct_rate", "mean")],
-        xerr=avg_analyses[("growth_rate", "sem")],
-        yerr=avg_analyses[("extinct_rate", "sem")],
-        c=COLORS[11],
-        **PLOT_STYLE,
+    plot_errorbar_with_band(
+        ax_5, avg_analyses, "growth_rate", "extinct_rate", True, None
     )
 
     fig_dir = init_sim_job.base_dir / "plots" / "prob_mut"
@@ -448,37 +412,12 @@ def generate_n_agents_plots(
         xlabel="$\\langle\\mu\\rangle$", ylabel="$r_e$", yscale="log"
     )
 
-    ax_1.errorbar(
-        avg_analyses["n_agents"],
-        avg_analyses[("extinct_rate", "mean")],
-        yerr=avg_analyses[("extinct_rate", "sem")],
-        c=COLORS[11],
-        **PLOT_STYLE,
-    )
+    plot_errorbar_with_band(ax_1, avg_analyses, "n_agents", "extinct_rate", False, None)
 
-    ax_2.errorbar(
-        avg_analyses["n_agents"],
-        avg_analyses[("growth_rate", "mean")],
-        yerr=avg_analyses[("growth_rate", "sem")],
-        c=COLORS[11],
-        **PLOT_STYLE,
-    )
+    plot_errorbar_with_band(ax_2, avg_analyses, "n_agents", "growth_rate", False, None)
 
-    ax_3.errorbar(
-        avg_analyses["n_agents"],
-        avg_analyses[("avg_strat_phe_0", "mean")],
-        yerr=avg_analyses[("avg_strat_phe_0", "sem")],
-        c=COLORS[11],
-        **PLOT_STYLE,
-    )
-    ax_3.fill_between(
-        avg_analyses["n_agents"],
-        avg_analyses[("avg_strat_phe_0", "mean")]
-        - avg_analyses[("std_dev_strat_phe", "mean")],
-        avg_analyses[("avg_strat_phe_0", "mean")]
-        + avg_analyses[("std_dev_strat_phe", "mean")],
-        color=COLORS[11],
-        **FILL_STYLE,
+    plot_errorbar_with_band(
+        ax_3, avg_analyses, "n_agents", "avg_strat_phe_0", False, "std_dev_strat_phe"
     )
 
     hm_x = avg_analyses["n_agents"].tolist()
@@ -501,13 +440,8 @@ def generate_n_agents_plots(
     cbar = fig_4.colorbar(im, cax=ax_4_cbar, aspect=64)
     cbar.ax.set_ylabel("$p(s(0))$")
 
-    ax_5.errorbar(
-        avg_analyses[("growth_rate", "mean")],
-        avg_analyses[("extinct_rate", "mean")],
-        xerr=avg_analyses[("growth_rate", "sem")],
-        yerr=avg_analyses[("extinct_rate", "sem")],
-        c=COLORS[11],
-        **PLOT_STYLE,
+    plot_errorbar_with_band(
+        ax_5, avg_analyses, "growth_rate", "extinct_rate", True, None
     )
 
     fig_dir = init_sim_job.base_dir / "plots" / "n_agents"
