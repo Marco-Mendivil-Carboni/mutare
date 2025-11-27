@@ -2,21 +2,21 @@ import toml
 from pathlib import Path
 import hashlib
 import json
-from typing import TypedDict, List, NotRequired, cast
+from typing import TypedDict, NotRequired, cast
 
 
 class ModelParams(TypedDict):
     n_env: int
     n_phe: int
-    rates_trans: List[List[float]]
-    rates_birth: List[List[float]]
-    rates_death: List[List[float]]
+    rates_trans: list[list[float]]
+    rates_birth: list[list[float]]
+    rates_death: list[list[float]]
     prob_mut: float
 
 
 class InitParams(TypedDict):
     n_agents: int
-    strat_phe: NotRequired[List[float]]
+    strat_phe: NotRequired[list[float]]
 
 
 class OutputParams(TypedDict):

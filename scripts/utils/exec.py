@@ -9,7 +9,7 @@ import fcntl
 import sys
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import List, Optional
+from typing import Optional
 from types import FrameType
 
 from .config import Config, hash_sim_dir
@@ -44,7 +44,7 @@ def build_bin():
     subprocess.run(["cargo", "build", "--release"], check=True, capture_output=True)
 
 
-def run_bin(sim_dir: Path, extra_args: List[str]) -> None:
+def run_bin(sim_dir: Path, extra_args: list[str]) -> None:
     if stop_requested:
         raise StopRequested()
 
@@ -103,10 +103,10 @@ class SimJob:
 
 def create_sim_jobs(
     init_sim_job: SimJob,
-    strat_phe_0_values: List[float],
-    prob_mut_values: List[float],
-    n_agents_values: List[int],
-) -> List[SimJob]:
+    strat_phe_0_values: list[float],
+    prob_mut_values: list[float],
+    n_agents_values: list[int],
+) -> list[SimJob]:
     base_dir = init_sim_job.base_dir
     run_options = init_sim_job.run_options
 
@@ -163,7 +163,7 @@ def execute_sim_job(sim_job: SimJob) -> JobResult:
         return JobResult.FAILED
 
 
-def execute_sim_jobs(sim_jobs: List[SimJob]) -> None:
+def execute_sim_jobs(sim_jobs: list[SimJob]) -> None:
     set_signal_handler()
 
     build_bin()

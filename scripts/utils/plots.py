@@ -4,7 +4,7 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 import matplotlib.gridspec as gridspec
 import matplotlib.colors as colors
-from typing import Dict, List, Tuple, Literal, Any, overload
+from typing import Literal, Any, overload
 
 from .exec import SimJob
 from .analysis import collect_avg_analyses, SimType
@@ -37,9 +37,9 @@ COLORS = [
     "#15992c",
 ]
 
-PLOT_STYLE: Dict[str, Any] = dict(ls=":", marker="o", markersize=2)
-FILL_STYLE: Dict[str, Any] = dict(lw=0.0, alpha=0.5)
-LINE_STYLE: Dict[str, Any] = dict(ls=":", lw=1.0, alpha=0.5)
+PLOT_STYLE: dict[str, Any] = dict(ls=":", marker="o", markersize=2)
+FILL_STYLE: dict[str, Any] = dict(lw=0.0, alpha=0.5)
+LINE_STYLE: dict[str, Any] = dict(ls=":", lw=1.0, alpha=0.5)
 
 CMAP = colors.LinearSegmentedColormap.from_list("custom", ["white", COLORS[1]])
 
@@ -57,7 +57,7 @@ SIM_LABELS: dict[SimType, str] = {
 
 def create_standard_figure(
     xlabel: str, ylabel: str, xscale: str = "linear", yscale: str = "linear"
-) -> Tuple[Figure, Axes]:
+) -> tuple[Figure, Axes]:
     fig = Figure(figsize=FIGSIZE)
     ax = fig.add_subplot()
     ax.set_xlabel(xlabel)
@@ -70,11 +70,11 @@ def create_standard_figure(
 @overload
 def create_heatmap_figure(
     xlabel: str, ylabel: str, panels: Literal[2], xscale: str = "linear"
-) -> Tuple[Figure, Axes, Axes]: ...
+) -> tuple[Figure, Axes, Axes]: ...
 @overload
 def create_heatmap_figure(
     xlabel: str, ylabel: str, panels: Literal[3], xscale: str = "linear"
-) -> Tuple[Figure, Axes, Axes, Axes]: ...
+) -> tuple[Figure, Axes, Axes, Axes]: ...
 def create_heatmap_figure(
     xlabel: str, ylabel: str, panels: int, xscale: str = "linear"
 ):
@@ -104,7 +104,7 @@ def create_heatmap_figure(
         return fig, ax_main, ax_side, ax_cbar
 
 
-def get_sim_color_and_label(avg_analyses: pd.DataFrame) -> Tuple[str, str]:
+def get_sim_color_and_label(avg_analyses: pd.DataFrame) -> tuple[str, str]:
     sim_types = avg_analyses["sim_type"].unique()
     if len(sim_types) != 1:
         raise ValueError("sim_type not unique")
@@ -115,8 +115,8 @@ def get_sim_color_and_label(avg_analyses: pd.DataFrame) -> Tuple[str, str]:
 def plot_horizontal_bands(
     ax: Axes,
     avg_analyses: pd.DataFrame,
-    mean_col: Tuple[str, str],
-    span_col: Tuple[str, str],
+    mean_col: tuple[str, str],
+    span_col: tuple[str, str],
 ) -> None:
     color, label = get_sim_color_and_label(avg_analyses)
     for mean, span in avg_analyses[[mean_col, span_col]].itertuples(index=False):
@@ -142,6 +142,17 @@ def plot_errorbar_with_band(
     if y_span_col is not None:
         y_span = avg_analyses[(y_span_col, "mean")]
         ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
+
+
+def generate_heatmap_matrix(
+    avg_analyses: pd.DataFrame, hist_bins: int
+) -> list[list[float]]:
+    hm_z = []
+    for bin in range(hist_bins):
+        hm_z.append(
+            (hist_bins * avg_analyses[(f"dist_strat_phe_0_{bin}", "mean")]).tolist()
+        )
+    return hm_z
 
 
 def generate_strat_phe_plots(
@@ -458,7 +469,7 @@ def generate_n_agents_plots(
     fig_5.savefig(fig_dir / "rates.pdf")
 
 
-def plot_sim_jobs(sim_jobs: List[SimJob]) -> None:
+def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
     init_sim_job = sim_jobs[0]
     avg_analyses = collect_avg_analyses(sim_jobs)
     hist_bins = len(

@@ -2,7 +2,7 @@ import msgpack
 from pathlib import Path
 import pandas as pd
 from enum import Enum, auto
-from typing import TypedDict, Dict, List, cast
+from typing import TypedDict, cast
 
 from .exec import SimJob
 
@@ -10,9 +10,9 @@ from .exec import SimJob
 class Analysis(TypedDict):
     growth_rate: float
     extinct_rate: int
-    avg_strat_phe: List[float]
+    avg_strat_phe: list[float]
     std_dev_strat_phe: float
-    dist_strat_phe: List[List[float]]
+    dist_strat_phe: list[list[float]]
 
 
 def read_analysis(sim_dir: Path, run_idx: int) -> Analysis:
@@ -28,13 +28,13 @@ class SimType(Enum):
     RANDOM = auto()
 
 
-def collect_avg_analyses(sim_jobs: List[SimJob]) -> pd.DataFrame:
+def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
     avg_analyses = []
     for sim_job in sim_jobs:
         analyses = []
         for run_idx in range(sim_job.run_options.n_runs):
             analysis = read_analysis(sim_job.sim_dir, run_idx)
-            analysis = cast(Dict, analysis)
+            analysis = cast(dict, analysis)
             analysis["avg_strat_phe_0"] = analysis["avg_strat_phe"][0]
             analysis.pop("avg_strat_phe")
             for bin, ele in enumerate(analysis["dist_strat_phe"][0]):
