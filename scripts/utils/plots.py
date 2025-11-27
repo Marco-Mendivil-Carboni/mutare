@@ -93,6 +93,20 @@ def create_heatmap_figure(
         return fig, ax_main, ax_side, ax_cbar
 
 
+def plot_horizontal_bands(
+    ax: Axes,
+    avg_analyses: pd.DataFrame,
+    mean_col: Tuple[str, str],
+    span_col: Tuple[str, str],
+    color: str,
+    label: str | None,
+) -> None:
+    for mean, span in avg_analyses[[mean_col, span_col]].itertuples(index=False):
+        ax.axhline(mean, c=color, label=label, ls=":")
+        ax.axhspan(mean + span, mean - span, color=color, **FILL_STYLE)
+        label = None
+
+
 def generate_strat_phe_plots(
     init_sim_job: SimJob, avg_analyses: pd.DataFrame, hist_bins: int
 ) -> None:
@@ -148,16 +162,14 @@ def generate_strat_phe_plots(
             ]
 
         if label == "random init":
-            for extinct_rate_mean, extinct_rate_sem in avg_analyses[
-                [("extinct_rate", "mean"), ("extinct_rate", "sem")]
-            ].itertuples(index=False):
-                ax_1.axhline(extinct_rate_mean, c=color, label=label, ls=":")
-                ax_1.axhspan(
-                    extinct_rate_mean + extinct_rate_sem,
-                    extinct_rate_mean - extinct_rate_sem,
-                    color=color,
-                    **FILL_STYLE,
-                )
+            plot_horizontal_bands(
+                ax_1,
+                avg_analyses,
+                ("extinct_rate", "mean"),
+                ("extinct_rate", "sem"),
+                color,
+                label,
+            )
         else:
             ax_1.errorbar(
                 avg_analyses["strat_phe_0"],
@@ -169,16 +181,14 @@ def generate_strat_phe_plots(
             )
 
         if label == "random init":
-            for growth_rate_mean, growth_rate_sem in avg_analyses[
-                [("growth_rate", "mean"), ("growth_rate", "sem")]
-            ].itertuples(index=False):
-                ax_2.axhline(growth_rate_mean, c=color, label=label, ls=":")
-                ax_2.axhspan(
-                    growth_rate_mean + growth_rate_sem,
-                    growth_rate_mean - growth_rate_sem,
-                    color=color,
-                    **FILL_STYLE,
-                )
+            plot_horizontal_bands(
+                ax_2,
+                avg_analyses,
+                ("growth_rate", "mean"),
+                ("growth_rate", "sem"),
+                color,
+                label,
+            )
         else:
             ax_2.errorbar(
                 avg_analyses["strat_phe_0"],
@@ -190,16 +200,14 @@ def generate_strat_phe_plots(
             )
 
         if label == "random init":
-            for avg_strat_phe_0, std_dev_strat_phe in avg_analyses[
-                [("avg_strat_phe_0", "mean"), ("std_dev_strat_phe", "mean")]
-            ].itertuples(index=False):
-                ax_3.axhline(avg_strat_phe_0, c=color, label=label, ls=":")
-                ax_3.axhspan(
-                    avg_strat_phe_0 + std_dev_strat_phe,
-                    avg_strat_phe_0 - std_dev_strat_phe,
-                    color=color,
-                    **FILL_STYLE,
-                )
+            plot_horizontal_bands(
+                ax_3,
+                avg_analyses,
+                ("avg_strat_phe_0", "mean"),
+                ("std_dev_strat_phe", "mean"),
+                color,
+                label,
+            )
         else:
             ax_3.errorbar(
                 avg_analyses["strat_phe_0"],
@@ -348,9 +356,10 @@ def generate_prob_mut_plots(
         **PLOT_STYLE,
     )
 
-    ax_3.plot(
+    ax_3.errorbar(
         avg_analyses["prob_mut"],
         avg_analyses[("avg_strat_phe_0", "mean")],
+        yerr=avg_analyses[("avg_strat_phe_0", "sem")],
         c=COLORS[11],
         **PLOT_STYLE,
     )
@@ -455,9 +464,10 @@ def generate_n_agents_plots(
         **PLOT_STYLE,
     )
 
-    ax_3.plot(
+    ax_3.errorbar(
         avg_analyses["n_agents"],
         avg_analyses[("avg_strat_phe_0", "mean")],
+        yerr=avg_analyses[("avg_strat_phe_0", "sem")],
         c=COLORS[11],
         **PLOT_STYLE,
     )
