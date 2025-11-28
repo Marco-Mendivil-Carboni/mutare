@@ -62,14 +62,6 @@ COL_TEX_LABELS: dict[str, str] = {
     "growth_rate": "$\\langle\\mu\\rangle$",
     "avg_strat_phe_0": "$\\langle s(0)\\rangle$",
 }
-COL_SCALES: dict[str, str] = {
-    "strat_phe_0": "linear",
-    "prob_mut": "log",
-    "n_agents": "log",
-    "extinct_rate": "log",
-    "growth_rate": "linear",
-    "avg_strat_phe_0": "linear",
-}
 
 
 def create_standard_figure(x_col: str, y_col: str) -> tuple[Figure, Axes]:
@@ -77,8 +69,6 @@ def create_standard_figure(x_col: str, y_col: str) -> tuple[Figure, Axes]:
     ax = fig.add_subplot()
     ax.set_xlabel(COL_TEX_LABELS[x_col])
     ax.set_ylabel(COL_TEX_LABELS[y_col])
-    ax.set_xscale(COL_SCALES[x_col])
-    ax.set_yscale(COL_SCALES[y_col])
     return fig, ax
 
 
@@ -92,7 +82,6 @@ def create_heatmap_figure(x_col: str, two_panels: bool) -> tuple[Figure, list[Ax
         ax_cbar = fig.add_subplot(gs[0, 2])
         ax_main.set_xlabel(COL_TEX_LABELS[x_col])
         ax_main.set_ylabel("$s(0)$")
-        ax_main.set_xscale(COL_SCALES[x_col])
         ax_side.set_xticks([])
         ax_side.set_yticks([])
 
@@ -104,7 +93,6 @@ def create_heatmap_figure(x_col: str, two_panels: bool) -> tuple[Figure, list[Ax
         ax_cbar = fig.add_subplot(gs[0, 1])
         ax_main.set_xlabel(COL_TEX_LABELS[x_col])
         ax_main.set_ylabel("$s(0)$")
-        ax_main.set_xscale(COL_SCALES[x_col])
 
         return fig, [ax_main, ax_cbar]
 
@@ -214,10 +202,10 @@ PARAM_FILTERS = {
 
 
 def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
-    df = PARAM_FILTERS[param](df, job)
-    if len(df) < 2:
+    df_p = PARAM_FILTERS[param](df, job)
+    if len(df_p) < 2:
         return
-    df = df.sort_values(param)
+    df_p = df_p.sort_values(param)
 
     fig_1, ax_1 = create_standard_figure(param, "extinct_rate")
     fig_2, ax_2 = create_standard_figure(param, "growth_rate")
@@ -231,14 +219,9 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
 
     fig_5, ax_5 = create_standard_figure("growth_rate", "extinct_rate")
 
-    sim_types = df["sim_type"]
-
-    min_extinct: Any = None
-    max_growth: Any = None
-
     if param == "strat_phe_0":
-        min_extinct = df[param][df[("extinct_rate", "mean")].idxmin()]
-        max_growth = df[param][df[("growth_rate", "mean")].idxmax()]
+        min_extinct = df_p[param][df_p[("extinct_rate", "mean")].idxmin()]
+        max_growth = df_p[param][df_p[("growth_rate", "mean")].idxmax()]
         for ax in [ax_1, ax_2]:
             ax.axvline(min_extinct, color="gray", ls=":")
             ax.axvline(max_growth, color="gray", ls="-.")
@@ -246,8 +229,9 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
             ax.axhline(min_extinct, color="gray", ls=":")
             ax.axhline(max_growth, color="gray", ls="-.")
 
+    sim_types = df_p["sim_type"]
     for sim_type in sim_types.unique():
-        df_s = df[sim_types == sim_type]
+        df_s = df_p[sim_types == sim_type]
 
         def plot_with_uncertainty(ax: Axes, y_col: str, y_span_col: str | None):
             if param == "strat_phe_0" and sim_type == SimType.RANDOM:
@@ -276,8 +260,21 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
 
         plot_errorbar(ax_5, df_s, "growth_rate", "extinct_rate", True)
 
+    if param == "prob_mut":
+        df_s = df[df["sim_type"] == SimType.FIXED]
+        df_s.sort_values("strat_phe_0")
+        plot_errorbar(ax_5, df_s, "growth_rate", "extinct_rate", True)
+
     fig_dir = job.base_dir / "plots" / param
     fig_dir.mkdir(parents=True, exist_ok=True)
+
+    if param in ["prob_mut", "n_agents"]:
+        for ax in [ax_1, ax_2, ax_3, axs_4[0]]:
+            ax.set_xscale("log")
+    for ax in [ax_1, ax_5]:
+        ax.set_yscale("log")
+    for ax in [ax_1, ax_2, ax_3, ax_5]:
+        ax.legend()
 
     fig_1.savefig(fig_dir / "extinct_rate.pdf")
     fig_2.savefig(fig_dir / "growth_rate.pdf")
