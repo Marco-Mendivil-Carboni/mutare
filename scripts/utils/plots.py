@@ -4,7 +4,7 @@ from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 import matplotlib.gridspec as gridspec
 import matplotlib.colors as colors
-from typing import Literal, Any, overload
+from typing import Any
 
 from .exec import SimJob
 from .analysis import collect_avg_analyses, SimType
@@ -82,28 +82,10 @@ def create_standard_figure(x_col: str, y_col: str) -> tuple[Figure, Axes]:
     return fig, ax
 
 
-@overload
-def create_heatmap_figure(
-    x_col: str, panels: Literal[2]
-) -> tuple[Figure, Axes, Axes]: ...
-@overload
-def create_heatmap_figure(
-    x_col: str, panels: Literal[3]
-) -> tuple[Figure, Axes, Axes, Axes]: ...
-def create_heatmap_figure(x_col: str, panels: int):
+def create_heatmap_figure(x_col: str, two_panels: bool) -> tuple[Figure, list[Axes]]:
     fig = Figure(figsize=FIGSIZE)
 
-    if panels == 2:
-        gs = gridspec.GridSpec(1, 2, figure=fig, width_ratios=[64, 1], wspace=0)
-        ax_main = fig.add_subplot(gs[0, 0])
-        ax_cbar = fig.add_subplot(gs[0, 1])
-        ax_main.set_xlabel(COL_TEX_LABELS[x_col])
-        ax_main.set_ylabel("$s(0)$")
-        ax_main.set_xscale(COL_SCALES[x_col])
-
-        return fig, ax_main, ax_cbar
-
-    elif panels == 3:
+    if two_panels:
         gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[64, 8, 1], wspace=0)
         ax_main = fig.add_subplot(gs[0, 0])
         ax_side = fig.add_subplot(gs[0, 1])
@@ -114,7 +96,17 @@ def create_heatmap_figure(x_col: str, panels: int):
         ax_side.set_xticks([])
         ax_side.set_yticks([])
 
-        return fig, ax_main, ax_side, ax_cbar
+        return fig, [ax_main, ax_side, ax_cbar]
+
+    else:
+        gs = gridspec.GridSpec(1, 2, figure=fig, width_ratios=[64, 1], wspace=0)
+        ax_main = fig.add_subplot(gs[0, 0])
+        ax_cbar = fig.add_subplot(gs[0, 1])
+        ax_main.set_xlabel(COL_TEX_LABELS[x_col])
+        ax_main.set_ylabel("$s(0)$")
+        ax_main.set_xscale(COL_SCALES[x_col])
+
+        return fig, [ax_main, ax_cbar]
 
 
 def get_sim_color_and_label(df: pd.DataFrame) -> tuple[str, str]:
@@ -135,13 +127,8 @@ def plot_horizontal_bands(
         label = None
 
 
-def plot_errorbar_with_band(
-    ax: Axes,
-    df: pd.DataFrame,
-    x_col: str,
-    y_col: str,
-    use_xerr: bool,
-    y_span_col: str | None,
+def plot_errorbar(
+    ax: Axes, df: pd.DataFrame, x_col: str, y_col: str, use_xerr: bool
 ) -> None:
     color, label = get_sim_color_and_label(df)
     x = df[(x_col, "mean")] if use_xerr else df[x_col]
@@ -149,9 +136,16 @@ def plot_errorbar_with_band(
     xerr = df[(x_col, "sem")] if use_xerr else None
     yerr = df[(y_col, "sem")]
     ax.errorbar(x, y, yerr, xerr, c=color, label=label, **PLOT_STYLE)
-    if y_span_col is not None:
-        y_span = df[(y_span_col, "mean")]
-        ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
+
+
+def plot_errorband(
+    ax: Axes, df: pd.DataFrame, x_col: str, y_col: str, y_span_col: str
+) -> None:
+    color, _ = get_sim_color_and_label(df)
+    x = df[x_col]
+    y = df[(y_col, "mean")]
+    y_span = df[(y_span_col, "mean")]
+    ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
 
 
 def count_hist_bins(df: pd.DataFrame) -> int:
@@ -191,185 +185,6 @@ def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame) -> None:
     ax_side.pcolormesh(hm_x, hm_y, hm_z, cmap=CMAP, vmin=0, vmax=hist_bins)
 
 
-def generate_strat_phe_plots(init_sim_job: SimJob, df: pd.DataFrame) -> None:
-    df = df[
-        (
-            (df["prob_mut"] == init_sim_job.config["model"]["prob_mut"])
-            | (df["prob_mut"] == 0)
-        )
-        & (df["n_agents"] == init_sim_job.config["init"]["n_agents"])
-    ]
-    if len(df) < 2:
-        return
-
-    df = df.sort_values("strat_phe_0")
-
-    fig_1, ax_1 = create_standard_figure("strat_phe_0", "extinct_rate")
-    fig_2, ax_2 = create_standard_figure("strat_phe_0", "growth_rate")
-    fig_3, ax_3 = create_standard_figure("strat_phe_0", "avg_strat_phe_0")
-    fig_4, ax_4_main, ax_4_side, ax_4_cbar = create_heatmap_figure(
-        "strat_phe_0", panels=3
-    )
-    ax_4_side.set_xlabel("random init")
-    fig_5, ax_5 = create_standard_figure("growth_rate", "extinct_rate")
-
-    sim_types = df["sim_type"]
-
-    min_extinct_strat: Any = None
-    max_growth_strat: Any = None
-
-    for df, sim_type in [
-        (df[sim_types == SimType.FIXED], SimType.FIXED),
-        (df[sim_types == SimType.EVOL], SimType.EVOL),
-        (df[sim_types == SimType.RANDOM], SimType.RANDOM),
-    ]:
-        if sim_type == SimType.FIXED:
-            max_growth_strat = df["strat_phe_0"][df[("growth_rate", "mean")].idxmax()]
-            min_extinct_strat = df["strat_phe_0"][df[("extinct_rate", "mean")].idxmin()]
-
-        if sim_type == SimType.RANDOM:
-            plot_horizontal_bands(
-                ax_1, df, ("extinct_rate", "mean"), ("extinct_rate", "sem")
-            )
-        else:
-            plot_errorbar_with_band(
-                ax_1, df, "strat_phe_0", "extinct_rate", False, None
-            )
-
-        if sim_type == SimType.RANDOM:
-            plot_horizontal_bands(
-                ax_2, df, ("growth_rate", "mean"), ("growth_rate", "sem")
-            )
-        else:
-            plot_errorbar_with_band(ax_2, df, "strat_phe_0", "growth_rate", False, None)
-
-        if sim_type == SimType.RANDOM:
-            plot_horizontal_bands(
-                ax_3, df, ("avg_strat_phe_0", "mean"), ("std_dev_strat_phe", "mean")
-            )
-        else:
-            plot_errorbar_with_band(
-                ax_3, df, "strat_phe_0", "avg_strat_phe_0", False, "std_dev_strat_phe"
-            )
-
-        if sim_type == SimType.EVOL:
-            plot_main_heatmap(fig_4, ax_4_main, ax_4_cbar, df, "strat_phe_0")
-        elif sim_type == SimType.RANDOM:
-            plot_side_heatmap(ax_4_side, df)
-
-        plot_errorbar_with_band(ax_5, df, "growth_rate", "extinct_rate", True, None)
-
-    fig_dir = init_sim_job.base_dir / "plots" / "strat_phe"
-    fig_dir.mkdir(parents=True, exist_ok=True)
-
-    ax_1.legend()
-    ax_1.axvline(max_growth_strat, color="gray", ls="-.")
-    ax_1.axvline(min_extinct_strat, color="gray", ls=":")
-    fig_1.savefig(fig_dir / "extinct_rate.pdf")
-
-    ax_2.axvline(max_growth_strat, color="gray", ls="-.")
-    ax_2.axvline(min_extinct_strat, color="gray", ls=":")
-    ax_2.legend()
-    fig_2.savefig(fig_dir / "growth_rate.pdf")
-
-    ax_3.axhline(max_growth_strat, color="gray", ls="-.")
-    ax_3.axhline(min_extinct_strat, color="gray", ls=":")
-    ax_3.legend()
-    fig_3.savefig(fig_dir / "avg_strat_phe.pdf")
-
-    ax_4_main.axhline(max_growth_strat, color="gray", ls="-.")
-    ax_4_side.axhline(max_growth_strat, color="gray", ls="-.")
-    ax_4_main.axhline(min_extinct_strat, color="gray", ls=":")
-    ax_4_side.axhline(min_extinct_strat, color="gray", ls=":")
-    fig_4.savefig(fig_dir / "dist_strat_phe.pdf")
-
-    ax_5.legend()
-    fig_5.savefig(fig_dir / "rates.pdf")
-
-
-def generate_prob_mut_plots(init_sim_job: SimJob, df: pd.DataFrame) -> None:
-    df = df[
-        (df["sim_type"] == SimType.RANDOM)
-        & (df["n_agents"] == init_sim_job.config["init"]["n_agents"])
-    ]
-    if len(df) < 2:
-        return
-
-    df = df.sort_values("prob_mut")
-
-    fig_1, ax_1 = create_standard_figure("prob_mut", "extinct_rate")
-    fig_2, ax_2 = create_standard_figure("prob_mut", "growth_rate")
-    fig_3, ax_3 = create_standard_figure("prob_mut", "avg_strat_phe_0")
-    fig_4, ax_4_main, ax_4_cbar = create_heatmap_figure("prob_mut", panels=2)
-    fig_5, ax_5 = create_standard_figure("growth_rate", "extinct_rate")
-
-    plot_errorbar_with_band(ax_1, df, "prob_mut", "extinct_rate", False, None)
-    plot_errorbar_with_band(ax_2, df, "prob_mut", "growth_rate", False, None)
-    plot_errorbar_with_band(
-        ax_3, df, "prob_mut", "avg_strat_phe_0", False, "std_dev_strat_phe"
-    )
-    plot_main_heatmap(fig_4, ax_4_main, ax_4_cbar, df, "prob_mut")
-    plot_errorbar_with_band(ax_5, df, "growth_rate", "extinct_rate", True, None)
-
-    fig_dir = init_sim_job.base_dir / "plots" / "prob_mut"
-    fig_dir.mkdir(parents=True, exist_ok=True)
-
-    fig_1.savefig(fig_dir / "extinct_rate.pdf")
-    fig_2.savefig(fig_dir / "growth_rate.pdf")
-    fig_3.savefig(fig_dir / "avg_strat_phe.pdf")
-    fig_4.savefig(fig_dir / "dist_strat_phe.pdf")
-    fig_5.savefig(fig_dir / "rates.pdf")
-
-
-def generate_n_agents_plots(init_sim_job: SimJob, df: pd.DataFrame) -> None:
-    df = df[
-        (df["sim_type"] == SimType.RANDOM)
-        & (df["prob_mut"] == init_sim_job.config["model"]["prob_mut"])
-    ]
-    if len(df) < 2:
-        return
-
-    df = df.sort_values("n_agents")
-
-    fig_1, ax_1 = create_standard_figure("n_agents", "extinct_rate")
-    fig_2, ax_2 = create_standard_figure("n_agents", "growth_rate")
-    fig_3, ax_3 = create_standard_figure("n_agents", "avg_strat_phe_0")
-    fig_4, ax_4_main, ax_4_cbar = create_heatmap_figure("n_agents", panels=2)
-    fig_5, ax_5 = create_standard_figure("growth_rate", "extinct_rate")
-
-    plot_errorbar_with_band(ax_1, df, "n_agents", "extinct_rate", False, None)
-    plot_errorbar_with_band(ax_2, df, "n_agents", "growth_rate", False, None)
-    plot_errorbar_with_band(
-        ax_3, df, "n_agents", "avg_strat_phe_0", False, "std_dev_strat_phe"
-    )
-    plot_main_heatmap(fig_4, ax_4_main, ax_4_cbar, df, "n_agents")
-    plot_errorbar_with_band(ax_5, df, "growth_rate", "extinct_rate", True, None)
-
-    fig_dir = init_sim_job.base_dir / "plots" / "n_agents"
-    fig_dir.mkdir(parents=True, exist_ok=True)
-
-    fig_1.savefig(fig_dir / "extinct_rate.pdf")
-    fig_2.savefig(fig_dir / "growth_rate.pdf")
-    fig_3.savefig(fig_dir / "avg_strat_phe.pdf")
-    fig_4.savefig(fig_dir / "dist_strat_phe.pdf")
-    fig_5.savefig(fig_dir / "rates.pdf")
-
-
-def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
-    init_sim_job = sim_jobs[0]
-    df = collect_avg_analyses(sim_jobs)
-
-    generate_strat_phe_plots(init_sim_job, df)
-    generate_prob_mut_plots(init_sim_job, df)
-    generate_n_agents_plots(init_sim_job, df)
-
-    # generate_param_plots("strat_phe_0", init_sim_job, df)
-    # generate_param_plots("prob_mut", init_sim_job, df)
-    # generate_param_plots("n_agents", init_sim_job, df)
-
-    print("plots made")
-
-
 def strat_phe_0_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
     return df[
         ((df["prob_mut"] == job.config["model"]["prob_mut"]) | (df["prob_mut"] == 0))
@@ -391,110 +206,92 @@ def n_agents_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
     ]
 
 
-# PLOT_SPECS = {
-#     "strat_phe_0": {
-#         "filter": filter_strat_phe_0,
-#         "sim_types": [SimType.FIXED, SimType.EVOL, SimType.RANDOM],
-#         "heatmap_side": True,
-#         "compute_optima": True,
-#     },
-#     "prob_mut": {
-#         "filter": filter_prob_mut,
-#         "sim_types": [SimType.RANDOM],
-#         "heatmap_side": False,
-#         "compute_optima": False,
-#     },
-#     "n_agents": {
-#         "filter": filter_n_agents,
-#         "sim_types": [SimType.RANDOM],
-#         "heatmap_side": False,
-#         "compute_optima": False,
-#     },
-# }
+PARAM_FILTERS = {
+    "strat_phe_0": strat_phe_0_filter,
+    "prob_mut": prob_mut_filter,
+    "n_agents": n_agents_filter,
+}
 
 
-# def plot_metric(ax, df, col_x, col_y, sim_type, err_col=None):
-#     if sim_type == SimType.RANDOM and col_x != "growth_rate":
-#         plot_horizontal_bands(ax, df, (col_y, "mean"), (col_y, "sem"))
-#     else:
-#         plot_errorbar_with_band(ax, df, col_x, col_y, col_x == "growth_rate", err_col)
+def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
+    df = PARAM_FILTERS[param](df, job)
+    if len(df) < 2:
+        return
+    df = df.sort_values(param)
+
+    fig_1, ax_1 = create_standard_figure(param, "extinct_rate")
+    fig_2, ax_2 = create_standard_figure(param, "growth_rate")
+    fig_3, ax_3 = create_standard_figure(param, "avg_strat_phe_0")
+
+    if param == "strat_phe_0":
+        fig_4, axs_4 = create_heatmap_figure(param, True)
+        axs_4[1].set_xlabel("random init")
+    else:
+        fig_4, axs_4 = create_heatmap_figure(param, False)
+
+    fig_5, ax_5 = create_standard_figure("growth_rate", "extinct_rate")
+
+    sim_types = df["sim_type"]
+
+    min_extinct: Any = None
+    max_growth: Any = None
+
+    if param == "strat_phe_0":
+        min_extinct = df[param][df[("extinct_rate", "mean")].idxmin()]
+        max_growth = df[param][df[("growth_rate", "mean")].idxmax()]
+        for ax in [ax_1, ax_2]:
+            ax.axvline(min_extinct, color="gray", ls=":")
+            ax.axvline(max_growth, color="gray", ls="-.")
+        for ax in [ax_3] + axs_4[:-1]:
+            ax.axhline(min_extinct, color="gray", ls=":")
+            ax.axhline(max_growth, color="gray", ls="-.")
+
+    for sim_type in sim_types.unique():
+        df_s = df[sim_types == sim_type]
+
+        def plot_with_uncertainty(ax: Axes, y_col: str, y_span_col: str | None):
+            if param == "strat_phe_0" and sim_type == SimType.RANDOM:
+                if y_span_col is None:
+                    plot_horizontal_bands(ax, df_s, (y_col, "mean"), (y_col, "sem"))
+                else:
+                    plot_horizontal_bands(
+                        ax, df_s, (y_col, "mean"), (y_span_col, "mean")
+                    )
+            else:
+                plot_errorbar(ax, df_s, param, y_col, False)
+                if y_span_col is not None:
+                    plot_errorband(ax, df_s, param, y_col, y_span_col)
+
+        plot_with_uncertainty(ax_1, "extinct_rate", None)
+        plot_with_uncertainty(ax_2, "growth_rate", None)
+        plot_with_uncertainty(ax_3, "avg_strat_phe_0", "std_dev_strat_phe")
+
+        if param == "strat_phe_0":
+            if sim_type == SimType.EVOL:
+                plot_main_heatmap(fig_4, axs_4[0], axs_4[2], df_s, param)
+            elif sim_type == SimType.RANDOM:
+                plot_side_heatmap(axs_4[1], df_s)
+        else:
+            plot_main_heatmap(fig_4, axs_4[0], axs_4[1], df_s, param)
+
+        plot_errorbar(ax_5, df_s, "growth_rate", "extinct_rate", True)
+
+    fig_dir = job.base_dir / "plots" / param
+    fig_dir.mkdir(parents=True, exist_ok=True)
+
+    fig_1.savefig(fig_dir / "extinct_rate.pdf")
+    fig_2.savefig(fig_dir / "growth_rate.pdf")
+    fig_3.savefig(fig_dir / "avg_strat_phe_0.pdf")
+    fig_4.savefig(fig_dir / "dist_strat_phe_0.pdf")
+    fig_5.savefig(fig_dir / "rates.pdf")
 
 
-# def generate_param_plots(param: str, init_sim_job: SimJob, avg_df: pd.DataFrame):
-#     spec = PLOT_SPECS[param]
+def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
+    avg_analyses = collect_avg_analyses(sim_jobs)
+    init_sim_job = sim_jobs[0]
 
-#     df = spec["filter"](avg_df, init_sim_job)
-#     if len(df) < 2:
-#         return
-#     df = df.sort_values(param)
-#     sim_types = df["sim_type"]
+    generate_param_plots("strat_phe_0", avg_analyses, init_sim_job)
+    generate_param_plots("prob_mut", avg_analyses, init_sim_job)
+    generate_param_plots("n_agents", avg_analyses, init_sim_job)
 
-#     x = param
-#     fig1, ax1 = create_std_fig_for(x, "extinct_rate")
-#     fig2, ax2 = create_std_fig_for(x, "growth_rate")
-#     fig3, ax3 = create_std_fig_for(x, "avg_strat_phe_0")
-
-#     fig4 = None
-
-#     if spec["heatmap_side"]:
-#         fig4, ax4_main, ax4_side, ax4_cbar = create_heatmap_figure(
-#             xlabel=COL_TEX_LABELS[x], ylabel="$s(0)$", panels=3
-#         )
-#     else:
-#         fig4, ax4_main, ax4_cbar = create_heatmap_figure(
-#             xlabel=COL_TEX_LABELS[x], ylabel="$s(0)$", panels=2
-#         )
-#         ax4_side = None
-
-#     fig5, ax5 = create_std_fig_for("growth_rate", "extinct_rate")
-
-#     max_growth = None
-#     min_extinct = None
-
-#     if spec["compute_optima"]:
-#         fixed_df = df[sim_types == SimType.FIXED]
-#         if len(fixed_df):
-#             max_growth = fixed_df[param][fixed_df[("growth_rate", "mean")].idxmax()]
-#             min_extinct = fixed_df[param][fixed_df[("extinct_rate", "mean")].idxmin()]
-
-#     for st in spec["sim_types"]:
-#         sub = df[sim_types == st]
-#         if len(sub) == 0:
-#             continue
-
-#         plot_metric(ax1, sub, x, "extinct_rate", st)
-#         plot_metric(ax2, sub, x, "growth_rate", st)
-#         plot_metric(ax3, sub, x, "avg_strat_phe_0", st, err_col="std_dev_strat_phe")
-
-#         if st == SimType.EVOL:
-#             plot_main_heatmap(fig4, ax4_main, ax4_cbar, sub, x)
-#         elif st == SimType.RANDOM and spec["heatmap_side"]:
-#             if ax4_side is not None:
-#                 plot_side_heatmap(ax4_side, sub)
-
-#         plot_errorbar_with_band(ax5, sub, "growth_rate", "extinct_rate", True, None)
-
-#     if max_growth is not None:
-#         ax1.axvline(max_growth, color="gray", ls="-.")
-#         ax2.axvline(max_growth, color="gray", ls="-.")
-#         ax3.axhline(max_growth, color="gray", ls="-.")
-#         ax4_main.axhline(max_growth, color="gray", ls="-.")
-#         if ax4_side is not None:
-#             ax4_side.axhline(max_growth, color="gray", ls="-.")
-
-#     if min_extinct is not None:
-#         ax1.axvline(min_extinct, color="gray", ls=":")
-#         ax2.axvline(min_extinct, color="gray", ls=":")
-#         ax3.axhline(min_extinct, color="gray", ls=":")
-#         ax4_main.axhline(min_extinct, color="gray", ls=":")
-#         if ax4_side is not None:
-#             ax4_side.axhline(min_extinct, color="gray", ls=":")
-
-#     fig_dir = init_sim_job.base_dir / "plots" / param
-#     fig_dir.mkdir(parents=True, exist_ok=True)
-
-#     fig1.savefig(fig_dir / "extinct_rate.pdf")
-#     fig2.savefig(fig_dir / "growth_rate.pdf")
-#     fig3.savefig(fig_dir / "avg_strat_phe.pdf")
-#     fig4.savefig(fig_dir / "dist_strat_phe.pdf")
-#     fig5.savefig(fig_dir / "rates.pdf")
+    print("plots made")
