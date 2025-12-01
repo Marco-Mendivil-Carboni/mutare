@@ -15,12 +15,10 @@ mpl.rcParams["text.usetex"] = True
 mpl.rcParams["text.latex.preamble"] = "\\usepackage{lmodern}\\usepackage{mathtools}"
 mpl.rcParams["font.family"] = "lmodern"
 mpl.rcParams["font.size"] = 10
+mpl.rcParams["figure.constrained_layout.use"] = True
 
 CM = 1 / 2.54
-
 FIGSIZE = (8.0 * CM, 5.0 * CM)
-
-mpl.rcParams["figure.constrained_layout.use"] = True
 
 COLORS = [
     "#df591f",

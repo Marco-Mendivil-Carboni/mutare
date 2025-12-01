@@ -1,12 +1,50 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
+import argparse
 from pathlib import Path
 from shutil import rmtree
 import numpy as np
 from copy import deepcopy
+from dotenv import load_dotenv
+import os
+import requests
 
 from utils.exec import RunOptions, SimJob, create_sim_jobs, execute_sim_jobs
 from utils.plots import plot_sim_jobs
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        prog="make_all_sims", description="Make all the simulations for the project"
+    )
+    parser.add_argument(
+        "--notify", action="store_true", help="Send Telegram notifications"
+    )
+    return parser.parse_args()
+
+
+notify = False
+
+load_dotenv()
+TOKEN = os.getenv("TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
+
+
+def print_and_notify(message: str) -> None:
+    print(message)
+    if not notify:
+        return
+    if TOKEN and CHAT_ID:
+        try:
+            requests.post(
+                f"https://api.telegram.org/bot{TOKEN}/sendMessage",
+                params={"chat_id": CHAT_ID, "text": message},
+                timeout=16,
+            )
+        except Exception as exception:
+            print(f"failed to send notification: {exception}")
+    else:
+        print("failed to find Telegram credentials")
 
 
 def make_sims(
@@ -38,8 +76,14 @@ def make_sims(
 
     plot_sim_jobs(sim_jobs)
 
+    print_and_notify(f"Simulations finished: {init_sim_job.base_dir}")
 
-if __name__ == "__main__":
+
+def main() -> None:
+    args = parse_args()
+    global notify
+    notify = args.notify
+
     sims_dir = Path("sims")
 
     symmetric_sim_job = SimJob(
@@ -112,3 +156,13 @@ if __name__ == "__main__":
         prob_mut_sweep=False,
         n_agents_sweep=False,
     )
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as exception:
+        print_and_notify(f"Program execution failed: {exception}")
+        raise
+    else:
+        print_and_notify("All simulations finished successfully")
