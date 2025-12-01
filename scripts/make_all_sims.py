@@ -24,13 +24,13 @@ def parse_args() -> argparse.Namespace:
         "--skip-analysis", action="store_true", help="skip simulation analysis"
     )
     parser.add_argument(
-        "--prune-sims-dir", action="store_true", help="prune simulations directory"
+        "--prune-dirs", action="store_true", help="prune simulation directories"
     )
     return parser.parse_args()
 
 
 notify = False
-prune_sims_dir = False
+prune_dirs = False
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
@@ -74,7 +74,7 @@ def make_sims(
     )
     execute_sim_jobs(sim_jobs)
 
-    if prune_sims_dir:
+    if prune_dirs:
         norm_sim_dirs = [sim_job.sim_dir.resolve() for sim_job in sim_jobs]
         for entry in init_sim_job.base_dir.iterdir():
             norm_entry = entry.resolve()
@@ -95,9 +95,9 @@ def make_sims(
 def main() -> None:
     args = parse_args()
 
-    global notify, prune_sims_dir
+    global notify, prune_dirs
     notify = args.notify
-    prune_sims_dir = args.prune_sims_dir
+    prune_dirs = args.prune_dirs
 
     symmetric_sim_job = SimJob(
         base_dir=SIMS_DIR / "symmetric",
