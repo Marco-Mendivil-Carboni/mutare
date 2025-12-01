@@ -82,7 +82,6 @@ Now you can begin making simulation runs and analyzing them. Here are some examp
 mutare --sim-dir example_sim/ create # Create new simulation run
 mutare --sim-dir example_sim/ resume --run-idx 0  # Resume run 0
 mutare --sim-dir example_sim/ analyze # Analyze all runs
-mutare --sim-dir example_sim/ clean # Clean up all runs
 ```
 
 Run `mutare --help` to see more detailed help information.

@@ -62,7 +62,5 @@ fn basic_workflow() {
 
     run_bin(&["--sim-dir", test_dir_str, "analyze"]);
 
-    run_bin(&["--sim-dir", test_dir_str, "clean"]);
-
     fs::remove_dir_all(&test_dir).ok();
 }

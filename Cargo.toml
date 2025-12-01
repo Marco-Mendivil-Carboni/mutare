@@ -9,7 +9,7 @@ license = "MIT"
 
 [dependencies]
 anyhow = "1.0.99"
-clap = { version = "4.5.51", default-features = false, features = ["std", "help", "usage", "error-context", "derive"] }
+clap = { version = "4.5.53", default-features = false, features = ["std", "help", "usage", "error-context", "derive"] }
 env_logger = { version = "0.11.8", default-features = false, features = ["humantime"] }
 glob = "0.3.3"
 log = "0.4.28"

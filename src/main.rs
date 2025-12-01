@@ -39,9 +39,6 @@ enum SimCmd {
 
     /// Analyze all simulation runs.
     Analyze,
-
-    /// Clean up all simulation runs.
-    Clean,
 }
 
 /// Entry point of the application.
@@ -74,7 +71,6 @@ fn run_cli() -> Result<()> {
         SimCmd::Create => mgr.create_run()?,
         SimCmd::Resume { run_idx } => mgr.resume_run(run_idx)?,
         SimCmd::Analyze => mgr.analyze_sim()?,
-        SimCmd::Clean => mgr.clean_sim()?,
     }
 
     Ok(())

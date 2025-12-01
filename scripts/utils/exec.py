@@ -55,17 +55,12 @@ def run_bin(sim_dir: Path, extra_args: list[str]) -> None:
 
 @dataclass
 class RunOptions:
-    clean: bool
     n_runs: int
     n_files: int
     analyze: bool
 
 
 def run_sim(sim_dir: Path, run_options: RunOptions) -> None:
-    if run_options.clean:
-        print_process_msg("cleaning all runs")
-        run_bin(sim_dir, ["clean"])
-
     n_runs = len(list(sim_dir.glob("run-*")))
     while n_runs < run_options.n_runs:
         print_process_msg(f"creating run {n_runs}")

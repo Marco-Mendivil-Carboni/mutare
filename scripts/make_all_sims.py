@@ -15,15 +15,22 @@ from utils.plots import plot_sim_jobs
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        prog="make_all_sims", description="Make all the simulations for the project"
+        prog="make_all_sims", description="make all the simulations for the project"
     )
     parser.add_argument(
-        "--notify", action="store_true", help="Send Telegram notifications"
+        "--notify", action="store_true", help="send Telegram notifications"
+    )
+    parser.add_argument(
+        "--skip-analysis", action="store_true", help="skip simulation analysis"
+    )
+    parser.add_argument(
+        "--prune-sims-dir", action="store_true", help="prune simulations directory"
     )
     return parser.parse_args()
 
 
 notify = False
+prune_sims_dir = False
 
 load_dotenv()
 TOKEN = os.getenv("TOKEN")
@@ -47,6 +54,9 @@ def print_and_notify(message: str) -> None:
         print("failed to find Telegram credentials")
 
 
+SIMS_DIR = Path("sims")
+
+
 def make_sims(
     init_sim_job: SimJob,
     strat_phe_sweep: bool,
@@ -64,15 +74,18 @@ def make_sims(
     )
     execute_sim_jobs(sim_jobs)
 
-    norm_sim_dirs = [sim_job.sim_dir.resolve() for sim_job in sim_jobs]
-    for entry in sim_jobs[0].base_dir.iterdir():
-        norm_entry = entry.resolve()
-        if norm_entry not in norm_sim_dirs:
-            print(f"removing {entry}")
-            if entry.is_dir():
-                rmtree(norm_entry)
-            else:
-                norm_entry.unlink()
+    if prune_sims_dir:
+        norm_sim_dirs = [sim_job.sim_dir.resolve() for sim_job in sim_jobs]
+        for entry in init_sim_job.base_dir.iterdir():
+            norm_entry = entry.resolve()
+            if not norm_entry.is_relative_to(SIMS_DIR.resolve()):
+                raise ValueError(f"path outside SIMS_DIR: {norm_entry}")
+            if norm_entry not in norm_sim_dirs:
+                print(f"removing {entry}")
+                if entry.is_dir():
+                    rmtree(norm_entry)
+                else:
+                    norm_entry.unlink()
 
     plot_sim_jobs(sim_jobs)
 
@@ -81,13 +94,13 @@ def make_sims(
 
 def main() -> None:
     args = parse_args()
-    global notify
-    notify = args.notify
 
-    sims_dir = Path("sims")
+    global notify, prune_sims_dir
+    notify = args.notify
+    prune_sims_dir = args.prune_sims_dir
 
     symmetric_sim_job = SimJob(
-        base_dir=sims_dir / "symmetric",
+        base_dir=SIMS_DIR / "symmetric",
         config={
             "model": {
                 "n_env": 2,
@@ -114,10 +127,9 @@ def main() -> None:
             },
         },
         run_options=RunOptions(
-            clean=False,
             n_runs=16,
             n_files=64,
-            analyze=False,
+            analyze=not args.skip_analysis,
         ),
     )
 
@@ -129,7 +141,7 @@ def main() -> None:
     )
 
     asymmetric_sim_job = deepcopy(symmetric_sim_job)
-    asymmetric_sim_job.base_dir = sims_dir / "asymmetric"
+    asymmetric_sim_job.base_dir = SIMS_DIR / "asymmetric"
     asymmetric_sim_job.config["model"]["rates_birth"] = [
         [1.0, 0.2],
         [0.0, 0.0],
@@ -147,7 +159,7 @@ def main() -> None:
     )
 
     extended_sim_job = deepcopy(asymmetric_sim_job)
-    extended_sim_job.base_dir = sims_dir / "extended"
+    extended_sim_job.base_dir = SIMS_DIR / "extended"
     extended_sim_job.config["init"]["n_agents"] = 1000
 
     make_sims(

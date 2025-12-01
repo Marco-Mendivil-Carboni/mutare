@@ -101,18 +101,6 @@ impl Manager {
         Ok(())
     }
 
-    /// Delete all simulation runs in the simulation directory.
-    pub fn clean_sim(&self) -> Result<()> {
-        let n_runs = self.count_run_dirs().context("failed to count run dirs")?;
-        for run_idx in 0..n_runs {
-            let run_dir = self.run_dir(run_idx);
-            fs::remove_dir_all(&run_dir)
-                .with_context(|| format!("failed to remove {run_dir:?}"))?;
-            log::info!("deleted {run_dir:?}");
-        }
-        Ok(())
-    }
-
     fn count_run_dirs(&self) -> Result<usize> {
         let pattern = self.sim_dir.join("run-*");
         let pattern = pattern.to_str().context("pattern is not valid UTF-8")?;
