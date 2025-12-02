@@ -6,7 +6,6 @@ import os
 from datetime import datetime
 from signal import signal, SIGTERM
 import fcntl
-import sys
 from dataclasses import dataclass
 from enum import Enum, auto
 from typing import Optional
@@ -171,9 +170,7 @@ def execute_sim_jobs(sim_jobs: list[SimJob]) -> None:
     print_process_msg("process pool finished")
 
     if job_results.count(JobResult.FAILED) > 0:
-        print_process_msg("some job failed")
-        sys.exit(1)
+        raise RuntimeError("some job failed")
 
     if job_results.count(JobResult.STOPPED) > 0:
-        print_process_msg("some job was stopped")
-        sys.exit(0)
+        raise RuntimeError("some job was stopped")

@@ -8,8 +8,9 @@ from .exec import SimJob
 
 
 class Analysis(TypedDict):
+    dist_n_agents: list[float]
     growth_rate: float
-    extinct_rate: int
+    extinct_rate: float
     avg_strat_phe: list[float]
     std_dev_strat_phe: float
     dist_strat_phe: list[list[float]]
@@ -40,6 +41,9 @@ def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
             for bin, ele in enumerate(analysis["dist_strat_phe"][0]):
                 analysis[f"dist_strat_phe_0_{bin}"] = ele
             analysis.pop("dist_strat_phe")
+            for bin, ele in enumerate(analysis["dist_n_agents"]):
+                analysis[f"dist_n_agents_{bin}"] = ele
+            analysis.pop("dist_n_agents")
             analysis = pd.DataFrame(analysis, index=[run_idx])
 
             analyses.append(analysis)

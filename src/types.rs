@@ -63,6 +63,9 @@ pub struct Observables {
     /// Time until the next event.
     pub time_step: f64,
 
+    /// Number of agents in the simulation.
+    pub n_agents: f64,
+
     /// Instantaneous population growth rate.
     pub growth_rate: f64,
 

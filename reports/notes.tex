@@ -34,7 +34,7 @@ The purpose of this work is to investigate, through numerical simulations, how a
 
 \section{The model: a Markov process} \label{sec:model}
 
-We consider a population with an initial number of agents $N_0$ evolving in an environment that fluctuates randomly over time. The \emph{environment} is modeled as a discrete variable with $n_{\text{env}}$ possible states, denoted by $e\in\{0,\dots,n_{\text{env}}-1\}$, which evolve according to a continuous-time Markov chain with transition rates $\omega_t(e,e')$ between states $e$ and $e'$.
+We consider a population with an initial number of agents $N_i$ evolving in an environment that fluctuates randomly over time. The \emph{environment} is modeled as a discrete variable with $n_{\text{env}}$ possible states, denoted by $e\in\{0,\dots,n_{\text{env}}-1\}$, which evolve according to a continuous-time Markov chain with transition rates $\omega_t(e,e')$ between states $e$ and $e'$.
 
 Each agent is characterized by a \emph{phenotype} $\phi\in\{0,\dots,n_{\text{phe}}-1\}$ and a \emph{phenotypic strategy} $s(\phi)$, which represents a probability distribution (see \autoref{eq:phenotypic_strategy}) over the possible phenotypes:
 \begin{equation} \label{eq:phenotypic_strategy}
@@ -46,7 +46,7 @@ Population dynamics occur through stochastic birth and death processes that depe
 
 When an agent reproduces, its offspring inherits the parent's phenotypic strategy $s(\phi)$, but with probability $p_{\text{mut}}$ a mutation occurs, leading to a new random strategy. This mechanism allows for evolutionary exploration of the space of possible strategies.
 
-An important aspect of the model is that the total population is limited to its initial size $N_0$: whenever reproduction events cause this number to be exceeded, an agent is randomly removed, preventing unbounded growth (a mechanism more or less analogous to an ecological carrying capacity). If the population goes extinct, it is reinitialized, allowing for long-term statistical characterization of the dynamics.
+An important aspect of the model is that the total population is limited to its initial size $N_i$: whenever reproduction events cause this number to be exceeded, an agent is randomly removed, preventing unbounded growth (a mechanism more or less analogous to an ecological carrying capacity). If the population goes extinct, it is reinitialized, allowing for long-term statistical characterization of the dynamics.
 
 During the simulation, several observables are measured, including the average population growth rate $\langle\mu\rangle$, the extinction rate $r_e$, and the distribution of phenotypic strategies $p(s(0))$. These quantities provide insight into whether evolution favors the maximization of mean fitness, the minimization of extinction risk, or the emergence of mixed strategies balancing both goals.
 
@@ -61,7 +61,7 @@ In \autoref{fig:symmetric_strat_phe_0}, \autoref{fig:symmetric_prob_mut} and \au
     \item $\omega_b(e,\phi)=\begin{pmatrix}1.2&0.0\\0.0&0.8\end{pmatrix}$
     \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&1.0\\1.0&0.0\end{pmatrix}$
     \item $p_{\text{mut}}=0.001$
-    \item $N_0=100$
+    \item $N_i=100$
 \end{itemize}
 
 In \autoref{fig:asymmetric_strat_phe_0}, \autoref{fig:asymmetric_prob_mut} and \autoref{fig:asymmetric_n_agents} we show the results for the following \emph{asymmetric} parameters:
@@ -73,60 +73,63 @@ In \autoref{fig:asymmetric_strat_phe_0}, \autoref{fig:asymmetric_prob_mut} and \
 
 For the parameter sets analyzed here, the fixed-strategy simulations (i.e., without evolution) show that in general the strategies that maximize mean growth rate and those that minimize extinction rate are different (see the growth and extinction panels in \autoref{fig:symmetric_strat_phe_0} and \autoref{fig:asymmetric_strat_phe_0}). In both the symmetric and asymmetric cases, the growth-optimal strategy is a mixed one, with nonzero fractions of both phenotypes. This reflects that, for these specific parameters, phenotypic diversity can increase the long-term growth rate. By contrast, the extinction-minimizing strategies differ: in the symmetric case, extinction is lowest for a balanced mixture, whereas in the asymmetric case it is minimized by a nearly pure phenotype-1 population.
 
-It is important to emphasize that the appearance of mixed optimal strategies is not general across all possible parameters, but rather a feature of the particular parameter choices used here, selected precisely because they allow the study of trade-offs between growth maximization and extinction avoidance.
+It is important to emphasize that the appearance of mixed optimal strategies (bet hedging) is not general across all possible parameters, but rather a feature of the particular parameter choices used here, selected precisely because they allow the study of trade-offs between growth maximization and extinction avoidance.
 
-We must clarify that in the average-strategy plots, the error bands represent the instantaneous dispersion of strategies across agents, not the dispersion accumulated over time. This dispersion remains small throughout all simulations, implying that at any moment the population is almost monomorphic, even though mutation-driven exploration over long times is broad (see distribution panels in \autoref{fig:symmetric_strat_phe_0} and \autoref{fig:asymmetric_strat_phe_0}). This justifies comparing the evolved states directly with the fixed-strategy simulations.
+We must clarify that in the average-strategy plots, the error bands represent the instantaneous dispersion of strategies across agents, not the dispersion accumulated over time. This dispersion remains small throughout all this simulations, implying that at any moment the population is almost monomorphic, even though mutation-driven exploration over long times is broad (see distribution panels in \autoref{fig:symmetric_strat_phe_0} and \autoref{fig:asymmetric_strat_phe_0}). This justifies comparing the evolutive simulations directly with the fixed-strategy simulations.
 
 In \autoref{fig:extended_strat_phe_0} we show the results for the following \emph{extended} parameters:
 \begin{itemize}
-    \item $N_0=1000$
+    \item $N_i=1000$
     \item The rest of the parameters have the same values as in the \emph{asymmetric} parameters.
 \end{itemize}
 
-When evolution is enabled, the system converges to a well-defined stationary behavior regardless of the initial distribution of strategies. As shown in the average-strategy panels of \autoref{fig:symmetric_strat_phe_0}, \autoref{fig:asymmetric_strat_phe_0} and \autoref{fig:extended_strat_phe_0}, both monomorphic and randomly initialized populations evolve toward the same average strategy and long-term distribution. This indicates a stable attractor in strategy space.
+When evolution is enabled, the system converges to a well-defined stationary strategy regardless of the initial distribution of strategies. As shown in the average-strategy panels of \autoref{fig:symmetric_strat_phe_0}, \autoref{fig:asymmetric_strat_phe_0} and \autoref{fig:extended_strat_phe_0}, both monomorphic and randomly initialized populations evolve toward the same average strategy and long-term distribution. This indicates a stable attractor in strategy space.
 
 Finally, the nature of the evolved strategy depends strongly on population size and the corresponding extinction risk. In the extended simulations (\autoref{fig:extended_strat_phe_0}), where population size is large and extinction is rare, evolution converges to the growth-maximizing strategy (as expected from standard evolutionary theory). In contrast, smaller populations with higher extinction risk (see \autoref{fig:symmetric_n_agents} and \autoref{fig:asymmetric_n_agents}) evolve toward safer strategies with lower extinction, even when this requires sacrificing growth. This reveals a clear bias towards risk-reducing strategies as extinction risk increases.
 
 The remaining four figures, \autoref{fig:symmetric_prob_mut}, \autoref{fig:symmetric_n_agents}, \autoref{fig:asymmetric_prob_mut}, and \autoref{fig:asymmetric_n_agents}, illustrate how the evolutionary outcome (starting from a random initial condition) changes when we vary either the mutation probability or the population size.
 
-The effect of changing the number of agents (\autoref{fig:symmetric_n_agents} and \autoref{fig:asymmetric_n_agents}) behaves as expected. As the population size $N$ increases, the evolved average strategy approaches the growth-maximizing strategy obtained from the fixed-strategy simulations. Likewise, the distribution of strategies explored over long evolutionary time becomes increasingly concentrated. A somewhat counterintuitive effect appears in the instantaneous dispersion: although the long-term distribution tightens with increasing $N$, the instantaneous dispersion increases slightly. This occurs because larger populations allow multiple very similar strategies to coexist for longer periods without being lost by drift, i.e. in small populations, nearly identical strategies tend to go extinct rapidly and only one survives at any moment. All other panels in these figures follow directly from this behavior.
+The effect of changing the number of agents (\autoref{fig:symmetric_n_agents} and \autoref{fig:asymmetric_n_agents}) behaves as expected. As the (maximum) population size $N_i$ increases, the evolved average strategy approaches the growth-maximizing strategy obtained from the fixed-strategy simulations. Likewise, the distribution of strategies explored over long evolutionary time becomes increasingly concentrated. A somewhat counterintuitive effect appears in the instantaneous dispersion: although the long-term distribution tightens with increasing $N$, the instantaneous dispersion increases slightly. This occurs because larger populations allow multiple very similar strategies to coexist for longer periods without being lost by drift, i.e. in small populations, nearly identical strategies tend to go extinct rapidly and only one survives at any moment. All other panels in these figures follow directly from this behavior.
 
 Changing the mutation probability (\autoref{fig:symmetric_prob_mut} and \autoref{fig:asymmetric_prob_mut}) produces a richer and less intuitive set of behaviors. For very large mutation probabilities (close to $1$), the biological relevance is limited, but the dynamics are clear: the population behaves almost as if fully randomized each generation. Both phenotypes appear with approximately $50\%$ frequency throughout the simulation, and the instantaneous dispersion is correspondingly extremely large. In this regime, the results essentially reproduce those of a fixed strategy with a 50--50 phenotype mixture.
 
 As the mutation probability decreases, we enter the regime around our reference value $p_{\text{mut}}=10^{-3}$. Here the instantaneous dispersion collapses: the population becomes effectively monomorphic at each time step. Correspondingly, the average strategy moves away from the 50--50 baseline and seamingly approaches the growth-maximizing value. However, this tendency quickly changes: $s(0)$ reaches a maximum at moderate mutation probabilities and then decreases again as $p_{\text{mut}}$ is further reduced.
 
-For even smaller mutation probabilities, the system enters a regime in which mutations are so rare that almost none occur during the simulation timescale. In this limit, the observed outcome is no longer determined by evolutionary adaptation but rather by selection among the $N$ randomly assigned initial strategies. In the symmetric case, this limiting value lies close to $50\%$, which coincides with the minimum-extinction mixed strategy (although this may be coincidental). In the asymmetric case, the limiting behavior is qualitatively different: the average strategy first decreases and then increases again as $p_{\text{mut}}$ approaches zero. This lead to a (shallow) minimum in the extinction rate for a particular mutation probability.
+For even smaller mutation probabilities, the system enters a regime in which mutations are so rare that almost none occur during the simulation timescale. In this limit, the observed outcome is no longer determined by evolutionary adaptation but rather by selection among the $N_i$ randomly assigned initial strategies. In the symmetric case, this limiting value lies close to $50\%$, which coincides with the minimum-extinction mixed strategy (although this may be coincidental). In the asymmetric case, the limiting behavior is qualitatively different: the average strategy first decreases and then increases again as $p_{\text{mut}}$ approaches zero. This leads to a (shallow) minimum in the extinction rate for a particular mutation probability.
 
 \printbibliography
 
 \begin{figure*}[p]
     \centering
     \caption{Results for the symmetric parameters with different initial strategies.} \label{fig:symmetric_strat_phe_0}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0/extinct_rate.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0/growth_rate.pdf}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0/avg_strat_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0/extinct_rate.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0/rates.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0/dist_n_agents.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0/avg_strat_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
     \centering
     \caption{Results for the symmetric parameters with different mutation probabilities.} \label{fig:symmetric_prob_mut}
-    \includegraphics{../sims/symmetric/plots/prob_mut/extinct_rate.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/growth_rate.pdf}
-    \includegraphics{../sims/symmetric/plots/prob_mut/avg_strat_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/prob_mut/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/prob_mut/extinct_rate.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/rates.pdf}
+    \includegraphics{../sims/symmetric/plots/prob_mut/dist_n_agents.pdf}
+    \includegraphics{../sims/symmetric/plots/prob_mut/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/prob_mut/avg_strat_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
     \centering
     \caption{Results for the symmetric parameters with different numbers of agents.} \label{fig:symmetric_n_agents}
-    \includegraphics{../sims/symmetric/plots/n_agents/extinct_rate.pdf}
     \includegraphics{../sims/symmetric/plots/n_agents/growth_rate.pdf}
-    \includegraphics{../sims/symmetric/plots/n_agents/avg_strat_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/n_agents/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents/extinct_rate.pdf}
     \includegraphics{../sims/symmetric/plots/n_agents/rates.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents/dist_n_agents.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents/avg_strat_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]

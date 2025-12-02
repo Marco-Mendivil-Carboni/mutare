@@ -64,6 +64,7 @@ pub fn calc_observables(
     Observables {
         time: state.time,
         time_step,
+        n_agents,
         growth_rate,
         n_extinct,
         avg_strat_phe,
@@ -75,6 +76,9 @@ pub fn calc_observables(
 /// Simulation analysis results.
 #[derive(Serialize)]
 pub struct Analysis {
+    /// Distribution of the number of agents.
+    pub dist_n_agents: Vec<f64>,
+
     /// Mean population growth rate.
     pub growth_rate: f64,
 
@@ -156,6 +160,17 @@ impl Analyzer {
 
         let analysis = Analysis {
             growth_rate: obs_weighted_average(&|obs| obs.growth_rate),
+            dist_n_agents: (0..self.cfg.output.hist_bins)
+                .map(|bin| {
+                    obs_weighted_average(&|obs| {
+                        let hist_bins = self.cfg.output.hist_bins;
+                        let obs_bin = ((obs.n_agents / self.cfg.init.n_agents as f64
+                            * hist_bins as f64) as usize)
+                            .min(hist_bins - 1);
+                        if obs_bin == bin { 1.0 } else { 0.0 }
+                    })
+                })
+                .collect(),
             extinct_rate: last_observables.n_extinct as f64 / last_observables.time,
             avg_strat_phe: (0..self.cfg.model.n_phe)
                 .map(|phe| obs_weighted_average(&|obs| obs.avg_strat_phe[phe]))

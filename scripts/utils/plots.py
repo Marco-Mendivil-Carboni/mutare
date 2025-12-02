@@ -15,6 +15,7 @@ mpl.rcParams["text.usetex"] = True
 mpl.rcParams["text.latex.preamble"] = "\\usepackage{lmodern}\\usepackage{mathtools}"
 mpl.rcParams["font.family"] = "lmodern"
 mpl.rcParams["font.size"] = 10
+mpl.rcParams["figure.dpi"] = 1200
 mpl.rcParams["figure.constrained_layout.use"] = True
 
 CM = 1 / 2.54
@@ -39,7 +40,7 @@ PLOT_STYLE: dict[str, Any] = dict(ls=":", marker="o", markersize=2)
 FILL_STYLE: dict[str, Any] = dict(lw=0.0, alpha=0.5)
 LINE_STYLE: dict[str, Any] = dict(ls=":", lw=1.0, alpha=0.5)
 
-CMAP = colors.LinearSegmentedColormap.from_list("custom", ["white", COLORS[1]])
+CMAP = colors.LinearSegmentedColormap.from_list("custom", list(reversed(COLORS)))
 
 SIM_COLORS: dict[SimType, str] = {
     SimType.FIXED: COLORS[1],
@@ -47,18 +48,20 @@ SIM_COLORS: dict[SimType, str] = {
     SimType.RANDOM: COLORS[11],
 }
 SIM_LABELS: dict[SimType, str] = {
-    SimType.FIXED: "fixed strat",
-    SimType.EVOL: "evolutive",
-    SimType.RANDOM: "random init",
+    SimType.FIXED: "\\texttt{fixed}",
+    SimType.EVOL: "\\texttt{evol}",
+    SimType.RANDOM: "\\texttt{random}",
 }
 
 COL_TEX_LABELS: dict[str, str] = {
     "strat_phe_0": "$s(0)_i$",
     "prob_mut": "$p_{\\text{mut}}$",
-    "n_agents": "$N_0$",
-    "extinct_rate": "$r_e$",
+    "n_agents": "$N_i$",
+    "dist_n_agents": "$N/N_i$",
     "growth_rate": "$\\langle\\mu\\rangle$",
+    "extinct_rate": "$r_e$",
     "avg_strat_phe_0": "$\\langle s(0)\\rangle$",
+    "dist_strat_phe_0": "$s(0)$",
 }
 
 
@@ -70,16 +73,18 @@ def create_standard_figure(x_col: str, y_col: str) -> tuple[Figure, Axes]:
     return fig, ax
 
 
-def create_heatmap_figure(x_col: str, two_panels: bool) -> tuple[Figure, list[Axes]]:
+def create_heatmap_figure(
+    x_col: str, y_col: str, two_panels: bool
+) -> tuple[Figure, list[Axes]]:
     fig = Figure(figsize=FIGSIZE)
 
     if two_panels:
-        gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[64, 8, 1], wspace=0)
+        gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[64, 4, 1], wspace=0)
         ax_main = fig.add_subplot(gs[0, 0])
         ax_side = fig.add_subplot(gs[0, 1])
         ax_cbar = fig.add_subplot(gs[0, 2])
         ax_main.set_xlabel(COL_TEX_LABELS[x_col])
-        ax_main.set_ylabel("$s(0)$")
+        ax_main.set_ylabel(COL_TEX_LABELS[y_col])
         ax_side.set_xticks([])
         ax_side.set_yticks([])
 
@@ -90,7 +95,7 @@ def create_heatmap_figure(x_col: str, two_panels: bool) -> tuple[Figure, list[Ax
         ax_main = fig.add_subplot(gs[0, 0])
         ax_cbar = fig.add_subplot(gs[0, 1])
         ax_main.set_xlabel(COL_TEX_LABELS[x_col])
-        ax_main.set_ylabel("$s(0)$")
+        ax_main.set_ylabel(COL_TEX_LABELS[y_col])
 
         return fig, [ax_main, ax_cbar]
 
@@ -134,41 +139,46 @@ def plot_errorband(
     ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
 
 
-def count_hist_bins(df: pd.DataFrame) -> int:
+def count_hist_bins(df: pd.DataFrame, y_col: str) -> int:
     hist_bins = 0
-    while (f"dist_strat_phe_0_{hist_bins}", "mean") in df.columns:
+    while (f"{y_col}_{hist_bins}", "mean") in df.columns:
         hist_bins += 1
     return hist_bins
 
 
-def generate_heatmap_matrix(df: pd.DataFrame, hist_bins: int) -> list[list[float]]:
+def generate_heatmap_matrix(
+    df: pd.DataFrame, y_col: str, hist_bins: int
+) -> list[list[float]]:
     hm_z = []
     for bin in range(hist_bins):
-        hm_z.append((hist_bins * df[(f"dist_strat_phe_0_{bin}", "mean")]).tolist())
+        hm_z.append((hist_bins * df[(f"{y_col}_{bin}", "mean")]).tolist())
     return hm_z
 
 
 def plot_main_heatmap(
-    fig: Figure, ax_main: Axes, ax_cbar: Axes, df: pd.DataFrame, x_col: str
+    fig: Figure, ax_main: Axes, ax_cbar: Axes, df: pd.DataFrame, x_col: str, y_col: str
 ) -> None:
-    hist_bins = count_hist_bins(df)
+    hist_bins = count_hist_bins(df, y_col)
     hm_x = df[x_col].tolist()
     hm_y = [(i + 0.5) / hist_bins for i in range(hist_bins)]
-    hm_z = generate_heatmap_matrix(df, hist_bins)
+    hm_z = generate_heatmap_matrix(df, y_col, hist_bins)
+    norm = colors.PowerNorm(gamma=0.5, vmin=0, vmax=hist_bins)
     im = ax_main.pcolormesh(
-        hm_x, hm_y, hm_z, cmap=CMAP, vmin=0, vmax=hist_bins, shading="nearest"
+        hm_x, hm_y, hm_z, alpha=0.5, norm=norm, cmap=CMAP, shading="nearest"
     )
     ax_main.set_xlim(hm_x[0], hm_x[-1])
     cbar = fig.colorbar(im, cax=ax_cbar, aspect=64)
-    cbar.ax.set_ylabel("$p(s(0))$")
+    raw_y_label = COL_TEX_LABELS[y_col][1:-1]
+    cbar.ax.set_ylabel(f"$p({raw_y_label})$")
 
 
-def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame) -> None:
-    hist_bins = count_hist_bins(df)
+def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, y_col: str) -> None:
+    hist_bins = count_hist_bins(df, y_col)
     hm_x = [0.0, 1.0]
     hm_y = [i / hist_bins for i in range(hist_bins + 1)]
-    hm_z = generate_heatmap_matrix(df, hist_bins)
-    ax_side.pcolormesh(hm_x, hm_y, hm_z, cmap=CMAP, vmin=0, vmax=hist_bins)
+    hm_z = generate_heatmap_matrix(df, y_col, hist_bins)
+    norm = colors.PowerNorm(gamma=0.5, vmin=0, vmax=hist_bins)
+    ax_side.pcolormesh(hm_x, hm_y, hm_z, alpha=0.5, norm=norm, cmap=CMAP)
 
 
 def strat_phe_0_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
@@ -205,17 +215,18 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         return
     df_p = df_p.sort_values(param)
 
-    fig_1, ax_1 = create_standard_figure(param, "extinct_rate")
-    fig_2, ax_2 = create_standard_figure(param, "growth_rate")
-    fig_3, ax_3 = create_standard_figure(param, "avg_strat_phe_0")
-
+    fig_1, ax_1 = create_standard_figure(param, "growth_rate")
+    fig_2, ax_2 = create_standard_figure(param, "extinct_rate")
+    fig_3, ax_3 = create_standard_figure("growth_rate", "extinct_rate")
     if param == "strat_phe_0":
-        fig_4, axs_4 = create_heatmap_figure(param, True)
-        axs_4[1].set_xlabel("random init")
+        fig_4, axs_4 = create_heatmap_figure(param, "dist_n_agents", True)
+        axs_4[1].set_xlabel(SIM_LABELS[SimType.RANDOM])
+        fig_5, axs_5 = create_heatmap_figure(param, "dist_strat_phe_0", True)
+        axs_5[1].set_xlabel(SIM_LABELS[SimType.RANDOM])
     else:
-        fig_4, axs_4 = create_heatmap_figure(param, False)
-
-    fig_5, ax_5 = create_standard_figure("growth_rate", "extinct_rate")
+        fig_4, axs_4 = create_heatmap_figure(param, "dist_n_agents", False)
+        fig_5, axs_5 = create_heatmap_figure(param, "dist_strat_phe_0", False)
+    fig_6, ax_6 = create_standard_figure(param, "avg_strat_phe_0")
 
     if param == "strat_phe_0":
         min_extinct = df_p[param][df_p[("extinct_rate", "mean")].idxmin()]
@@ -223,7 +234,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         for ax in [ax_1, ax_2]:
             ax.axvline(min_extinct, color="gray", ls=":")
             ax.axvline(max_growth, color="gray", ls="-.")
-        for ax in [ax_3] + axs_4[:-1]:
+        for ax in axs_5[:-1] + [ax_6]:
             ax.axhline(min_extinct, color="gray", ls=":")
             ax.axhline(max_growth, color="gray", ls="-.")
 
@@ -244,41 +255,52 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
                 if y_span_col is not None:
                     plot_errorband(ax, df_s, param, y_col, y_span_col)
 
-        plot_with_uncertainty(ax_1, "extinct_rate", None)
-        plot_with_uncertainty(ax_2, "growth_rate", None)
-        plot_with_uncertainty(ax_3, "avg_strat_phe_0", "std_dev_strat_phe")
+        plot_with_uncertainty(ax_1, "growth_rate", None)
+        plot_with_uncertainty(ax_2, "extinct_rate", None)
+
+        plot_errorbar(ax_3, df_s, "growth_rate", "extinct_rate", True)
 
         if param == "strat_phe_0":
             if sim_type == SimType.EVOL:
-                plot_main_heatmap(fig_4, axs_4[0], axs_4[2], df_s, param)
+                plot_main_heatmap(
+                    fig_4, axs_4[0], axs_4[2], df_s, param, "dist_n_agents"
+                )
+                plot_main_heatmap(
+                    fig_5, axs_5[0], axs_5[2], df_s, param, "dist_strat_phe_0"
+                )
             elif sim_type == SimType.RANDOM:
-                plot_side_heatmap(axs_4[1], df_s)
+                plot_side_heatmap(axs_4[1], df_s, "dist_n_agents")
+                plot_side_heatmap(axs_5[1], df_s, "dist_strat_phe_0")
         else:
-            plot_main_heatmap(fig_4, axs_4[0], axs_4[1], df_s, param)
+            plot_main_heatmap(fig_4, axs_4[0], axs_4[1], df_s, param, "dist_n_agents")
+            plot_main_heatmap(
+                fig_5, axs_5[0], axs_5[1], df_s, param, "dist_strat_phe_0"
+            )
 
-        plot_errorbar(ax_5, df_s, "growth_rate", "extinct_rate", True)
+        plot_with_uncertainty(ax_6, "avg_strat_phe_0", "std_dev_strat_phe")
 
     if param == "prob_mut":
         df_s = df[df["sim_type"] == SimType.FIXED]
         df_s.sort_values("strat_phe_0")
-        plot_errorbar(ax_5, df_s, "growth_rate", "extinct_rate", True)
+        plot_errorbar(ax_3, df_s, "growth_rate", "extinct_rate", True)
 
     fig_dir = job.base_dir / "plots" / param
     fig_dir.mkdir(parents=True, exist_ok=True)
 
     if param in ["prob_mut", "n_agents"]:
-        for ax in [ax_1, ax_2, ax_3, axs_4[0]]:
+        for ax in [ax_1, ax_2, axs_4[0], axs_5[0], ax_6]:
             ax.set_xscale("log")
-    for ax in [ax_1, ax_5]:
+    for ax in [ax_2, ax_3]:
         ax.set_yscale("log")
-    for ax in [ax_1, ax_2, ax_3, ax_5]:
+    for ax in [ax_1, ax_2, ax_3, ax_6]:
         ax.legend()
 
-    fig_1.savefig(fig_dir / "extinct_rate.pdf")
-    fig_2.savefig(fig_dir / "growth_rate.pdf")
-    fig_3.savefig(fig_dir / "avg_strat_phe_0.pdf")
-    fig_4.savefig(fig_dir / "dist_strat_phe_0.pdf")
-    fig_5.savefig(fig_dir / "rates.pdf")
+    fig_1.savefig(fig_dir / "growth_rate.pdf")
+    fig_2.savefig(fig_dir / "extinct_rate.pdf")
+    fig_3.savefig(fig_dir / "rates.pdf")
+    fig_4.savefig(fig_dir / "dist_n_agents.pdf")
+    fig_5.savefig(fig_dir / "dist_strat_phe_0.pdf")
+    fig_6.savefig(fig_dir / "avg_strat_phe_0.pdf")
 
 
 def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
