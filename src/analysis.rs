@@ -163,10 +163,10 @@ impl Analyzer {
             dist_n_agents: (0..self.cfg.output.hist_bins)
                 .map(|bin| {
                     obs_weighted_average(&|obs| {
-                        let hist_bins = self.cfg.output.hist_bins;
                         let obs_bin = ((obs.n_agents / self.cfg.init.n_agents as f64
-                            * hist_bins as f64) as usize)
-                            .min(hist_bins - 1);
+                            * self.cfg.output.hist_bins as f64)
+                            as usize)
+                            .min(self.cfg.output.hist_bins - 1);
                         if obs_bin == bin { 1.0 } else { 0.0 }
                     })
                 })

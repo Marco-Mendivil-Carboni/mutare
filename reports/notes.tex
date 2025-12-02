@@ -64,6 +64,8 @@ In \autoref{fig:symmetric_strat_phe_0}, \autoref{fig:symmetric_prob_mut} and \au
     \item $N_i=100$
 \end{itemize}
 
+In this figures we show the results of three kinds of simulations: \texttt{fixed} (all agents share a prescribed, non-evolving strategy), \texttt{evolutive} (the initial population is monomorphic and strategies evolve by mutation and selection), and \texttt{random} (each agent begins with an independent random strategy before evolution acts). In all the panels where they appear, the dotted lines mark the extinction-minimizing strategy and the dash-dot lines mark the growth-maximizing strategy, serving as visual references for comparison.
+
 In \autoref{fig:asymmetric_strat_phe_0}, \autoref{fig:asymmetric_prob_mut} and \autoref{fig:asymmetric_n_agents} we show the results for the following \emph{asymmetric} parameters:
 \begin{itemize}
     \item $\omega_b(e,\phi)=\begin{pmatrix}1.0&0.2\\0.0&0.0\end{pmatrix}$
@@ -75,7 +77,7 @@ For the parameter sets analyzed here, the fixed-strategy simulations (i.e., with
 
 It is important to emphasize that the appearance of mixed optimal strategies (bet hedging) is not general across all possible parameters, but rather a feature of the particular parameter choices used here, selected precisely because they allow the study of trade-offs between growth maximization and extinction avoidance.
 
-We must clarify that in the average-strategy plots, the error bands represent the instantaneous dispersion of strategies across agents, not the dispersion accumulated over time. This dispersion remains small throughout all this simulations, implying that at any moment the population is almost monomorphic, even though mutation-driven exploration over long times is broad (see distribution panels in \autoref{fig:symmetric_strat_phe_0} and \autoref{fig:asymmetric_strat_phe_0}). This justifies comparing the evolutive simulations directly with the fixed-strategy simulations.
+We must clarify that in the average-strategy plots, the error bands represent the instantaneous dispersion of strategies across agents, not the dispersion accumulated over time. This dispersion remains small throughout all this simulations, implying that at any moment the population is almost monomorphic, even though mutation-driven exploration over long times is broad (see distribution panels in \autoref{fig:symmetric_strat_phe_0} and \autoref{fig:asymmetric_strat_phe_0}). This justifies comparing the \texttt{evolutive} and \texttt{random} simulations directly with the \texttt{fixed} simulations.
 
 In \autoref{fig:extended_strat_phe_0} we show the results for the following \emph{extended} parameters:
 \begin{itemize}
