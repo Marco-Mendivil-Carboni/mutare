@@ -14,6 +14,7 @@ class Analysis(TypedDict):
     avg_strat_phe: list[float]
     std_dev_strat_phe: float
     dist_strat_phe: list[list[float]]
+    dist_phe: list[float]
 
 
 def read_analysis(sim_dir: Path, run_idx: int) -> Analysis:
@@ -36,14 +37,16 @@ def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
         for run_idx in range(sim_job.run_options.n_runs):
             analysis = read_analysis(sim_job.sim_dir, run_idx)
             analysis = cast(dict, analysis)
+            for bin, ele in enumerate(analysis["dist_n_agents"]):
+                analysis[f"dist_n_agents_{bin}"] = ele
+            analysis.pop("dist_n_agents")
             analysis["avg_strat_phe_0"] = analysis["avg_strat_phe"][0]
             analysis.pop("avg_strat_phe")
             for bin, ele in enumerate(analysis["dist_strat_phe"][0]):
                 analysis[f"dist_strat_phe_0_{bin}"] = ele
             analysis.pop("dist_strat_phe")
-            for bin, ele in enumerate(analysis["dist_n_agents"]):
-                analysis[f"dist_n_agents_{bin}"] = ele
-            analysis.pop("dist_n_agents")
+            analysis["dist_phe_0"] = analysis["dist_phe"][0]
+            analysis.pop("dist_phe")
             analysis = pd.DataFrame(analysis, index=[run_idx])
 
             analyses.append(analysis)

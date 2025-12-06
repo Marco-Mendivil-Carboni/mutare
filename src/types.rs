@@ -80,4 +80,7 @@ pub struct Observables {
 
     /// Distribution of phenotypic strategies.
     pub dist_strat_phe: Vec<Vec<f64>>,
+
+    /// Distribution of phenotypes.
+    pub dist_phe: Vec<f64>,
 }

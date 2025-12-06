@@ -12,6 +12,15 @@ import requests
 from utils.exec import RunOptions, SimJob, create_sim_jobs, execute_sim_jobs
 from utils.plots import plot_sim_jobs
 
+SIMS_DIR = Path("sims")
+
+notify: bool
+clean: bool
+
+load_dotenv()
+TOKEN = os.getenv("TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -21,20 +30,9 @@ def parse_args() -> argparse.Namespace:
         "--notify", action="store_true", help="send Telegram notifications"
     )
     parser.add_argument(
-        "--skip-analysis", action="store_true", help="skip simulation analysis"
-    )
-    parser.add_argument(
-        "--prune-dirs", action="store_true", help="prune simulation directories"
+        "--clean", action="store_true", help="prune stale simulation directories"
     )
     return parser.parse_args()
-
-
-notify = False
-prune_dirs = False
-
-load_dotenv()
-TOKEN = os.getenv("TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
 
 
 def print_and_notify(message: str) -> None:
@@ -54,15 +52,16 @@ def print_and_notify(message: str) -> None:
         print("failed to find Telegram credentials")
 
 
-SIMS_DIR = Path("sims")
-
-
 def make_sims(
     init_sim_job: SimJob,
     strat_phe_sweep: bool,
     prob_mut_sweep: bool,
     n_agents_sweep: bool,
 ) -> None:
+    base_dir = init_sim_job.base_dir
+    if not base_dir.resolve().is_relative_to(SIMS_DIR.resolve()):
+        raise ValueError(f"'{base_dir}' must be inside '{SIMS_DIR}'")
+
     strat_phe_0_values = np.linspace(start=1 / 16, stop=15 / 16, num=15)
     prob_mut_values = np.logspace(start=-8, stop=0, num=17)
     n_agents_values = np.logspace(start=1.5, stop=3.5, num=9).round().astype(int)
@@ -74,30 +73,26 @@ def make_sims(
     )
     execute_sim_jobs(sim_jobs)
 
-    if prune_dirs:
-        norm_sim_dirs = [sim_job.sim_dir.resolve() for sim_job in sim_jobs]
-        for entry in init_sim_job.base_dir.iterdir():
-            norm_entry = entry.resolve()
-            if not norm_entry.is_relative_to(SIMS_DIR.resolve()):
-                raise ValueError(f"path outside SIMS_DIR: {norm_entry}")
-            if norm_entry not in norm_sim_dirs:
-                print(f"removing {entry}")
-                if entry.is_dir():
-                    rmtree(norm_entry)
-                else:
-                    norm_entry.unlink()
-
     plot_sim_jobs(sim_jobs)
 
-    print_and_notify(f"Simulations finished: {init_sim_job.base_dir}")
+    if clean:
+        expected_dirs = {sim_job.sim_dir.resolve() for sim_job in sim_jobs}
+        expected_dirs.add((base_dir / "plots").resolve())
+        for entry in base_dir.iterdir():
+            entry = entry.resolve()
+            if entry.is_dir() and entry not in expected_dirs:
+                print(f"removing {entry}")
+                rmtree(entry)
+
+    print_and_notify(f"'{base_dir}' simulations finished")
 
 
-def main() -> None:
+def make_all_sims() -> None:
     args = parse_args()
 
-    global notify, prune_dirs
+    global notify, clean
     notify = args.notify
-    prune_dirs = args.prune_dirs
+    clean = args.clean
 
     symmetric_sim_job = SimJob(
         base_dir=SIMS_DIR / "symmetric",
@@ -126,11 +121,7 @@ def main() -> None:
                 "hist_bins": 16,
             },
         },
-        run_options=RunOptions(
-            n_runs=16,
-            n_files=64,
-            analyze=not args.skip_analysis,
-        ),
+        run_options=RunOptions(n_runs=16, n_files=64),
     )
 
     make_sims(
@@ -172,9 +163,9 @@ def main() -> None:
 
 if __name__ == "__main__":
     try:
-        main()
+        make_all_sims()
     except Exception as exception:
-        print_and_notify(f"Program execution failed: {exception}")
+        print_and_notify(f"'make_all_sims' failed: {exception}")
         raise
     else:
-        print_and_notify("All simulations finished successfully")
+        print_and_notify("'make_all_sims' finished")

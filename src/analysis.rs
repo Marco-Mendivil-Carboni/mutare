@@ -61,6 +61,12 @@ pub fn calc_observables(
         row.iter_mut().for_each(|ele| *ele /= n_agents);
     });
 
+    let mut dist_phe = vec![0.0; n_phe];
+    for agent in &state.agents {
+        dist_phe[agent.phe()] += 1.0;
+    }
+    dist_phe.iter_mut().for_each(|ele| *ele /= n_agents);
+
     Observables {
         time: state.time,
         time_step,
@@ -70,6 +76,7 @@ pub fn calc_observables(
         avg_strat_phe,
         std_dev_strat_phe,
         dist_strat_phe,
+        dist_phe,
     }
 }
 
@@ -93,6 +100,9 @@ pub struct Analysis {
 
     /// Mean distribution of phenotypic strategies.
     pub dist_strat_phe: Vec<Vec<f64>>,
+
+    /// Mean distribution of phenotypes.
+    pub dist_phe: Vec<f64>,
 }
 
 /// Simulation analyzer.
@@ -182,6 +192,9 @@ impl Analyzer {
                         .map(|bin| obs_weighted_average(&|obs| obs.dist_strat_phe[phe][bin]))
                         .collect()
                 })
+                .collect(),
+            dist_phe: (0..self.cfg.model.n_phe)
+                .map(|phe| obs_weighted_average(&|obs| obs.dist_phe[phe]))
                 .collect(),
         };
 
