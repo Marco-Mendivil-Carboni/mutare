@@ -97,6 +97,18 @@ As the mutation probability decreases, we enter the regime around our reference 
 
 For even smaller mutation probabilities, the system enters a regime in which mutations are so rare that almost none occur before extinction is reached. In this limit, the observed outcome is no longer determined by evolutionary adaptation but rather by selection among the $N_i$ randomly assigned initial strategies. In the symmetric case, the limiting value of $\langle s(0)\rangle$ lies close to $0.5$, which coincides with the minimum-extinction strategy (although this may be coincidental), and in the asymmetric case, is a little lower at around $0.4$.
 
+In addition to the strategy-related observables discussed above, two further quantities provide complementary insight into the underlying evolutionary and ecological dynamics: (i) the distribution of the normalized population size $N/N_i$ during the simulations, and (ii) the distribution of actual phenotypes present in the population at each time step.
+
+Across all parameter regimes explored, the distribution of $N/N_i$ exhibits a dominant peak at $1$, indicating that populations typically remain close to the carrying capacity. This reflects that the average long-term growth rate is positive under all strategies visited during the simulations. The informative part of the distribution lies in its tail, which broadens systematically as extinction risk increases. Wider tails imply more frequent or deeper demographic bottlenecks, consistent with the interpretation that populations experiencing a higher extinction rate also undergo larger fluctuations in size.
+
+The structure of this tail reveals additional dynamical information. In the symmetric parameter set, the population-size distribution develops a secondary maximum whose location varies with the underlying strategy. This secondary peak approaches zero for strategies dominated by a phenotype maladapted to the currently unfavorable environment, rises toward values close to $1$ when there is always a significant proportion of agents adapted to each environment, and returns to zero as the strategy shifts further.
+
+In contrast, under the asymmetric parameters the secondary peak instead shifts monotonically from $0$ to $1$ as the strategy moves from the ``risky'' phentoype to the ``safe'' one. This is consistent with the fact that committing to the safe phenotype prevents severe population declines, whereas betting entirely on the environmentally fragile phenotype leads to repeated near-extinction events whenever the environment turns unfavorable. An intriguing effect, which we do not yet fully understand, is that the height of the secondary peak relative to the main peak tends to decrease as the population size $N_i$ increases.
+
+The second observable concerns the actual distribution of phenotypes present in the population at each time, which in general does not coincide with the underlying phenotypic strategy. This discrepancy is substantial in the asymmetric case. The mismatch arises because the realized phenotype frequencies respond directly to differential birth and death rates in each environment, whereas the strategy specifies only the probabilities with which phenotypes are produced at reproduction.
+
+It is also important to compare this observable to the theoretical equilibrium distributions obtained from the dominant eigenvector of the environment dependent birth and death matrices for a fixed strategy. For any fixed strategy and fixed environment $e$, this eigenvector gives the expected stable composition of phenotypes in a large population in the absence of stochasticity. As expected, the actual phenotype distribution observed in simulations always lies between the theoretical equilibrium lines corresponding to the two environments. These equilibrium curves appear nearly linear functions of the strategy (and may indeed be analytically linear for this class of models, it is left as an excercise for the reader).
+
 \printbibliography
 
 \begin{figure*}[p]
@@ -108,6 +120,7 @@ For even smaller mutation probabilities, the system enters a regime in which mut
     \includegraphics{../sims/symmetric/plots/strat_phe_0/dist_n_agents.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0/dist_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0/dist_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -119,6 +132,7 @@ For even smaller mutation probabilities, the system enters a regime in which mut
     \includegraphics{../sims/symmetric/plots/prob_mut/dist_n_agents.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/dist_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/prob_mut/dist_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -130,6 +144,7 @@ For even smaller mutation probabilities, the system enters a regime in which mut
     \includegraphics{../sims/symmetric/plots/n_agents/dist_n_agents.pdf}
     \includegraphics{../sims/symmetric/plots/n_agents/dist_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/n_agents/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents/dist_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -141,6 +156,7 @@ For even smaller mutation probabilities, the system enters a regime in which mut
     \includegraphics{../sims/asymmetric/plots/strat_phe_0/dist_n_agents.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0/dist_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0/dist_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -152,6 +168,7 @@ For even smaller mutation probabilities, the system enters a regime in which mut
     \includegraphics{../sims/asymmetric/plots/prob_mut/dist_n_agents.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/dist_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/prob_mut/dist_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -163,6 +180,7 @@ For even smaller mutation probabilities, the system enters a regime in which mut
     \includegraphics{../sims/asymmetric/plots/n_agents/dist_n_agents.pdf}
     \includegraphics{../sims/asymmetric/plots/n_agents/dist_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/n_agents/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents/dist_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}
@@ -174,6 +192,7 @@ For even smaller mutation probabilities, the system enters a regime in which mut
     \includegraphics{../sims/extended/plots/strat_phe_0/dist_n_agents.pdf}
     \includegraphics{../sims/extended/plots/strat_phe_0/dist_strat_phe_0.pdf}
     \includegraphics{../sims/extended/plots/strat_phe_0/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe_0/dist_phe_0.pdf}
 \end{figure*}
 
 \end{document}

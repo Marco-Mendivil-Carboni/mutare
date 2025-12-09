@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import matplotlib as mpl
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
@@ -44,8 +45,8 @@ CMAP = colors.LinearSegmentedColormap.from_list("custom", list(reversed(COLORS))
 
 SIM_COLORS: dict[SimType, str] = {
     SimType.FIXED: COLORS[1],
-    SimType.EVOL: COLORS[7],
-    SimType.RANDOM: COLORS[11],
+    SimType.EVOL: COLORS[5],
+    SimType.RANDOM: COLORS[9],
 }
 SIM_LABELS: dict[SimType, str] = {
     SimType.FIXED: "\\texttt{fixed}",
@@ -62,6 +63,7 @@ COL_TEX_LABELS: dict[str, str] = {
     "extinct_rate": "$r_e$",
     "avg_strat_phe_0": "$\\langle s(0)\\rangle$",
     "dist_strat_phe_0": "$s(0)$",
+    "dist_phe_0": "$p_{\\phi}(0)$",
 }
 
 
@@ -227,16 +229,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         fig_4, axs_4 = create_heatmap_figure(param, "dist_n_agents", False)
         fig_5, axs_5 = create_heatmap_figure(param, "dist_strat_phe_0", False)
     fig_6, ax_6 = create_standard_figure(param, "avg_strat_phe_0")
-
-    if param == "strat_phe_0":
-        min_extinct = df_p[param][df_p[("extinct_rate", "mean")].idxmin()]
-        max_growth = df_p[param][df_p[("growth_rate", "mean")].idxmax()]
-        for ax in [ax_1, ax_2]:
-            ax.axvline(min_extinct, color="gray", ls=":")
-            ax.axvline(max_growth, color="gray", ls="-.")
-        for ax in axs_5[:-1] + [ax_6]:
-            ax.axhline(min_extinct, color="gray", ls=":")
-            ax.axhline(max_growth, color="gray", ls="-.")
+    fig_7, ax_7 = create_standard_figure(param, "dist_phe_0")
 
     sim_types = df_p["sim_type"]
     for sim_type in sim_types.unique():
@@ -261,10 +254,11 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         plot_errorbar(ax_3, df_s, "growth_rate", "extinct_rate", True)
 
         if param == "strat_phe_0":
-            if sim_type == SimType.EVOL:
+            if sim_type == SimType.FIXED:
                 plot_main_heatmap(
                     fig_4, axs_4[0], axs_4[2], df_s, param, "dist_n_agents"
                 )
+            elif sim_type == SimType.EVOL:
                 plot_main_heatmap(
                     fig_5, axs_5[0], axs_5[2], df_s, param, "dist_strat_phe_0"
                 )
@@ -278,21 +272,58 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
             )
 
         plot_with_uncertainty(ax_6, "avg_strat_phe_0", "std_dev_strat_phe")
+        plot_with_uncertainty(ax_7, "dist_phe_0", None)
+
+        if param == "strat_phe_0" and sim_type == SimType.FIXED:
+            min_extinct = df_s[param][df_s[("extinct_rate", "mean")].idxmin()]
+            max_growth = df_s[param][df_s[("growth_rate", "mean")].idxmax()]
+            for ax in [ax_1, ax_2]:
+                ax.axvline(min_extinct, color="gray", ls=":")
+                ax.axvline(max_growth, color="gray", ls="-.")
+            for ax in axs_5[:-1] + [ax_6]:
+                ax.axhline(min_extinct, color="gray", ls=":")
+                ax.axhline(max_growth, color="gray", ls="-.")
 
     if param == "prob_mut":
         df_s = df[df["sim_type"] == SimType.FIXED]
         df_s.sort_values("strat_phe_0")
         plot_errorbar(ax_3, df_s, "growth_rate", "extinct_rate", True)
 
+    if param == "strat_phe_0":
+        for env in range(job.config["model"]["n_env"]):
+            births = np.array(job.config["model"]["rates_birth"][env])
+            proportions_for_env = []
+            for strat_phe_0 in np.linspace(start=1 / 16, stop=15 / 16, num=15).tolist():
+                matrix = np.array(
+                    [
+                        strat_phe_0 * births,
+                        (1.0 - strat_phe_0) * births,
+                    ]
+                )
+                matrix[0][0] -= job.config["model"]["rates_death"][env][0]
+                matrix[1][1] -= job.config["model"]["rates_death"][env][1]
+                eigenvalues, eigenvectors = np.linalg.eig(matrix)
+                max_index = np.argmax(eigenvalues)
+                max_eigenvector = eigenvectors[:, max_index]
+                proportion = float(max_eigenvector[0] / np.sum(max_eigenvector))
+                proportions_for_env.append(proportion)
+            ax_7.plot(
+                np.linspace(start=1 / 16, stop=15 / 16, num=15).tolist(),
+                proportions_for_env,
+                c=COLORS[4 * env + 3],
+                label=f"$e={env}$",
+                **LINE_STYLE,
+            )
+
     fig_dir = job.base_dir / "plots" / param
     fig_dir.mkdir(parents=True, exist_ok=True)
 
     if param in ["prob_mut", "n_agents"]:
-        for ax in [ax_1, ax_2, axs_4[0], axs_5[0], ax_6]:
+        for ax in [ax_1, ax_2, axs_4[0], axs_5[0], ax_6, ax_7]:
             ax.set_xscale("log")
     for ax in [ax_2, ax_3]:
         ax.set_yscale("log")
-    for ax in [ax_1, ax_2, ax_3, ax_6]:
+    for ax in [ax_1, ax_2, ax_3, ax_6, ax_7]:
         ax.legend()
 
     fig_1.savefig(fig_dir / "growth_rate.pdf")
@@ -301,6 +332,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_4.savefig(fig_dir / "dist_n_agents.pdf")
     fig_5.savefig(fig_dir / "dist_strat_phe_0.pdf")
     fig_6.savefig(fig_dir / "avg_strat_phe_0.pdf")
+    fig_7.savefig(fig_dir / "dist_phe_0.pdf")
 
 
 def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:

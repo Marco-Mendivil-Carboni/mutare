@@ -5,4 +5,5 @@ pandas==2.3.2
 python-dotenv==1.2.1
 requests==2.32.5
 scipy==1.16.1
+textual==6.8.0
 toml==0.10.2

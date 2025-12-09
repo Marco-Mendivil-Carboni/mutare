@@ -111,12 +111,14 @@ def create_sim_jobs(
 
     sim_jobs = [init_sim_job]
 
-    for strat_phe_0 in strat_phe_0_values:
-        config = deepcopy(init_sim_job.config)
-        config["init"]["strat_phe"] = [strat_phe_0, 1 - strat_phe_0]
-        sim_jobs.append(SimJob(base_dir, config, run_options))
-        config["model"]["prob_mut"] = 0.0
-        sim_jobs.append(SimJob(base_dir, config, run_options))
+    if init_sim_job.config["model"]["n_phe"] == 2:
+        for strat_phe_0 in strat_phe_0_values:
+            config = deepcopy(init_sim_job.config)
+            strat_phe = [strat_phe_0, 1 - strat_phe_0]
+            config["init"]["strat_phe"] = strat_phe
+            sim_jobs.append(SimJob(base_dir, config, run_options))
+            config["model"]["prob_mut"] = 0.0
+            sim_jobs.append(SimJob(base_dir, config, run_options))
 
     for prob_mut in prob_mut_values:
         if prob_mut == init_sim_job.config["model"]["prob_mut"]:
