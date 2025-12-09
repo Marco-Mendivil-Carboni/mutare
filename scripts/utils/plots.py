@@ -54,6 +54,8 @@ SIM_LABELS: dict[SimType, str] = {
     SimType.RANDOM: "\\texttt{random}",
 }
 
+EXTRA_COLORS = [COLORS[3], COLORS[7], COLORS[11]]
+
 COL_TEX_LABELS: dict[str, str] = {
     "strat_phe_0": "$s(0)_i$",
     "prob_mut": "$p_{\\text{mut}}$",
@@ -166,6 +168,8 @@ def generate_heatmap_matrix(
 def plot_main_heatmap(
     fig: Figure, ax_main: Axes, ax_cbar: Axes, df: pd.DataFrame, x_col: str, y_col: str
 ) -> None:
+    _, label = get_sim_color_and_label(df)
+    add_top_label(ax_main, label)
     hist_bins = count_hist_bins(df, y_col)
     hm_x = df[x_col].tolist()
     hm_y = [(i + 0.5) / hist_bins for i in range(hist_bins)]
@@ -181,6 +185,8 @@ def plot_main_heatmap(
 
 
 def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, y_col: str) -> None:
+    _, label = get_sim_color_and_label(df)
+    add_top_label(ax_side, label)
     hist_bins = count_hist_bins(df, y_col)
     hm_x = [0.0, 1.0]
     hm_y = [i / hist_bins for i in range(hist_bins + 1)]
@@ -216,8 +222,8 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
         ax.plot(
             strat_phe_0_values,
             dist_phe_0_lim_values,
-            c=COLORS[4 * env + 3],
-            label=f"$e={env}$",
+            c=EXTRA_COLORS[env],
+            label=f"sol. for $e={env}$",
             **LINE_STYLE,
         )
 
@@ -251,24 +257,17 @@ PARAM_FILTERS = {
 
 
 def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
-    df_p = PARAM_FILTERS[param](df, job)
+    df_p = PARAM_FILTERS[param](df, job).sort_values(param)
     if len(df_p) < 2:
         return
-    df_p = df_p.sort_values(param)
+
+    strat_phe_0 = param == "strat_phe_0"
 
     fig_1, ax_1 = create_standard_figure(param, "growth_rate")
     fig_2, ax_2 = create_standard_figure(param, "extinct_rate")
     fig_3, ax_3 = create_standard_figure("growth_rate", "extinct_rate")
-    if param == "strat_phe_0":
-        fig_4, axs_4 = create_heatmap_figure(param, "dist_n_agents", True)
-        add_top_label(axs_4[0], SIM_LABELS[SimType.FIXED])
-        add_top_label(axs_4[1], SIM_LABELS[SimType.RANDOM])
-        fig_5, axs_5 = create_heatmap_figure(param, "dist_strat_phe_0", True)
-        add_top_label(axs_5[0], SIM_LABELS[SimType.EVOL])
-        add_top_label(axs_5[1], SIM_LABELS[SimType.RANDOM])
-    else:
-        fig_4, axs_4 = create_heatmap_figure(param, "dist_n_agents", False)
-        fig_5, axs_5 = create_heatmap_figure(param, "dist_strat_phe_0", False)
+    fig_4, axs_4 = create_heatmap_figure(param, "dist_n_agents", strat_phe_0)
+    fig_5, axs_5 = create_heatmap_figure(param, "dist_strat_phe_0", strat_phe_0)
     fig_6, ax_6 = create_standard_figure(param, "avg_strat_phe_0")
     fig_7, ax_7 = create_standard_figure(param, "dist_phe_0")
 
@@ -277,7 +276,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         df_s = df_p[sim_types == sim_type]
 
         def plot_with_uncertainty(ax: Axes, y_col: str, y_span_col: str | None):
-            if param == "strat_phe_0" and sim_type == SimType.RANDOM:
+            if strat_phe_0 and sim_type == SimType.RANDOM:
                 if y_span_col is None:
                     plot_horizontal_bands(ax, df_s, (y_col, "mean"), (y_col, "sem"))
                 else:
@@ -294,7 +293,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
 
         plot_errorbar(ax_3, df_s, "growth_rate", "extinct_rate", True)
 
-        if param == "strat_phe_0":
+        if strat_phe_0:
             if sim_type == SimType.FIXED:
                 plot_main_heatmap(
                     fig_4, axs_4[0], axs_4[2], df_s, param, "dist_n_agents"
@@ -315,25 +314,21 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         plot_with_uncertainty(ax_6, "avg_strat_phe_0", "std_dev_strat_phe")
         plot_with_uncertainty(ax_7, "dist_phe_0", None)
 
-        if param == "strat_phe_0" and sim_type == SimType.FIXED:
+        if strat_phe_0 and sim_type == SimType.FIXED:
             min_extinct = df_s[param][df_s[("extinct_rate", "mean")].idxmin()]
             max_growth = df_s[param][df_s[("growth_rate", "mean")].idxmax()]
             for ax in [ax_1, ax_2]:
-                ax.axvline(min_extinct, color="gray", ls=":")
-                ax.axvline(max_growth, color="gray", ls="-.")
+                ax.axvline(min_extinct, c=EXTRA_COLORS[0], **LINE_STYLE)
+                ax.axvline(max_growth, c=EXTRA_COLORS[1], **LINE_STYLE)
             for ax in axs_5[:-1] + [ax_6]:
-                ax.axhline(min_extinct, color="gray", ls=":")
-                ax.axhline(max_growth, color="gray", ls="-.")
+                ax.axhline(min_extinct, c=EXTRA_COLORS[0], **LINE_STYLE)
+                ax.axhline(max_growth, c=EXTRA_COLORS[1], **LINE_STYLE)
+
+            plot_dist_phe_0_lims(ax_7, df_s, job)
 
     if param == "prob_mut":
-        df_s = df[df["sim_type"] == SimType.FIXED]
-        df_s.sort_values("strat_phe_0")
+        df_s = df[df["sim_type"] == SimType.FIXED].sort_values("strat_phe_0")
         plot_errorbar(ax_3, df_s, "growth_rate", "extinct_rate", True)
-
-    if param == "strat_phe_0":
-        df_s = df[df["sim_type"] == SimType.FIXED]
-        df_s.sort_values("strat_phe_0")
-        plot_dist_phe_0_lims(ax_7, df_s, job)
 
     fig_dir = job.base_dir / "plots" / param
     fig_dir.mkdir(parents=True, exist_ok=True)

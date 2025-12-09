@@ -25,9 +25,9 @@ def read_analysis(sim_dir: Path, run_idx: int) -> Analysis:
 
 
 class SimType(Enum):
-    EVOL = auto()
-    FIXED = auto()
     RANDOM = auto()
+    FIXED = auto()
+    EVOL = auto()
 
 
 def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
