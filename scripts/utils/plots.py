@@ -102,6 +102,12 @@ def create_heatmap_figure(
         return fig, [ax_main, ax_cbar]
 
 
+def add_top_label(ax: Axes, label: str) -> None:
+    sec_ax = ax.secondary_xaxis("top")
+    sec_ax.set_xticks([])
+    sec_ax.set_xlabel(label)
+
+
 def get_sim_color_and_label(df: pd.DataFrame) -> tuple[str, str]:
     sim_types = df["sim_type"].unique()
     if len(sim_types) != 1:
@@ -183,6 +189,39 @@ def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, y_col: str) -> None:
     ax_side.pcolormesh(hm_x, hm_y, hm_z, alpha=0.5, norm=norm, cmap=CMAP)
 
 
+def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
+    n_env = job.config["model"]["n_env"]
+    n_phe = job.config["model"]["n_phe"]
+    if n_env != 2 or n_phe != 2:
+        return
+
+    strat_phe_0_values = df["strat_phe_0"].tolist()
+
+    for env in range(n_env):
+        rates_birth = np.array(job.config["model"]["rates_birth"][env])
+        rates_death = np.array(job.config["model"]["rates_death"][env])
+        dist_phe_0_lim_values = []
+        for strat_phe_0 in strat_phe_0_values:
+            strat_phe_1 = 1.0 - strat_phe_0
+            matrix = np.array([strat_phe_0 * rates_birth, strat_phe_1 * rates_birth])
+            matrix[0][0] -= rates_death[0]
+            matrix[1][1] -= rates_death[1]
+            eigenvalues, eigenvectors = np.linalg.eig(matrix)
+            max_index = np.argmax(eigenvalues)
+            max_eigenvector = eigenvectors[:, max_index]
+            dist_phe_0_lim_values.append(
+                float(max_eigenvector[0] / np.sum(max_eigenvector))
+            )
+
+        ax.plot(
+            strat_phe_0_values,
+            dist_phe_0_lim_values,
+            c=COLORS[4 * env + 3],
+            label=f"$e={env}$",
+            **LINE_STYLE,
+        )
+
+
 def strat_phe_0_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
     return df[
         ((df["prob_mut"] == job.config["model"]["prob_mut"]) | (df["prob_mut"] == 0))
@@ -222,9 +261,11 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_3, ax_3 = create_standard_figure("growth_rate", "extinct_rate")
     if param == "strat_phe_0":
         fig_4, axs_4 = create_heatmap_figure(param, "dist_n_agents", True)
-        axs_4[1].set_xlabel(SIM_LABELS[SimType.RANDOM])
+        add_top_label(axs_4[0], SIM_LABELS[SimType.FIXED])
+        add_top_label(axs_4[1], SIM_LABELS[SimType.RANDOM])
         fig_5, axs_5 = create_heatmap_figure(param, "dist_strat_phe_0", True)
-        axs_5[1].set_xlabel(SIM_LABELS[SimType.RANDOM])
+        add_top_label(axs_5[0], SIM_LABELS[SimType.EVOL])
+        add_top_label(axs_5[1], SIM_LABELS[SimType.RANDOM])
     else:
         fig_4, axs_4 = create_heatmap_figure(param, "dist_n_agents", False)
         fig_5, axs_5 = create_heatmap_figure(param, "dist_strat_phe_0", False)
@@ -290,30 +331,9 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         plot_errorbar(ax_3, df_s, "growth_rate", "extinct_rate", True)
 
     if param == "strat_phe_0":
-        for env in range(job.config["model"]["n_env"]):
-            births = np.array(job.config["model"]["rates_birth"][env])
-            proportions_for_env = []
-            for strat_phe_0 in np.linspace(start=1 / 16, stop=15 / 16, num=15).tolist():
-                matrix = np.array(
-                    [
-                        strat_phe_0 * births,
-                        (1.0 - strat_phe_0) * births,
-                    ]
-                )
-                matrix[0][0] -= job.config["model"]["rates_death"][env][0]
-                matrix[1][1] -= job.config["model"]["rates_death"][env][1]
-                eigenvalues, eigenvectors = np.linalg.eig(matrix)
-                max_index = np.argmax(eigenvalues)
-                max_eigenvector = eigenvectors[:, max_index]
-                proportion = float(max_eigenvector[0] / np.sum(max_eigenvector))
-                proportions_for_env.append(proportion)
-            ax_7.plot(
-                np.linspace(start=1 / 16, stop=15 / 16, num=15).tolist(),
-                proportions_for_env,
-                c=COLORS[4 * env + 3],
-                label=f"$e={env}$",
-                **LINE_STYLE,
-            )
+        df_s = df[df["sim_type"] == SimType.FIXED]
+        df_s.sort_values("strat_phe_0")
+        plot_dist_phe_0_lims(ax_7, df_s, job)
 
     fig_dir = job.base_dir / "plots" / param
     fig_dir.mkdir(parents=True, exist_ok=True)
