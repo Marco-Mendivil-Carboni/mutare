@@ -1,15 +1,16 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
 import argparse
-from shutil import rmtree
 from dotenv import load_dotenv
 import os
+from pathlib import Path
 import requests
+from shutil import rmtree
 
-from utils.exec import SimsConfig, create_sim_jobs, execute_sim_jobs
+from utils.exec import SimJob, SimsConfig, create_sim_jobs, execute_sim_jobs
 from utils.plots import plot_sim_jobs
 
-from sims_configs import SIMS_DIR, ALL_CONFIGS
+from sims_configs import SIMS_DIR, SIMS_CONFIGS
 
 notify: bool
 clean: bool
@@ -49,6 +50,16 @@ def print_and_notify(message: str) -> None:
         print("failed to find Telegram credentials")
 
 
+def clean_base_dir(base_dir: Path, sim_jobs: list[SimJob]) -> None:
+    expected_dirs = {sim_job.sim_dir.resolve() for sim_job in sim_jobs}
+    expected_dirs.add((base_dir / "plots").resolve())
+    for entry in base_dir.iterdir():
+        entry = entry.resolve()
+        if entry.is_dir() and entry not in expected_dirs:
+            print(f"removing {entry}")
+            rmtree(entry)
+
+
 def make_sims(sims_config: SimsConfig) -> None:
     base_dir = sims_config.init_sim_job.base_dir
     if not base_dir.resolve().is_relative_to(SIMS_DIR.resolve()):
@@ -59,15 +70,9 @@ def make_sims(sims_config: SimsConfig) -> None:
     plot_sim_jobs(sim_jobs)
 
     if clean:
-        expected_dirs = {sim_job.sim_dir.resolve() for sim_job in sim_jobs}
-        expected_dirs.add((base_dir / "plots").resolve())
-        for entry in base_dir.iterdir():
-            entry = entry.resolve()
-            if entry.is_dir() and entry not in expected_dirs:
-                print(f"removing {entry}")
-                rmtree(entry)
+        clean_base_dir(base_dir, sim_jobs)
 
-    print_and_notify(f"'{base_dir}' simulations finished")
+    print_and_notify(f"'{base_dir.name}' simulations finished")
 
 
 def make_all_sims() -> None:
@@ -77,7 +82,7 @@ def make_all_sims() -> None:
     notify = args.notify
     clean = args.clean
 
-    for sims_config in ALL_CONFIGS:
+    for sims_config in SIMS_CONFIGS:
         make_sims(sims_config)
 
 

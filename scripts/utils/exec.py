@@ -47,8 +47,11 @@ def run_bin(sim_dir: Path, extra_args: list[str]) -> None:
     if stop_requested:
         raise StopRequested()
 
+    project_root = Path(__file__).resolve().parents[2]
+    binary = project_root / "target" / "release" / "mutare"
+
     with open(sim_dir / "output.log", "w", buffering=1) as output_file:
-        args = ["target/release/mutare", "--sim-dir", str(sim_dir)] + extra_args
+        args = [str(binary), "--sim-dir", str(sim_dir)] + extra_args
         subprocess.run(args, stdout=output_file, stderr=subprocess.STDOUT, check=True)
 
 

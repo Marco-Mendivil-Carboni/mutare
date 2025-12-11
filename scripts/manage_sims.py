@@ -7,13 +7,15 @@ from textual.screen import ModalScreen
 from textual.containers import Vertical, Horizontal
 from textual.widgets import Checkbox, Button, Static, Label, Log, Header, Footer
 
-MAIN_SCRIPT = Path("scripts/make_all_sims.py").resolve()
-LOG_FILE = Path("sims/output.log").resolve()
+from sims_configs import SIMS_DIR, SIMS_CONFIGS
+
+MAKE_ALL_SIMS = Path(__file__).resolve().parent / "make_all_sims.py"
+LOG_FILE = SIMS_DIR / "output.log"
 
 
 def sims_running() -> bool:
     try:
-        subprocess.check_output(["pgrep", "-f", str(MAIN_SCRIPT)])
+        subprocess.check_output(["pgrep", "-f", str(MAKE_ALL_SIMS)])
         return True
     except subprocess.CalledProcessError:
         return False
@@ -23,7 +25,7 @@ def start_sims(notify: bool, clean: bool) -> bool:
     if sims_running():
         return False
 
-    command = [str(MAIN_SCRIPT)]
+    command = [str(MAKE_ALL_SIMS)]
     if notify:
         command.append("--notify")
     if clean:
@@ -46,7 +48,7 @@ def stop_sims() -> bool:
     if not sims_running():
         return False
 
-    subprocess.run(["pkill", "-f", str(MAIN_SCRIPT)])
+    subprocess.run(["pkill", "-f", str(MAKE_ALL_SIMS)])
 
     return True
 
