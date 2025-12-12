@@ -4,8 +4,17 @@ from pathlib import Path
 import subprocess
 from textual.app import App, ComposeResult
 from textual.screen import ModalScreen
-from textual.containers import Vertical, Horizontal
-from textual.widgets import Checkbox, Button, Static, Label, Log, Header, Footer
+from textual.containers import Horizontal, Grid, Vertical, Container
+from textual.widgets import (
+    Checkbox,
+    Label,
+    ProgressBar,
+    Button,
+    Static,
+    Log,
+    Header,
+    Footer,
+)
 
 from sims_configs import SIMS_DIR, SIMS_CONFIGS
 
@@ -55,27 +64,34 @@ def stop_sims() -> bool:
 
 class StartSimsScreen(ModalScreen):
     def compose(self) -> ComposeResult:
-        yield Label("Start Simulations")
-        with Vertical():
-            self.notify_cb = Checkbox("Send Telegram notifications?")
-            self.clean_cb = Checkbox("Prune stale simulation directories?")
-            yield self.notify_cb
-            yield self.clean_cb
+        self.label = Label("Start Simulations", classes="title")
 
-        with Horizontal():
-            yield Button("Start", id="start", variant="primary")
-            yield Button("Cancel", id="cancel", variant="error")
+        self.notify_chk = Checkbox("Send Telegram notifications?")
+        self.clean_chk = Checkbox("Prune stale simulation directories?")
+
+        self.start_btn = Button("Start", id="start", variant="success")
+        self.cancel_btn = Button("Cancel", id="cancel", variant="error")
+
+        yield Vertical(
+            self.label,
+            self.notify_chk,
+            self.clean_chk,
+            Horizontal(self.start_btn, self.cancel_btn, classes="buttons"),
+            classes="dialog",
+        )
 
     def on_button_pressed(self, event: Button.Pressed):
         button_id = event.button.id
         if button_id == "start":
-            start_sims(self.notify_cb.value, self.clean_cb.value)
+            start_sims(self.notify_chk.value, self.clean_chk.value)
             self.app.pop_screen()
         elif button_id == "cancel":
             self.app.pop_screen()
 
 
 class SimsManager(App):
+    CSS_PATH = "manage_sims.tcss"
+
     BINDINGS = [
         ("s", "start", "Start simulations"),
         ("k", "stop", "Stop simulations"),
@@ -85,27 +101,29 @@ class SimsManager(App):
     def compose(self) -> ComposeResult:
         yield Header()
 
-        self.status_panel = Static("Status: Loading...", id="status_panel")
-        yield self.status_panel
+        self.status_panel = Static(id="status_panel")
+        self.progress_panel = Static()
+        self.log_panel = Log()
 
-        self.log_panel = Log(max_lines=10, id="log_panel")
-        yield self.log_panel
+        yield Container(
+            self.status_panel, self.progress_panel, self.log_panel, id="panels"
+        )
 
         yield Footer()
 
     def on_mount(self):
-        self.set_interval(1, self.refresh_status)
+        self.set_interval(1, self.refresh_panels)
 
-    def refresh_status(self):
+    def refresh_panels(self):
         if sims_running():
             status = "RUNNING"
         else:
             status = "NOT RUNNING"
 
         self.status_panel.update(f"Status: {status}")
-
+        self.progress_panel.update("...")
         if LOG_FILE.exists():
-            lines = LOG_FILE.read_text().splitlines(keepends=True)[-10:]
+            lines = LOG_FILE.read_text().splitlines(keepends=True)[-64:]
             self.log_panel.clear()
             for line in lines:
                 self.log_panel.write(line)

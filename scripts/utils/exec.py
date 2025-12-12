@@ -152,7 +152,7 @@ class JobResult(Enum):
 
 def execute_sim_job(sim_job: SimJob) -> JobResult:
     try:
-        print_process_msg(f"starting job: {sim_job.sim_dir}")
+        print_process_msg(f"starting job: {sim_job.sim_dir.name}")
 
         with open(sim_job.sim_dir / ".lock", "w") as lock_file:
             fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)

@@ -261,13 +261,12 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     if len(df_p) < 2:
         return
 
-    strat_phe_0 = param == "strat_phe_0"
-
+    two_panels = param == "strat_phe_0"
     fig_1, ax_1 = create_standard_figure(param, "growth_rate")
     fig_2, ax_2 = create_standard_figure(param, "extinct_rate")
     fig_3, ax_3 = create_standard_figure("growth_rate", "extinct_rate")
-    fig_4, axs_4 = create_heatmap_figure(param, "dist_n_agents", strat_phe_0)
-    fig_5, axs_5 = create_heatmap_figure(param, "dist_strat_phe_0", strat_phe_0)
+    fig_4, axs_4 = create_heatmap_figure(param, "dist_n_agents", two_panels)
+    fig_5, axs_5 = create_heatmap_figure(param, "dist_strat_phe_0", two_panels)
     fig_6, ax_6 = create_standard_figure(param, "avg_strat_phe_0")
     fig_7, ax_7 = create_standard_figure(param, "dist_phe_0")
 
@@ -276,7 +275,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         df_s = df_p[sim_types == sim_type]
 
         def plot_with_uncertainty(ax: Axes, y_col: str, y_span_col: str | None):
-            if strat_phe_0 and sim_type == SimType.RANDOM:
+            if param == "strat_phe_0" and sim_type == SimType.RANDOM:
                 if y_span_col is None:
                     plot_horizontal_bands(ax, df_s, (y_col, "mean"), (y_col, "sem"))
                 else:
@@ -293,7 +292,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
 
         plot_errorbar(ax_3, df_s, "growth_rate", "extinct_rate", True)
 
-        if strat_phe_0:
+        if param == "strat_phe_0":
             if sim_type == SimType.FIXED:
                 plot_main_heatmap(
                     fig_4, axs_4[0], axs_4[2], df_s, param, "dist_n_agents"
@@ -314,7 +313,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         plot_with_uncertainty(ax_6, "avg_strat_phe_0", "std_dev_strat_phe")
         plot_with_uncertainty(ax_7, "dist_phe_0", None)
 
-        if strat_phe_0 and sim_type == SimType.FIXED:
+        if param == "strat_phe_0" and sim_type == SimType.FIXED:
             min_extinct = df_s[param][df_s[("extinct_rate", "mean")].idxmin()]
             max_growth = df_s[param][df_s[("growth_rate", "mean")].idxmax()]
             for ax in [ax_1, ax_2]:

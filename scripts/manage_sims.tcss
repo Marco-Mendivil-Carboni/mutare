@@ -1,0 +1,46 @@
+#panels {
+    layout: grid;
+    grid-size: 2 2;
+    grid-rows: 1fr 4fr;
+
+    #status_panel {
+        column-span: 2;
+    }
+ 
+    Static {
+        background: $panel;
+        border: solid white;
+    }
+
+    Log {
+        border: solid white;
+    }
+}
+
+StartSimsScreen {
+    align: center middle;
+}
+
+.dialog {
+    background: $panel;
+    width: 64;
+    height: 12;
+
+    Label {
+        width: 100%;
+        content-align: center middle;
+    }
+
+    Checkbox {
+        width: 100%;
+    }
+
+    Button {
+        width: 1fr;
+    }
+
+    .buttons {
+        height: auto;
+        dock: bottom;
+    }
+}
