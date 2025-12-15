@@ -1,46 +1,48 @@
-#panels {
+#panel-grid {
     layout: grid;
     grid-size: 2 2;
-    grid-rows: 1fr 4fr;
-
-    #status_panel {
-        column-span: 2;
-    }
- 
-    Static {
-        background: $panel;
-        border: solid white;
-    }
-
-    Log {
-        border: solid white;
-    }
+    grid-rows: 6 1fr;
+    grid-gutter: 1 2;
+    margin: 1 2;
 }
 
-StartSimsScreen {
+.panel {
+    background: $surface;
+    padding: 1 2;
+}
+
+#status-panel {
+    column-span: 2;
+}
+
+.panel Label {
+    padding-bottom: 1;
+    color: $text-primary;
+    text-style: bold;
+}
+
+DialogScreen {
     align: center middle;
 }
 
-.dialog {
+#dialog-box {
     background: $panel;
+    layout: grid;
+    grid-size: 2 2;
     width: 64;
-    height: 12;
+    height: auto;
+    padding: 1 2;
+}
 
-    Label {
-        width: 100%;
-        content-align: center middle;
-    }
+#dialog-box Label {
+    column-span: 2;
+    width: 1fr;
+    padding: 1 2;
+    padding-bottom: 2;
+    text-align: center;
+    text-style: bold;
+}
 
-    Checkbox {
-        width: 100%;
-    }
-
-    Button {
-        width: 1fr;
-    }
-
-    .buttons {
-        height: auto;
-        dock: bottom;
-    }
+#dialog-box Button {
+    width: 1fr;
 }

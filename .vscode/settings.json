@@ -3,4 +3,8 @@
     "rust-analyzer.inlayHints.typeHints.enable": false,
     "python.terminal.activateEnvironment": false,
     "python.analysis.typeCheckingMode": "standard",
+    "files.associations": {
+        "*.tcss": "css",
+    },
+    "css.validate": false,
 }

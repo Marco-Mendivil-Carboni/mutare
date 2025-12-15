@@ -8,7 +8,7 @@ import matplotlib.colors as colors
 from typing import Any
 
 from .exec import SimJob
-from .analysis import collect_avg_analyses, SimType
+from .analysis import SimType, collect_avg_analyses, collect_run_time_series
 
 mpl.use("pdf")
 
@@ -57,6 +57,7 @@ SIM_LABELS: dict[SimType, str] = {
 EXTRA_COLORS = [COLORS[3], COLORS[7], COLORS[11]]
 
 COL_TEX_LABELS: dict[str, str] = {
+    "time": "$t$",
     "strat_phe_0": "$s(0)_i$",
     "prob_mut": "$p_{\\text{mut}}$",
     "n_agents": "$N_i$",
@@ -274,7 +275,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     for sim_type in sim_types.unique():
         df_s = df_p[sim_types == sim_type]
 
-        def plot_with_uncertainty(ax: Axes, y_col: str, y_span_col: str | None):
+        def plot_with_uncertainty(ax: Axes, y_col: str, y_span_col: str | None) -> None:
             if param == "strat_phe_0" and sim_type == SimType.RANDOM:
                 if y_span_col is None:
                     plot_horizontal_bands(ax, df_s, (y_col, "mean"), (y_col, "sem"))
@@ -349,12 +350,39 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_7.savefig(fig_dir / "dist_phe_0.pdf")
 
 
+def plot_time_series(
+    ax: Axes, df: pd.DataFrame, y_col: str, y_span_col: str | None
+) -> None:
+    color = EXTRA_COLORS[0]
+    x = df["time"]
+    y = df[y_col]
+    ax.plot(x, y, c=color, lw=0.25)
+    if y_span_col is not None:
+        y_span = df[y_span_col]
+        ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
+
+
+def generate_time_series_plots(df: pd.DataFrame, job: SimJob) -> None:
+    fig_dir = job.base_dir / "plots" / "time_series"
+    fig_dir.mkdir(parents=True, exist_ok=True)
+
+    for y_col in ["n_agents", "avg_strat_phe_0", "dist_phe_0"]:
+        fig, ax = create_standard_figure("time", y_col)
+        y_span_col = "std_dev_strat_phe" if y_col == "avg_strat_phe_0" else None
+        plot_time_series(ax, df, y_col, y_span_col)
+        fig.savefig(fig_dir / f"{y_col}.pdf")
+
+
 def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
     avg_analyses = collect_avg_analyses(sim_jobs)
     init_sim_job = sim_jobs[0]
 
+    run_time_series = collect_run_time_series(init_sim_job, 0)
+
     generate_param_plots("strat_phe_0", avg_analyses, init_sim_job)
     generate_param_plots("prob_mut", avg_analyses, init_sim_job)
     generate_param_plots("n_agents", avg_analyses, init_sim_job)
+
+    generate_time_series_plots(run_time_series, init_sim_job)
 
     print("plots made")

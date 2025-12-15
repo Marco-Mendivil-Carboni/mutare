@@ -4,11 +4,13 @@ from pathlib import Path
 import subprocess
 from textual.app import App, ComposeResult
 from textual.screen import ModalScreen
+from textual import on, work
 from textual.containers import Horizontal, Grid, Vertical, Container
 from textual.widgets import (
     Checkbox,
     Label,
     ProgressBar,
+    DirectoryTree,
     Button,
     Static,
     Log,
@@ -30,15 +32,13 @@ def sims_running() -> bool:
         return False
 
 
-def start_sims(notify: bool, clean: bool) -> bool:
+def start_sims(notify: bool) -> bool:
     if sims_running():
         return False
 
     command = [str(MAKE_ALL_SIMS)]
     if notify:
         command.append("--notify")
-    if clean:
-        command.append("--clean")
 
     LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
     with LOG_FILE.open("w") as log_file:
@@ -62,31 +62,26 @@ def stop_sims() -> bool:
     return True
 
 
-class StartSimsScreen(ModalScreen):
+class DialogScreen(ModalScreen[bool]):
+    def __init__(self, question: str) -> None:
+        self.question = question
+        super().__init__()
+
     def compose(self) -> ComposeResult:
-        self.label = Label("Start Simulations", classes="title")
-
-        self.notify_chk = Checkbox("Send Telegram notifications?")
-        self.clean_chk = Checkbox("Prune stale simulation directories?")
-
-        self.start_btn = Button("Start", id="start", variant="success")
-        self.cancel_btn = Button("Cancel", id="cancel", variant="error")
-
-        yield Vertical(
-            self.label,
-            self.notify_chk,
-            self.clean_chk,
-            Horizontal(self.start_btn, self.cancel_btn, classes="buttons"),
-            classes="dialog",
+        yield Container(
+            Label(self.question),
+            Button("Yes", id="yes", variant="success"),
+            Button("No", id="no", variant="error"),
+            id="dialog-box",
         )
 
-    def on_button_pressed(self, event: Button.Pressed):
-        button_id = event.button.id
-        if button_id == "start":
-            start_sims(self.notify_chk.value, self.clean_chk.value)
-            self.app.pop_screen()
-        elif button_id == "cancel":
-            self.app.pop_screen()
+    @on(Button.Pressed, "#yes")
+    def handle_yes(self) -> None:
+        self.dismiss(True)
+
+    @on(Button.Pressed, "#no")
+    def handle_no(self) -> None:
+        self.dismiss(False)
 
 
 class SimsManager(App):
@@ -101,38 +96,53 @@ class SimsManager(App):
     def compose(self) -> ComposeResult:
         yield Header()
 
-        self.status_panel = Static(id="status_panel")
-        self.progress_panel = Static()
-        self.log_panel = Log()
+        self.status_text = Static()
+        self.status_panel = Container(
+            Label("Status:"), self.status_text, id="status-panel", classes="panel"
+        )
+        self.progress_panel = Container(Label("Progress:"), classes="panel")
+        self.log_text = Log(max_lines=1024)
+        self.log_panel = Container(Label("Log:"), self.log_text, classes="panel")
 
         yield Container(
-            self.status_panel, self.progress_panel, self.log_panel, id="panels"
+            self.status_panel, self.progress_panel, self.log_panel, id="panel-grid"
         )
 
         yield Footer()
 
     def on_mount(self):
         self.set_interval(1, self.refresh_panels)
+        self._last_log_mtime = 0
 
     def refresh_panels(self):
-        if sims_running():
-            status = "RUNNING"
-        else:
-            status = "NOT RUNNING"
+        status_text = (
+            "[$success]RUNNING[/]" if sims_running() else "[$error]NOT RUNNING[/]"
+        )
 
-        self.status_panel.update(f"Status: {status}")
-        self.progress_panel.update("...")
+        self.status_text.update(f"{status_text}")
+
         if LOG_FILE.exists():
-            lines = LOG_FILE.read_text().splitlines(keepends=True)[-64:]
-            self.log_panel.clear()
-            for line in lines:
-                self.log_panel.write(line)
+            log_mtime = LOG_FILE.stat().st_mtime
+            if log_mtime != self._last_log_mtime:
+                self._last_log_mtime = log_mtime
+                self.log_text.clear()
+                self.log_text.write(LOG_FILE.read_text())
 
-    def action_start(self) -> None:
-        self.push_screen(StartSimsScreen())
+    @work
+    async def action_start(self) -> None:
+        if await self.push_screen_wait(DialogScreen("Start simulations?")):
+            start_sims(
+                await self.push_screen_wait(
+                    DialogScreen("Send Telegram notifications?")
+                )
+            )
+            self.notify("simulations started")
 
-    def action_stop(self) -> None:
-        stop_sims()
+    @work
+    async def action_stop(self) -> None:
+        if await self.push_screen_wait(DialogScreen("Stop simulations?")):
+            stop_sims()
+            self.notify("simulations stopped")
 
 
 if __name__ == "__main__":

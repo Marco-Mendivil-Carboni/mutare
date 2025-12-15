@@ -2,26 +2,67 @@ import msgpack
 from pathlib import Path
 import pandas as pd
 from enum import Enum, auto
-from typing import TypedDict, cast
+from typing import Any
 
 from .exec import SimJob
 
+OBSERVABLES = [
+    "time",
+    "time_step",
+    "n_agents",
+    "growth_rate",
+    "n_extinct",
+    "avg_strat_phe",
+    "std_dev_strat_phe",
+    "dist_strat_phe",
+    "dist_phe",
+]
 
-class Analysis(TypedDict):
-    dist_n_agents: list[float]
-    growth_rate: float
-    extinct_rate: float
-    avg_strat_phe: list[float]
-    std_dev_strat_phe: float
-    dist_strat_phe: list[list[float]]
-    dist_phe: list[float]
+SCALAR_OBS = [
+    "time",
+    "time_step",
+    "n_agents",
+    "growth_rate",
+    "n_extinct",
+    "std_dev_strat_phe",
+]
+
+MAX_ROWS = 4096
+
+ANALYSIS = [
+    "dist_n_agents",
+    "growth_rate",
+    "extinct_rate",
+    "avg_strat_phe",
+    "std_dev_strat_phe",
+    "dist_strat_phe",
+    "dist_phe",
+]
 
 
-def read_analysis(sim_dir: Path, run_idx: int) -> Analysis:
-    file_path = sim_dir / f"run-{run_idx:04}/analysis.msgpack"
+def collect_run_time_series(sim_job: SimJob, run_idx: int) -> pd.DataFrame:
+    run_time_series = []
+    run_dir = sim_job.sim_dir / f"run-{run_idx:04}"
+    for file_idx in range(sim_job.run_options.n_files):
+        file_path = run_dir / f"output-{file_idx:04}.msgpack"
+        with file_path.open("rb") as file:
+            output = msgpack.Unpacker(file)
+            for message in output:
+                obs = {key: message[idx] for idx, key in enumerate(OBSERVABLES)}
+                row = {key: obs.get(key) for key in SCALAR_OBS}
+                row.update({"avg_strat_phe_0": obs["avg_strat_phe"][0]})
+                row.update({"dist_phe_0": obs["dist_phe"][0]})
+                run_time_series.append(row)
+                if len(run_time_series) >= MAX_ROWS:
+                    return pd.DataFrame(run_time_series)
+    return pd.DataFrame(run_time_series)
+
+
+def read_analysis(sim_dir: Path, run_idx: int) -> dict[str, Any]:
+    file_path = sim_dir / f"run-{run_idx:04}" / "analysis.msgpack"
     with file_path.open("rb") as file:
-        analysis = msgpack.unpack(file)
-    return cast(Analysis, analysis)
+        message: Any = msgpack.unpack(file)
+    return {key: message[idx] for idx, key in enumerate(ANALYSIS)}
 
 
 class SimType(Enum):
@@ -36,7 +77,6 @@ def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
         analyses = []
         for run_idx in range(sim_job.run_options.n_runs):
             analysis = read_analysis(sim_job.sim_dir, run_idx)
-            analysis = cast(dict, analysis)
             for bin, ele in enumerate(analysis["dist_n_agents"]):
                 analysis[f"dist_n_agents_{bin}"] = ele
             analysis.pop("dist_n_agents")

@@ -198,7 +198,7 @@ impl Analyzer {
                 .collect(),
         };
 
-        encode::write_named(&mut writer, &analysis).context("failed to serialize analysis")?;
+        encode::write(&mut writer, &analysis).context("failed to serialize analysis")?;
 
         Ok(())
     }
