@@ -2,21 +2,15 @@
 
 from pathlib import Path
 import subprocess
+from shutil import rmtree
+import psutil
+from textual import on, work
 from textual.app import App, ComposeResult
 from textual.screen import ModalScreen
-from textual import on, work
-from textual.containers import Horizontal, Grid, Vertical, Container
-from textual.widgets import (
-    Checkbox,
-    Label,
-    ProgressBar,
-    DirectoryTree,
-    Button,
-    Static,
-    Log,
-    Header,
-    Footer,
-)
+from textual.containers import Container
+from textual.widgets import Label, ProgressBar, Button, Static, Log, Header, Footer
+
+from utils.exec import SimJob, create_sim_jobs
 
 from sims_configs import SIMS_DIR, SIMS_CONFIGS
 
@@ -24,42 +18,44 @@ MAKE_ALL_SIMS = Path(__file__).resolve().parent / "make_all_sims.py"
 LOG_FILE = SIMS_DIR / "output.log"
 
 
-def sims_running() -> bool:
-    try:
-        subprocess.check_output(["pgrep", "-f", str(MAKE_ALL_SIMS)])
-        return True
-    except subprocess.CalledProcessError:
-        return False
+def sims_running() -> list[int]:
+    pids = []
+    for process in psutil.process_iter(["pid", "cmdline"]):
+        try:
+            cmdline = process.info["cmdline"]
+            if cmdline and any(MAKE_ALL_SIMS.name in arg for arg in cmdline):
+                pids.append(process.info["pid"])
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+    return pids
 
 
-def start_sims(notify: bool) -> bool:
-    if sims_running():
-        return False
-
-    command = [str(MAKE_ALL_SIMS)]
-    if notify:
-        command.append("--notify")
-
-    LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
-    with LOG_FILE.open("w") as log_file:
-        subprocess.Popen(
-            command,
-            stdin=subprocess.DEVNULL,
-            stdout=log_file,
-            stderr=subprocess.STDOUT,
-            start_new_session=True,
+def generate_expected_paths() -> set[Path]:
+    expected_paths = {SIMS_DIR / "output.log"}
+    for sims_config in SIMS_CONFIGS:
+        sim_jobs = create_sim_jobs(sims_config)
+        base_dir = sims_config.init_sim_job.base_dir
+        expected_paths.add(base_dir)
+        run_options = sims_config.init_sim_job.run_options
+        sim_dirs = {sim_job.sim_dir.resolve() for sim_job in sim_jobs}
+        for sim_dir in sim_dirs:
+            expected_paths.add(sim_dir)
+            for run_idx in range(run_options.n_runs):
+                run_dir = sim_dir / f"run-{run_idx:04}"
+                expected_paths.add(run_dir)
+                expected_paths.add(run_dir / "analysis.msgpack")
+                expected_paths.add(run_dir / "checkpoint.msgpack")
+                for file_idx in range(run_options.n_files):
+                    expected_paths.add(run_dir / f"output-{file_idx:04}.msgpack")
+            expected_paths.add(sim_dir / ".lock")
+            expected_paths.add(sim_dir / "config.toml")
+            expected_paths.add(sim_dir / "output.log")
+        expected_paths.add(base_dir / "plots")
+        expected_paths.union(
+            {path for path in (base_dir / "plots").rglob("*") if path.is_file()}
         )
 
-    return True
-
-
-def stop_sims() -> bool:
-    if not sims_running():
-        return False
-
-    subprocess.run(["pkill", "-f", str(MAKE_ALL_SIMS)])
-
-    return True
+    return expected_paths
 
 
 class DialogScreen(ModalScreen[bool]):
@@ -98,28 +94,35 @@ class SimsManager(App):
 
         self.status_text = Static()
         self.status_panel = Container(
-            Label("Status:"), self.status_text, id="status-panel", classes="panel"
+            Label("Status:"), self.status_text, classes="panel"
         )
         self.progress_panel = Container(Label("Progress:"), classes="panel")
         self.log_text = Log(max_lines=1024)
-        self.log_panel = Container(Label("Log:"), self.log_text, classes="panel")
+        self.log_panel = Container(
+            Label("Log:"), self.log_text, id="log-panel", classes="panel"
+        )
 
         yield Container(
-            self.status_panel, self.progress_panel, self.log_panel, id="panel-grid"
+            self.status_panel, self.log_panel, self.progress_panel, id="panel-grid"
         )
 
         yield Footer()
 
     def on_mount(self):
-        self.set_interval(1, self.refresh_panels)
+        self.status_panel.loading = True
+        self.log_panel.loading = True
         self._last_log_mtime = 0
+        # self.expected_paths = generate_expected_paths()
+        self.set_interval(1, self.refresh_panels)
 
     def refresh_panels(self):
-        status_text = (
-            "[$success]RUNNING[/]" if sims_running() else "[$error]NOT RUNNING[/]"
+        n_pids = len(sims_running())
+        self.status_text.update(
+            f"[$success]RUNNING[/] processes: {n_pids}"
+            if n_pids > 0
+            else "[$error]NOT RUNNING[/]"
         )
-
-        self.status_text.update(f"{status_text}")
+        self.status_panel.loading = False
 
         if LOG_FILE.exists():
             log_mtime = LOG_FILE.stat().st_mtime
@@ -127,22 +130,51 @@ class SimsManager(App):
                 self._last_log_mtime = log_mtime
                 self.log_text.clear()
                 self.log_text.write(LOG_FILE.read_text())
+        self.log_panel.loading = False
 
     @work
     async def action_start(self) -> None:
         if await self.push_screen_wait(DialogScreen("Start simulations?")):
-            start_sims(
-                await self.push_screen_wait(
-                    DialogScreen("Send Telegram notifications?")
+            if sims_running():
+                self.notify("Simulations are already running", severity="warning")
+                return
+
+            command = [str(MAKE_ALL_SIMS)]
+            if await self.push_screen_wait(
+                DialogScreen("Send Telegram notifications?")
+            ):
+                command.append("--notify")
+
+            LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+            with LOG_FILE.open("w") as log_file:
+                subprocess.Popen(
+                    command,
+                    stdin=subprocess.DEVNULL,
+                    stdout=log_file,
+                    stderr=subprocess.STDOUT,
+                    start_new_session=True,
                 )
-            )
-            self.notify("simulations started")
+
+            self.notify("Simulations started")
+            return
 
     @work
     async def action_stop(self) -> None:
         if await self.push_screen_wait(DialogScreen("Stop simulations?")):
-            stop_sims()
-            self.notify("simulations stopped")
+            pids = sims_running()
+
+            if not pids:
+                self.notify("No simulations are running", severity="warning")
+                return
+
+            for pid in pids:
+                try:
+                    psutil.Process(pid).terminate()
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+
+            self.notify("Simulations stopped")
+            return
 
 
 if __name__ == "__main__":

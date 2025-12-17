@@ -2,6 +2,7 @@ import subprocess
 import multiprocessing as mp
 from pathlib import Path
 from copy import deepcopy
+import psutil
 import os
 from datetime import datetime
 from signal import signal, SIGTERM
@@ -178,7 +179,8 @@ def execute_sim_jobs(sim_jobs: list[SimJob]) -> None:
 
     print_process_msg("starting process pool")
 
-    with mp.Pool(processes=max(1, mp.cpu_count() // 2)) as pool:
+    cores = psutil.cpu_count(logical=False)
+    with mp.Pool(processes=cores) as pool:
         job_results = pool.map(execute_sim_job, sim_jobs)
 
     print_process_msg("process pool finished")

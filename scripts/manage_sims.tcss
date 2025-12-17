@@ -11,8 +11,8 @@
     padding: 1 2;
 }
 
-#status-panel {
-    column-span: 2;
+#log-panel {
+    row-span: 2;
 }
 
 .panel Label {
