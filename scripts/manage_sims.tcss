@@ -1,5 +1,4 @@
 #panel-grid {
-    layout: grid;
     grid-size: 2 2;
     grid-rows: 6 1fr;
     grid-gutter: 1 2;
@@ -7,15 +6,19 @@
 }
 
 .panel {
-    background: $surface;
+    background: $panel;
     padding: 1 2;
 }
+/* 
+#main-progress-info {
+    grid-size: 2 2;
+} */
 
 #log-panel {
     row-span: 2;
 }
 
-.panel Label {
+.panel .title {
     padding-bottom: 1;
     color: $text-primary;
     text-style: bold;
@@ -27,7 +30,6 @@ DialogScreen {
 
 #dialog-box {
     background: $panel;
-    layout: grid;
     grid-size: 2 2;
     width: 64;
     height: auto;
