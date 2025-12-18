@@ -4,13 +4,24 @@ from pathlib import Path
 import subprocess
 from shutil import rmtree
 import psutil
+import time
 from textual import on, work
+from textual.worker import Worker, WorkerState, get_current_worker, WorkerCancelled
 from textual.app import App, ComposeResult
 from textual.screen import ModalScreen
 from textual.containers import Container
-from textual.widgets import Label, ProgressBar, Button, Static, Log, Header, Footer
+from textual.widgets import (
+    Header,
+    Label,
+    ProgressBar,
+    Collapsible,
+    Button,
+    Static,
+    Log,
+    Footer,
+)
 
-from utils.exec import SimJob, create_sim_jobs
+from utils.exec import create_sim_jobs
 
 from sims_configs import SIMS_DIR, SIMS_CONFIGS
 
@@ -30,32 +41,73 @@ def sims_running() -> list[int]:
     return pids
 
 
-def generate_expected_paths() -> set[Path]:
-    expected_paths = {SIMS_DIR / "output.log"}
+def yield_or_raise(worker: Worker):
+    if worker.is_cancelled:
+        raise WorkerCancelled
+    time.sleep(0)
+
+
+def scan_sims_dir() -> tuple[int, int, set[Path]]:
+    worker = get_current_worker()
+
+    n_expected_msgpack_files = 0
+    n_missing_msgpack_files = 0
+    unexpected_entries = set()
+
     for sims_config in SIMS_CONFIGS:
+        yield_or_raise(worker)
         sim_jobs = create_sim_jobs(sims_config)
         base_dir = sims_config.init_sim_job.base_dir
-        expected_paths.add(base_dir)
         run_options = sims_config.init_sim_job.run_options
-        sim_dirs = {sim_job.sim_dir.resolve() for sim_job in sim_jobs}
-        for sim_dir in sim_dirs:
-            expected_paths.add(sim_dir)
-            for run_idx in range(run_options.n_runs):
-                run_dir = sim_dir / f"run-{run_idx:04}"
-                expected_paths.add(run_dir)
-                expected_paths.add(run_dir / "analysis.msgpack")
-                expected_paths.add(run_dir / "checkpoint.msgpack")
-                for file_idx in range(run_options.n_files):
-                    expected_paths.add(run_dir / f"output-{file_idx:04}.msgpack")
-            expected_paths.add(sim_dir / ".lock")
-            expected_paths.add(sim_dir / "config.toml")
-            expected_paths.add(sim_dir / "output.log")
-        expected_paths.add(base_dir / "plots")
-        expected_paths.union(
-            {path for path in (base_dir / "plots").rglob("*") if path.is_file()}
+
+        yield_or_raise(worker)
+        sim_dirs = {sim_job.sim_dir for sim_job in sim_jobs}
+
+        expected_base_dir_entry_names = {sim_dir.name for sim_dir in sim_dirs}.union(
+            {"plots"}
+        )
+        run_dir_names = {f"run-{run_idx:04}" for run_idx in range(run_options.n_runs)}
+        expected_sim_dir_entry_names = run_dir_names.union(
+            {".lock", "config.toml", "output.log"}
+        )
+        expected_run_dir_entry_names = {
+            f"output-{file_idx:04}.msgpack" for file_idx in range(run_options.n_files)
+        }.union({"checkpoint.msgpack", "analysis.msgpack"})
+
+        n_expected_msgpack_files += (
+            len(sim_dirs) * run_options.n_runs * (run_options.n_files + 2)
         )
 
-    return expected_paths
+        yield_or_raise(worker)
+        base_dir_entry_names = {path.name for path in base_dir.iterdir()}
+        unexpected_entries |= {
+            base_dir / entry_name
+            for entry_name in base_dir_entry_names - expected_base_dir_entry_names
+        }
+
+        for sim_dir in sim_dirs:
+            run_dirs = {sim_dir / run_dir_name for run_dir_name in run_dir_names}
+
+            yield_or_raise(worker)
+            sim_dir_entry_names = {path.name for path in sim_dir.iterdir()}
+            unexpected_entries |= {
+                sim_dir / entry_name
+                for entry_name in sim_dir_entry_names - expected_sim_dir_entry_names
+            }
+
+            for run_dir in run_dirs:
+                yield_or_raise(worker)
+                run_dir_entry_names = {path.name for path in run_dir.iterdir()}
+                unexpected_entries |= {
+                    run_dir / entry_name
+                    for entry_name in run_dir_entry_names - expected_run_dir_entry_names
+                }
+
+                n_missing_msgpack_files += len(
+                    expected_run_dir_entry_names - run_dir_entry_names
+                )
+
+    return n_expected_msgpack_files, n_missing_msgpack_files, unexpected_entries
 
 
 class DialogScreen(ModalScreen[bool]):
@@ -96,7 +148,20 @@ class SimsManager(App):
         self.status_panel = Container(
             Label("Status:"), self.status_text, classes="panel"
         )
-        self.progress_panel = Container(Label("Progress:"), classes="panel")
+        self.progress_bar = ProgressBar(show_eta=False)
+        self.progress_label = Label("0 / 0")
+
+        self.unexpected_label = Label("")
+        self.rescan_button = Button("Rescan", id="rescan", variant="primary")
+        self.progress_panel = Container(
+            Label("Progress:"),
+            self.progress_bar,
+            self.progress_label,
+            self.rescan_button,
+            Collapsible(self.unexpected_label, title="Unexpected entries"),
+            classes="panel",
+        )
+
         self.log_text = Log(max_lines=1024)
         self.log_panel = Container(
             Label("Log:"), self.log_text, id="log-panel", classes="panel"
@@ -110,10 +175,14 @@ class SimsManager(App):
 
     def on_mount(self):
         self.status_panel.loading = True
+        self.progress_panel.loading = True
         self.log_panel.loading = True
+
+        self.sims_dir_paths = None
         self._last_log_mtime = 0
-        # self.expected_paths = generate_expected_paths()
-        self.set_interval(1, self.refresh_panels)
+
+        self.set_interval(1.0, self.refresh_panels)
+        self.run_scan_sims_dir()
 
     def refresh_panels(self):
         n_pids = len(sims_running())
@@ -124,6 +193,23 @@ class SimsManager(App):
         )
         self.status_panel.loading = False
 
+        if (self.background_worker is not None) and (
+            self.background_worker.state == WorkerState.SUCCESS
+        ):
+            if self.background_worker.result is not None:
+                n_expected_files, n_missing_files, unexpected_paths = (
+                    self.background_worker.result
+                )
+                self.progress_bar.total = n_expected_files
+                self.progress_bar.progress = n_expected_files - n_missing_files
+                self.progress_label.update(
+                    f"{self.progress_bar.progress} / {self.progress_bar.total}"
+                )
+                self.unexpected_label.update(
+                    "\n".join([str(path) for path in unexpected_paths])
+                )
+                self.progress_panel.loading = False
+
         if LOG_FILE.exists():
             log_mtime = LOG_FILE.stat().st_mtime
             if log_mtime != self._last_log_mtime:
@@ -131,6 +217,16 @@ class SimsManager(App):
                 self.log_text.clear()
                 self.log_text.write(LOG_FILE.read_text())
         self.log_panel.loading = False
+
+    @on(Button.Pressed, "#rescan")
+    def rescan_pressed(self) -> None:
+        self.progress_panel.loading = True
+        self.run_scan_sims_dir()
+
+    def run_scan_sims_dir(self) -> None:
+        self.background_worker = self.run_worker(
+            scan_sims_dir, exclusive=True, thread=True
+        )
 
     @work
     async def action_start(self) -> None:
