@@ -1,27 +1,51 @@
-#panel-grid {
-    grid-size: 2 2;
-    grid-rows: 6 1fr;
-    grid-gutter: 1 2;
-    margin: 1 2;
+Header {
+    background: $panel;
+    align: center middle;
+    width: 1fr;
+    height: 1;
+    dock: top;
 }
 
-.panel {
-    background: $panel;
+Panel {
+    background: $surface;
     padding: 1 2;
 }
-/* 
-#main-progress-info {
-    grid-size: 2 2;
-} */
 
-#log-panel {
-    row-span: 2;
-}
-
-.panel .title {
-    padding-bottom: 1;
+PanelTitle {
     color: $text-primary;
     text-style: bold;
+    width: 1fr;
+    height: auto;
+}
+
+SubPanel {
+    border-top: $primary;
+    height: auto;
+}
+
+#inner-panel-grid {
+    grid-size: 1;
+    grid-rows: 6 1fr;
+    grid-gutter: 1 2;
+}
+
+#main-panel-grid {
+    grid-rows: 20;
+    grid-gutter: 1 2;
+    padding: 1 2;
+}
+
+#main-panel-grid Button {
+    min-width: 0;
+    dock: right;
+}
+
+#main-panel-grid #bar {
+    width: 1fr;
+}
+
+#main-panel-grid Log {
+    height: 16;
 }
 
 DialogScreen {
@@ -31,18 +55,18 @@ DialogScreen {
 #dialog-box {
     background: $panel;
     grid-size: 2 2;
-    width: 64;
+    width: 32;
     height: auto;
     padding: 1 2;
 }
 
 #dialog-box Label {
+    text-align: center;
+    text-style: bold;
     column-span: 2;
     width: 1fr;
     padding: 1 2;
     padding-bottom: 2;
-    text-align: center;
-    text-style: bold;
 }
 
 #dialog-box Button {

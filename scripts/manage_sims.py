@@ -10,8 +10,8 @@ from textual import on, work
 from textual.worker import Worker, get_current_worker, WorkerCancelled
 from textual.app import App, ComposeResult
 from textual.screen import ModalScreen
-from textual.containers import Horizontal, Vertical, Grid
-from textual.widgets import Header, Label, Button, ProgressBar, Log, Footer
+from textual.containers import Container, Grid, ItemGrid
+from textual.widgets import Label, Button, ProgressBar, Log, Footer
 
 from utils.exec import create_sim_jobs
 
@@ -107,6 +107,22 @@ def scan_sims_dir() -> ProgressInfo:
     return progress_info
 
 
+class Header(Container):
+    pass
+
+
+class Panel(Container):
+    pass
+
+
+class PanelTitle(Container):
+    pass
+
+
+class SubPanel(Container):
+    pass
+
+
 class DialogScreen(ModalScreen[bool]):
     def __init__(self, question: str) -> None:
         self.question = question
@@ -131,7 +147,7 @@ class DialogScreen(ModalScreen[bool]):
 
 class SimsManager(App):
     CSS_PATH = "manage_sims.tcss"
-
+    ENABLE_COMMAND_PALETTE = False
     BINDINGS = [
         ("s", "start", "Start simulations"),
         ("k", "stop", "Stop simulations"),
@@ -139,44 +155,36 @@ class SimsManager(App):
     ]
 
     def compose(self) -> ComposeResult:
-        yield Header()
+        yield Header(Label("Simulations Manager"))
 
         self.status_text = Label()
-        self.status_panel = Vertical(
-            Label("Status:", classes="title"), self.status_text, classes="panel"
+        self.status_panel = Panel(
+            PanelTitle(Label("Status:")), SubPanel(self.status_text)
         )
 
+        self.update_progress = Button(
+            "Update", id="update-progress", variant="primary", compact=True
+        )
         self.progress_bar = ProgressBar(show_eta=False)
         self.progress_text = Label()
         self.extra_text = Label()
-        self.main_progress_info = Horizontal(
-            self.progress_bar,
-            self.progress_text,
-            Button("Update", id="update-progress", variant="primary"),
-            id="main-progress-info",
+        self.delete_extra = Button(
+            "Delete", id="delete-extra", variant="error", compact=True
         )
-        self.extra_progress_info = Horizontal(
-            self.extra_text,
-            Button("Delete", id="delete-extra", variant="error"),
-            classes="sub-panel",
-        )
-        self.progress_panel = Vertical(
-            Label("Progress:", classes="title"),
-            self.main_progress_info,
-            self.extra_progress_info,
-            classes="panel",
+        self.progress_panel = Panel(
+            PanelTitle(Label("Progress:"), self.update_progress),
+            SubPanel(self.progress_bar, self.progress_text),
+            SubPanel(self.extra_text, self.delete_extra),
         )
 
         self.log_text = Log(max_lines=1024)
-        self.log_panel = Vertical(
-            Label("Log:", classes="title"),
-            self.log_text,
-            id="log-panel",
-            classes="panel",
-        )
+        self.log_panel = Panel(PanelTitle(Label("Log:")), SubPanel(self.log_text))
 
-        yield Grid(
-            self.status_panel, self.log_panel, self.progress_panel, id="panel-grid"
+        yield ItemGrid(
+            Grid(self.status_panel, self.progress_panel, id="inner-panel-grid"),
+            self.log_panel,
+            min_column_width=32,
+            id="main-panel-grid",
         )
 
         yield Footer()
@@ -215,20 +223,23 @@ class SimsManager(App):
             self.progress_bar.total = n_expected_msgpacks
             self.progress_bar.progress = n_expected_msgpacks - n_missing_msgpacks
             self.progress_text.update(
-                f"[dim]{n_expected_msgpacks} expected_msgpacks[/]\n"
+                f"[dim]{n_expected_msgpacks} expected msgpacks[/]\n"
                 + f"[dim]{n_missing_msgpacks} missing msgpacks[/]"
             )
 
-            show_extra_info = bool(extra_entries)
-            self.extra_progress_info.display = show_extra_info
-            if show_extra_info:
-                MAX_SHOW = 1
-                lines = [f"\t[dim]{path}[/]" for path in list(extra_entries)[:MAX_SHOW]]
-                if len(extra_entries) > MAX_SHOW:
-                    lines.append(
-                        f"[dim]... and {len(extra_entries) - MAX_SHOW} more[/]"
-                    )
+            if extra_entries:
+                n_entries = len(extra_entries)
+                lines = [f"{n_entries} extra entries:"]
+                MAX_ENTRY_LINES = 4
+                for entry in list(extra_entries)[:MAX_ENTRY_LINES]:
+                    lines.append(f"  · [dim]{entry.relative_to(SIMS_DIR)}[/]")
+                if n_entries > MAX_ENTRY_LINES:
+                    lines[-1] = "  · [dim]...[/]"
                 self.extra_text.update("\n".join(lines))
+                self.delete_extra.disabled = False
+            else:
+                self.extra_text.update("No extra entries")
+                self.delete_extra.disabled = True
 
             self.progress_panel.loading = False
 
