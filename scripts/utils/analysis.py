@@ -18,13 +18,10 @@ OBSERVABLES = [
     "dist_phe",
 ]
 
-SCALAR_OBS = [
-    "time",
-    "time_step",
-    "n_agents",
-    "growth_rate",
-    "n_extinct",
-    "std_dev_strat_phe",
+SCALAR_OBSERVABLES = [
+    obs
+    for obs in OBSERVABLES
+    if obs not in {"avg_strat_phe", "dist_strat_phe", "dist_phe"}
 ]
 
 MAX_ROWS = 4096
@@ -49,7 +46,7 @@ def collect_run_time_series(sim_job: SimJob, run_idx: int) -> pd.DataFrame:
             output = msgpack.Unpacker(file)
             for message in output:
                 obs = {key: message[idx] for idx, key in enumerate(OBSERVABLES)}
-                row = {key: obs.get(key) for key in SCALAR_OBS}
+                row = {key: obs.get(key) for key in SCALAR_OBSERVABLES}
                 row.update({"avg_strat_phe_0": obs["avg_strat_phe"][0]})
                 row.update({"dist_phe_0": obs["dist_phe"][0]})
                 run_time_series.append(row)
