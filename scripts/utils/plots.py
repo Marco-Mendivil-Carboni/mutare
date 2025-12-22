@@ -108,6 +108,7 @@ def create_heatmap_figure(
 def add_top_label(ax: Axes, label: str) -> None:
     sec_ax = ax.secondary_xaxis("top")
     sec_ax.set_xticks([])
+    sec_ax.set_xticks([], minor=True)
     sec_ax.set_xlabel(label)
 
 
@@ -258,8 +259,8 @@ PARAM_FILTERS = {
 
 
 def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
-    df_p = PARAM_FILTERS[param](df, job).sort_values(param)
-    if len(df_p) < 2:
+    param_df = PARAM_FILTERS[param](df, job).sort_values(param)
+    if len(param_df) < 2:
         return
 
     two_panels = param == "strat_phe_0"
@@ -271,52 +272,64 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_6, ax_6 = create_standard_figure(param, "avg_strat_phe_0")
     fig_7, ax_7 = create_standard_figure(param, "dist_phe_0")
 
-    sim_types = df_p["sim_type"]
-    for sim_type in sim_types.unique():
-        df_s = df_p[sim_types == sim_type]
+    if param in ["prob_mut", "n_agents"]:
+        for ax in [axs_4[0], axs_5[0]]:
+            ax.set_xscale("log")
 
-        def plot_with_uncertainty(ax: Axes, y_col: str, y_span_col: str | None) -> None:
+    for sim_type, subgroup_df in param_df.groupby("sim_type", sort=False):
+
+        def plot_mean_and_uncertainty(
+            ax: Axes, y_col: str, y_span_col: str | None
+        ) -> None:
             if param == "strat_phe_0" and sim_type == SimType.RANDOM:
                 if y_span_col is None:
-                    plot_horizontal_bands(ax, df_s, (y_col, "mean"), (y_col, "sem"))
+                    plot_horizontal_bands(
+                        ax, subgroup_df, (y_col, "mean"), (y_col, "sem")
+                    )
                 else:
                     plot_horizontal_bands(
-                        ax, df_s, (y_col, "mean"), (y_span_col, "mean")
+                        ax, subgroup_df, (y_col, "mean"), (y_span_col, "mean")
                     )
             else:
-                plot_errorbar(ax, df_s, param, y_col, False)
+                plot_errorbar(ax, subgroup_df, param, y_col, False)
                 if y_span_col is not None:
-                    plot_errorband(ax, df_s, param, y_col, y_span_col)
+                    plot_errorband(ax, subgroup_df, param, y_col, y_span_col)
 
-        plot_with_uncertainty(ax_1, "growth_rate", None)
-        plot_with_uncertainty(ax_2, "extinct_rate", None)
+        plot_mean_and_uncertainty(ax_1, "growth_rate", None)
+        plot_mean_and_uncertainty(ax_2, "extinct_rate", None)
 
-        plot_errorbar(ax_3, df_s, "growth_rate", "extinct_rate", True)
+        plot_errorbar(ax_3, subgroup_df, "growth_rate", "extinct_rate", True)
 
         if param == "strat_phe_0":
             if sim_type == SimType.FIXED:
                 plot_main_heatmap(
-                    fig_4, axs_4[0], axs_4[2], df_s, param, "dist_n_agents"
+                    fig_4, axs_4[0], axs_4[2], subgroup_df, param, "dist_n_agents"
                 )
             elif sim_type == SimType.EVOL:
                 plot_main_heatmap(
-                    fig_5, axs_5[0], axs_5[2], df_s, param, "dist_strat_phe_0"
+                    fig_5, axs_5[0], axs_5[2], subgroup_df, param, "dist_strat_phe_0"
                 )
             elif sim_type == SimType.RANDOM:
-                plot_side_heatmap(axs_4[1], df_s, "dist_n_agents")
-                plot_side_heatmap(axs_5[1], df_s, "dist_strat_phe_0")
+                plot_side_heatmap(axs_4[1], subgroup_df, "dist_n_agents")
+                plot_side_heatmap(axs_5[1], subgroup_df, "dist_strat_phe_0")
         else:
-            plot_main_heatmap(fig_4, axs_4[0], axs_4[1], df_s, param, "dist_n_agents")
             plot_main_heatmap(
-                fig_5, axs_5[0], axs_5[1], df_s, param, "dist_strat_phe_0"
+                fig_4, axs_4[0], axs_4[1], subgroup_df, param, "dist_n_agents"
+            )
+            plot_main_heatmap(
+                fig_5, axs_5[0], axs_5[1], subgroup_df, param, "dist_strat_phe_0"
             )
 
-        plot_with_uncertainty(ax_6, "avg_strat_phe_0", "std_dev_strat_phe")
-        plot_with_uncertainty(ax_7, "dist_phe_0", None)
+        plot_mean_and_uncertainty(ax_6, "avg_strat_phe_0", "std_dev_strat_phe")
+        plot_mean_and_uncertainty(ax_7, "dist_phe_0", None)
 
         if param == "strat_phe_0" and sim_type == SimType.FIXED:
-            min_extinct = df_s[param][df_s[("extinct_rate", "mean")].idxmin()]
-            max_growth = df_s[param][df_s[("growth_rate", "mean")].idxmax()]
+            min_extinct = subgroup_df[param][
+                subgroup_df[("extinct_rate", "mean")].idxmin()
+            ]
+            max_growth = subgroup_df[param][
+                subgroup_df[("growth_rate", "mean")].idxmax()
+            ]
             for ax in [ax_1, ax_2]:
                 ax.axvline(min_extinct, c=EXTRA_COLORS[0], **LINE_STYLE)
                 ax.axvline(max_growth, c=EXTRA_COLORS[1], **LINE_STYLE)
@@ -324,22 +337,23 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
                 ax.axhline(min_extinct, c=EXTRA_COLORS[0], **LINE_STYLE)
                 ax.axhline(max_growth, c=EXTRA_COLORS[1], **LINE_STYLE)
 
-            plot_dist_phe_0_lims(ax_7, df_s, job)
+            plot_dist_phe_0_lims(ax_7, subgroup_df, job)
 
     if param == "prob_mut":
-        df_s = df[df["sim_type"] == SimType.FIXED].sort_values("strat_phe_0")
-        plot_errorbar(ax_3, df_s, "growth_rate", "extinct_rate", True)
-
-    fig_dir = job.base_dir / "plots" / param
-    fig_dir.mkdir(parents=True, exist_ok=True)
+        subgroup_df = df[df["sim_type"] == SimType.FIXED].sort_values("strat_phe_0")
+        plot_errorbar(ax_3, subgroup_df, "growth_rate", "extinct_rate", True)
 
     if param in ["prob_mut", "n_agents"]:
-        for ax in [ax_1, ax_2, axs_4[0], axs_5[0], ax_6, ax_7]:
+        for ax in [ax_1, ax_2, ax_6, ax_7]:
             ax.set_xscale("log")
     for ax in [ax_2, ax_3]:
         ax.set_yscale("log")
+
     for ax in [ax_1, ax_2, ax_3, ax_6, ax_7]:
         ax.legend()
+
+    fig_dir = job.base_dir / "plots" / param
+    fig_dir.mkdir(parents=True, exist_ok=True)
 
     fig_1.savefig(fig_dir / "growth_rate.pdf")
     fig_2.savefig(fig_dir / "extinct_rate.pdf")
