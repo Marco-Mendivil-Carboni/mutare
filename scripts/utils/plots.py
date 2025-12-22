@@ -230,6 +230,18 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
         )
 
 
+def plot_time_series(
+    ax: Axes, df: pd.DataFrame, y_col: str, y_span_col: str | None
+) -> None:
+    color = EXTRA_COLORS[0]
+    x = df["time"]
+    y = df[y_col]
+    ax.plot(x, y, c=color, lw=0.25)
+    if y_span_col is not None:
+        y_span = df[y_span_col]
+        ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
+
+
 def strat_phe_0_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
     return df[
         ((df["prob_mut"] == job.config["model"]["prob_mut"]) | (df["prob_mut"] == 0))
@@ -362,18 +374,6 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_5.savefig(fig_dir / "dist_strat_phe_0.pdf")
     fig_6.savefig(fig_dir / "avg_strat_phe_0.pdf")
     fig_7.savefig(fig_dir / "dist_phe_0.pdf")
-
-
-def plot_time_series(
-    ax: Axes, df: pd.DataFrame, y_col: str, y_span_col: str | None
-) -> None:
-    color = EXTRA_COLORS[0]
-    x = df["time"]
-    y = df[y_col]
-    ax.plot(x, y, c=color, lw=0.25)
-    if y_span_col is not None:
-        y_span = df[y_span_col]
-        ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
 
 
 def generate_time_series_plots(df: pd.DataFrame, job: SimJob) -> None:
