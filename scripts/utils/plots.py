@@ -24,14 +24,27 @@ FIGSIZE = (8.0 * CM, 5.0 * CM)
 
 PLOT_STYLE: dict[str, Any] = dict(ls=":", marker="o", markersize=2)
 FILL_STYLE: dict[str, Any] = dict(lw=0.0, alpha=0.5)
-LINE_STYLE: dict[str, Any] = dict(ls="-.", lw=1.0, alpha=0.5)
+LINE_STYLE: dict[str, Any] = dict(c="k", lw=1.0, alpha=0.5)
+
+COLORS = {
+    "blue": "#636efa",
+    "red_orange": "#ef553b",
+    "green": "#00cc96",
+    "purple": "#ab63fa",
+    "orange": "#ffa15a",
+    "cyan": "#19d3f3",
+    "pink": "#ff6692",
+    "light_green": "#b6e880",
+    "light_pink": "#ff97ff",
+    "yellow": "#fecb52",
+}
 
 CMAP = mpl.colormaps["magma_r"]
 
 SIM_COLORS: dict[SimType, Any] = {
-    SimType.FIXED: "tab:blue",
-    SimType.EVOL: "tab:orange",
-    SimType.RANDOM: "tab:green",
+    SimType.FIXED: COLORS["blue"],
+    SimType.EVOL: COLORS["red_orange"],
+    SimType.RANDOM: COLORS["green"],
 }
 SIM_LABELS: dict[SimType, str] = {
     SimType.FIXED: "\\texttt{fixed}",
@@ -202,13 +215,13 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
                 float(max_eigenvector[0] / np.sum(max_eigenvector))
             )
 
-        ax.plot(strat_phe_0_values, dist_phe_0_lim_values, c="tab:gray", **LINE_STYLE)
+        ax.plot(strat_phe_0_values, dist_phe_0_lim_values, ls="-.", **LINE_STYLE)
 
 
 def plot_time_series(
     ax: Axes, df: pd.DataFrame, y_col: str, y_span_col: str | None
 ) -> None:
-    color = "tab:purple"
+    color = COLORS["purple"]
     x = df["time"]
     y = df[y_col]
     ax.plot(x, y, c=color, lw=0.25)
@@ -318,11 +331,11 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
                 subgroup_df[("growth_rate", "mean")].idxmax()
             ]
             for ax in [ax_1, ax_2]:
-                ax.axvline(min_extinct, c="tab:blue", **LINE_STYLE)
-                ax.axvline(max_growth, c="tab:green", **LINE_STYLE)
+                ax.axvline(min_extinct, ls=":", **LINE_STYLE)
+                ax.axvline(max_growth, ls="--", **LINE_STYLE)
             for ax in axs_5[:-1] + [ax_6]:
-                ax.axhline(min_extinct, c="tab:blue", **LINE_STYLE)
-                ax.axhline(max_growth, c="tab:green", **LINE_STYLE)
+                ax.axhline(min_extinct, ls=":", **LINE_STYLE)
+                ax.axhline(max_growth, ls="--", **LINE_STYLE)
 
             plot_dist_phe_0_lims(ax_7, subgroup_df, job)
 
