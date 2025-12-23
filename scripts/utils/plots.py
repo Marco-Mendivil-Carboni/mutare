@@ -3,8 +3,8 @@ import numpy as np
 import matplotlib as mpl
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
-import matplotlib.gridspec as gridspec
-import matplotlib.colors as colors
+from matplotlib.gridspec import GridSpec
+from matplotlib.colors import PowerNorm
 from typing import Any
 
 from .exec import SimJob
@@ -22,39 +22,22 @@ mpl.rcParams["figure.constrained_layout.use"] = True
 CM = 1 / 2.54
 FIGSIZE = (8.0 * CM, 5.0 * CM)
 
-COLORS = [
-    "#df591f",
-    "#d81e2c",
-    "#d21e6f",
-    "#cc1dad",
-    "#a31cc5",
-    "#611bbf",
-    "#221ab9",
-    "#194bb2",
-    "#1880ac",
-    "#17a69b",
-    "#169f62",
-    "#15992c",
-]
-
 PLOT_STYLE: dict[str, Any] = dict(ls=":", marker="o", markersize=2)
 FILL_STYLE: dict[str, Any] = dict(lw=0.0, alpha=0.5)
-LINE_STYLE: dict[str, Any] = dict(ls=":", lw=1.0, alpha=0.5)
+LINE_STYLE: dict[str, Any] = dict(ls="-.", lw=1.0, alpha=0.5)
 
-CMAP = colors.LinearSegmentedColormap.from_list("custom", list(reversed(COLORS)))
+CMAP = mpl.colormaps["magma_r"]
 
-SIM_COLORS: dict[SimType, str] = {
-    SimType.FIXED: COLORS[1],
-    SimType.EVOL: COLORS[5],
-    SimType.RANDOM: COLORS[9],
+SIM_COLORS: dict[SimType, Any] = {
+    SimType.FIXED: "tab:blue",
+    SimType.EVOL: "tab:orange",
+    SimType.RANDOM: "tab:green",
 }
 SIM_LABELS: dict[SimType, str] = {
     SimType.FIXED: "\\texttt{fixed}",
     SimType.EVOL: "\\texttt{evol}",
     SimType.RANDOM: "\\texttt{random}",
 }
-
-EXTRA_COLORS = [COLORS[3], COLORS[7], COLORS[11]]
 
 COL_TEX_LABELS: dict[str, str] = {
     "time": "$t$",
@@ -84,25 +67,25 @@ def create_heatmap_figure(
     fig = Figure(figsize=FIGSIZE)
 
     if two_panels:
-        gs = gridspec.GridSpec(1, 3, figure=fig, width_ratios=[64, 4, 1], wspace=0)
+        gs = GridSpec(1, 3, figure=fig, width_ratios=[64, 4, 1], wspace=0)
         ax_main = fig.add_subplot(gs[0, 0])
         ax_side = fig.add_subplot(gs[0, 1])
-        ax_cbar = fig.add_subplot(gs[0, 2])
+        ax_bar = fig.add_subplot(gs[0, 2])
         ax_main.set_xlabel(COL_TEX_LABELS[x_col])
         ax_main.set_ylabel(COL_TEX_LABELS[y_col])
         ax_side.set_xticks([])
         ax_side.set_yticks([])
 
-        return fig, [ax_main, ax_side, ax_cbar]
+        return fig, [ax_main, ax_side, ax_bar]
 
     else:
-        gs = gridspec.GridSpec(1, 2, figure=fig, width_ratios=[64, 1], wspace=0)
+        gs = GridSpec(1, 2, figure=fig, width_ratios=[64, 1], wspace=0)
         ax_main = fig.add_subplot(gs[0, 0])
-        ax_cbar = fig.add_subplot(gs[0, 1])
+        ax_bar = fig.add_subplot(gs[0, 1])
         ax_main.set_xlabel(COL_TEX_LABELS[x_col])
         ax_main.set_ylabel(COL_TEX_LABELS[y_col])
 
-        return fig, [ax_main, ax_cbar]
+        return fig, [ax_main, ax_bar]
 
 
 def add_top_label(ax: Axes, label: str) -> None:
@@ -168,7 +151,7 @@ def generate_heatmap_matrix(
 
 
 def plot_main_heatmap(
-    fig: Figure, ax_main: Axes, ax_cbar: Axes, df: pd.DataFrame, x_col: str, y_col: str
+    fig: Figure, ax_main: Axes, ax_bar: Axes, df: pd.DataFrame, x_col: str, y_col: str
 ) -> None:
     _, label = get_sim_color_and_label(df)
     add_top_label(ax_main, label)
@@ -176,12 +159,10 @@ def plot_main_heatmap(
     hm_x = df[x_col].tolist()
     hm_y = [(i + 0.5) / hist_bins for i in range(hist_bins)]
     hm_z = generate_heatmap_matrix(df, y_col, hist_bins)
-    norm = colors.PowerNorm(gamma=0.5, vmin=0, vmax=hist_bins)
-    im = ax_main.pcolormesh(
-        hm_x, hm_y, hm_z, alpha=0.5, norm=norm, cmap=CMAP, shading="nearest"
-    )
+    norm = PowerNorm(gamma=0.5, vmin=0, vmax=hist_bins)
+    im = ax_main.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP, shading="nearest")
     ax_main.set_xlim(hm_x[0], hm_x[-1])
-    cbar = fig.colorbar(im, cax=ax_cbar, aspect=64)
+    cbar = fig.colorbar(im, cax=ax_bar, aspect=64)
     raw_y_label = COL_TEX_LABELS[y_col][1:-1]
     cbar.ax.set_ylabel(f"$p({raw_y_label})$")
 
@@ -193,8 +174,8 @@ def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, y_col: str) -> None:
     hm_x = [0.0, 1.0]
     hm_y = [i / hist_bins for i in range(hist_bins + 1)]
     hm_z = generate_heatmap_matrix(df, y_col, hist_bins)
-    norm = colors.PowerNorm(gamma=0.5, vmin=0, vmax=hist_bins)
-    ax_side.pcolormesh(hm_x, hm_y, hm_z, alpha=0.5, norm=norm, cmap=CMAP)
+    norm = PowerNorm(gamma=0.5, vmin=0, vmax=hist_bins)
+    ax_side.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP)
 
 
 def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
@@ -221,19 +202,13 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
                 float(max_eigenvector[0] / np.sum(max_eigenvector))
             )
 
-        ax.plot(
-            strat_phe_0_values,
-            dist_phe_0_lim_values,
-            c=EXTRA_COLORS[env],
-            label=f"sol. for $e={env}$",
-            **LINE_STYLE,
-        )
+        ax.plot(strat_phe_0_values, dist_phe_0_lim_values, c="tab:gray", **LINE_STYLE)
 
 
 def plot_time_series(
     ax: Axes, df: pd.DataFrame, y_col: str, y_span_col: str | None
 ) -> None:
-    color = EXTRA_COLORS[0]
+    color = "tab:purple"
     x = df["time"]
     y = df[y_col]
     ax.plot(x, y, c=color, lw=0.25)
@@ -343,11 +318,11 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
                 subgroup_df[("growth_rate", "mean")].idxmax()
             ]
             for ax in [ax_1, ax_2]:
-                ax.axvline(min_extinct, c=EXTRA_COLORS[0], **LINE_STYLE)
-                ax.axvline(max_growth, c=EXTRA_COLORS[1], **LINE_STYLE)
+                ax.axvline(min_extinct, c="tab:blue", **LINE_STYLE)
+                ax.axvline(max_growth, c="tab:green", **LINE_STYLE)
             for ax in axs_5[:-1] + [ax_6]:
-                ax.axhline(min_extinct, c=EXTRA_COLORS[0], **LINE_STYLE)
-                ax.axhline(max_growth, c=EXTRA_COLORS[1], **LINE_STYLE)
+                ax.axhline(min_extinct, c="tab:blue", **LINE_STYLE)
+                ax.axhline(max_growth, c="tab:green", **LINE_STYLE)
 
             plot_dist_phe_0_lims(ax_7, subgroup_df, job)
 
