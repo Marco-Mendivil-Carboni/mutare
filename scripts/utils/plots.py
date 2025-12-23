@@ -43,7 +43,7 @@ CMAP = mpl.colormaps["magma_r"]
 
 SIM_COLORS: dict[SimType, Any] = {
     SimType.FIXED: COLORS["blue"],
-    SimType.EVOL: COLORS["orange"],
+    SimType.EVOL: COLORS["teal"],
     SimType.RANDOM: COLORS["red"],
 }
 SIM_LABELS: dict[SimType, str] = {
@@ -221,7 +221,7 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
 def plot_time_series(
     ax: Axes, df: pd.DataFrame, y_col: str, y_span_col: str | None
 ) -> None:
-    color = COLORS["teal"]
+    color = COLORS["mauve"]
     x = df["time"]
     y = df[y_col]
     ax.plot(x, y, c=color, lw=0.25)
