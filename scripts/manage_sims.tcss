@@ -61,11 +61,11 @@ DialogScreen {
 }
 
 #dialog-box Label {
+    align: center middle;
     text-align: center;
     text-style: bold;
     column-span: 2;
     width: 1fr;
-    padding: 1 2;
     padding-bottom: 2;
 }
 
