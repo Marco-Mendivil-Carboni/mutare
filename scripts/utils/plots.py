@@ -22,7 +22,7 @@ mpl.rcParams["figure.constrained_layout.use"] = True
 CM = 1 / 2.54
 FIGSIZE = (8.0 * CM, 5.0 * CM)
 
-PLOT_STYLE: dict[str, Any] = dict(ls=":", marker="o", markersize=2)
+PLOT_STYLE: dict[str, Any] = dict(ls="--", marker="o", markersize=2)
 FILL_STYLE: dict[str, Any] = dict(lw=0.0, alpha=0.5)
 LINE_STYLE: dict[str, Any] = dict(c="k", lw=1.0, alpha=0.5)
 
@@ -42,9 +42,9 @@ COLORS = {
 CMAP = mpl.colormaps["magma_r"]
 
 SIM_COLORS: dict[SimType, Any] = {
-    SimType.FIXED: COLORS["red"],
-    SimType.EVOL: COLORS["mauve"],
-    SimType.RANDOM: COLORS["teal"],
+    SimType.FIXED: COLORS["mauve"],
+    SimType.EVOL: COLORS["blue"],
+    SimType.RANDOM: COLORS["green"],
 }
 SIM_LABELS: dict[SimType, str] = {
     SimType.FIXED: "\\texttt{fixed}",
@@ -221,7 +221,7 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
 def plot_time_series(
     ax: Axes, df: pd.DataFrame, y_col: str, y_span_col: str | None
 ) -> None:
-    color = COLORS["teal"]
+    color = COLORS["green"]
     x = df["time"]
     y = df[y_col]
     ax.plot(x, y, c=color, lw=0.25)
