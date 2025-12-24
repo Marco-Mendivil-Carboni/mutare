@@ -27,24 +27,20 @@ FILL_STYLE: dict[str, Any] = dict(lw=0.0, alpha=0.5)
 LINE_STYLE: dict[str, Any] = dict(c="k", lw=1.0, alpha=0.5)
 
 COLORS = {
-    "blue": "#4c78a8",
-    "orange": "#f58518",
-    "red": "#e45756",
-    "teal": "#72b7b2",
-    "green": "#54a24b",
-    "yellow": "#eeca3b",
-    "mauve": "#b279a2",
-    "pink": "#ff9da6",
-    "brown": "#9d755d",
-    "gray": "#bab0ac",
+    "orange": "#e69f00",
+    "sky_blue": "#56b4e9",
+    "green": "#009e73",
+    "yellow": "#f0e442",
+    "blue": "#0072b2",
+    "vermilion": "#d55e00",
+    "magenta": "#cc79a7",
 }
-
 CMAP = mpl.colormaps["magma_r"]
 
 SIM_COLORS: dict[SimType, Any] = {
-    SimType.FIXED: COLORS["blue"],
-    SimType.EVOL: COLORS["teal"],
-    SimType.RANDOM: COLORS["red"],
+    SimType.FIXED: COLORS["vermilion"],
+    SimType.EVOL: COLORS["blue"],
+    SimType.RANDOM: COLORS["green"],
 }
 SIM_LABELS: dict[SimType, str] = {
     SimType.FIXED: "\\texttt{fixed}",
@@ -221,7 +217,7 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
 def plot_time_series(
     ax: Axes, df: pd.DataFrame, y_col: str, y_span_col: str | None
 ) -> None:
-    color = COLORS["mauve"]
+    color = COLORS["sky_blue"]
     x = df["time"]
     y = df[y_col]
     ax.plot(x, y, c=color, lw=0.25)
