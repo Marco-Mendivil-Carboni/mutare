@@ -107,9 +107,9 @@ class SimJob:
 @dataclass
 class SimsConfig:
     init_sim_job: SimJob
-    strat_phe_0_values: list[float]
+    strat_phe_0_i_values: list[float]
     prob_mut_values: list[float]
-    n_agents_values: list[int]
+    n_agents_i_values: list[int]
 
 
 def create_sim_jobs(sims_config: SimsConfig) -> list[SimJob]:
@@ -120,10 +120,10 @@ def create_sim_jobs(sims_config: SimsConfig) -> list[SimJob]:
     sim_jobs = [init_sim_job]
 
     if init_sim_job.config["model"]["n_phe"] == 2:
-        for strat_phe_0 in sims_config.strat_phe_0_values:
+        for strat_phe_0_i in sims_config.strat_phe_0_i_values:
             config = deepcopy(init_sim_job.config)
-            strat_phe = [strat_phe_0, 1 - strat_phe_0]
-            config["init"]["strat_phe"] = strat_phe
+            strat_phe_i = [strat_phe_0_i, 1 - strat_phe_0_i]
+            config["init"]["strat_phe"] = strat_phe_i
             sim_jobs.append(SimJob(base_dir, config, run_options))
             config["model"]["prob_mut"] = 0.0
             sim_jobs.append(SimJob(base_dir, config, run_options))
@@ -135,11 +135,11 @@ def create_sim_jobs(sims_config: SimsConfig) -> list[SimJob]:
         config["model"]["prob_mut"] = prob_mut
         sim_jobs.append(SimJob(base_dir, config, run_options))
 
-    for n_agents in sims_config.n_agents_values:
-        if n_agents == init_sim_job.config["init"]["n_agents"]:
+    for n_agents_i in sims_config.n_agents_i_values:
+        if n_agents_i == init_sim_job.config["init"]["n_agents"]:
             continue
         config = deepcopy(init_sim_job.config)
-        config["init"]["n_agents"] = n_agents
+        config["init"]["n_agents"] = n_agents_i
         sim_jobs.append(SimJob(base_dir, config, run_options))
 
     return sim_jobs

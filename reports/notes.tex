@@ -52,7 +52,7 @@ During the simulation, several observables are measured, including the average p
 
 \section{Results: phenotypic diversity and safe strategies} \label{sec:results}
 
-In \autoref{fig:symmetric_strat_phe_0}, \autoref{fig:symmetric_prob_mut} and \autoref{fig:symmetric_n_agents} we show the results for the following \emph{symmetric} parameters:
+In \autoref{fig:symmetric_strat_phe_0_i}, \autoref{fig:symmetric_prob_mut} and \autoref{fig:symmetric_n_agents_i} we show the results for the following \emph{symmetric} parameters:
 \begin{itemize}
     \item $n_{\text{env}}=2$, $n_{\text{phe}}=2$
     \item $\omega_t(e,e')=\begin{pmatrix}-1.0&+1.0\\+1.0&-1.0\end{pmatrix}$
@@ -64,32 +64,32 @@ In \autoref{fig:symmetric_strat_phe_0}, \autoref{fig:symmetric_prob_mut} and \au
 
 In these figures we show the results of three kinds of simulations: \texttt{fixed} (all agents share a prescribed, non-evolving strategy, $p_{\text{mut}}$ is set to $0$ in this case), \texttt{evolutive} (the initial population is monomorphic and strategies evolve by mutation and selection), and \texttt{random} (each agent begins with an independent random strategy that will evolve like in the previous case). In all the panels where they appear, the dotted lines mark the extinction-minimizing strategy and the dash-dot lines mark the growth-maximizing strategy, serving as visual references for comparison.
 
-In \autoref{fig:asymmetric_strat_phe_0}, \autoref{fig:asymmetric_prob_mut} and \autoref{fig:asymmetric_n_agents} we show the results for the following \emph{asymmetric} parameters:
+In \autoref{fig:asymmetric_strat_phe_0_i}, \autoref{fig:asymmetric_prob_mut} and \autoref{fig:asymmetric_n_agents_i} we show the results for the following \emph{asymmetric} parameters:
 \begin{itemize}
     \item $\omega_b(e,\phi)=\begin{pmatrix}1.0&0.2\\0.0&0.0\end{pmatrix}$
     \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&0.0\\1.0&0.1\end{pmatrix}$
     \item The rest of the parameters have the same values as in the \emph{symmetric} parameters.
 \end{itemize}
 
-For the parameter sets analyzed here, the fixed-strategy simulations (i.e., without evolution) show that in general the strategies that maximize mean growth rate and those that minimize extinction rate are different (see the growth and extinction panels in \autoref{fig:symmetric_strat_phe_0} and \autoref{fig:asymmetric_strat_phe_0}). In both the symmetric and asymmetric cases, the growth-optimal strategy is a mixed one, with nonzero fractions of both phenotypes. This reflects that, for these specific parameters, phenotypic diversity can increase the long-term growth rate. By contrast, the extinction-minimizing strategies differ: in the symmetric case, extinction is lowest for a balanced mixture, whereas in the asymmetric case it is minimized by a nearly pure phenotype-1 population.
+For the parameter sets analyzed here, the fixed-strategy simulations (i.e., without evolution) show that in general the strategies that maximize mean growth rate and those that minimize extinction rate are different (see the growth and extinction panels in \autoref{fig:symmetric_strat_phe_0_i} and \autoref{fig:asymmetric_strat_phe_0_i}). In both the symmetric and asymmetric cases, the growth-optimal strategy is a mixed one, with nonzero fractions of both phenotypes. This reflects that, for these specific parameters, phenotypic diversity can increase the long-term growth rate. By contrast, the extinction-minimizing strategies differ: in the symmetric case, extinction is lowest for a balanced mixture, whereas in the asymmetric case it is minimized by a nearly pure phenotype-1 population.
 
 It is important to emphasize that the appearance of mixed optimal strategies (bet hedging) is not general across all possible parameters, but rather a feature of the particular parameter choices used here, selected precisely because they allow the study of trade-offs between growth maximization and extinction avoidance.
 
-We must clarify that in the average-strategy plots, the error bands represent the instantaneous dispersion of strategies across agents, not the dispersion accumulated over time. This dispersion remains small throughout all these simulations, implying that at any moment the population is almost monomorphic, even though mutation-driven exploration over long times is broad (see distribution panels in \autoref{fig:symmetric_strat_phe_0} and \autoref{fig:asymmetric_strat_phe_0}). This justifies comparing the \texttt{evolutive} and \texttt{random} simulations directly with the \texttt{fixed} simulations.
+We must clarify that in the average-strategy plots, the error bands represent the instantaneous dispersion of strategies across agents, not the dispersion accumulated over time. This dispersion remains small throughout all these simulations, implying that at any moment the population is almost monomorphic, even though mutation-driven exploration over long times is broad (see distribution panels in \autoref{fig:symmetric_strat_phe_0_i} and \autoref{fig:asymmetric_strat_phe_0_i}). This justifies comparing the \texttt{evolutive} and \texttt{random} simulations directly with the \texttt{fixed} simulations.
 
-In \autoref{fig:extended_strat_phe_0} we show the results for the following \emph{extended} parameters:
+In \autoref{fig:extended_strat_phe_0_i} we show the results for the following \emph{extended} parameters:
 \begin{itemize}
     \item $N_i=1000$
     \item The rest of the parameters have the same values as in the \emph{asymmetric} parameters.
 \end{itemize}
 
-When evolution is enabled, the system converges to a well-defined stationary strategy regardless of the initial distribution of strategies. As shown in the average-strategy panels of \autoref{fig:symmetric_strat_phe_0}, \autoref{fig:asymmetric_strat_phe_0} and \autoref{fig:extended_strat_phe_0}, both monomorphic and randomly initialized populations evolve toward the same average strategy and long-term distribution. This indicates a stable attractor in strategy space.
+When evolution is enabled, the system converges to a well-defined stationary strategy regardless of the initial distribution of strategies. As shown in the average-strategy panels of \autoref{fig:symmetric_strat_phe_0_i}, \autoref{fig:asymmetric_strat_phe_0_i} and \autoref{fig:extended_strat_phe_0_i}, both monomorphic and randomly initialized populations evolve toward the same average strategy and long-term distribution. This indicates a stable attractor in strategy space.
 
-Finally, the nature of the evolved strategy depends strongly on population size and the corresponding extinction risk. In the extended simulations (\autoref{fig:extended_strat_phe_0}), where population size is large and extinction is rare, evolution converges to the growth-maximizing strategy (as expected from standard evolutionary theory). In contrast, smaller populations with higher extinction risk (see \autoref{fig:symmetric_n_agents} and \autoref{fig:asymmetric_n_agents}) evolve toward safer strategies with lower extinction, even when this requires sacrificing growth. This reveals a clear bias towards risk-reducing strategies as extinction risk increases.
+Finally, the nature of the evolved strategy depends strongly on population size and the corresponding extinction risk. In the extended simulations (\autoref{fig:extended_strat_phe_0_i}), where population size is large and extinction is rare, evolution converges to the growth-maximizing strategy (as expected from standard evolutionary theory). In contrast, smaller populations with higher extinction risk (see \autoref{fig:symmetric_n_agents_i} and \autoref{fig:asymmetric_n_agents_i}) evolve toward safer strategies with lower extinction, even when this requires sacrificing growth. This reveals a clear bias towards risk-reducing strategies as extinction risk increases.
 
-The remaining four figures (\autoref{fig:symmetric_prob_mut}, \autoref{fig:symmetric_n_agents}, \autoref{fig:asymmetric_prob_mut} and \autoref{fig:asymmetric_n_agents}) illustrate how the evolutionary outcome (starting from a random initial condition) changes when we vary either the mutation probability or the population size.
+The remaining four figures (\autoref{fig:symmetric_prob_mut}, \autoref{fig:symmetric_n_agents_i}, \autoref{fig:asymmetric_prob_mut} and \autoref{fig:asymmetric_n_agents_i}) illustrate how the evolutionary outcome (starting from a random initial condition) changes when we vary either the mutation probability or the population size.
 
-The effect of changing the number of agents (\autoref{fig:symmetric_n_agents} and \autoref{fig:asymmetric_n_agents}) behaves as expected. As the (maximum) population size $N_i$ increases, the evolved $\langle s(0)\rangle$ approaches the growth-maximizing value obtained from the fixed-strategy simulations. Likewise, the distribution of strategies explored over long evolutionary time becomes increasingly concentrated. A somewhat counterintuitive effect appears in the instantaneous dispersion: although the long-term distribution tightens with increasing $N_i$, the instantaneous dispersion increases slightly. This occurs because larger populations allow multiple very similar strategies to coexist for longer periods without being lost by drift, i.e. in small populations, nearly identical strategies tend to go extinct rapidly and only one survives at any moment. All other panels in these figures follow directly from this behavior.
+The effect of changing the number of agents (\autoref{fig:symmetric_n_agents_i} and \autoref{fig:asymmetric_n_agents_i}) behaves as expected. As the (maximum) population size $N_i$ increases, the evolved $\langle s(0)\rangle$ approaches the growth-maximizing value obtained from the fixed-strategy simulations. Likewise, the distribution of strategies explored over long evolutionary time becomes increasingly concentrated. A somewhat counterintuitive effect appears in the instantaneous dispersion: although the long-term distribution tightens with increasing $N_i$, the instantaneous dispersion increases slightly. This occurs because larger populations allow multiple very similar strategies to coexist for longer periods without being lost by drift, i.e. in small populations, nearly identical strategies tend to go extinct rapidly and only one survives at any moment. All other panels in these figures follow directly from this behavior.
 
 Changing the mutation probability (\autoref{fig:symmetric_prob_mut} and \autoref{fig:asymmetric_prob_mut}) produces a richer and less intuitive set of behaviors. For very large mutation probabilities (close to $1$), the biological relevance is limited, but the dynamics are clear: the population behaves almost as if fully randomized each generation. Both phenotypes appear with approximately $50\%$ frequency throughout the simulation, and the instantaneous dispersion is correspondingly extremely large. In this regime, the results essentially reproduce those of a fixed strategy with a 50--50 phenotype mixture.
 
@@ -113,14 +113,14 @@ It is also important to compare this observable to the theoretical equilibrium d
 
 \begin{figure*}[p]
     \centering
-    \caption{Results for the symmetric parameters with different initial strategies.} \label{fig:symmetric_strat_phe_0}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0/growth_rate.pdf}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0/extinct_rate.pdf}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0/rates.pdf}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0/dist_n_agents.pdf}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0/dist_strat_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0/avg_strat_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0/dist_phe_0.pdf}
+    \caption{Results for the symmetric parameters with different initial strategies.} \label{fig:symmetric_strat_phe_0_i}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/growth_rate.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/extinct_rate.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/rates.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/dist_n_agents.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/dist_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -137,14 +137,14 @@ It is also important to compare this observable to the theoretical equilibrium d
 
 \begin{figure*}[p]
     \centering
-    \caption{Results for the symmetric parameters with different numbers of agents.} \label{fig:symmetric_n_agents}
-    \includegraphics{../sims/symmetric/plots/n_agents/growth_rate.pdf}
-    \includegraphics{../sims/symmetric/plots/n_agents/extinct_rate.pdf}
-    \includegraphics{../sims/symmetric/plots/n_agents/rates.pdf}
-    \includegraphics{../sims/symmetric/plots/n_agents/dist_n_agents.pdf}
-    \includegraphics{../sims/symmetric/plots/n_agents/dist_strat_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/n_agents/avg_strat_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/n_agents/dist_phe_0.pdf}
+    \caption{Results for the symmetric parameters with different numbers of agents.} \label{fig:symmetric_n_agents_i}
+    \includegraphics{../sims/symmetric/plots/n_agents_i/growth_rate.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents_i/extinct_rate.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents_i/rates.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents_i/dist_n_agents.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents_i/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents_i/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents_i/dist_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -157,14 +157,14 @@ It is also important to compare this observable to the theoretical equilibrium d
 
 \begin{figure*}[p]
     \centering
-    \caption{Results for the asymmetric parameters with different initial strategies.} \label{fig:asymmetric_strat_phe_0}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0/growth_rate.pdf}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0/extinct_rate.pdf}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0/rates.pdf}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0/dist_n_agents.pdf}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0/dist_strat_phe_0.pdf}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0/avg_strat_phe_0.pdf}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0/dist_phe_0.pdf}
+    \caption{Results for the asymmetric parameters with different initial strategies.} \label{fig:asymmetric_strat_phe_0_i}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/growth_rate.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_n_agents.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -181,14 +181,14 @@ It is also important to compare this observable to the theoretical equilibrium d
 
 \begin{figure*}[p]
     \centering
-    \caption{Results for the asymmetric parameters with different numbers of agents.} \label{fig:asymmetric_n_agents}
-    \includegraphics{../sims/asymmetric/plots/n_agents/growth_rate.pdf}
-    \includegraphics{../sims/asymmetric/plots/n_agents/extinct_rate.pdf}
-    \includegraphics{../sims/asymmetric/plots/n_agents/rates.pdf}
-    \includegraphics{../sims/asymmetric/plots/n_agents/dist_n_agents.pdf}
-    \includegraphics{../sims/asymmetric/plots/n_agents/dist_strat_phe_0.pdf}
-    \includegraphics{../sims/asymmetric/plots/n_agents/avg_strat_phe_0.pdf}
-    \includegraphics{../sims/asymmetric/plots/n_agents/dist_phe_0.pdf}
+    \caption{Results for the asymmetric parameters with different numbers of agents.} \label{fig:asymmetric_n_agents_i}
+    \includegraphics{../sims/asymmetric/plots/n_agents_i/growth_rate.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents_i/extinct_rate.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents_i/rates.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_n_agents.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents_i/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -201,14 +201,14 @@ It is also important to compare this observable to the theoretical equilibrium d
 
 \begin{figure*}
     \centering
-    \caption{Results for the extended parameters with different initial strategies.} \label{fig:extended_strat_phe_0}
-    \includegraphics{../sims/extended/plots/strat_phe_0/growth_rate.pdf}
-    \includegraphics{../sims/extended/plots/strat_phe_0/extinct_rate.pdf}
-    \includegraphics{../sims/extended/plots/strat_phe_0/rates.pdf}
-    \includegraphics{../sims/extended/plots/strat_phe_0/dist_n_agents.pdf}
-    \includegraphics{../sims/extended/plots/strat_phe_0/dist_strat_phe_0.pdf}
-    \includegraphics{../sims/extended/plots/strat_phe_0/avg_strat_phe_0.pdf}
-    \includegraphics{../sims/extended/plots/strat_phe_0/dist_phe_0.pdf}
+    \caption{Results for the extended parameters with different initial strategies.} \label{fig:extended_strat_phe_0_i}
+    \includegraphics{../sims/extended/plots/strat_phe_0_i/growth_rate.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe_0_i/extinct_rate.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe_0_i/rates.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe_0_i/dist_n_agents.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe_0_i/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe_0_i/dist_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]

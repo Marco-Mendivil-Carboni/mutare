@@ -37,6 +37,27 @@ ANALYSIS = [
 ]
 
 
+class SimType(Enum):
+    FIXED = auto()
+    EVOL = auto()
+    RANDOM = auto()
+
+
+def add_sim_info(df_or_dict: pd.DataFrame | dict[str, Any], sim_job: SimJob) -> None:
+    df_or_dict["prob_mut"] = sim_job.config["model"]["prob_mut"]
+    df_or_dict["n_agents_i"] = sim_job.config["init"]["n_agents"]
+
+    strat_phe_i = sim_job.config["init"].get("strat_phe")
+    if strat_phe_i is not None:
+        df_or_dict["strat_phe_0_i"] = strat_phe_i[0]
+        if sim_job.config["model"]["prob_mut"] == 0.0:
+            df_or_dict["sim_type"] = SimType.FIXED
+        else:
+            df_or_dict["sim_type"] = SimType.EVOL
+    else:
+        df_or_dict["sim_type"] = SimType.RANDOM
+
+
 def collect_run_time_series(sim_job: SimJob, run_idx: int) -> pd.DataFrame:
     run_time_series = []
     run_dir = sim_job.sim_dir / f"run-{run_idx:04}"
@@ -49,6 +70,7 @@ def collect_run_time_series(sim_job: SimJob, run_idx: int) -> pd.DataFrame:
                 row = {key: obs.get(key) for key in SCALAR_OBSERVABLES}
                 row.update({"avg_strat_phe_0": obs["avg_strat_phe"][0]})
                 row.update({"dist_phe_0": obs["dist_phe"][0]})
+                add_sim_info(row, sim_job)
                 run_time_series.append(row)
                 if len(run_time_series) >= MAX_ROWS:
                     return pd.DataFrame(run_time_series)
@@ -60,12 +82,6 @@ def read_analysis(sim_dir: Path, run_idx: int) -> dict[str, Any]:
     with file_path.open("rb") as file:
         message: Any = msgpack.unpack(file)
     return {key: message[idx] for idx, key in enumerate(ANALYSIS)}
-
-
-class SimType(Enum):
-    RANDOM = auto()
-    FIXED = auto()
-    EVOL = auto()
 
 
 def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
@@ -99,18 +115,7 @@ def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
             [analyses.columns, ["mean", "sem"]]
         )
 
-        avg_analysis["prob_mut"] = sim_job.config["model"]["prob_mut"]
-        avg_analysis["n_agents"] = sim_job.config["init"]["n_agents"]
-
-        strat_phe = sim_job.config["init"].get("strat_phe")
-        if strat_phe is not None:
-            avg_analysis["strat_phe_0"] = strat_phe[0]
-            if sim_job.config["model"]["prob_mut"] > 0.0:
-                avg_analysis["sim_type"] = SimType.EVOL
-            else:
-                avg_analysis["sim_type"] = SimType.FIXED
-        else:
-            avg_analysis["sim_type"] = SimType.RANDOM
+        add_sim_info(avg_analysis, sim_job)
 
         avg_analyses.append(avg_analysis)
 

@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from shutil import rmtree
 import matplotlib as mpl
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
@@ -54,9 +55,10 @@ SIM_LABELS: dict[SimType, str] = {
 
 COL_TEX_LABELS: dict[str, str] = {
     "time": "$t$",
-    "strat_phe_0": "$s(0)_i$",
+    "strat_phe_0_i": "$s(0)_i$",
     "prob_mut": "$p_{\\text{mut}}$",
-    "n_agents": "$N_i$",
+    "n_agents_i": "$N_i$",
+    "n_agents": "$N$",
     "dist_n_agents": "$N/N_i$",
     "growth_rate": "$\\langle\\mu\\rangle$",
     "extinct_rate": "$r_e$",
@@ -197,15 +199,17 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
     if n_env != 2 or n_phe != 2:
         return
 
-    strat_phe_0_values = df["strat_phe_0"].tolist()
+    strat_phe_0_i_values = df["strat_phe_0_i"].tolist()
 
     for env in range(n_env):
         rates_birth = np.array(job.config["model"]["rates_birth"][env])
         rates_death = np.array(job.config["model"]["rates_death"][env])
         dist_phe_0_lim_values = []
-        for strat_phe_0 in strat_phe_0_values:
-            strat_phe_1 = 1.0 - strat_phe_0
-            matrix = np.array([strat_phe_0 * rates_birth, strat_phe_1 * rates_birth])
+        for strat_phe_0_i in strat_phe_0_i_values:
+            strat_phe_1_i = 1.0 - strat_phe_0_i
+            matrix = np.array(
+                [strat_phe_0_i * rates_birth, strat_phe_1_i * rates_birth]
+            )
             matrix[0][0] -= rates_death[0]
             matrix[1][1] -= rates_death[1]
             eigenvalues, eigenvectors = np.linalg.eig(matrix)
@@ -215,36 +219,36 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
                 float(max_eigenvector[0] / np.sum(max_eigenvector))
             )
 
-        ax.plot(strat_phe_0_values, dist_phe_0_lim_values, ls="-.", **LINE_STYLE)
+        ax.plot(strat_phe_0_i_values, dist_phe_0_lim_values, ls="-.", **LINE_STYLE)
 
 
 def plot_time_series(
     ax: Axes, df: pd.DataFrame, y_col: str, y_span_col: str | None
 ) -> None:
-    color = COLORS["green"]
+    color, label = get_sim_color_and_label(df)
     x = df["time"]
     y = df[y_col]
-    ax.plot(x, y, c=color, lw=0.25)
+    ax.plot(x, y, c=color, label=label, lw=0.25)
     if y_span_col is not None:
         y_span = df[y_span_col]
         ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
 
 
-def strat_phe_0_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
+def strat_phe_0_i_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
     return df[
         ((df["prob_mut"] == job.config["model"]["prob_mut"]) | (df["prob_mut"] == 0))
-        & (df["n_agents"] == job.config["init"]["n_agents"])
+        & (df["n_agents_i"] == job.config["init"]["n_agents"])
     ]
 
 
 def prob_mut_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
     return df[
         (df["sim_type"] == SimType.RANDOM)
-        & (df["n_agents"] == job.config["init"]["n_agents"])
+        & (df["n_agents_i"] == job.config["init"]["n_agents"])
     ]
 
 
-def n_agents_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
+def n_agents_i_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
     return df[
         (df["sim_type"] == SimType.RANDOM)
         & (df["prob_mut"] == job.config["model"]["prob_mut"])
@@ -252,9 +256,9 @@ def n_agents_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
 
 
 PARAM_FILTERS = {
-    "strat_phe_0": strat_phe_0_filter,
+    "strat_phe_0_i": strat_phe_0_i_filter,
     "prob_mut": prob_mut_filter,
-    "n_agents": n_agents_filter,
+    "n_agents_i": n_agents_i_filter,
 }
 
 
@@ -263,7 +267,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     if len(param_df) < 2:
         return
 
-    two_panels = param == "strat_phe_0"
+    two_panels = param == "strat_phe_0_i"
     fig_1, ax_1 = create_standard_figure(param, "growth_rate")
     fig_2, ax_2 = create_standard_figure(param, "extinct_rate")
     fig_3, ax_3 = create_standard_figure("growth_rate", "extinct_rate")
@@ -272,7 +276,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_6, ax_6 = create_standard_figure(param, "avg_strat_phe_0")
     fig_7, ax_7 = create_standard_figure(param, "dist_phe_0")
 
-    if param in ["prob_mut", "n_agents"]:
+    if param in ["prob_mut", "n_agents_i"]:
         for ax in [axs_4[0], axs_5[0]]:
             ax.set_xscale("log")
 
@@ -281,7 +285,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         def plot_mean_and_uncertainty(
             ax: Axes, y_col: str, y_span_col: str | None
         ) -> None:
-            if param == "strat_phe_0" and sim_type == SimType.RANDOM:
+            if param == "strat_phe_0_i" and sim_type == SimType.RANDOM:
                 if y_span_col is None:
                     plot_horizontal_bands(
                         ax, subgroup_df, (y_col, "mean"), (y_col, "sem")
@@ -300,7 +304,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
 
         plot_errorbar(ax_3, subgroup_df, "growth_rate", "extinct_rate", True)
 
-        if param == "strat_phe_0":
+        if param == "strat_phe_0_i":
             if sim_type == SimType.FIXED:
                 plot_main_heatmap(
                     fig_4, axs_4[0], axs_4[2], subgroup_df, param, "dist_n_agents"
@@ -323,7 +327,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         plot_mean_and_uncertainty(ax_6, "avg_strat_phe_0", "std_dev_strat_phe")
         plot_mean_and_uncertainty(ax_7, "dist_phe_0", None)
 
-        if param == "strat_phe_0" and sim_type == SimType.FIXED:
+        if param == "strat_phe_0_i" and sim_type == SimType.FIXED:
             min_extinct = subgroup_df[param][
                 subgroup_df[("extinct_rate", "mean")].idxmin()
             ]
@@ -340,10 +344,10 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
             plot_dist_phe_0_lims(ax_7, subgroup_df, job)
 
     if param == "prob_mut":
-        subgroup_df = df[df["sim_type"] == SimType.FIXED].sort_values("strat_phe_0")
+        subgroup_df = df[df["sim_type"] == SimType.FIXED].sort_values("strat_phe_0_i")
         plot_errorbar(ax_3, subgroup_df, "growth_rate", "extinct_rate", True)
 
-    if param in ["prob_mut", "n_agents"]:
+    if param in ["prob_mut", "n_agents_i"]:
         for ax in [ax_1, ax_2, ax_6, ax_7]:
             ax.set_xscale("log")
     for ax in [ax_2, ax_3]:
@@ -372,18 +376,20 @@ def generate_time_series_plots(df: pd.DataFrame, job: SimJob) -> None:
         fig, ax = create_standard_figure("time", y_col)
         y_span_col = "std_dev_strat_phe" if y_col == "avg_strat_phe_0" else None
         plot_time_series(ax, df, y_col, y_span_col)
+        ax.legend()
         fig.savefig(fig_dir / f"{y_col}.pdf")
 
 
 def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
     avg_analyses = collect_avg_analyses(sim_jobs)
     init_sim_job = sim_jobs[0]
-
     run_time_series = collect_run_time_series(init_sim_job, 0)
 
-    generate_param_plots("strat_phe_0", avg_analyses, init_sim_job)
+    rmtree(init_sim_job.base_dir / "plots", ignore_errors=True)
+
+    generate_param_plots("strat_phe_0_i", avg_analyses, init_sim_job)
     generate_param_plots("prob_mut", avg_analyses, init_sim_job)
-    generate_param_plots("n_agents", avg_analyses, init_sim_job)
+    generate_param_plots("n_agents_i", avg_analyses, init_sim_job)
 
     generate_time_series_plots(run_time_series, init_sim_job)
 
