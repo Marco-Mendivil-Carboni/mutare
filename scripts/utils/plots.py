@@ -54,11 +54,12 @@ SIM_LABELS: dict[SimType, str] = {
 }
 
 COL_TEX_LABELS: dict[str, str] = {
-    "time": "$t$",
     "strat_phe_0_i": "$s(0)_i$",
     "prob_mut": "$p_{\\text{mut}}$",
     "n_agents_i": "$N_i$",
+    "time": "$t$",
     "n_agents": "$N$",
+    "n_extinct": "$n_e$",
     "dist_n_agents": "$N/N_i$",
     "growth_rate": "$\\langle\\mu\\rangle$",
     "extinct_rate": "$r_e$",
@@ -372,7 +373,7 @@ def generate_time_series_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_dir = job.base_dir / "plots" / "time_series"
     fig_dir.mkdir(parents=True, exist_ok=True)
 
-    for y_col in ["n_agents", "avg_strat_phe_0", "dist_phe_0"]:
+    for y_col in ["n_agents", "n_extinct", "avg_strat_phe_0", "dist_phe_0"]:
         fig, ax = create_standard_figure("time", y_col)
         y_span_col = "std_dev_strat_phe" if y_col == "avg_strat_phe_0" else None
         plot_time_series(ax, df, y_col, y_span_col)
