@@ -43,8 +43,8 @@ COLORS = {
 CMAP = mpl.colormaps["magma_r"]
 
 SIM_COLORS: dict[SimType, Any] = {
-    SimType.FIXED: COLORS["mauve"],
-    SimType.EVOL: COLORS["blue"],
+    SimType.FIXED: COLORS["blue"],
+    SimType.EVOL: COLORS["teal"],
     SimType.RANDOM: COLORS["green"],
 }
 SIM_LABELS: dict[SimType, str] = {
@@ -124,7 +124,7 @@ def plot_horizontal_bands(
 ) -> None:
     color, label = get_sim_color_and_label(df)
     for mean, span in df[[mean_col, span_col]].itertuples(index=False):
-        ax.axhline(mean, c=color, label=label, ls=":")
+        ax.axhline(mean, c=color, label=label, ls="--")
         ax.axhspan(mean + span, mean - span, color=color, **FILL_STYLE)
         label = None
 
@@ -281,7 +281,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         for ax in [axs_4[0], axs_5[0]]:
             ax.set_xscale("log")
 
-    for sim_type, subgroup_df in param_df.groupby("sim_type", sort=False):
+    for sim_type, subgroup_df in param_df.groupby("sim_type"):
 
         def plot_mean_and_uncertainty(
             ax: Axes, y_col: str, y_span_col: str | None

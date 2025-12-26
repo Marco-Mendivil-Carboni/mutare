@@ -1,7 +1,7 @@
 import msgpack
 from pathlib import Path
 import pandas as pd
-from enum import Enum, auto
+from enum import IntEnum, auto
 from typing import Any
 
 from .exec import SimJob
@@ -37,7 +37,7 @@ ANALYSIS = [
 ]
 
 
-class SimType(Enum):
+class SimType(IntEnum):
     FIXED = auto()
     EVOL = auto()
     RANDOM = auto()
