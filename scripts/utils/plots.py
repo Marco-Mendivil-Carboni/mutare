@@ -8,7 +8,7 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.colors import PowerNorm
 from typing import Any
 
-from .exec import SimJob
+from .exec import SimJob, print_process_msg
 from .analysis import SimType, collect_avg_analyses, collect_run_time_series
 
 mpl.use("pdf")
@@ -124,7 +124,7 @@ def plot_horizontal_bands(
 ) -> None:
     color, label = get_sim_color_and_label(df)
     for mean, span in df[[mean_col, span_col]].itertuples(index=False):
-        ax.axhline(mean, c=color, label=label, ls="--")
+        ax.axhline(mean, c=color, label=label, ls=PLOT_STYLE["ls"])
         ax.axhspan(mean + span, mean - span, color=color, **FILL_STYLE)
         label = None
 
@@ -221,6 +221,12 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
             )
 
         ax.plot(strat_phe_0_i_values, dist_phe_0_lim_values, ls="-.", **LINE_STYLE)
+
+
+def plot_extinct_times(ax: Axes, df: pd.DataFrame) -> None:
+    extinct_times = df["time"][df["n_extinct"].diff() > 0]
+    for extinct_time in extinct_times:
+        ax.axvline(extinct_time, ls=":", c="k", lw=0.25, alpha=0.5)
 
 
 def plot_time_series(
@@ -376,7 +382,9 @@ def generate_time_series_plots(df: pd.DataFrame, job: SimJob) -> None:
     for y_col in ["n_agents", "n_extinct", "avg_strat_phe_0", "dist_phe_0"]:
         fig, ax = create_standard_figure("time", y_col)
         y_span_col = "std_dev_strat_phe" if y_col == "avg_strat_phe_0" else None
+        plot_extinct_times(ax, df)
         plot_time_series(ax, df, y_col, y_span_col)
+        ax.margins(0.0)
         ax.legend()
         fig.savefig(fig_dir / f"{y_col}.pdf")
 
@@ -394,4 +402,4 @@ def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
 
     generate_time_series_plots(run_time_series, init_sim_job)
 
-    print("plots made")
+    print_process_msg("finished plots")

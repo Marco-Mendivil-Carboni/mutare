@@ -4,7 +4,7 @@ import pandas as pd
 from enum import IntEnum, auto
 from typing import Any
 
-from .exec import SimJob
+from .exec import SimJob, print_process_msg
 
 OBSERVABLES = [
     "time",
@@ -23,8 +23,6 @@ SCALAR_OBSERVABLES = [
     for obs in OBSERVABLES
     if obs not in {"avg_strat_phe", "dist_strat_phe", "dist_phe"}
 ]
-
-MAX_ROWS = 4096
 
 ANALYSIS = [
     "dist_n_agents",
@@ -61,19 +59,27 @@ def add_sim_info(df_or_dict: pd.DataFrame | dict[str, Any], sim_job: SimJob) -> 
 def collect_run_time_series(sim_job: SimJob, run_idx: int) -> pd.DataFrame:
     run_time_series = []
     run_dir = sim_job.sim_dir / f"run-{run_idx:04}"
+    last_time = 0.0
+    MAX_TIME = 65_536
+
     for file_idx in range(sim_job.run_options.n_files):
         file_path = run_dir / f"output-{file_idx:04}.msgpack"
         with file_path.open("rb") as file:
             output = msgpack.Unpacker(file)
             for message in output:
+                if last_time >= MAX_TIME:
+                    break
+
                 obs = {key: message[idx] for idx, key in enumerate(OBSERVABLES)}
                 row = {key: obs.get(key) for key in SCALAR_OBSERVABLES}
                 row.update({"avg_strat_phe_0": obs["avg_strat_phe"][0]})
                 row.update({"dist_phe_0": obs["dist_phe"][0]})
                 add_sim_info(row, sim_job)
                 run_time_series.append(row)
-                if len(run_time_series) >= MAX_ROWS:
-                    return pd.DataFrame(run_time_series)
+                last_time = obs["time"]
+
+    print_process_msg("collected 'run_time_series'")
+
     return pd.DataFrame(run_time_series)
 
 
@@ -119,6 +125,6 @@ def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
 
         avg_analyses.append(avg_analysis)
 
-    print("analyses collected")
+    print_process_msg("collected 'avg_analyses'")
 
     return pd.concat(avg_analyses, ignore_index=True)

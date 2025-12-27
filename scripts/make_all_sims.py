@@ -27,7 +27,7 @@ CHAT_ID = os.getenv("CHAT_ID")
 
 
 def log(message: str, notify: bool) -> None:
-    print(message)
+    print(message, flush=True)
     if not notify:
         return
     if TOKEN and CHAT_ID:
