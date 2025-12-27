@@ -26,15 +26,15 @@
 
 \section{Introduction and objectives} \label{sec:introduction}
 
-Adaptation in fluctuating environments is a central problem in evolutionary biology \cite{dinisPhaseTransitionsOptimal2020}. Natural populations rarely experience constant conditions: rather, they face environments that change unpredictably over time, often on ecological or evolutionary timescales. In such contexts, the success of a population depends not only on the intrinsic fitness of individual phenotypes but also on their ability to persist and reproduce across variable conditions.
+Adaptation in fluctuating environments is a central problem in evolutionary biology \cite{dinisPhaseTransitionsOptimal2020}. Natural populations rarely experience constant conditions: rather, they face environments that change unpredictably over time, often on ecological or evolutionary timescales. In such contexts, the success of a population depends not only on the intrinsic fitness of individual phenotypes but also on their ability to persist and grow across variable conditions.
 
 A classical view of evolution suggests that populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$ (also called fitness). However, when environmental fluctuations are strong and extinction risk is non-negligible, selection may favor strategies that sacrifice some fitness in exchange for a lower extinction rate $r_e$.
 
-The purpose of this work is to investigate, through numerical simulations, how adaptation in uncertain environments gives rise to phenotypic diversity and whether the strategies that emerge correspond to those of maximal fitness or to safer, more resilient alternatives. The tool \emph{mutare} provides a framework to simulate and analyze such evolutionary dynamics with a simple stochastic model that we will describe in the next section.
+The purpose of this work is to investigate, through numerical simulations, how adaptation in uncertain environments gives rise to phenotypic diversity and whether the strategies that emerge correspond to those of maximal fitness or to safer, more resilient alternatives. The tool \emph{mutare} provides a framework to simulate and analyze such evolutionary dynamics with a simple stochastic model that we will describe in detail in \autoref{sec:model}.
 
 \section{The model: a Markov process} \label{sec:model}
 
-We consider a population with an initial number of agents $N_i$ evolving in an environment that fluctuates randomly over time. The \emph{environment} is modeled as a discrete variable with $n_{\text{env}}$ possible states, denoted by $e\in\{0,\dots,n_{\text{env}}-1\}$, which evolve according to a continuous-time Markov chain with transition rates $\omega_t(e,e')$ between states $e$ and $e'$.
+We consider a population with an initial number of agents $N_i$ evolving in an environment that fluctuates randomly over time. The \emph{environment} is modeled as a discrete variable with $n_{\text{env}}$ possible states, $e\in\{0,\dots,n_{\text{env}}-1\}$, which evolve according to a continuous-time Markov chain with transition rates $\omega_t(e,e')$ between states $e$ and $e'$.
 
 Each agent is characterized by a \emph{phenotype} $\phi\in\{0,\dots,n_{\text{phe}}-1\}$ and a \emph{phenotypic strategy} $s(\phi)$, which represents a probability distribution (see \autoref{eq:phenotypic_strategy}) over the possible phenotypes:
 \begin{equation} \label{eq:phenotypic_strategy}
@@ -44,11 +44,25 @@ The phenotypic strategy determines the phenotype of the offspring, introducing a
 
 Population dynamics occur through stochastic birth and death processes that depend on both the current environment and the phenotype of the agent. The matrices $\omega_b(e,\phi)$ and $\omega_d(e,\phi)$ denote the birth and death rates of phenotype $\phi$ in environment $e$, respectively. The net growth rate in a given environment thus depends on the phenotypic composition of the population.
 
-When an agent reproduces, its offspring inherits the parent's phenotypic strategy $s(\phi)$, but with probability $p_{\text{mut}}$ a mutation occurs, leading to a new random strategy. This mechanism allows for evolutionary exploration of the space of possible strategies.
+When an agent replicates, its offspring inherits the parent's phenotypic strategy $s(\phi)$, but with probability $p_{\text{mut}}$ a mutation occurs, leading to a new random strategy. This mechanism allows for evolutionary exploration of the space of possible strategies.
 
-The total population size is capped at the initial value $N_i$: whenever reproduction would cause the population to exceed this value, a random agent is removed. This mimics a form of ecological carrying capacity. If the population goes extinct, it is reinitialized, allowing for long-term statistical characterization of the dynamics.
+The total population size is capped at the initial value $N_i$: whenever replication would cause the population to exceed this value, a random agent is removed. This mimics a form of ecological carrying capacity. If the population goes extinct, it is reinitialized, allowing for long-term statistical characterization of the dynamics.
 
-During the simulation, several observables are measured, including the average population growth rate $\langle\mu\rangle$, the extinction rate $r_e$, and the distribution of phenotypic strategies $p(s(0))$. These quantities provide insight into whether evolution favors the maximization of mean fitness, the minimization of extinction risk, or the emergence of mixed strategies balancing both goals.
+We will restrict ourselves to the case $n_{\text{env}}=n_{\text{phe}}=2$. To solve the stochastic model we will use the Gillespie algorithm [ADD CITE].
+
+During the simulation, the following observables are measured:
+\begin{itemize}
+    \item time $t$
+    \item time step $\Delta t$
+    \item number of agents $N$
+    \item population growth rate $\mu$
+    \item number of extinctions so far $n_e$ (from which we obtain the extinction rate $r_e$)
+    \item average phenotypic strategy $\langle s(0)\rangle$
+    \item standard deviation of the phenotypic strategy $\sigma_s$
+    \item distribution of phenotypic strategies $p(s(0))$
+    \item distribution of phenotypes $p_{\phi}(0)$
+\end{itemize}
+These quantities will provide insight into whether evolution favors the maximization of mean fitness, the minimization of extinction risk, or the emergence of mixed strategies balancing both goals.
 
 \section{Results: phenotypic diversity and safe strategies} \label{sec:results}
 
@@ -62,7 +76,7 @@ In \autoref{fig:symmetric_strat_phe_0_i}, \autoref{fig:symmetric_prob_mut} and \
     \item $N_i=100$
 \end{itemize}
 
-In these figures we show the results of three kinds of simulations: \texttt{fixed} (all agents share a prescribed, non-evolving strategy, $p_{\text{mut}}$ is set to $0$ in this case), \texttt{evolutive} (the initial population is monomorphic and strategies evolve by mutation and selection), and \texttt{random} (each agent begins with an independent random strategy that will evolve like in the previous case). In all the panels where they appear, the dotted lines mark the extinction-minimizing strategy and the dash-dot lines mark the growth-maximizing strategy, serving as visual references for comparison.
+In these figures we show the results of three kinds of simulations: \texttt{fixed} (all agents share a prescribed, non-evolving strategy, $p_{\text{mut}}$ is set to $0$ in this case), \texttt{evolutive} (the initial population is monomorphic and strategies evolve by mutation and selection), and \texttt{random} (each agent begins with an independent random strategy that will evolve like in the previous case). In this panels the gray dotted lines mark the extinction-minimizing strategy and the gray dashed lines mark the growth-maximizing strategy, serving as visual references for comparison.
 
 In \autoref{fig:asymmetric_strat_phe_0_i}, \autoref{fig:asymmetric_prob_mut} and \autoref{fig:asymmetric_n_agents_i} we show the results for the following \emph{asymmetric} parameters:
 \begin{itemize}
@@ -75,7 +89,7 @@ For the parameter sets analyzed here, the fixed-strategy simulations (i.e., with
 
 It is important to emphasize that the appearance of mixed optimal strategies (bet hedging) is not general across all possible parameters, but rather a feature of the particular parameter choices used here, selected precisely because they allow the study of trade-offs between growth maximization and extinction avoidance.
 
-We must clarify that in the average-strategy plots, the error bands represent the instantaneous dispersion of strategies across agents, not the dispersion accumulated over time. This dispersion remains small throughout all these simulations, implying that at any moment the population is almost monomorphic, even though mutation-driven exploration over long times is broad (see distribution panels in \autoref{fig:symmetric_strat_phe_0_i} and \autoref{fig:asymmetric_strat_phe_0_i}). This justifies comparing the \texttt{evolutive} and \texttt{random} simulations directly with the \texttt{fixed} simulations.
+We must clarify that in the average-strategy plots, the error bands represent the instantaneous dispersion of strategies across agents ($\sigma_s$), not the dispersion accumulated over time. This dispersion remains small throughout all these simulations, implying that at any moment the population is almost monomorphic, even though mutation-driven exploration over long times is broad (see distribution panels in \autoref{fig:symmetric_strat_phe_0_i} and \autoref{fig:asymmetric_strat_phe_0_i}). This justifies comparing the \texttt{evolutive} and \texttt{random} simulations directly with the \texttt{fixed} simulations.
 
 In \autoref{fig:extended_strat_phe_0_i} we show the results for the following \emph{extended} parameters:
 \begin{itemize}
@@ -89,7 +103,7 @@ Finally, the nature of the evolved strategy depends strongly on population size 
 
 The remaining four figures (\autoref{fig:symmetric_prob_mut}, \autoref{fig:symmetric_n_agents_i}, \autoref{fig:asymmetric_prob_mut} and \autoref{fig:asymmetric_n_agents_i}) illustrate how the evolutionary outcome (starting from a random initial condition) changes when we vary either the mutation probability or the population size.
 
-The effect of changing the number of agents (\autoref{fig:symmetric_n_agents_i} and \autoref{fig:asymmetric_n_agents_i}) behaves as expected. As the (maximum) population size $N_i$ increases, the evolved $\langle s(0)\rangle$ approaches the growth-maximizing value obtained from the fixed-strategy simulations. Likewise, the distribution of strategies explored over long evolutionary time becomes increasingly concentrated. A somewhat counterintuitive effect appears in the instantaneous dispersion: although the long-term distribution tightens with increasing $N_i$, the instantaneous dispersion increases slightly. This occurs because larger populations allow multiple very similar strategies to coexist for longer periods without being lost by drift, i.e. in small populations, nearly identical strategies tend to go extinct rapidly and only one survives at any moment. All other panels in these figures follow directly from this behavior.
+The effect of changing the number of agents (\autoref{fig:symmetric_n_agents_i} and \autoref{fig:asymmetric_n_agents_i}) behaves as expected. As the (maximum) population size $N_i$ increases, the evolved $\langle s(0)\rangle$ approaches the growth-maximizing value obtained from the fixed-strategy simulations. Likewise, the distribution of strategies explored over long evolutionary time becomes increasingly concentrated. A somewhat counterintuitive effect appears in the instantaneous dispersion: although the long-term distribution tightens with increasing $N_i$, the instantaneous dispersion increases slightly. This occurs because larger populations allow multiple very similar strategies to coexist for longer periods without being lost by drift [CITE?]. All other panels in these figures follow directly from this behavior.
 
 Changing the mutation probability (\autoref{fig:symmetric_prob_mut} and \autoref{fig:asymmetric_prob_mut}) produces a richer and less intuitive set of behaviors. For very large mutation probabilities (close to $1$), the biological relevance is limited, but the dynamics are clear: the population behaves almost as if fully randomized each generation. Both phenotypes appear with approximately $50\%$ frequency throughout the simulation, and the instantaneous dispersion is correspondingly extremely large. In this regime, the results essentially reproduce those of a fixed strategy with a 50--50 phenotype mixture.
 
@@ -99,15 +113,23 @@ For even smaller mutation probabilities, the system enters a regime in which mut
 
 In addition to the strategy-related observables discussed above, two further quantities provide complementary insight into the underlying evolutionary and ecological dynamics: (i) the distribution of the normalized population size $N/N_i$ during the simulations, and (ii) the distribution of actual phenotypes present in the population at each time step.
 
-Across all parameter regimes explored, the distribution of $N/N_i$ exhibits a dominant peak at $1$, indicating that populations typically remain close to the carrying capacity. This reflects that the average long-term growth rate is positive under all strategies visited during the simulations. The informative part of the distribution lies in its tail, which broadens systematically as extinction risk increases. Wider tails imply more frequent or deeper demographic bottlenecks, consistent with the interpretation that populations experiencing a higher extinction rate also undergo larger fluctuations in size.
+Across all parameter regimes explored, the distribution of $N/N_i$ exhibits a clear peak at $1$, indicating that populations typically remain close to the carrying capacity. This reflects that the average long-term growth rate is positive under all strategies visited during the simulations. The informative part of the distribution lies in its tail, which broadens systematically as extinction risk increases. Wider tails imply more frequent or deeper demographic bottlenecks.
 
-The structure of this tail reveals additional dynamical information. In the symmetric parameter set, the population-size distribution develops a secondary maximum whose location varies with the underlying strategy. This secondary peak approaches zero for strategies dominated by a phenotype maladapted to the currently unfavorable environment, rises toward values close to $1$ when there is always a significant proportion of agents adapted to each environment, and returns to zero as the strategy shifts further.
+The structure of this tail reveals additional dynamical information. In the symmetric parameter set, the population-size distribution develops a secondary maximum whose location varies with the underlying strategy. This secondary peak approaches $0$ for strategies dominated by a single phenotype (either one) and approaches $1$ when there is a significant proportion of agents adapted to each environment.
 
-In contrast, under the asymmetric parameters the secondary peak instead shifts monotonically from $0$ to $1$ as the strategy moves from the ``risky'' phentoype to the ``safe'' one. This is consistent with the fact that committing to the safe phenotype prevents severe population declines, whereas betting entirely on the environmentally fragile phenotype leads to repeated near-extinction events whenever the environment turns unfavorable. An intriguing effect, which we do not yet fully understand, is that the height of the secondary peak relative to the main peak tends to decrease as the population size $N_i$ increases.
+In contrast, under the asymmetric parameters the secondary peak instead shifts monotonically from $0$ to $1$ as the strategy moves from the ``risky'' phentoype to the ``safe'' one. This is consistent with the fact that committing to the safe phenotype prevents severe population declines, whereas betting entirely on the environmentally fragile phenotype leads to repeated near-extinction events whenever the environment turns unfavorable. An intriguing effect, which we do not yet understand, is that the height of the secondary peak relative to the main peak tends to decrease as the population size $N_i$ increases.
 
-The second observable concerns the actual distribution of phenotypes present in the population at each time, which in general does not coincide with the underlying phenotypic strategy. This discrepancy is substantial in the asymmetric case. The mismatch arises because the realized phenotype frequencies respond directly to differential birth and death rates in each environment, whereas the strategy specifies only the probabilities with which phenotypes are produced at reproduction.
+The second observable concerns the actual distribution of phenotypes present in the population at each time $p_{\phi}(0)$, which in general does not coincide with the underlying phenotypic strategy. This discrepancy is substantial in the asymmetric case. The mismatch arises because the realized phenotype frequencies on the death rates of the phenotypes in each environment, whereas the strategy specifies only the probabilities with which phenotypes are produced at replication.
 
-It is also important to compare this observable to the theoretical equilibrium distributions obtained from the dominant eigenvector of the environment dependent birth and death matrices for a fixed strategy. For any fixed strategy and fixed environment $e$, this eigenvector gives the expected stable composition of phenotypes in a large population in the absence of stochasticity. As expected, the actual phenotype distribution observed in simulations always lies between the theoretical equilibrium lines corresponding to the two environments. These equilibrium curves appear nearly linear functions of the strategy (and may indeed be analytically linear for this class of models, it is left as an excercise for the reader).
+It is also important to compare this observable to the theoretical equilibrium distributions for a fixed strategy $s(\phi)$ and a fixed environment $e$, obtained from the dominant eigenvector of the matrix
+\begin{equation} \label{eq:equilibrium_matrix}
+    \begin{pmatrix}s(0)\omega_b(e,0)-\omega_d(e,0)&s(0)\omega_b(e,1)\\s(1)\omega_b(e,0)&s(1)\omega_b(e,1)-\omega_d(e,1)\end{pmatrix}.
+\end{equation}
+This eigenvector gives the expected stable composition of phenotypes in a large population in the absence of stochasticity. As expected, the actual phenotype distribution observed in the fixed simulations always lies between the theoretical equilibrium lines corresponding to the two environments. These equilibrium curves appear nearly linear functions of the strategy (and may indeed be analytically linear for this class of models, the proof is left as an excercise for the reader).
+
+COMMENT TIME SERIES
+
+\newpage
 
 \printbibliography
 
