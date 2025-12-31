@@ -127,7 +127,20 @@ It is also important to compare this observable to the theoretical equilibrium d
 \end{equation}
 This eigenvector gives the expected stable composition of phenotypes in a large population in the absence of stochasticity. As expected, the actual phenotype distribution observed in the fixed simulations always lies between the theoretical equilibrium lines corresponding to the two environments. These equilibrium curves appear nearly linear functions of the strategy (and may indeed be analytically linear for this class of models, the proof is left as an excercise for the reader).
 
-COMMENT TIME SERIES
+The time series plots are consistent with the previous results but don't show any fundamentally new information, they reassure us though that when the instantaneous dispersion is small the population is indeed almost monomorphic and thus talking about a common strategy for the population makes sense.
+
+\section{Discussion and outlook} \label{sec:discussion}
+
+The numerical results presented here naturally raise the question of what quantity evolution is effectively optimizing in finite populations subject to demographic stochasticity and environmental fluctuations. While classical evolutionary theory predicts maximization of long-term growth rate in large populations, our results suggest that this principle breaks down once extinction becomes a relevant event CITE GILLESPIE1977 ALREADY POINTED THIS OUT. In particular, the observed convergence toward safer, lower-growth strategies at small population sizes points to the existence of an alternative optimization principle that explicitly incorporates extinction risk. Identifying such a principle, and understanding how it interpolates between growth maximization and extinction avoidance as population size varies, remains an important open problem. Some possible expresions for fitness:
+\begin{equation} \label{eq:effective_fitness}
+    \mu-\frac{1}{2}\sigma_\mu, \ \mu-\frac{1}{N_i}\sigma_\mu, \ \mu-N_i\cdot r_e, \ \dots
+\end{equation}
+
+From a theoretical perspective, extinction in a growing population is a rare, large-fluctuation event. This places the problem squarely within the framework of large deviations theory for stochastic birth-death processes, as developed in works such as ASSAF \& MEERSON. In this framework, the extinction rate is expected to scale exponentially with population size, $r_e\sim\exp(-N_i\cdot S(s))$, where the action $S(s)$ depends on the underlying phenotypic strategy and the model parameters. This scaling provides a natural explanation for why small changes in strategy can lead to dramatic differences in extinction risk, even when average growth rates differ only slightly.
+
+Several extensions of the present work could help clarify these issues. A systematic study of the scaling of extinction rates with population size for fixed strategies would allow direct numerical estimation of the action $S(s)$. This would make it possible to test whether the evolved strategies indeed minimize extinction rate, and more broadly, connecting the observed evolutionary attractors to quasi-stationary distributions (as studied, for instance, by CHAZOTTES, COLLET \& MÉLEARD) could provide a rigorous theoretical foundation for understanding adaptation in fluctuating and risky environments.
+
+It remains to be explained as well the dependance of the evolved strategies on $p_{\text{mut}}$. For fixed strategies one could try to aproximate the growth rate and the extinction risk with the theoretical results for the fast and slow varying environment limits (and we could also make simulations in thsi two limits). We could also reintroduce small mutations (and thus another parameter) to check in more detail how similar the results are and whether the attractor is truly stable and does not depend on the mutation kernel. Finally, a very natural extension would be to allow strategies to depend on the current environment (with noise): sensing.
 
 \newpage
 
