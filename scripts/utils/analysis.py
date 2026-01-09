@@ -107,6 +107,10 @@ def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
             analysis["dist_phe_0"] = analysis["dist_phe"][0]
             analysis.pop("dist_phe")
             analysis = pd.DataFrame(analysis, index=[run_idx])
+            analysis["fitness"] = (
+                analysis["growth_rate"]
+                - sim_job.config["init"]["n_agents"] * analysis["extinct_rate"]
+            )
 
             analyses.append(analysis)
 

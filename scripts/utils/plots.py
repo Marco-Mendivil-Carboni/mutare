@@ -66,6 +66,7 @@ COL_TEX_LABELS: dict[str, str] = {
     "avg_strat_phe_0": "$\\langle s(0)\\rangle$",
     "dist_strat_phe_0": "$s(0)$",
     "dist_phe_0": "$p_{\\phi}(0)$",
+    "fitness": "$w$",
 }
 
 
@@ -282,6 +283,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_5, axs_5 = create_heatmap_figure(param, "dist_strat_phe_0", two_panels)
     fig_6, ax_6 = create_standard_figure(param, "avg_strat_phe_0")
     fig_7, ax_7 = create_standard_figure(param, "dist_phe_0")
+    fig_8, ax_8 = create_standard_figure(param, "fitness")
 
     if param in ["prob_mut", "n_agents_i"]:
         for ax in [axs_4[0], axs_5[0]]:
@@ -333,6 +335,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
 
         plot_mean_and_uncertainty(ax_6, "avg_strat_phe_0", "std_dev_strat_phe")
         plot_mean_and_uncertainty(ax_7, "dist_phe_0", None)
+        plot_mean_and_uncertainty(ax_8, "fitness", None)
 
         if param == "strat_phe_0_i" and sim_type == SimType.FIXED:
             min_extinct = subgroup_df[param][
@@ -341,12 +344,14 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
             max_growth = subgroup_df[param][
                 subgroup_df[("growth_rate", "mean")].idxmax()
             ]
-            for ax in [ax_1, ax_2]:
+            max_fitness = subgroup_df[param][subgroup_df[("fitness", "mean")].idxmax()]
+            for ax in [ax_1, ax_2, ax_8]:
                 ax.axvline(min_extinct, ls=":", **LINE_STYLE)
                 ax.axvline(max_growth, ls="--", **LINE_STYLE)
             for ax in axs_5[:-1] + [ax_6]:
                 ax.axhline(min_extinct, ls=":", **LINE_STYLE)
                 ax.axhline(max_growth, ls="--", **LINE_STYLE)
+            ax_8.axvline(max_fitness, ls="-.", **LINE_STYLE)
 
             plot_dist_phe_0_lims(ax_7, subgroup_df, job)
 
@@ -355,12 +360,12 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         plot_errorbar(ax_3, subgroup_df, "growth_rate", "extinct_rate", True)
 
     if param in ["prob_mut", "n_agents_i"]:
-        for ax in [ax_1, ax_2, ax_6, ax_7]:
+        for ax in [ax_1, ax_2, ax_6, ax_7, ax_8]:
             ax.set_xscale("log")
     for ax in [ax_2, ax_3]:
         ax.set_yscale("log")
 
-    for ax in [ax_1, ax_2, ax_3, ax_6, ax_7]:
+    for ax in [ax_1, ax_2, ax_3, ax_6, ax_7, ax_8]:
         ax.legend()
 
     fig_dir = job.base_dir / "plots" / param
@@ -373,6 +378,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_5.savefig(fig_dir / "dist_strat_phe_0.pdf")
     fig_6.savefig(fig_dir / "avg_strat_phe_0.pdf")
     fig_7.savefig(fig_dir / "dist_phe_0.pdf")
+    fig_8.savefig(fig_dir / "fitness.pdf")
 
 
 def generate_time_series_plots(df: pd.DataFrame, job: SimJob) -> None:

@@ -131,10 +131,11 @@ The time series plots are consistent with the previous results but don't show an
 
 \section{Discussion and outlook} \label{sec:discussion}
 
-The numerical results presented here naturally raise the question of what quantity evolution is effectively optimizing in finite populations subject to demographic stochasticity and environmental fluctuations. While classical evolutionary theory predicts maximization of long-term growth rate in large populations, our results suggest that this principle breaks down once extinction becomes a relevant event CITE GILLESPIE1977 ALREADY POINTED THIS OUT. In particular, the observed convergence toward safer, lower-growth strategies at small population sizes points to the existence of an alternative optimization principle that explicitly incorporates extinction risk. Identifying such a principle, and understanding how it interpolates between growth maximization and extinction avoidance as population size varies, remains an important open problem. Some possible expresions for fitness:
+The numerical results presented here naturally raise the question of what quantity evolution is effectively optimizing in finite populations subject to demographic stochasticity and environmental fluctuations. While classical evolutionary theory predicts maximization of long-term growth rate in large populations, our results suggest that this principle breaks down once extinction becomes a relevant event (\cite{gillespieNaturalSelectionVariances1977} already pointed this out). In particular, the observed convergence toward safer, lower-growth strategies at small population sizes points to the existence of an alternative optimization principle that explicitly incorporates extinction risk. Identifying such a principle, and understanding how it interpolates between growth maximization and extinction avoidance as population size varies, remains an important open problem. Some possible expresions for the fitness are:
 \begin{equation} \label{eq:effective_fitness}
-    \mu-\frac{1}{2}\sigma_\mu, \ \mu-\frac{1}{N_i}\sigma_\mu, \ \mu-N_i\cdot r_e, \ \dots
+    \mu-\frac{1}{2}\sigma_\mu^2, \ \mu-\frac{1}{N_i}\sigma_\mu^2 \ \& \ \mu-N_i\cdot r_e.
 \end{equation}
+The last expression is the one suggest and the one I use in the figures although I do not know yet how to justify it, while the first two were proposed by \cite{gillespieNaturalSelectionVariances1977}.
 
 From a theoretical perspective, extinction in a growing population is a rare, large-fluctuation event. This places the problem squarely within the framework of large deviations theory for stochastic birth-death processes, as developed in works such as ASSAF \& MEERSON. In this framework, the extinction rate is expected to scale exponentially with population size, $r_e\sim\exp(-N_i\cdot S(s))$, where the action $S(s)$ depends on the underlying phenotypic strategy and the model parameters. This scaling provides a natural explanation for why small changes in strategy can lead to dramatic differences in extinction risk, even when average growth rates differ only slightly.
 
@@ -156,6 +157,7 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/dist_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/fitness.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -168,6 +170,7 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/symmetric/plots/prob_mut/dist_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/dist_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/prob_mut/fitness.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -180,6 +183,7 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/symmetric/plots/n_agents_i/dist_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/n_agents_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/n_agents_i/dist_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents_i/fitness.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -201,6 +205,7 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/fitness.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -213,6 +218,7 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/asymmetric/plots/prob_mut/dist_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/dist_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/prob_mut/fitness.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -225,6 +231,7 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents_i/fitness.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -246,6 +253,7 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/extended/plots/strat_phe_0_i/dist_strat_phe_0.pdf}
     \includegraphics{../sims/extended/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/extended/plots/strat_phe_0_i/dist_phe_0.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe_0_i/fitness.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
