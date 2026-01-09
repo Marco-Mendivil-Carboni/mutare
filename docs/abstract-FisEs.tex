@@ -1,0 +1,56 @@
+% Abstract template for FisEs Joven'26
+
+% PLEASE DO NOT MODIFY THE FOLLOWING LINES.
+\documentclass[a4paper]{article}
+\usepackage{authblk, fancyhdr}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{lipsum}
+\usepackage[dvipsnames]{xcolor}
+\usepackage[left=25mm, right=25mm, top=15mm, bottom=20mm, noheadfoot]{geometry}
+
+\pagestyle{fancy}
+
+\providecommand{\keywords}[1]
+{
+  \small{\textbf{\textit{Keywords---}} #1}
+}
+
+\fancyhead[R]{}
+\fancyhead[L]{ \footnotesize{
+IV Congreso FisEs Joven'26 – 10-12 Marzo, 2026}
+}
+
+\begin{document}
+
+% Please change the following abstract title and author description.
+\title{Evolving Safely: Adaptation and Phenotypic Diversity under Environmental and Demographic Constraints}
+
+\author[1]{Marco Mendívil Carboni}
+
+\affil[1]{Departamento de Estructura de la Materia, F\'isica T\'ermica y Electr\'onica and Grupo Interdisciplinar de Sistemas Complejos (GISC), Universidad Complutense Madrid, 28040, Madrid, Spain}
+
+% PLEASE DO NOT MODIFY THE FOLLOWING LINES.
+\date{}
+\maketitle\thispagestyle{fancy}
+\vspace*{-0.75cm}
+
+
+\keywords{Evolutionary dynamics, Continuous-time Markov processes, Phenotypic diversity}
+\bigskip
+
+% BEGINNING OF MAIN ABSTRACT TEXT
+
+Natural populations rarely evolve under stable conditions. In this study, we introduce a minimal stochastic model to explore how adaptation unfolds under fluctuating environments and demographic constraints. By representing both environmental transitions and population dynamics as continuous-time Markov processes, we quantify how different regimes of variability shape evolutionary outcomes. Our results show that under strong environmental uncertainty and population pressure, populations evolve toward ``safer'' strategies, sacrificing part of their reproductive potential to reduce extinction risk. These findings offer a mechanistic perspective on how environmental noise and ecological limits drive the evolution of phenotypic diversity and robustness.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}
+    \caption{Extinction rate and average growth rate in our model for different initial conditions with and without evolutionary dynamics.}
+    \label{fig}
+\end{figure}
+
+% END OF MAIN ABSTRACT TEXT
+
+\end{document}
