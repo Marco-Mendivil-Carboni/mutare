@@ -34,9 +34,7 @@ impl Manager {
     }
 
     /// Create a new simulation run directory and initialize the engine.
-    pub fn create_run(&self) -> Result<()> {
-        let run_idx = self.count_run_dirs().context("failed to count run dirs")?;
-
+    pub fn create_run(&self, run_idx: usize) -> Result<()> {
         let run_dir = self.run_dir(run_idx);
         fs::create_dir_all(&run_dir).with_context(|| format!("failed to create {run_dir:?}"))?;
         log::info!("created {run_dir:?}");
@@ -75,41 +73,27 @@ impl Manager {
         Ok(())
     }
 
-    /// Analyze all output files from all simulation runs and save the analysis.
-    pub fn analyze_sim(&self) -> Result<()> {
-        let n_runs = self.count_run_dirs().context("failed to count run dirs")?;
-        for run_idx in 0..n_runs {
-            let mut analyzer = Analyzer::new(self.cfg.clone());
+    /// Analyze all output files from a simulation run and save the analysis.
+    pub fn analyze_run(&self, run_idx: usize) -> Result<()> {
+        let mut analyzer = Analyzer::new(self.cfg.clone());
 
-            let n_files = self
-                .count_output_files(run_idx)
-                .context("failed to count output files")?;
-            for file_idx in 0..n_files {
-                analyzer
-                    .add_output_file(self.output_file(run_idx, file_idx))
-                    .context("failed to add output file")?;
-            }
-
+        let n_files = self
+            .count_output_files(run_idx)
+            .context("failed to count output files")?;
+        for file_idx in 0..n_files {
             analyzer
-                .analyze(self.analysis_file(run_idx))
-                .context("failed to save analysis")?;
-
-            let run_dir = self.run_dir(run_idx);
-            log::info!("analyzed {run_dir:?}");
+                .add_output_file(self.output_file(run_idx, file_idx))
+                .context("failed to add output file")?;
         }
 
-        Ok(())
-    }
+        analyzer
+            .analyze(self.analysis_file(run_idx))
+            .context("failed to save analysis")?;
 
-    fn count_run_dirs(&self) -> Result<usize> {
-        let pattern = self.sim_dir.join("run-*");
-        let pattern = pattern.to_str().context("pattern is not valid UTF-8")?;
-        let count = glob::glob(pattern)
-            .context("failed to glob run dirs")?
-            .filter_map(Result::ok)
-            .filter(|p| p.is_dir())
-            .count();
-        Ok(count)
+        let run_dir = self.run_dir(run_idx);
+        log::info!("analyzed {run_dir:?}");
+
+        Ok(())
     }
 
     fn run_dir(&self, run_idx: usize) -> PathBuf {

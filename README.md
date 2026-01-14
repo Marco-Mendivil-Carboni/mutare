@@ -19,10 +19,13 @@
 During the simulation, every `steps_per_save` steps, the following observables are computed and saved:
 - Current simulation time
 - Time until the next event
+- Number of agents in the simulation
 - Instantaneous population growth rate
 - Number of extinctions so far
 - Average phenotypic strategy
 - Standard deviation of the phenotypic strategy
+- Distribution of phenotypic strategies
+- Distribution of phenotypes
 
 Every `steps_per_file` steps, the simulation is stopped and a new output file is written to disk.
 
@@ -79,9 +82,9 @@ hist_bins = 16
 Now you can begin making simulation runs and analyzing them. Here are some examples of common commands:
 
 ```bash
-mutare --sim-dir example_sim/ create # Create new simulation run
-mutare --sim-dir example_sim/ resume --run-idx 0  # Resume run 0
-mutare --sim-dir example_sim/ analyze # Analyze all runs
+mutare --sim-dir example_sim/ --run-idx 0 create # Create run 0
+mutare --sim-dir example_sim/ --run-idx 0 resume # Resume run 0
+mutare --sim-dir example_sim/ --run-idx 0 analyze # Analyze run 0
 ```
 
 Run `mutare --help` to see more detailed help information.

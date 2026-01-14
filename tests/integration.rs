@@ -51,16 +51,17 @@ fn basic_workflow() {
         .to_str()
         .expect("failed to convert test directory to string");
 
-    run_bin(&["--sim-dir", test_dir_str, "create"]);
-    run_bin(&["--sim-dir", test_dir_str, "create"]);
+    run_bin(&["--sim-dir", test_dir_str, "--run-idx", "0", "create"]);
+    run_bin(&["--sim-dir", test_dir_str, "--run-idx", "1", "create"]);
 
-    run_bin(&["--sim-dir", test_dir_str, "resume", "--run-idx", "0"]);
-    run_bin(&["--sim-dir", test_dir_str, "resume", "--run-idx", "0"]);
+    run_bin(&["--sim-dir", test_dir_str, "--run-idx", "0", "resume"]);
+    run_bin(&["--sim-dir", test_dir_str, "--run-idx", "0", "resume"]);
 
-    run_bin(&["--sim-dir", test_dir_str, "resume", "--run-idx", "1"]);
-    run_bin(&["--sim-dir", test_dir_str, "resume", "--run-idx", "1"]);
+    run_bin(&["--sim-dir", test_dir_str, "--run-idx", "1", "resume"]);
+    run_bin(&["--sim-dir", test_dir_str, "--run-idx", "1", "resume"]);
 
-    run_bin(&["--sim-dir", test_dir_str, "analyze"]);
+    run_bin(&["--sim-dir", test_dir_str, "--run-idx", "0", "analyze"]);
+    run_bin(&["--sim-dir", test_dir_str, "--run-idx", "1", "analyze"]);
 
     fs::remove_dir_all(&test_dir).ok();
 }

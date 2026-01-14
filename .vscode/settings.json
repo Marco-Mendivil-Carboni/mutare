@@ -8,4 +8,5 @@
     },
     "css.validate": false,
     "latex-workshop.latex.autoBuild.run": "onSave",
+    "explorer.autoReveal": false,
 }

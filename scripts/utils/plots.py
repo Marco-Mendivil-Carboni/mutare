@@ -61,7 +61,7 @@ COL_TEX_LABELS: dict[str, str] = {
     "n_agents": "$N$",
     "n_extinct": "$n_e$",
     "dist_n_agents": "$N/N_i$",
-    "growth_rate": "$\\langle\\mu\\rangle$",
+    "avg_growth_rate": "$\\langle\\mu\\rangle$",
     "extinct_rate": "$r_e$",
     "avg_strat_phe_0": "$\\langle s(0)\\rangle$",
     "dist_strat_phe_0": "$s(0)$",
@@ -236,7 +236,7 @@ def plot_time_series(
     color, label = get_sim_color_and_label(df)
     x = df["time"]
     y = df[y_col]
-    ax.plot(x, y, c=color, label=label, lw=0.25)
+    ax.scatter(x, y, c=color, label=label, lw=0.0, s=0.25)
     if y_span_col is not None:
         y_span = df[y_span_col]
         ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
@@ -276,9 +276,9 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         return
 
     two_panels = param == "strat_phe_0_i"
-    fig_1, ax_1 = create_standard_figure(param, "growth_rate")
+    fig_1, ax_1 = create_standard_figure(param, "avg_growth_rate")
     fig_2, ax_2 = create_standard_figure(param, "extinct_rate")
-    fig_3, ax_3 = create_standard_figure("growth_rate", "extinct_rate")
+    fig_3, ax_3 = create_standard_figure("avg_growth_rate", "extinct_rate")
     fig_4, axs_4 = create_heatmap_figure(param, "dist_n_agents", two_panels)
     fig_5, axs_5 = create_heatmap_figure(param, "dist_strat_phe_0", two_panels)
     fig_6, ax_6 = create_standard_figure(param, "avg_strat_phe_0")
@@ -308,10 +308,10 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
                 if y_span_col is not None:
                     plot_errorband(ax, subgroup_df, param, y_col, y_span_col)
 
-        plot_mean_and_uncertainty(ax_1, "growth_rate", None)
+        plot_mean_and_uncertainty(ax_1, "avg_growth_rate", None)
         plot_mean_and_uncertainty(ax_2, "extinct_rate", None)
 
-        plot_errorbar(ax_3, subgroup_df, "growth_rate", "extinct_rate", True)
+        plot_errorbar(ax_3, subgroup_df, "avg_growth_rate", "extinct_rate", True)
 
         if param == "strat_phe_0_i":
             if sim_type == SimType.FIXED:
@@ -341,23 +341,23 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
             min_extinct = subgroup_df[param][
                 subgroup_df[("extinct_rate", "mean")].idxmin()
             ]
-            max_growth = subgroup_df[param][
-                subgroup_df[("growth_rate", "mean")].idxmax()
+            max_avg_growth = subgroup_df[param][
+                subgroup_df[("avg_growth_rate", "mean")].idxmax()
             ]
             max_fitness = subgroup_df[param][subgroup_df[("fitness", "mean")].idxmax()]
             for ax in [ax_1, ax_2, ax_8]:
                 ax.axvline(min_extinct, ls=":", **LINE_STYLE)
-                ax.axvline(max_growth, ls="--", **LINE_STYLE)
+                ax.axvline(max_avg_growth, ls="--", **LINE_STYLE)
             for ax in axs_5[:-1] + [ax_6]:
                 ax.axhline(min_extinct, ls=":", **LINE_STYLE)
-                ax.axhline(max_growth, ls="--", **LINE_STYLE)
+                ax.axhline(max_avg_growth, ls="--", **LINE_STYLE)
             ax_8.axvline(max_fitness, ls="-.", **LINE_STYLE)
 
             plot_dist_phe_0_lims(ax_7, subgroup_df, job)
 
     if param == "prob_mut":
         subgroup_df = df[df["sim_type"] == SimType.FIXED].sort_values("strat_phe_0_i")
-        plot_errorbar(ax_3, subgroup_df, "growth_rate", "extinct_rate", True)
+        plot_errorbar(ax_3, subgroup_df, "avg_growth_rate", "extinct_rate", True)
 
     if param in ["prob_mut", "n_agents_i"]:
         for ax in [ax_1, ax_2, ax_6, ax_7, ax_8]:
@@ -371,7 +371,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_dir = job.base_dir / "plots" / param
     fig_dir.mkdir(parents=True, exist_ok=True)
 
-    fig_1.savefig(fig_dir / "growth_rate.pdf")
+    fig_1.savefig(fig_dir / "avg_growth_rate.pdf")
     fig_2.savefig(fig_dir / "extinct_rate.pdf")
     fig_3.savefig(fig_dir / "rates.pdf")
     fig_4.savefig(fig_dir / "dist_n_agents.pdf")

@@ -51,58 +51,64 @@ def scan_sims_dir() -> ProgressInfo:
 
     progress_info = ProgressInfo(0, 0, set())
 
+    def check_dir_entry_names(
+        dir: Path, expected_dir_entry_names: set[str]
+    ) -> set[str]:
+        dir_entry_names = (
+            {path.name for path in dir.iterdir()} if dir.is_dir() else set()
+        )
+        progress_info.extra_entries |= {
+            dir / entry_name
+            for entry_name in dir_entry_names - expected_dir_entry_names
+        }
+        return dir_entry_names
+
+    expected_sims_dir_entry_names = {"output.log"}
+
     for sims_config in SIMS_CONFIGS:
         yield_or_raise(worker)
         sim_jobs = create_sim_jobs(sims_config)
         base_dir = sims_config.init_sim_job.base_dir
-        run_options = sims_config.init_sim_job.run_options
+        n_runs = sims_config.init_sim_job.n_runs
+        n_files = sims_config.init_sim_job.n_files
+
+        expected_sims_dir_entry_names |= {base_dir.name}
 
         yield_or_raise(worker)
         sim_dirs = {sim_job.sim_dir for sim_job in sim_jobs}
 
-        expected_base_dir_entry_names = {sim_dir.name for sim_dir in sim_dirs}.union(
-            {"plots"}
-        )
-        run_dir_names = {f"run-{run_idx:04}" for run_idx in range(run_options.n_runs)}
-        expected_sim_dir_entry_names = run_dir_names.union(
-            {".lock", "config.toml", "output.log"}
-        )
+        sim_dir_names = {sim_dir.name for sim_dir in sim_dirs}
+        expected_base_dir_entry_names = sim_dir_names | {"plots"}
+        run_dir_names = {f"run-{run_idx:04}" for run_idx in range(n_runs)}
+        expected_sim_dir_entry_names = run_dir_names | {"config.toml"}
         expected_run_dir_entry_names = {
-            f"output-{file_idx:04}.msgpack" for file_idx in range(run_options.n_files)
-        }.union({"checkpoint.msgpack", "analysis.msgpack"})
+            f"output-{file_idx:04}.msgpack" for file_idx in range(n_files)
+        } | {"checkpoint.msgpack", "analysis.msgpack", ".lock", "output.log"}
 
-        progress_info.n_expected_msgpacks += (
-            len(sim_dirs) * run_options.n_runs * (run_options.n_files + 2)
-        )
+        progress_info.n_expected_msgpacks += len(sim_dirs) * n_runs * (n_files + 2)
 
         yield_or_raise(worker)
-        base_dir_entry_names = {path.name for path in base_dir.iterdir()}
-        progress_info.extra_entries |= {
-            base_dir / entry_name
-            for entry_name in base_dir_entry_names - expected_base_dir_entry_names
-        }
+        check_dir_entry_names(base_dir, expected_base_dir_entry_names)
 
         for sim_dir in sim_dirs:
             run_dirs = {sim_dir / run_dir_name for run_dir_name in run_dir_names}
 
             yield_or_raise(worker)
-            sim_dir_entry_names = {path.name for path in sim_dir.iterdir()}
-            progress_info.extra_entries |= {
-                sim_dir / entry_name
-                for entry_name in sim_dir_entry_names - expected_sim_dir_entry_names
-            }
+            check_dir_entry_names(sim_dir, expected_sim_dir_entry_names)
 
             for run_dir in run_dirs:
                 yield_or_raise(worker)
-                run_dir_entry_names = {path.name for path in run_dir.iterdir()}
-                progress_info.extra_entries |= {
-                    run_dir / entry_name
-                    for entry_name in run_dir_entry_names - expected_run_dir_entry_names
-                }
+                run_dir_entry_names = check_dir_entry_names(
+                    run_dir, expected_run_dir_entry_names
+                )
 
                 progress_info.n_missing_msgpacks += len(
-                    expected_run_dir_entry_names - run_dir_entry_names
+                    expected_run_dir_entry_names
+                    - {".lock", "output.log"}
+                    - run_dir_entry_names
                 )
+
+    check_dir_entry_names(SIMS_DIR, expected_sims_dir_entry_names)
 
     return progress_info
 
@@ -177,7 +183,7 @@ class SimsManager(App):
             SubPanel(self.extra_text, self.delete_extra),
         )
 
-        self.log_text = Log(max_lines=1024)
+        self.log_text = Log()
         self.log_panel = Panel(PanelTitle(Label("Log:")), SubPanel(self.log_text))
 
         yield ItemGrid(
@@ -248,7 +254,10 @@ class SimsManager(App):
             if log_mtime != self._last_log_mtime:
                 self._last_log_mtime = log_mtime
                 self.log_text.clear()
-                self.log_text.write(LOG_FILE.read_text())
+                MAX_LOG_LINES = 1_024
+                with LOG_FILE.open() as log_file:
+                    for log_line in log_file.readlines()[-MAX_LOG_LINES:]:
+                        self.log_text.write(log_line)
         self.log_panel.loading = False
 
     @on(Button.Pressed, "#update-progress")
@@ -277,6 +286,12 @@ class SimsManager(App):
             if sims_running():
                 self.notify("Simulations are already running", severity="warning")
                 return
+
+            if await self.push_screen_wait(
+                DialogScreen("Remove previous analysis files?")
+            ):
+                for file in SIMS_DIR.rglob("analysis.msgpack"):
+                    file.unlink()
 
             command = [str(MAKE_ALL_SIMS)]
             if await self.push_screen_wait(

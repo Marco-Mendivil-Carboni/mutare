@@ -26,7 +26,7 @@ SCALAR_OBSERVABLES = [
 
 ANALYSIS = [
     "dist_n_agents",
-    "growth_rate",
+    "avg_growth_rate",
     "extinct_rate",
     "avg_strat_phe",
     "std_dev_strat_phe",
@@ -58,16 +58,17 @@ def add_sim_info(df_or_dict: pd.DataFrame | dict[str, Any], sim_job: SimJob) -> 
 
 def collect_run_time_series(sim_job: SimJob, run_idx: int) -> pd.DataFrame:
     run_time_series = []
-    run_dir = sim_job.sim_dir / f"run-{run_idx:04}"
-    last_time = 0.0
-    MAX_TIME = 65_536
+    n_rows = 0
+    MAX_ROWS = 4_096
 
-    for file_idx in range(sim_job.run_options.n_files):
-        file_path = run_dir / f"output-{file_idx:04}.msgpack"
+    for file_idx in range(sim_job.n_files):
+        file_path = (
+            sim_job.sim_dir / f"run-{run_idx:04}" / f"output-{file_idx:04}.msgpack"
+        )
         with file_path.open("rb") as file:
             output = msgpack.Unpacker(file)
             for message in output:
-                if last_time >= MAX_TIME:
+                if n_rows >= MAX_ROWS:
                     break
 
                 obs = {key: message[idx] for idx, key in enumerate(OBSERVABLES)}
@@ -76,7 +77,7 @@ def collect_run_time_series(sim_job: SimJob, run_idx: int) -> pd.DataFrame:
                 row.update({"dist_phe_0": obs["dist_phe"][0]})
                 add_sim_info(row, sim_job)
                 run_time_series.append(row)
-                last_time = obs["time"]
+                n_rows += 1
 
     print_process_msg("collected 'run_time_series'")
 
@@ -94,7 +95,7 @@ def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
     avg_analyses = []
     for sim_job in sim_jobs:
         analyses = []
-        for run_idx in range(sim_job.run_options.n_runs):
+        for run_idx in range(sim_job.n_runs):
             analysis = read_analysis(sim_job.sim_dir, run_idx)
             for bin, ele in enumerate(analysis["dist_n_agents"]):
                 analysis[f"dist_n_agents_{bin}"] = ele
@@ -108,7 +109,7 @@ def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
             analysis.pop("dist_phe")
             analysis = pd.DataFrame(analysis, index=[run_idx])
             analysis["fitness"] = (
-                analysis["growth_rate"]
+                analysis["avg_growth_rate"]
                 - sim_job.config["init"]["n_agents"] * analysis["extinct_rate"]
             )
 

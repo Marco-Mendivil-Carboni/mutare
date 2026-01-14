@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import os
 import requests
 
-from utils.exec import SimsConfig, create_sim_jobs, execute_sim_jobs
+from utils.exec import SimsConfig, create_sim_jobs, exec_sim_jobs
 from utils.plots import plot_sim_jobs
 
 from sims_configs import SIMS_DIR, SIMS_CONFIGS
@@ -49,7 +49,7 @@ def make_sims(sims_config: SimsConfig, notify: bool) -> None:
         raise ValueError(f"'{base_dir}' must be inside '{SIMS_DIR}'")
 
     sim_jobs = create_sim_jobs(sims_config)
-    execute_sim_jobs(sim_jobs)
+    exec_sim_jobs(sim_jobs)
     plot_sim_jobs(sim_jobs)
 
     log(f"'{base_dir.name}' simulations finished", notify)

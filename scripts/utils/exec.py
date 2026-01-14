@@ -44,60 +44,93 @@ def build_bin():
     subprocess.run(["cargo", "build", "--release"], check=True, capture_output=True)
 
 
-def run_bin(sim_dir: Path, extra_args: list[str]) -> None:
+@dataclass
+class SimRun:
+    sim_dir: Path
+    run_idx: int
+    n_files: int
+
+    @property
+    def run_dir(self) -> Path:
+        run_dir = self.sim_dir / f"run-{self.run_idx:04}"
+        run_dir.mkdir(parents=True, exist_ok=True)
+        return run_dir
+
+
+class RunResult(Enum):
+    FINISHED = auto()
+    STOPPED = auto()
+    FAILED = auto()
+
+
+def exec_bin(sim_run: SimRun, sim_cmd: str) -> None:
     if stop_requested:
         raise StopRequested()
 
     project_root = Path(__file__).resolve().parents[2]
-    binary = project_root / "target" / "release" / "mutare"
+    binary = str(project_root / "target" / "release" / "mutare")
 
-    with open(sim_dir / "output.log", "w", buffering=1) as output_file:
-        args = [str(binary), "--sim-dir", str(sim_dir)] + extra_args
+    sim_dir = str(sim_run.sim_dir)
+    run_idx = str(sim_run.run_idx)
+    run_dir = sim_run.run_dir
+    with open(run_dir / "output.log", "w", buffering=1) as output_file:
+        args = [binary, "--sim-dir", sim_dir, "--run-idx", run_idx, sim_cmd]
         subprocess.run(args, stdout=output_file, stderr=subprocess.STDOUT, check=True)
 
 
-@dataclass
-class RunOptions:
-    n_runs: int
-    n_files: int
+def exec_sim_run(sim_run: SimRun):
+    run_idx = sim_run.run_idx
+    n_files = sim_run.n_files
 
+    try:
+        print_process_msg(f"starting run {run_idx}")
 
-def run_sim(sim_dir: Path, run_options: RunOptions) -> None:
-    analyze = False
+        run_dir = sim_run.run_dir
+        with open(run_dir / ".lock", "w") as lock_file:
+            fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
 
-    n_runs = len(list(sim_dir.glob("run-*")))
-    while n_runs < run_options.n_runs:
-        print_process_msg(f"creating run {n_runs}")
-        run_bin(sim_dir, ["create"])
-        n_runs += 1
+            analyze = False
 
-    for run_idx in range(run_options.n_runs):
-        run_dir = sim_dir / f"run-{run_idx:04}"
+            if not (run_dir / "checkpoint.msgpack").exists():
+                print_process_msg(f"creating run {run_idx}")
+                exec_bin(sim_run, "create")
+                analyze = True
 
-        if not (run_dir / "analysis.msgpack").exists():
-            analyze = True
+            curr_n_files = len(list(run_dir.glob("output-*")))
+            while curr_n_files < n_files:
+                print_process_msg(f"resuming run {run_idx} ({curr_n_files})")
+                exec_bin(sim_run, "resume")
+                curr_n_files += 1
+                analyze = True
 
-        n_files = len(list(run_dir.glob("output-*")))
-        while n_files < run_options.n_files:
-            print_process_msg(f"resuming run {run_idx} file {n_files}")
-            run_bin(sim_dir, ["resume", "--run-idx", str(run_idx)])
-            analyze = True
-            n_files += 1
+            if not (run_dir / "analysis.msgpack").exists():
+                analyze = True
 
-    if analyze:
-        print_process_msg("analyzing all runs")
-        run_bin(sim_dir, ["analyze"])
+            if analyze:
+                print_process_msg(f"analyzing run {run_idx}")
+                exec_bin(sim_run, "analyze")
+
+        print_process_msg(f"run {run_idx} finished")
+        return RunResult.FINISHED
+
+    except StopRequested:
+        print_process_msg(f"run {run_idx} stopped")
+        return RunResult.STOPPED
+
+    except Exception as exception:
+        print_process_msg(f"run {run_idx} failed: {exception}")
+        return RunResult.FAILED
 
 
 @dataclass
 class SimJob:
     base_dir: Path
     config: Config
-    run_options: RunOptions
+    n_runs: int
+    n_files: int
 
     def __post_init__(self):
         self.config = deepcopy(self.config)
-        self.run_options = deepcopy(self.run_options)
 
     @property
     def sim_dir(self) -> Path:
@@ -115,7 +148,8 @@ class SimsConfig:
 def create_sim_jobs(sims_config: SimsConfig) -> list[SimJob]:
     init_sim_job = sims_config.init_sim_job
     base_dir = sims_config.init_sim_job.base_dir
-    run_options = sims_config.init_sim_job.run_options
+    n_runs = sims_config.init_sim_job.n_runs
+    n_files = sims_config.init_sim_job.n_files
 
     sim_jobs = [init_sim_job]
 
@@ -124,69 +158,59 @@ def create_sim_jobs(sims_config: SimsConfig) -> list[SimJob]:
             config = deepcopy(init_sim_job.config)
             strat_phe_i = [strat_phe_0_i, 1 - strat_phe_0_i]
             config["init"]["strat_phe"] = strat_phe_i
-            sim_jobs.append(SimJob(base_dir, config, run_options))
+            sim_jobs.append(SimJob(base_dir, config, n_runs, n_files))
             config["model"]["prob_mut"] = 0.0
-            sim_jobs.append(SimJob(base_dir, config, run_options))
+            sim_jobs.append(SimJob(base_dir, config, n_runs, n_files))
 
     for prob_mut in sims_config.prob_mut_values:
         if prob_mut == init_sim_job.config["model"]["prob_mut"]:
             continue
         config = deepcopy(init_sim_job.config)
         config["model"]["prob_mut"] = prob_mut
-        sim_jobs.append(SimJob(base_dir, config, run_options))
+        sim_jobs.append(SimJob(base_dir, config, n_runs, n_files))
 
     for n_agents_i in sims_config.n_agents_i_values:
         if n_agents_i == init_sim_job.config["init"]["n_agents"]:
             continue
         config = deepcopy(init_sim_job.config)
         config["init"]["n_agents"] = n_agents_i
-        sim_jobs.append(SimJob(base_dir, config, run_options))
+        sim_jobs.append(SimJob(base_dir, config, n_runs, n_files))
 
     return sim_jobs
 
 
-class JobResult(Enum):
-    FINISHED = auto()
-    STOPPED = auto()
-    FAILED = auto()
-
-
-def execute_sim_job(sim_job: SimJob) -> JobResult:
-    try:
-        print_process_msg(f"starting job: {sim_job.sim_dir.name}")
-
-        with open(sim_job.sim_dir / ".lock", "w") as lock_file:
-            fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
-
-            run_sim(sim_job.sim_dir, sim_job.run_options)
-
-        print_process_msg("job finished")
-        return JobResult.FINISHED
-
-    except StopRequested:
-        print_process_msg("job stopped")
-        return JobResult.STOPPED
-
-    except Exception as exception:
-        print_process_msg(f"job failed: {exception}")
-        return JobResult.FAILED
-
-
-def execute_sim_jobs(sim_jobs: list[SimJob]) -> None:
-    set_signal_handler()
-
-    build_bin()
+def exec_sim_job(sim_job: SimJob) -> None:
+    print_process_msg(f"starting job ({sim_job.sim_dir.name})")
 
     print_process_msg("starting process pool")
 
     cores = psutil.cpu_count(logical=False)
+    sim_runs = [
+        SimRun(sim_job.sim_dir, run_idx, sim_job.n_files)
+        for run_idx in range(sim_job.n_runs)
+    ]
     with mp.Pool(processes=cores) as pool:
-        job_results = pool.map(execute_sim_job, sim_jobs)
+        run_results = pool.map(exec_sim_run, sim_runs)
 
     print_process_msg("process pool finished")
 
-    if job_results.count(JobResult.FAILED) > 0:
-        raise RuntimeError("some job failed")
+    if run_results.count(RunResult.FAILED) > 0:
+        raise RuntimeError("some run failed")
 
-    if job_results.count(JobResult.STOPPED) > 0:
-        raise RuntimeError("some job was stopped")
+    if run_results.count(RunResult.STOPPED) > 0:
+        raise RuntimeError("some run was stopped")
+
+    print_process_msg(f"job ({sim_job.sim_dir.name}) finished")
+
+
+def exec_sim_jobs(sim_jobs: list[SimJob]) -> None:
+    set_signal_handler()
+
+    build_bin()
+
+    print_process_msg("starting jobs")
+
+    for sim_job in sim_jobs:
+        exec_sim_job(sim_job)
+
+    print_process_msg("jobs finished")

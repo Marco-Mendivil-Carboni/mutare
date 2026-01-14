@@ -86,22 +86,22 @@ pub struct Analysis {
     /// Distribution of the number of agents.
     pub dist_n_agents: Vec<f64>,
 
-    /// Mean population growth rate.
-    pub growth_rate: f64,
+    /// Average population growth rate.
+    pub avg_growth_rate: f64,
 
     /// Total extinction rate.
     pub extinct_rate: f64,
 
-    /// Mean average phenotypic strategy.
+    /// Average phenotypic strategy.
     pub avg_strat_phe: Vec<f64>,
 
-    /// Mean standard deviation of the phenotypic strategy.
+    /// Standard deviation of the phenotypic strategy.
     pub std_dev_strat_phe: f64,
 
-    /// Mean distribution of phenotypic strategies.
+    /// Distribution of phenotypic strategies.
     pub dist_strat_phe: Vec<Vec<f64>>,
 
-    /// Mean distribution of phenotypes.
+    /// Distribution of phenotypes.
     pub dist_phe: Vec<f64>,
 }
 
@@ -169,7 +169,6 @@ impl Analyzer {
         };
 
         let analysis = Analysis {
-            growth_rate: obs_weighted_average(&|obs| obs.growth_rate),
             dist_n_agents: (0..self.cfg.output.hist_bins)
                 .map(|bin| {
                     obs_weighted_average(&|obs| {
@@ -181,11 +180,17 @@ impl Analyzer {
                     })
                 })
                 .collect(),
+
+            avg_growth_rate: obs_weighted_average(&|obs| obs.growth_rate),
+
             extinct_rate: last_observables.n_extinct as f64 / last_observables.time,
+
             avg_strat_phe: (0..self.cfg.model.n_phe)
                 .map(|phe| obs_weighted_average(&|obs| obs.avg_strat_phe[phe]))
                 .collect(),
+
             std_dev_strat_phe: obs_weighted_average(&|obs| obs.std_dev_strat_phe),
+
             dist_strat_phe: (0..self.cfg.model.n_phe)
                 .map(|phe| {
                     (0..self.cfg.output.hist_bins)
@@ -193,6 +198,7 @@ impl Analyzer {
                         .collect()
                 })
                 .collect(),
+
             dist_phe: (0..self.cfg.model.n_phe)
                 .map(|phe| obs_weighted_average(&|obs| obs.dist_phe[phe]))
                 .collect(),

@@ -19,6 +19,10 @@ struct CLI {
     #[arg(long)]
     sim_dir: PathBuf,
 
+    /// Simulation run index.
+    #[arg(long)]
+    run_idx: usize,
+
     /// Simulation command.
     #[command(subcommand)]
     sim_cmd: SimCmd,
@@ -27,17 +31,13 @@ struct CLI {
 /// Available simulation commands.
 #[derive(Debug, Subcommand)]
 enum SimCmd {
-    /// Create a new simulation run.
+    /// Create simulation run.
     Create,
 
-    /// Resume an existing simulation run.
-    Resume {
-        /// Index of the run to resume.
-        #[arg(long)]
-        run_idx: usize,
-    },
+    /// Resume simulation run.
+    Resume,
 
-    /// Analyze all simulation runs.
+    /// Analyze simulation run.
     Analyze,
 }
 
@@ -68,9 +68,9 @@ fn run_cli() -> Result<()> {
 
     // Execute the requested simulation command.
     match cli.sim_cmd {
-        SimCmd::Create => mgr.create_run()?,
-        SimCmd::Resume { run_idx } => mgr.resume_run(run_idx)?,
-        SimCmd::Analyze => mgr.analyze_sim()?,
+        SimCmd::Create => mgr.create_run(cli.run_idx)?,
+        SimCmd::Resume => mgr.resume_run(cli.run_idx)?,
+        SimCmd::Analyze => mgr.analyze_run(cli.run_idx)?,
     }
 
     Ok(())
