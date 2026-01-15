@@ -89,7 +89,7 @@
       \centering
       \begin{tabular}{c c c}
         \toprule
-        symbol             & name                         & value                                                        \\
+        symbol             & description                  & value                                                        \\
         \midrule
         $\omega_t(e,e')$   & environment transition rates & $\begin{psmallmatrix}-1.0&+1.0\\+1.0&-1.0\end{psmallmatrix}$ \\
         $\omega_b(e,\phi)$ & birth rates                  & $\begin{psmallmatrix}1.2&0.0\\0.0&0.8\end{psmallmatrix}$     \\
@@ -114,7 +114,21 @@
 \begin{frame}{Symmetric parameters}
   \begin{figure}
     \centering
+    \frame{\includegraphics{../sims/symmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Symmetric parameters}
+  \begin{figure}
+    \centering
     \frame{\includegraphics{../sims/symmetric/plots/n_agents_i/avg_strat_phe_0.pdf}}
+  \end{figure}
+\end{frame}
+
+\begin{frame}{Symmetric parameters}
+  \begin{figure}
+    \centering
+    \frame{\includegraphics{../sims/symmetric/plots/strat_phe_0_i/dist_phe_0.pdf}}
   \end{figure}
 \end{frame}
 
@@ -125,6 +139,13 @@
     \item Item example.
   \end{itemize}
   \note[item]{Note example.}
+\end{frame}
+
+\begin{frame}{Symmetric parameters}
+  \begin{figure}
+    \centering
+    \frame{\includegraphics{../sims/symmetric/plots/strat_phe_0_i/fitness.pdf}}
+  \end{figure}
 \end{frame}
 
 \section{Acknowledgments}
@@ -138,6 +159,7 @@
 \section{Appendix}
 
 \begin{frame}{Numerical methods: Gillespie algorithm}
+  \note[item]{Mention the care needed to analyze the results of this simulations.}
 \end{frame}
 
 \end{document}
