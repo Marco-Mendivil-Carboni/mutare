@@ -5,6 +5,12 @@ __pycache__
 
 .env
 
-/sims*
+*.msgpack
+*.toml
+*.log
+*.lock
 
-build
+*.png
+*.jpg
+
+*.pdf

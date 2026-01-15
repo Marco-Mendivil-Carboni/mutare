@@ -1,0 +1,84 @@
+\documentclass{beamer}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage{lmodern}
+
+\usepackage{mathtools,amssymb}
+
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+
+\usepackage{booktabs}
+
+\definecolor{red_UCM}{HTML}{b01131}
+
+\usetheme{Berlin}
+\useoutertheme{infolines}
+\useinnertheme{rectangles}
+\usecolortheme[named=red_UCM]{structure}
+
+\usetikzlibrary{calc, positioning}
+
+\AtBeginSection[]
+{
+  \begin{frame}
+    \tableofcontents[currentsection]
+  \end{frame}
+}
+
+\setbeameroption{show notes}
+
+\setbeamertemplate{note page}{\vskip 0.5em \insertnote}
+\addtobeamertemplate{note page}{}{\thispdfpagelabel{notes:\insertframenumber}}
+
+\setbeamertemplate{navigation symbols}{}
+
+\usebackgroundtemplate{\tikz[overlay,remember picture]\node[opacity=0.03125]at (current page.center){\includegraphics[scale=0.5]{UCM-logo.png}};}
+
+\title[XXII GISC Workshop]{Evolving Safely: Adaptation and Phenotypic Diversity under Environmental and Demographic Constraints}
+\author[]
+{
+  \texorpdfstring{{\large Mendívil Carboni, Marco\inst{1}}\\\vspace{1ex} Mazo Torres, Juan José\inst{1} (dir.) \and Dinis Vizcaíno, Luis Ignacio\inst{1} (dir.)}{Marco Mendívil Carboni}
+} 
+\institute[Universidad Complutense de Madrid]
+{
+  \inst{1}
+  Grupo Interdisciplinar de Sistemas Complejos (GISC) and Departamento de Estructura de la Materia, Física Térmica y Electrónica, Universidad Complutense de Madrid
+}
+
+\begin{document}
+
+\frame{\titlepage}
+
+\begin{frame}
+  \tableofcontents
+\end{frame}
+
+\section{Introduction}
+
+\subsection{Motivation and objectives}
+
+\begin{frame}{Objectives}
+\end{frame}
+
+\section{Conclusions and future work}
+
+\begin{frame}{Conclusions}
+  \begin{itemize}
+    \item Item example.
+  \end{itemize}
+  \note[item]{Note example.}
+\end{frame}
+
+\section*{Acknowledgments}
+
+\begin{frame}
+  \begin{center}
+    \Large{Thank you for your attention.}
+  \end{center}
+\end{frame}
+
+\end{document}

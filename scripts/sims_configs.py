@@ -42,7 +42,7 @@ def _generate_sims_configs() -> list[SimsConfig]:
             },
         },
         n_runs=16,
-        n_files=64,
+        n_files=96,
     )
 
     symmetric_sims_config = SimsConfig(
