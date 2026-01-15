@@ -36,7 +36,7 @@
 
 \setbeamertemplate{navigation symbols}{}
 
-\usebackgroundtemplate{\tikz[overlay,remember picture]\node[opacity=0.03125]at (current page.center){\includegraphics[scale=0.5]{UCM-logo.png}};}
+\usebackgroundtemplate{\tikz[overlay,remember picture]\node[opacity=0.03125]at (current page.center){\includegraphics[scale=0.5]{images/UCM-logo.png}};}
 
 \title[XXII GISC Workshop]{Evolving Safely: Adaptation and Phenotypic Diversity under Environmental and Demographic Constraints}
 \author[]
@@ -57,12 +57,42 @@
   \tableofcontents
 \end{frame}
 
-\section{Introduction}
+\section{Introduction and objectives}
 
-\subsection{Motivation and objectives}
+\begin{frame}{Motivation}
+  \begin{minipage}{0.6\textwidth}
+    \begin{itemize}
+      \item Adaptation in fluctuating environments.
+      \item Do populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$?
+    \end{itemize}
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.3\textwidth}
+    \begin{figure}
+      \includegraphics[width=\textwidth]{images/changing-environment.jpg}
+    \end{figure}
+  \end{minipage}
 
-\begin{frame}{Objectives}
+  \note[item]{Adaptation in fluctuating environments is a central problem in evolutionary biology.}
+  \note[item]{A classical view of evolution suggests that populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$.}
 \end{frame}
+
+\section{The model: a Markov process}
+
+\begin{frame}{The model}
+  \begin{table}
+    \centering
+    \begin{tabular}{c c c}
+      \toprule
+      symbol & name                     & value \\
+      \midrule
+      $N_i$  & initial number of agents & $100$ \\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+\end{frame}
+
+\section{Results: phenotypic diversity and safe strategies}
 
 \section{Conclusions and future work}
 
@@ -73,12 +103,17 @@
   \note[item]{Note example.}
 \end{frame}
 
-\section*{Acknowledgments}
+\section{Acknowledgments}
 
 \begin{frame}
   \begin{center}
     \Large{Thank you for your attention.}
   \end{center}
+\end{frame}
+
+\section{Appendix}
+
+\begin{frame}{Numerical methods: Gillespie algorithm}
 \end{frame}
 
 \end{document}
