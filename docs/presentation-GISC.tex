@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[10pt]{beamer}
 
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -61,10 +61,12 @@
 
 \begin{frame}{Motivation}
   \begin{minipage}{0.6\textwidth}
-    \begin{itemize}
-      \item Adaptation in fluctuating environments.
-      \item Do populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$?
-    \end{itemize}
+    \begin{block}{Objectives}
+      \begin{itemize}
+        \item Adaptation in fluctuating environments.
+        \item Do populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$?
+      \end{itemize}
+    \end{block}
   \end{minipage}
   \hfill
   \begin{minipage}{0.3\textwidth}
@@ -80,19 +82,34 @@
 \section{The model: a Markov process}
 
 \begin{frame}{The model}
-  \begin{table}
-    \centering
-    \begin{tabular}{c c c}
-      \toprule
-      symbol & name                     & value \\
-      \midrule
-      $N_i$  & initial number of agents & $100$ \\
-      \bottomrule
-    \end{tabular}
-  \end{table}
+  \begin{block}{Variables}
+  \end{block}
+  \begin{block}{Parameters}
+    \begin{table}
+      \centering
+      \begin{tabular}{c c c}
+        \toprule
+        symbol             & name                         & value                                                        \\
+        \midrule
+        $\omega_t(e,e')$   & environment transition rates & $\begin{psmallmatrix}-1.0&+1.0\\+1.0&-1.0\end{psmallmatrix}$ \\
+        $\omega_b(e,\phi)$ & birth rates                  & $\begin{psmallmatrix}1.2&0.0\\0.0&0.8\end{psmallmatrix}$     \\
+        $\omega_d(e,\phi)$ & death rates                  & $\begin{psmallmatrix}0.0&1.0\\1.0&0.0\end{psmallmatrix}$     \\
+        $p_{\text{mut}}$   & mutation probability         & $0.001$                                                      \\
+        $N_i$              & initial number of agents     & $100$                                                        \\
+        \bottomrule
+      \end{tabular}
+    \end{table}
+  \end{block}
 \end{frame}
 
 \section{Results: phenotypic diversity and safe strategies}
+
+\begin{frame}{Symmetric parameters}
+  \begin{figure}
+    \centering
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/rates.pdf}
+  \end{figure}
+\end{frame}
 
 \section{Conclusions and future work}
 
