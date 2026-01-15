@@ -77,6 +77,13 @@
 
   \note[item]{Adaptation in fluctuating environments is a central problem in evolutionary biology.}
   \note[item]{A classical view of evolution suggests that populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$.}
+
+  \note[item]{This work is titled *Evolving Safely: Adaptation and Phenotypic Diversity under Environmental and Demographic Constraints*.}
+  \note[item]{The main objective is to understand how populations adapt in fluctuating environments.}
+  \note[item]{This question is motivated by prior work on population dynamics showing that environmental fluctuations strongly affect growth rates.}
+  \note[item]{A key question is whether natural selection favors strategies that maximize average growth rate or instead favors safer strategies when fluctuations are large.}
+  \note[item]{Natural populations rarely experience constant conditions, challenging the classical evolutionary view that selection maximizes mean growth rate.}
+  \note[item]{To investigate this, we use numerical simulations based on a minimal model that includes only the essential ingredients.}
 \end{frame}
 
 \section{The model: a Markov process}
@@ -100,8 +107,46 @@
       \end{tabular}
     \end{table}
   \end{block}
+
+  \note[item]{The model is a modified birth-and-death Markov process describing a population evolving in a fluctuating environment.}
+  \note[item]{The population starts with an initial number of agents and evolves in continuous time.}
+  \note[item]{The environment is a discrete variable that can take one of a finite number of states and changes according to a continuous-time Markov chain with given transition rates.}
+  \note[item]{Each agent is characterized by a phenotype and a phenotypic strategy.}
+  \note[item]{The phenotype takes discrete values, while the phenotypic strategy is a probability distribution over the possible phenotypes.}
+  \note[item]{When an agent reproduces, the offspring's phenotype is drawn from the parent's phenotypic strategy.}
+  \note[item]{Offspring inherit the same phenotypic strategy as their parent, allowing natural selection to act on strategies.}
+  \note[item]{To allow evolution, mutations are introduced: with a small probability at duplication, an agent's strategy mutates to a new random strategy.}
+  \note[item]{Although rare, these mutations enable exploration of the space of possible strategies during simulations.}
+  \note[item]{The total population size is capped at its initial value, introducing a demographic constraint.}
+  \note[item]{As a consequence, populations almost surely go extinct eventually in the simulations.}
+  \note[item]{When extinction occurs, the simulation is reinitialized and repeated many times to collect statistics.}
 \end{frame}
 
+\begin{frame}{The model}
+  \note[item]{The analysis is restricted to the case of two environments and two phenotypes.}
+  \note[item]{The stochastic dynamics are simulated using the Gillespie algorithm.}
+  \note[item]{Measured observables include time, population size, and the population growth rate defined as $\Delta N/(N\Delta t)$.}
+  \note[item]{The number of extinctions is recorded to compute extinction rates.}
+  \note[item]{We compute the average phenotypic strategy across the population and over time.}
+  \note[item]{We also compute the standard deviation of the phenotypic strategy across agents.}
+  \note[item]{Histograms are constructed for phenotypic strategies and for phenotype proportions in the population.}
+  \note[item]{Because strategies and phenotypes are two-dimensional and normalized, only the first component needs to be tracked.}
+\end{frame}
+
+\begin{frame}
+  \note[item]{Three main parameter sets are studied: symmetric, asymmetric, and an extended asymmetric case.}
+  \note[item]{In the symmetric case, environmental transition rates are equal and set to one, making both environments equally likely.}
+  \note[item]{Birth and death rates depend on both environment and phenotype, with each phenotype best adapted to one environment.}
+  \note[item]{The mutation probability is set to $10^{-3}$, and the maximum population size is $100$.}
+  \note[item]{In the asymmetric case, one phenotype grows well in a good environment but dies quickly in a bad one.}
+  \note[item]{The second phenotype grows more slowly in the good environment but survives much better in the bad environment.}
+  \note[item]{Three types of simulations are performed: fixed, evolutive, and random.}
+  \note[item]{In fixed simulations, all agents share a prescribed, non-evolving strategy and mutations are disabled.}
+  \note[item]{In evolutive simulations, the population starts monomorphic, and strategies evolve through mutation and selection.}
+  \note[item]{In random simulations, agents start with independent random strategies, which then evolve.}
+  \note[item]{These cases are compared to identify evolutionary attractors and the strategies favored by selection.}
+  \note[item]{The extended parameter set is identical to the asymmetric case but uses a larger population size of $1000$ agents.}
+\end{frame}
 \section{Results: phenotypic diversity and safe strategies}
 
 \begin{frame}{Symmetric parameters}
@@ -135,10 +180,6 @@
 \section{Conclusions and future work}
 
 \begin{frame}{Conclusions}
-  \begin{itemize}
-    \item Item example.
-  \end{itemize}
-  \note[item]{Note example.}
 \end{frame}
 
 \begin{frame}{Symmetric parameters}
