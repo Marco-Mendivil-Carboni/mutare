@@ -59,49 +59,73 @@
 
 \section{Introduction and objectives}
 
-\begin{frame}{Motivation}
-  \begin{minipage}{0.6\textwidth}
-    \begin{block}{Objectives}
+\begin{frame}
+  \begin{minipage}{0.62\textwidth}
+    \begin{block}{Motivation}
       \begin{itemize}
-        \item Adaptation in fluctuating environments.
-        \item Do populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$?
+        \item \alert{Adaptation} in fluctuating \alert{environments} is not fully understood yet.
+        \item Especially under \alert{demographic constraints}.
+        \item Paradigmatic setting to study the effects of \alert{fluctuations in biological processes}.
       \end{itemize}
     \end{block}
+    \vfill
   \end{minipage}
   \hfill
-  \begin{minipage}{0.3\textwidth}
+  \begin{minipage}{0.34\textwidth}
     \begin{figure}
+      \centering
       \frame{\includegraphics[width=\textwidth]{images/changing-environment.jpg}}
     \end{figure}
   \end{minipage}
 
-  \note[item]{Adaptation in fluctuating environments is a central problem in evolutionary biology.}
-  \note[item]{A classical view of evolution suggests that populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$.}
+  \begin{block}{Objectives}
+    \begin{itemize}
+      \item Develop a minimal mathematical \alert{model} to study this problem.
+      \item Quantify how the \alert{evolutionary outcome} depends on these constraints.
+      \item Identify the main mechanisms shaping these results and seek ways to \alert{approximate} them.
+    \end{itemize}
+  \end{block}
 
-  \note[item]{This work is titled *Evolving Safely: Adaptation and Phenotypic Diversity under Environmental and Demographic Constraints*.}
-  \note[item]{The main objective is to understand how populations adapt in fluctuating environments.}
-  \note[item]{This question is motivated by prior work on population dynamics showing that environmental fluctuations strongly affect growth rates.}
-  \note[item]{A key question is whether natural selection favors strategies that maximize average growth rate or instead favors safer strategies when fluctuations are large.}
-  \note[item]{Natural populations rarely experience constant conditions, challenging the classical evolutionary view that selection maximizes mean growth rate.}
-  \note[item]{To investigate this, we use numerical simulations based on a minimal model that includes only the essential ingredients.}
+  \note[item]{Adaptation in fluctuating environments is a central problem in evolutionary biology.}
+  \note[item]{Natural populations experience fluctuating rather than constant environments.}
+  \note[item]{We will use a minimal mathematical model, not a detailed biological one.}
+  \note[item]{To investigate this, we will use numerical simulations.}
+  \note[item]{The main objective is to understand how populations adapt in fluctuating environments under demographic constraints.}
+  \note[item]{A key question is whether these outcomes can be described using an effective notion of fitness.}
 \end{frame}
 
 \section{The model: a Markov process}
 
-\begin{frame}{The model}
+\begin{frame}
   \begin{block}{Variables}
+    \begin{table}
+      \centering
+      \begin{tabular}{c c c}
+        \toprule
+        symbol & name        & range                          \\
+        \midrule
+        $e$    & environment & $\{0,\dots,n_{\text{env}}-1\}$ \\
+        \addlinespace
+        $\phi$ & phenotype   & $\{0,\dots,n_{\text{phe}}-1\}$ \\
+        \bottomrule
+      \end{tabular}
+    \end{table}
   \end{block}
   \begin{block}{Parameters}
     \begin{table}
       \centering
       \begin{tabular}{c c c}
         \toprule
-        symbol             & description                  & value                                                        \\
+        symbol             & name                         & value                                                        \\
         \midrule
         $\omega_t(e,e')$   & environment transition rates & $\begin{psmallmatrix}-1.0&+1.0\\+1.0&-1.0\end{psmallmatrix}$ \\
-        $\omega_b(e,\phi)$ & birth rates                  & $\begin{psmallmatrix}1.2&0.0\\0.0&0.8\end{psmallmatrix}$     \\
-        $\omega_d(e,\phi)$ & death rates                  & $\begin{psmallmatrix}0.0&1.0\\1.0&0.0\end{psmallmatrix}$     \\
+        \addlinespace
+        $\omega_b(e,\phi)$ & birth rates                  & $\begin{psmallmatrix}1.0&0.2\\0.0&0.0\end{psmallmatrix}$     \\
+        \addlinespace
+        $\omega_d(e,\phi)$ & death rates                  & $\begin{psmallmatrix}0.0&0.0\\1.0&0.1\end{psmallmatrix}$     \\
+        \addlinespace
         $p_{\text{mut}}$   & mutation probability         & $0.001$                                                      \\
+        \addlinespace
         $N_i$              & initial number of agents     & $100$                                                        \\
         \bottomrule
       \end{tabular}
@@ -177,12 +201,35 @@
   \end{figure}
 \end{frame}
 
+\begin{frame}
+  \begin{minipage}{0.3\textwidth}
+    Some text...
+    \vfill
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.6\textwidth}
+    \begin{figure}
+      \frame{\includegraphics[scale=0.8]{../sims/extended/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
+    \end{figure}
+    \begin{figure}
+      \frame{\includegraphics[scale=0.8]{../sims/extended/plots/strat_phe_0_i/dist_phe_0.pdf}}
+    \end{figure}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}
+  \begin{figure}
+    \centering
+    \frame{\includegraphics{../sims/extended/plots/strat_phe_0_i/dist_phe_0.pdf}}
+  \end{figure}
+\end{frame}
+
 \section{Conclusions and future work}
 
 \begin{frame}{Conclusions}
 \end{frame}
 
-\begin{frame}
+\begin{frame}{Future work}
   \begin{figure}
     \centering
     \frame{\includegraphics{../sims/asymmetric/plots/strat_phe_0_i/fitness.pdf}}
@@ -200,6 +247,32 @@
 \section{Appendix}
 
 \begin{frame}{Numerical methods: Gillespie algorithm}
+  \begin{equation}
+    \mathbf{X}(t) = (X_1(t),\dots,X_N(t))
+  \end{equation}
+
+  \begin{equation}
+    a_j(\mathbf{X}) = c_j h_j(\mathbf{X}), \
+    a_0(\mathbf{X}) = \sum_{j=1}^M a_j(\mathbf{X})
+  \end{equation}
+
+  \begin{equation}
+    \tau = \frac{1}{a_0(\mathbf{X})}
+    \ln\!\left(\frac{1}{r_1}\right),
+    \ r_1 \sim U(0,1)
+  \end{equation}
+
+  \begin{equation}
+    \sum_{j=1}^{\mu-1} a_j(\mathbf{X})
+    < r_2 a_0(\mathbf{X})
+    \le \sum_{j=1}^{\mu} a_j(\mathbf{X}),
+    \ r_2 \sim U(0,1)
+  \end{equation}
+
+  \begin{equation}
+    \mathbf{X}(t+\tau) = \mathbf{X}(t) + \boldsymbol{\nu}_\mu
+  \end{equation}
+
   \note[item]{Mention the care needed to analyze the results of this simulations.}
 \end{frame}
 
