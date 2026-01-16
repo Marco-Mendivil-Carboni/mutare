@@ -142,11 +142,9 @@
   \note[item]{To allow evolution, mutations are introduced: with a small probability at duplication, an agent's strategy mutates to a new random strategy.}
   \note[item]{Although rare, these mutations enable exploration of the space of possible strategies during simulations.}
   \note[item]{The total population size is capped at its initial value, introducing a demographic constraint.}
-  \note[item]{As a consequence, populations almost surely go extinct eventually in the simulations.}
-  \note[item]{When extinction occurs, the simulation is reinitialized and repeated many times to collect statistics.}
 \end{frame}
 
-\begin{frame}{The model}
+\begin{frame}
   \note[item]{The analysis is restricted to the case of two environments and two phenotypes.}
   \note[item]{The stochastic dynamics are simulated using the Gillespie algorithm.}
   \note[item]{Measured observables include time, population size, and the population growth rate defined as $\Delta N/(N\Delta t)$.}
@@ -158,11 +156,9 @@
 \end{frame}
 
 \begin{frame}
-  \note[item]{Three main parameter sets are studied: symmetric, asymmetric, and an extended asymmetric case.}
-  \note[item]{In the symmetric case, environmental transition rates are equal and set to one, making both environments equally likely.}
-  \note[item]{Birth and death rates depend on both environment and phenotype, with each phenotype best adapted to one environment.}
+  \note[item]{environmental transition rates are equal and set to one, making both environments equally likely.}
   \note[item]{The mutation probability is set to $10^{-3}$, and the maximum population size is $100$.}
-  \note[item]{In the asymmetric case, one phenotype grows well in a good environment but dies quickly in a bad one.}
+  \note[item]{One phenotype grows well in a good environment but dies quickly in a bad one.}
   \note[item]{The second phenotype grows more slowly in the good environment but survives much better in the bad environment.}
   \note[item]{Three types of simulations are performed: fixed, evolutive, and random.}
   \note[item]{In fixed simulations, all agents share a prescribed, non-evolving strategy and mutations are disabled.}
@@ -226,14 +222,27 @@
 
 \section{Conclusions and future work}
 
-\begin{frame}{Conclusions}
-\end{frame}
-
-\begin{frame}{Future work}
-  \begin{figure}
-    \centering
-    \frame{\includegraphics{../sims/asymmetric/plots/strat_phe_0_i/fitness.pdf}}
-  \end{figure}
+\begin{frame}
+  \begin{block}{Conclusions}
+    \begin{itemize}
+      \item ...
+    \end{itemize}
+  \end{block}
+  \begin{minipage}{0.48\textwidth}
+    \begin{block}{Future work}
+      \begin{itemize}
+        \item ...
+      \end{itemize}
+    \end{block}
+    \vfill
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.48\textwidth}
+    \begin{figure}
+      \centering
+      \frame{\includegraphics[scale=0.6]{../sims/asymmetric/plots/strat_phe_0_i/fitness.pdf}}
+    \end{figure}
+  \end{minipage}
 \end{frame}
 
 \section{Acknowledgments}
@@ -246,32 +255,24 @@
 
 \section{Appendix}
 
-\begin{frame}{Numerical methods: Gillespie algorithm}
-  \begin{equation}
-    \mathbf{X}(t) = (X_1(t),\dots,X_N(t))
-  \end{equation}
-
-  \begin{equation}
-    a_j(\mathbf{X}) = c_j h_j(\mathbf{X}), \
-    a_0(\mathbf{X}) = \sum_{j=1}^M a_j(\mathbf{X})
-  \end{equation}
-
-  \begin{equation}
-    \tau = \frac{1}{a_0(\mathbf{X})}
-    \ln\!\left(\frac{1}{r_1}\right),
-    \ r_1 \sim U(0,1)
-  \end{equation}
-
-  \begin{equation}
-    \sum_{j=1}^{\mu-1} a_j(\mathbf{X})
-    < r_2 a_0(\mathbf{X})
-    \le \sum_{j=1}^{\mu} a_j(\mathbf{X}),
-    \ r_2 \sim U(0,1)
-  \end{equation}
-
-  \begin{equation}
-    \mathbf{X}(t+\tau) = \mathbf{X}(t) + \boldsymbol{\nu}_\mu
-  \end{equation}
+\begin{frame}
+  \begin{block}{Gillespie algorithm}
+    \begin{equation*}
+      \mathbf{X}(t) = (X_1(t),\dots,X_N(t))
+    \end{equation*}
+    \begin{equation*}
+      a_j(\mathbf{X}) = c_j h_j(\mathbf{X}), \ a_0(\mathbf{X}) = \sum_{j=1}^M a_j(\mathbf{X})
+    \end{equation*}
+    \begin{equation*}
+      \tau = \frac{1}{a_0(\mathbf{X})}\ln\!\left(\frac{1}{r_1}\right), \ r_1 \sim U(0,1)
+    \end{equation*}
+    \begin{equation*}
+      \sum_{j=1}^{\mu-1} a_j(\mathbf{X})< r_2 a_0(\mathbf{X})\le \sum_{j=1}^{\mu} a_j(\mathbf{X}), \ r_2 \sim U(0,1)
+    \end{equation*}
+    \begin{equation*}
+      \mathbf{X}(t+\tau) = \mathbf{X}(t) + \boldsymbol{\nu}_\mu
+    \end{equation*}
+  \end{block}
 
   \note[item]{Mention the care needed to analyze the results of this simulations.}
 \end{frame}
