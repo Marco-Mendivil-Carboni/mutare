@@ -16,7 +16,6 @@
 \usepackage{appendixnumberbeamer}
 
 \definecolor{red_UCM}{HTML}{b01131}
-
 \usetheme{Berlin}
 \useoutertheme{infolines}
 \useinnertheme{rectangles}
@@ -24,14 +23,7 @@
 \setbeamercolor{alerted text}{fg=red_UCM}
 
 \usetikzlibrary{calc, positioning}
-
-\AtBeginSection[]
-{
-  \begin{frame}
-    \tableofcontents[currentsection]
-  \end{frame}
-}
-
+\AtBeginSection[]{\begin{frame}\tableofcontents[currentsection]\end{frame}}
 \setbeameroption{show notes}
 \setbeamertemplate{note page}{\vskip 0.5em \insertnote}
 \addtobeamertemplate{note page}{}{\thispdfpagelabel{notes:\insertframenumber}}
