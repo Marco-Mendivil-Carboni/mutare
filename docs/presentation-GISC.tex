@@ -66,7 +66,6 @@
   \hfill
   \begin{minipage}{0.34\textwidth}
     \begin{figure}
-      \centering
       \frame{\includegraphics[scale=0.12]{images/changing-environment.jpg}}
     \end{figure}
   \end{minipage}
@@ -120,7 +119,6 @@
 \begin{frame}
   \begin{block}{Parameters}
     \begin{table}
-      \centering
       \begin{tabular}{c c c}
         \toprule
         symbol             & name                         & value                                                        \\
@@ -141,7 +139,6 @@
 
   \note[item]{The analysis is restricted to the case of two environments and two phenotypes.}
   \note[item]{The stochastic dynamics are simulated using the Gillespie algorithm.}
-  \note[item]{Measured observables include time, population size, and the population growth rate defined as $\Delta N/(N\Delta t)$.}
   \note[item]{The number of extinctions is recorded to compute extinction rates.}
   \note[item]{We compute the average phenotypic strategy across the population and over time.}
   \note[item]{We also compute the standard deviation of the phenotypic strategy across agents.}
@@ -164,54 +161,84 @@
 \section{Results: phenotypic diversity and safe strategies}
 
 \begin{frame}
-  \begin{figure}
-    \centering
-    \frame{\includegraphics{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \begin{figure}
-    \centering
-    \frame{\includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \begin{figure}
-    \centering
-    \frame{\includegraphics{../sims/asymmetric/plots/n_agents_i/avg_strat_phe_0.pdf}}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \begin{figure}
-    \centering
-    \frame{\includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_phe_0.pdf}}
-  \end{figure}
-\end{frame}
-
-\begin{frame}
-  \begin{minipage}{0.3\textwidth}
-    Some text...
-    \vfill
+  \begin{minipage}{0.42\textwidth}
+    \begin{block}{Observables}
+      List observables...
+    \end{block}
+    \begin{figure}
+      \frame{\includegraphics[scale=0.6]{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}}
+    \end{figure}
   \end{minipage}
   \hfill
-  \begin{minipage}{0.6\textwidth}
+  \begin{minipage}{0.54\textwidth}
+    \begin{figure}
+      \frame{\includegraphics[scale=0.8]{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}}
+    \end{figure}
+    \begin{figure}
+      \frame{\includegraphics[scale=0.8]{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}}
+    \end{figure}
+  \end{minipage}
+
+  \note[item]{Measured observables include time, population size, and the population growth rate defined as $\Delta N/(N\Delta t)$.}
+\end{frame}
+
+\begin{frame}
+  \begin{minipage}{0.42\textwidth}
+    Some more text explaining the main results...
+  \end{minipage}
+  \begin{minipage}{0.54\textwidth}
+    \begin{figure}
+      \frame{\includegraphics[scale=0.8]{../sims/asymmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}}
+    \end{figure}
+    \begin{figure}
+      \frame{\includegraphics[scale=0.8]{../sims/asymmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
+    \end{figure}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}
+  \begin{minipage}{0.42\textwidth}
+    Some more text explaining this auxiliary results...
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.54\textwidth}
+    \begin{figure}
+      \frame{\includegraphics[scale=0.8]{../sims/asymmetric/plots/strat_phe_0_i/dist_n_agents.pdf}}
+    \end{figure}
+    \begin{figure}
+      \frame{\includegraphics[scale=0.8]{../sims/asymmetric/plots/strat_phe_0_i/dist_phe_0.pdf}}
+    \end{figure}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}
+  \begin{minipage}{0.42\textwidth}
+    Some more text explaining the time series
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.54\textwidth}
+    \begin{figure}
+      \frame{\includegraphics[scale=0.8]{../sims/asymmetric/plots/time_series/avg_strat_phe_0.pdf}}
+    \end{figure}
+    \begin{figure}
+      \frame{\includegraphics[scale=0.8]{../sims/asymmetric/plots/time_series/n_extinct.pdf}}
+    \end{figure}
+  \end{minipage}
+\end{frame}
+
+\begin{frame}
+  \begin{minipage}{0.42\textwidth}
+    Some more text explaining the extended case...
+  \end{minipage}
+  \hfill
+  \begin{minipage}{0.54\textwidth}
+    \begin{figure}
+      \frame{\includegraphics[scale=0.8]{../sims/extended/plots/strat_phe_0_i/dist_strat_phe_0.pdf}}
+    \end{figure}
     \begin{figure}
       \frame{\includegraphics[scale=0.8]{../sims/extended/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
     \end{figure}
-    \begin{figure}
-      \frame{\includegraphics[scale=0.8]{../sims/extended/plots/strat_phe_0_i/dist_phe_0.pdf}}
-    \end{figure}
   \end{minipage}
-\end{frame}
-
-\begin{frame}
-  \begin{figure}
-    \centering
-    \frame{\includegraphics{../sims/extended/plots/strat_phe_0_i/dist_phe_0.pdf}}
-  \end{figure}
 \end{frame}
 
 \section{Conclusions and future work}
@@ -233,7 +260,6 @@
   \hfill
   \begin{minipage}{0.48\textwidth}
     \begin{figure}
-      \centering
       \frame{\includegraphics[scale=0.6]{../sims/asymmetric/plots/strat_phe_0_i/fitness.pdf}}
     \end{figure}
   \end{minipage}
