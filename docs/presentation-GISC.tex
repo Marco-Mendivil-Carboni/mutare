@@ -13,12 +13,15 @@
 
 \usepackage{booktabs}
 
+\usepackage{appendixnumberbeamer}
+
 \definecolor{red_UCM}{HTML}{b01131}
 
 \usetheme{Berlin}
 \useoutertheme{infolines}
 \useinnertheme{rectangles}
 \usecolortheme[named=red_UCM]{structure}
+\setbeamercolor{alerted text}{fg=red_UCM}
 
 \usetikzlibrary{calc, positioning}
 
@@ -30,13 +33,11 @@
 }
 
 \setbeameroption{show notes}
-
 \setbeamertemplate{note page}{\vskip 0.5em \insertnote}
 \addtobeamertemplate{note page}{}{\thispdfpagelabel{notes:\insertframenumber}}
-
 \setbeamertemplate{navigation symbols}{}
-
 \usebackgroundtemplate{\tikz[overlay,remember picture]\node[opacity=0.03125]at (current page.center){\includegraphics[scale=0.5]{images/UCM-logo.png}};}
+\renewcommand\appendixname{Appendix}
 
 \title[XXII GISC Workshop]{Evolving Safely: Adaptation and Phenotypic Diversity under Environmental and Demographic Constraints}
 \author[]
@@ -74,7 +75,7 @@
   \begin{minipage}{0.34\textwidth}
     \begin{figure}
       \centering
-      \frame{\includegraphics[width=\textwidth]{images/changing-environment.jpg}}
+      \frame{\includegraphics[scale=0.12]{images/changing-environment.jpg}}
     \end{figure}
   \end{minipage}
 
@@ -86,31 +87,45 @@
     \end{itemize}
   \end{block}
 
-  \note[item]{Adaptation in fluctuating environments is a central problem in evolutionary biology.}
+  \note[item]{Adaptation in fluctuating environments is a \alert{central problem} in \alert{evolutionary biology}.}
   \note[item]{Natural populations experience fluctuating rather than constant environments.}
-  \note[item]{We will use a minimal mathematical model, not a detailed biological one.}
-  \note[item]{To investigate this, we will use numerical simulations.}
-  \note[item]{The main objective is to understand how populations adapt in fluctuating environments under demographic constraints.}
-  \note[item]{A key question is whether these outcomes can be described using an effective notion of fitness.}
+  \note[item]{We will use a minimal mathematical model, \alert{not a detailed biological one}.}
+  \note[item]{To investigate this, we will use \alert{numerical simulations}.}
+  \note[item]{The main objective is to understand \alert{how populations adapt in fluctuating environments under demographic constraints}.}
+  \note[item]{A key question is whether these outcomes can be described using an \alert{effective notion of fitness}.}
 \end{frame}
 
 \section{The model: a Markov process}
 
 \begin{frame}
-  \begin{block}{Variables}
-    \begin{table}
-      \centering
-      \begin{tabular}{c c c}
-        \toprule
-        symbol & name        & range                          \\
-        \midrule
-        $e$    & environment & $\{0,\dots,n_{\text{env}}-1\}$ \\
-        \addlinespace
-        $\phi$ & phenotype   & $\{0,\dots,n_{\text{phe}}-1\}$ \\
-        \bottomrule
-      \end{tabular}
-    \end{table}
+  \begin{block}{Model definition}
+    \alert{Continuous-time Markov process}:
+    \begin{itemize}
+      \item \alert{Environment}: $e\in\{0,\dots,n_{\text{env}}-1\}$, evolves with rates \alert{$\omega_t(e,e')$}.
+      \item \alert{Agents}: population of size $N\le N_i$, each agent characterized by:
+            \begin{itemize}
+              \item \alert{phenotype}: $\phi\in\{0,\dots,n_{\text{phe}}-1\}$.
+              \item \alert{phenotypic strategy}: $s(\phi)$ (probability distribution).
+            \end{itemize}
+      \item \alert{Dynamics}: birth--death process with environment- and phenotype-dependent rates \alert{$\omega_b(e,\phi)$} and \alert{$\omega_d(e,\phi)$}.
+      \item \alert{Evolution}: offsprings inherit the parent's strategy; mutations occur with probability \alert{$p_{\text{mut}}$}.
+      \item \alert{Constraint}: population size \alert{capped at $N_i$}.
+    \end{itemize}
   \end{block}
+
+  \note[item]{The model is a modified birth-and-death Markov process describing a population evolving in a fluctuating environment.}
+  \note[item]{The population starts with an initial number of agents and evolves in continuous time.}
+  \note[item]{The environment is a discrete variable that can take one of a finite number of states and changes according to a continuous-time Markov chain with given transition rates.}
+  \note[item]{Each agent is characterized by a phenotype and a phenotypic strategy.}
+  \note[item]{The phenotype takes discrete values, while the phenotypic strategy is a probability distribution over the possible phenotypes.}
+  \note[item]{When an agent reproduces, the offspring's phenotype is drawn from the parent's phenotypic strategy.}
+  \note[item]{Offspring inherit the same phenotypic strategy as their parent, allowing natural selection to act on strategies.}
+  \note[item]{To allow evolution, mutations are introduced: with a small probability at duplication, an agent's strategy mutates to a new random strategy.}
+  \note[item]{Although rare, these mutations enable exploration of the space of possible strategies during simulations.}
+  \note[item]{The total population size is capped at its initial value, introducing a demographic constraint.}
+\end{frame}
+
+\begin{frame}
   \begin{block}{Parameters}
     \begin{table}
       \centering
@@ -132,19 +147,6 @@
     \end{table}
   \end{block}
 
-  \note[item]{The model is a modified birth-and-death Markov process describing a population evolving in a fluctuating environment.}
-  \note[item]{The population starts with an initial number of agents and evolves in continuous time.}
-  \note[item]{The environment is a discrete variable that can take one of a finite number of states and changes according to a continuous-time Markov chain with given transition rates.}
-  \note[item]{Each agent is characterized by a phenotype and a phenotypic strategy.}
-  \note[item]{The phenotype takes discrete values, while the phenotypic strategy is a probability distribution over the possible phenotypes.}
-  \note[item]{When an agent reproduces, the offspring's phenotype is drawn from the parent's phenotypic strategy.}
-  \note[item]{Offspring inherit the same phenotypic strategy as their parent, allowing natural selection to act on strategies.}
-  \note[item]{To allow evolution, mutations are introduced: with a small probability at duplication, an agent's strategy mutates to a new random strategy.}
-  \note[item]{Although rare, these mutations enable exploration of the space of possible strategies during simulations.}
-  \note[item]{The total population size is capped at its initial value, introducing a demographic constraint.}
-\end{frame}
-
-\begin{frame}
   \note[item]{The analysis is restricted to the case of two environments and two phenotypes.}
   \note[item]{The stochastic dynamics are simulated using the Gillespie algorithm.}
   \note[item]{Measured observables include time, population size, and the population growth rate defined as $\Delta N/(N\Delta t)$.}
@@ -245,7 +247,7 @@
   \end{minipage}
 \end{frame}
 
-\section{Acknowledgments}
+\section*{Acknowledgments}
 
 \begin{frame}
   \begin{center}
@@ -253,7 +255,9 @@
   \end{center}
 \end{frame}
 
-\section{Appendix}
+\appendix
+
+\section*{Numerical methods}
 
 \begin{frame}
   \begin{block}{Gillespie algorithm}
