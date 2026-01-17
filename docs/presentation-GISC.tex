@@ -53,22 +53,23 @@
 \section{Introduction and objectives}
 
 \begin{frame}
-  \begin{minipage}{0.62\textwidth}
-    \begin{block}{Motivation}
-      \begin{itemize}
-        \item \alert{Adaptation} in fluctuating \alert{environments} is not fully understood yet.
-        \item Especially under \alert{demographic constraints}.
-        \item Paradigmatic setting to study the effects of \alert{fluctuations in biological processes}.
-      \end{itemize}
-    \end{block}
-    \vfill
-  \end{minipage}
-  \hfill
-  \begin{minipage}{0.34\textwidth}
-    \begin{figure}
-      \frame{\includegraphics[scale=0.12]{images/changing-environment.jpg}}
-    \end{figure}
-  \end{minipage}
+  \begin{columns}
+    \hfill
+    \begin{column}{0.6\textwidth}
+      \begin{block}{Motivation}
+        \begin{itemize}
+          \item \alert{Adaptation} in fluctuating \alert{environments} is not fully understood yet.
+          \item Especially under \alert{demographic constraints}.
+          \item Paradigmatic setting to study the effects of \alert{fluctuations in biological processes}.
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.4\textwidth}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.12]{images/changing-environment.jpg}}
+      \end{figure}
+    \end{column}
+  \end{columns}
 
   \begin{block}{Objectives}
     \begin{itemize}
@@ -161,23 +162,28 @@
 \section{Results: phenotypic diversity and safe strategies}
 
 \begin{frame}
-  \begin{minipage}{0.42\textwidth}
-    \begin{block}{Observables}
-      List observables...
-    \end{block}
-    \begin{figure}
-      \frame{\includegraphics[scale=0.6]{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}}
-    \end{figure}
-  \end{minipage}
-  \hfill
-  \begin{minipage}{0.54\textwidth}
-    \begin{figure}
-      \frame{\includegraphics[scale=0.8]{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}}
-    \end{figure}
-    \begin{figure}
-      \frame{\includegraphics[scale=0.8]{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}}
-    \end{figure}
-  \end{minipage}
+  \begin{columns}
+    \hfill
+    \begin{column}{0.5\textwidth}
+      \begin{block}{Observables}
+        \begin{itemize}
+          \item Average growth rate $\langle\mu\rangle$
+          \item Total extinction rate $r_e$ ($n_e$)
+          \item Distribution of phenotypic strategies $p(s(0))$, Average phenotypic strategy $\langle s(0)\rangle$
+          \item Distribution of the number of agents $p(N/N_i)$
+          \item Distribution of phenotypes $p_\phi(0)$
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.7]{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}}
+      \end{figure}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.7]{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}}
+      \end{figure}
+    \end{column}
+  \end{columns}
 
   \note[item]{Measured observables include time, population size, and the population growth rate defined as $\Delta N/(N\Delta t)$.}
 \end{frame}
