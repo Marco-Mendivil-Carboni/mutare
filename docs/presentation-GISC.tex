@@ -206,31 +206,33 @@
     \begin{column}{0.45\textwidth}
       \begin{block}{Evolutionary outcome}
         \begin{itemize}
-          \item Evolution converges to a \alert{well-defined strategy}.
-          \item Independent of initial conditions.
-          \item Population remains \alert{almost monomorphic} at any time.
+          \item Convergence to a \alert{well-defined strategy}.
+          \item \alert{Independent} of initial conditions.
+          \item Population is \alert{nearly strategy-homogeneous} at any time.
         \end{itemize}
       \end{block}
-      \begin{block}{Key observation}
+      \begin{block}{Take-home message}
         Evolution selects a \alert{compromise}.
       \end{block}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}}
       \end{figure}
     \end{column}
   \end{columns}
 
-  \note[item]{Both monomorphic and random initial populations converge to preety much the same stationary strategy.}
-  \note[item]{This indicates the presence of a stable attractor in strategy space.}
-  \note[item]{At each instant, the population is nearly monomorphic: the instantaneous dispersion is very small.}
-  \note[item]{However, over long times, mutation allows exploration of a broad range of strategies.}
+  \note[item]{Both \alert{evolutive} and \alert{random} simulations converge to preety much the \alert{same average strategy}.}
+  \note[item]{This indicates the presence of a \alert{stable attractor} in the space of strategies.}
+  \note[item]{The \alert{strategy is common to almost all agents} at each instant, and thus talking about a \alert{common strategy} is meaningful.}
+  \note[item]{The histogram however shows broader fluctuations over time and across runs, but with a clear \alert{well-defined mean}.}
+  \note[item]{The secondary peak directly reflects the \alert{initial strategy}, while the main peak is initial-condition independent.}
+  \note[item]{The \alert{time-series} analysis will clarify how this compromise dynamically emerges.}
   \note[item]{This justifies comparing evolutive simulations with fixed-strategy simulations.}
-  \note[item]{Importantly, the evolved strategy does not coincide exactly with the growth-maximizing one.}
+  \note[item]{The selected strategy lies \alert{between} the growth-maximizing and extinction-minimizing strategies.}
 \end{frame}
 
 \begin{frame}
@@ -253,10 +255,10 @@
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/dist_n_agents.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/dist_phe_0.pdf}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/dist_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/dist_n_agents.pdf}}
       \end{figure}
     \end{column}
   \end{columns}
@@ -287,10 +289,10 @@
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/time_series/avg_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/time_series/n_extinct.pdf}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/time_series/n_extinct.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/time_series/avg_strat_phe_0.pdf}}
       \end{figure}
     \end{column}
   \end{columns}
@@ -302,7 +304,7 @@
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      \begin{block}{Large population limit}
+      \begin{block}{Large population limit ($N_i=1000$)}
         \begin{itemize}
           \item Extinction becomes extremely rare.
           \item Evolution maximizes \alert{mean growth rate}.
@@ -317,10 +319,10 @@
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/extended/plots/strat_phe_0_i/dist_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/extended/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/extended/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/extended/plots/strat_phe_0_i/dist_strat_phe_0.pdf}}
       \end{figure}
     \end{column}
   \end{columns}
