@@ -90,22 +90,26 @@
 \section{The model: a Markov process}
 
 \begin{frame}
-  \begin{block}{Model definition}
-    \alert{Continuous-time Markov process}:
+  \begin{block}{State}
     \begin{itemize}
-      \item \alert{Environment}: $e\in\{0,\dots,n_{\text{env}}-1\}$, evolves with rates \alert{$\omega_t(e,e')$}.
-      \item \alert{Agents}: population of size $N\le N_i$, each agent characterized by:
+      \item \alert{Environment}: $e\in\{0,\dots,n_{\text{env}}-1\}$
+      \item \alert{Population}: $N\le N_i$ agents, each one characterized by:
             \begin{itemize}
-              \item \alert{phenotype}: $\phi\in\{0,\dots,n_{\text{phe}}-1\}$.
-              \item \alert{phenotypic strategy}: $s(\phi)$ (probability distribution).
+              \item \alert{phenotype}: $\phi\in\{0,\dots,n_{\text{phe}}-1\}$
+              \item \alert{phenotypic strategy}: $s(\phi)$ (probability distribution)
             \end{itemize}
-      \item \alert{Dynamics}: birth--death process with environment- and phenotype-dependent rates \alert{$\omega_b(e,\phi)$} and \alert{$\omega_d(e,\phi)$}.
-      \item \alert{Evolution}: offsprings inherit the parent's strategy; mutations occur with probability \alert{$p_{\text{mut}}$}.
-      \item \alert{Constraint}: population size \alert{capped at $N_i$}.
+    \end{itemize}
+  \end{block}
+  \begin{block}{Dynamics}
+    \begin{itemize}
+      \item \alert{Environment}: transition rates \alert{$\omega_t(e,e')$}
+      \item \alert{Population}: environment- and phenotype-dependent birth and death rates \alert{$\omega_b(e,\phi)$} and \alert{$\omega_d(e,\phi)$}
+      \item \alert{Evolution}: offsprings inherit the parent's strategy, mutations occur with probability \alert{$p_{\text{mut}}$}
+      \item \alert{Constraint}: population size \alert{capped at $N_i$}
     \end{itemize}
   \end{block}
 
-  \note[item]{The model is a modified birth-and-death Markov process describing a population evolving in a fluctuating environment.}
+  \note[item]{Continuous-time Markov process describing a population evolving in a fluctuating environment.}
   \note[item]{The population starts with an initial number of agents and evolves in continuous time.}
   \note[item]{The environment is a discrete variable that can take one of a finite number of states and changes according to a continuous-time Markov chain with given transition rates.}
   \note[item]{Each agent is characterized by a phenotype and a phenotypic strategy.}
