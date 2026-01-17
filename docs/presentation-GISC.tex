@@ -159,6 +159,7 @@
   \note[item]{These cases are compared to identify evolutionary attractors and the strategies favored by selection.}
   \note[item]{The extended parameter set is identical to the asymmetric case but uses a larger population size of $1000$ agents.}
 \end{frame}
+
 \section{Results: phenotypic diversity and safe strategies}
 
 \begin{frame}
@@ -193,7 +194,19 @@
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      Some more text explaining the main results...
+      \begin{block}{Evolutionary outcome}
+        \begin{itemize}
+          \item Evolution converges to a \alert{well-defined strategy}.
+          \item Independent of initial conditions.
+          \item Population remains \alert{almost monomorphic} at any time.
+        \end{itemize}
+      \end{block}
+      \begin{block}{Key observation}
+        \begin{itemize}
+          \item Growth-maximizing and extinction-minimizing strategies \alert{differ}.
+          \item Evolution selects a \alert{compromise}.
+        \end{itemize}
+      \end{block}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
@@ -204,13 +217,32 @@
       \end{figure}
     \end{column}
   \end{columns}
+
+  \note[item]{Both monomorphic and random initial populations converge to the same stationary strategy.}
+  \note[item]{This indicates the presence of a stable attractor in strategy space.}
+  \note[item]{At each time, the population is nearly monomorphic: the instantaneous dispersion is very small.}
+  \note[item]{However, over long times, mutation allows exploration of a broad range of strategies.}
+  \note[item]{This justifies comparing evolutive simulations with fixed-strategy simulations.}
+  \note[item]{Importantly, the evolved strategy does not coincide exactly with the growth-maximizing one.}
 \end{frame}
 
 \begin{frame}
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      Some more text explaining this auxiliary results...
+      \begin{block}{Population size fluctuations}
+        \begin{itemize}
+          \item Population stays close to \alert{carrying capacity}.
+          \item Extinction corresponds to \alert{rare, large fluctuations}.
+          \item Riskier strategies show broader tails.
+        \end{itemize}
+      \end{block}
+      \begin{block}{Phenotypes vs strategies}
+        \begin{itemize}
+          \item Strategy $\neq$ realized phenotype distribution.
+          \item Death rates bias the observed composition.
+        \end{itemize}
+      \end{block}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
@@ -221,13 +253,31 @@
       \end{figure}
     \end{column}
   \end{columns}
+
+  \note[item]{The population-size distribution always peaks near $N/N_i=1$.}
+  \note[item]{The informative part is the tail, which reflects demographic bottlenecks.}
+  \note[item]{Riskier strategies lead to more frequent deep population declines.}
+  \note[item]{The realized phenotype distribution differs from the strategy because phenotypes experience different death rates.}
+  \note[item]{This effect is particularly strong in the asymmetric case.}
 \end{frame}
 
 \begin{frame}
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      Some more text explaining the time series
+      \begin{block}{Time evolution}
+        \begin{itemize}
+          \item Rapid convergence to a stationary strategy.
+          \item Long plateaus interrupted by extinction events.
+          \item Mutations drive slow exploration.
+        \end{itemize}
+      \end{block}
+      \begin{block}{Interpretation}
+        \begin{itemize}
+          \item Evolution acts between extinctions.
+          \item Extinction resets the population.
+        \end{itemize}
+      \end{block}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
@@ -238,13 +288,29 @@
       \end{figure}
     \end{column}
   \end{columns}
+
+  \note[item]{After a short transient, the strategy fluctuates around a stable value.}
+  \note[item]{Between extinctions, evolution is slow and mutation-limited.}
+  \note[item]{Extinction events effectively reset evolutionary history.}
+  \note[item]{This highlights the importance of extinction as an evolutionary force.}
 \end{frame}
 
 \begin{frame}
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      Some more text explaining the extended case...
+      \begin{block}{Large population limit}
+        \begin{itemize}
+          \item Extinction becomes extremely rare.
+          \item Evolution maximizes \alert{mean growth rate}.
+          \item Classical evolutionary prediction recovered.
+        \end{itemize}
+      \end{block}
+      \begin{block}{Key message}
+        \begin{itemize}
+          \item Population size controls the optimization principle.
+        \end{itemize}
+      \end{block}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
@@ -255,6 +321,10 @@
       \end{figure}
     \end{column}
   \end{columns}
+
+  \note[item]{With $N_i=1000$, extinction is negligible on simulation timescales.}
+  \note[item]{The evolved strategy coincides with the growth-maximizing one.}
+  \note[item]{This confirms that deviations at small $N_i$ are due to extinction risk.}
 \end{frame}
 
 \section{Conclusions and future work}
@@ -262,7 +332,9 @@
 \begin{frame}
   \begin{block}{Conclusions}
     \begin{itemize}
-      \item ...
+      \item Evolution does \alert{not always maximize growth}.
+      \item Finite populations favor \alert{safer strategies}.
+      \item Extinction risk reshapes evolutionary outcomes.
     \end{itemize}
   \end{block}
 
@@ -271,7 +343,9 @@
     \begin{column}{0.55\textwidth}
       \begin{block}{Future work}
         \begin{itemize}
-          \item ...
+          \item Measure extinction scaling with $N_i$.
+          \item Large deviations and quasi-stationary theory.
+          \item Environment-dependent (sensing) strategies.
         \end{itemize}
       \end{block}
     \end{column}
@@ -282,7 +356,9 @@
     \end{column}
   \end{columns}
 
-  \note[item]{...}
+  \note[item]{The results point to an effective fitness incorporating extinction risk.}
+  \note[item]{Large deviations theory provides a natural framework to understand extinction.}
+  \note[item]{Understanding this optimization principle is a key open problem.}
 \end{frame}
 
 \section*{Acknowledgments}
