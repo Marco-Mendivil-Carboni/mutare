@@ -168,11 +168,14 @@
         \begin{itemize}
           \item Average growth rate $\langle\mu\rangle$
           \item Total extinction rate $r_e$
-          \item Distribution of phenotypic strategies $p(s(0))$
           \item Average phenotypic strategy $\langle s(0)\rangle$
-          \item Distribution of the number of agents $p(N/N_i)$
+          \item Distribution of phenotypic strategies $p(s(0))$
           \item Distribution of phenotypes $p_\phi(0)$
+          \item Distribution of the number of agents $p(N/N_i)$
         \end{itemize}
+      \end{block}
+      \begin{block}{Take-home message}
+        \alert{Growth-maximization} $\neq$ \alert{extinction-minimization}
       \end{block}
     \end{column}
     \begin{column}{0.55\textwidth}
@@ -185,12 +188,10 @@
     \end{column}
   \end{columns}
 
-  \note[item]{Measured observables include time, population size, and the population growth rate defined as $\Delta N/(N\Delta t)$.}
-  \note[item]{The number of extinctions is recorded to compute extinction rates.}
-  \note[item]{We compute the average phenotypic strategy across the population and over time.}
-  \note[item]{We also compute the standard deviation of the phenotypic strategy across agents.}
-  \note[item]{Histograms are constructed for phenotypic strategies and for phenotype proportions in the population.}
-  \note[item]{Because strategies and phenotypes are two-dimensional and normalized, only the first component needs to be tracked.}
+  \note[item]{The population growth rate is defined as \alert{$\Delta N/(N\Delta t)$}.}
+  \note[item]{The number of extinctions is recorded to compute the total extinction rate.}
+  \note[item]{We also compute the \alert{instantaneous standard deviation} of the phenotypic strategy across agents.}
+  \note[item]{Because strategies and the phenotype distribution are \alert{two-dimensional and normalized}, only one component is independent.}
 \end{frame}
 
 \begin{frame}
@@ -205,10 +206,7 @@
         \end{itemize}
       \end{block}
       \begin{block}{Key observation}
-        \begin{itemize}
-          \item Growth-maximizing and extinction-minimizing strategies \alert{differ}.
-          \item Evolution selects a \alert{compromise}.
-        \end{itemize}
+        Evolution selects a \alert{compromise}.
       \end{block}
     \end{column}
     \begin{column}{0.55\textwidth}
