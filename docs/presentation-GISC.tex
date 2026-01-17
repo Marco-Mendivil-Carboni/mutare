@@ -109,7 +109,7 @@
     \end{itemize}
   \end{block}
 
-  \note[item]{\alert{Continuous-time} Markov process describing a population evolving in a fluctuating environment.}
+  \note[item]{\alert{Continuous-time} Markov process describing a population evolving in a fluctuating environment, that we will solve numerically using the \alert{Gillespie algorithm}.}
   \note[item]{The population starts with an initial number of agents \alert{$N_i$}.}
   \note[item]{The environment is a \alert{discrete variable} that changes according to some transition rates.}
   \note[item]{The phenotype takes \alert{discrete values} as well.}
@@ -148,16 +148,14 @@
     \end{enumerate}
   \end{block}
 
-  \note[item]{The analysis is restricted to the case of two environments and two phenotypes.}
-  \note[item]{The stochastic dynamics are simulated using the Gillespie algorithm.}
-  \note[item]{environmental transition rates are equal and set to one, making both environments equally likely.}
-  \note[item]{One phenotype grows well in a good environment but dies quickly in a bad one.}
-  \note[item]{The second phenotype grows more slowly in the good environment but survives much better in the bad environment.}
-  \note[item]{Three types of simulations are performed: fixed, evolutive, and random.}
-  \note[item]{In fixed simulations, all agents share a prescribed, non-evolving strategy and mutations are disabled.}
-  \note[item]{In evolutive simulations, the population starts monomorphic, and strategies evolve through mutation and selection.}
-  \note[item]{In random simulations, agents start with independent random strategies, which then evolve.}
-  \note[item]{These cases are compared to identify evolutionary attractors and the strategies favored by selection.}
+  \note[item]{We restrict ourselves to the case of \alert{two} environments and two phenotypes.}
+  \note[item]{Environmental transition rates are equal and set to one, making \alert{both environments equally likely} for simplicity.}
+  \note[item]{The environment alternates between a \alert{good} and a \alert{bad} state.}
+  \note[item]{The \alert{resistant} phenotype grows fast in the good environment but dies quickly in the bad one, while the \alert{persistent} phenotype grows slowly but survives much better in bad conditions.}
+  \note[item]{In \alert{fixed} simulations, all agents share the same strategy and \alert{evolution is suppressed}.}
+  \note[item]{In \alert{evol} simulations, agents initially share a strategy, which evolves through \alert{mutation and selection}.}
+  \note[item]{In \alert{random} simulations, agents start with independent random strategies, which then evolve.}
+  \note[item]{Comparing the results of these three cases reveals the properties of the \alert{strategies} favored by selection, as we will see next.}
 \end{frame}
 
 \section{Results: phenotypic diversity and safe strategies}
