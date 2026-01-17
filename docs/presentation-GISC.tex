@@ -140,12 +140,12 @@
     \end{table}
   \end{block}
 
-  \begin{block}{Simulation types}
-    \begin{itemize}
-      \item \alert{Fixed}: single prescribed strategy, no evolution ($p_{\text{mut}}=0$).
-      \item \alert{Evolutive}: monomorphic initial population, strategies evolve.
-      \item \alert{Random}: random initial strategies, then evolve.
-    \end{itemize}
+  \begin{block}{Types of simulations}
+    \begin{enumerate}
+      \item \alert{\texttt{random}}: \alert{independent random} initial strategies, \alert{evolving}.
+      \item \alert{\texttt{fixed}}: \alert{shared} initial strategy $s(\phi)_i$, \alert{not evolving} ($p_{\text{mut}}=0$).
+      \item \alert{\texttt{evol}}: \alert{shared} initial strategy $s(\phi)_i$, \alert{evolving}.
+    \end{enumerate}
   \end{block}
 
   \note[item]{The analysis is restricted to the case of two environments and two phenotypes.}
@@ -158,7 +158,6 @@
   \note[item]{In evolutive simulations, the population starts monomorphic, and strategies evolve through mutation and selection.}
   \note[item]{In random simulations, agents start with independent random strategies, which then evolve.}
   \note[item]{These cases are compared to identify evolutionary attractors and the strategies favored by selection.}
-  \note[item]{The extended parameter set is identical to the asymmetric case but uses a larger population size of $1000$ agents.}
 \end{frame}
 
 \section{Results: phenotypic diversity and safe strategies}
