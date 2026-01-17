@@ -140,7 +140,13 @@
     \end{table}
   \end{block}
 
-  Add block explaining simulation types...
+  \begin{block}{Simulation types}
+    \begin{itemize}
+      \item \alert{Fixed}: single prescribed strategy, no evolution ($p_{\text{mut}}=0$).
+      \item \alert{Evolutive}: monomorphic initial population, strategies evolve.
+      \item \alert{Random}: random initial strategies, then evolve.
+    \end{itemize}
+  \end{block}
 
   \note[item]{The analysis is restricted to the case of two environments and two phenotypes.}
   \note[item]{The stochastic dynamics are simulated using the Gillespie algorithm.}
