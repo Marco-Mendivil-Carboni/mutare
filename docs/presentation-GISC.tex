@@ -240,17 +240,17 @@
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      \begin{block}{Actual distribution of phenotypes}
+      \begin{block}{Actual phenotype distribution}
         \begin{itemize}
           \item \alert{Distribution of phenotypes} $\neq$ \alert{strategy}.
-          \item Birth sets production, \alert{death rates bias survival}.
+          \item Strategy fixes \alert{production}, death rates fix \alert{survival}.
+          \item Fluctuating environments interpolate \alert{between fixed-environment equilibria}.
         \end{itemize}
       \end{block}
       \begin{block}{Population-size fluctuations}
         \begin{itemize}
-          \item Population remains near \alert{carrying capacity}.
-          \item Extinction arises from \alert{rare, large fluctuations}.
-          \item Riskier strategies produce \alert{broader tails}.
+          \item Population is \alert{usually} close to the \alert{maximum size $N_i$}.
+          \item Riskier strategies show a \alert{secondary peak} (bad environment).
         \end{itemize}
       \end{block}
     \end{column}
@@ -266,10 +266,12 @@
 
   \note[item]{I would also like to show some \alert{complementary results} that help clarify how the system behaves.}
   \note[item]{For a \alert{fixed strategy} and a \alert{fixed environment}, the phenotype distribution is easily obtained \alert{analytically} from the dominant eigenvector of a certain matrix.}
-  \note[item]{The \alert{dotted lines} show these two fixed-environment equilibria.}
-  \note[item]{With a \alert{fluctuating environment}, the observed phenotype distribution lies \alert{between} the two fixed-environment results.}
-  \note[item]{The population-size distribution always \alert{peaks near $N/N_i=1$}, indicating sustained growth.}
-  \note[item]{Riskier strategies generate \alert{broader tails}, corresponding to more frequent near-extinction events.}
+  \note[item]{The \alert{dash-dotted lines} show these two fixed-environment equilibria.}
+  \note[item]{\alert{As expected}, with a \alert{fluctuating environment}, the observed phenotype distribution lies \alert{between} the two lines.}
+  \note[item]{The \alert{main peak} corresponds to growth in the \alert{good environment}.}
+  \note[item]{The \alert{secondary peak} reflects extended periods spent in the \alert{bad environment}.}
+  \note[item]{Riskier strategies increase the weight of this secondary peak.}
+  \note[item]{Since extinction corresponds to \alert{rare, large fluctuations} away from typical states near $N_i$, a \alert{large-deviation} framework is a natural theoretical approach.}
 \end{frame}
 
 \begin{frame}
