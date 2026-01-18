@@ -314,16 +314,18 @@
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      \begin{block}{Large population limit ($N_i=1000$)}
+      \begin{block}{Large population limit}
+        With \alert{$N_i=1000$}:
         \begin{itemize}
-          \item Extinction becomes extremely rare.
-          \item Evolution maximizes \alert{mean growth rate}.
-          \item Classical evolutionary prediction recovered.
+          \item Extinction is \alert{negligible}.
+          \item Evolution converges to the \alert{growth-maximizing strategy}.
+          \item Multiple similar \alert{strategies can coexist}.
         \end{itemize}
       \end{block}
-      \begin{block}{Key message}
+      \begin{block}{Take-home message}
         \begin{itemize}
-          \item Population size controls the optimization principle.
+          \item The \alert{evolutionary outcome} depends on population size.
+          \item \alert{Extinction risk} controls which strategies are selected.
         \end{itemize}
       \end{block}
     \end{column}
@@ -337,9 +339,12 @@
     \end{column}
   \end{columns}
 
-  \note[item]{With $N_i=1000$, extinction is extremely rare.}
-  \note[item]{The evolved strategy coincides with the growth-maximizing one.}
-  \note[item]{This confirms that deviations at small $N_i$ are due to extinction risk.}
+  \note[item]{Increasing $N_i$ strongly reduces the \alert{extinction risk} but does \alert{not} change the \alert{average growth rate}.}
+  \note[item]{In this regime, the evolved strategy coincides with the \alert{growth-maximizing} one.}
+  \note[item]{The evolutionary outcome therefore depends on population size through its effect on extinction.}
+  \note[item]{Notice as well that the \alert{instantaneous dispersion} of strategies is still small, but larger than at small $N_i$.}
+  \note[item]{This reflects the coexistence of several \alert{similar strategies} within the population.}
+  \note[item]{In contrast, the \alert{long-term dispersion} is reduced and comparable to the instantaneous one.}
 \end{frame}
 
 \section{Conclusions and future work}
@@ -374,6 +379,7 @@
   \note[item]{The results point to an effective fitness incorporating extinction risk.}
   \note[item]{Large deviations theory provides a natural framework to understand extinction.}
   \note[item]{Understanding this optimization principle is a key open problem.}
+  \note[item]{The evolutionary dynamics appear to optimize a combination of the \alert{average growth} and \alert{extinction risk}.}
 \end{frame}
 
 \section*{Acknowledgments}
