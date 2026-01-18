@@ -355,32 +355,32 @@
     \begin{itemize}
       \item Evolution does \alert{not always maximize growth}.
       \item Finite populations favor \alert{safer strategies}.
-      \item Extinction risk reshapes evolutionary outcomes.
+      \item \alert{Extinction risk} shapes the evolutionary outcome.
     \end{itemize}
   \end{block}
 
   \begin{columns}
     \hfill
-    \begin{column}{0.4\textwidth}
+    \begin{column}{0.45\textwidth}
       \begin{block}{Future work}
         \begin{itemize}
           \item Measure extinction scaling with $N_i$.
-          \item Large deviations and quasi-stationary theory.
-          \item Environment-dependent (sensing) strategies.
+          \item Identify an effective optimization principle combining growth and extinction.
+          \item Investigate environment-dependent strategies (sensing).
         \end{itemize}
       \end{block}
     \end{column}
-    \begin{column}{0.6\textwidth}
+    \begin{column}{0.55\textwidth}
       \begin{figure}
         \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/fitness.pdf}}
       \end{figure}
     \end{column}
   \end{columns}
 
-  \note[item]{The results point to an effective fitness incorporating extinction risk.}
-  \note[item]{Large deviations theory provides a natural framework to understand extinction.}
-  \note[item]{Understanding this optimization principle is a key open problem.}
-  \note[item]{The evolutionary dynamics appear to optimize a combination of the \alert{average growth} and \alert{extinction risk}.}
+  \note[item]{The results suggest the existence of an \alert{effective fitness} incorporating extinction risk.}
+  \note[item]{The figure shows a \alert{candidate objective function} combining average growth and extinction rate.}
+  \note[item]{For the simulations presented here, its maximum coincides with the \alert{selected strategy}.}
+  \note[item]{Deriving this optimization principle from theory is a key open problem, and \alert{large deviations theory} appears as a natural framework to address extinction.}
 \end{frame}
 
 \section*{Acknowledgments}
@@ -397,9 +397,6 @@
 
 \begin{frame}
   \begin{block}{Gillespie algorithm}
-    \begin{equation*}
-      \mathbf{X}(t) = (X_1(t),\dots,X_N(t))
-    \end{equation*}
     \begin{equation*}
       a_j(\mathbf{X}) = c_j h_j(\mathbf{X}), \ a_0(\mathbf{X}) = \sum_{j=1}^M a_j(\mathbf{X})
     \end{equation*}
