@@ -278,17 +278,17 @@
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      \begin{block}{Time evolution}
+      \begin{block}{Time series}
         \begin{itemize}
-          \item Rapid convergence to a stationary strategy.
-          \item Long plateaus interrupted by extinction events.
-          \item Mutations drive slow exploration.
+          \item \alert{Independent simulations} concatenated in time.
+          \item Each run ends at an \alert{extinction event}.
+          \item New runs start from a \alert{random initial condition}.
         \end{itemize}
       \end{block}
-      \begin{block}{Interpretation}
+      \begin{block}{Strategy dynamics}
         \begin{itemize}
-          \item Evolution acts between extinctions.
-          \item Extinction resets the population.
+          \item Long \alert{plateaus} with a \alert{common strategy}.
+          \item \alert{Abrupt switches} between strategies.
         \end{itemize}
       \end{block}
     \end{column}
@@ -302,7 +302,12 @@
     \end{column}
   \end{columns}
 
-  \note[item]{The strategy fluctuates around a stable value.}
+  \note[item]{The \alert{vertical dotted lines} mark extinction times.}
+  \note[item]{The lower panel shows the \alert{average strategy} as a function of time.}
+  \note[item]{Error bands indicate the \alert{instantaneous dispersion} across agents and are barely visible.}
+  \note[item]{As we anticipated, at any given time, the population shares a \alert{common strategy}, with negligible instantaneous dispersion.}
+  \note[item]{This time-series also reveals a \alert{less obvious feature}: strategies remain almost \alert{constant over long times} and \alert{change abruptly} when a different strategy takes over.}
+  \note[item]{Over long times and across runs, the explored strategies show a \alert{moderate dispersion}, consistent with the histogram we showed previously.}
 \end{frame}
 
 \begin{frame}
