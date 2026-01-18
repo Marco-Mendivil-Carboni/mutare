@@ -100,6 +100,7 @@
             \end{itemize}
     \end{itemize}
   \end{block}
+
   \begin{block}{Dynamics}
     \begin{itemize}
       \item \alert{Environment}: transition rates \alert{$\omega_t(e,e')$}
@@ -412,8 +413,76 @@
       \mathbf{X}(t+\tau) = \mathbf{X}(t) + \boldsymbol{\nu}_\mu
     \end{equation*}
   \end{block}
+\end{frame}
 
-  \note[item]{Mention the care needed to analyze the results of this simulations.}
+\section*{Symmetric parameters}
+
+\begin{frame}
+  \begin{columns}
+    \hfill
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}}
+      \end{figure}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/extinct_rate.pdf}}
+      \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
+      \end{figure}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}
+  \begin{columns}
+    \hfill
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/dist_phe_0.pdf}}
+      \end{figure}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/dist_n_agents.pdf}}
+      \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/time_series/n_extinct.pdf}}
+      \end{figure}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/time_series/avg_strat_phe_0.pdf}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section*{Population-size dependence}
+
+\begin{frame}
+  \begin{columns}
+    \hfill
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/n_agents_i/avg_strat_phe_0.pdf}}
+      \end{figure}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/n_agents_i/dist_strat_phe_0.pdf}}
+      \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/n_agents_i/avg_strat_phe_0.pdf}}
+      \end{figure}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/n_agents_i/dist_strat_phe_0.pdf}}
+      \end{figure}
+    \end{column}
+  \end{columns}
 \end{frame}
 
 \end{document}
