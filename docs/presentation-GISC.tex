@@ -56,28 +56,33 @@
   \begin{columns}
     \hfill
     \begin{column}{0.6\textwidth}
-      \begin{block}{Motivation}
-        \begin{itemize}
-          \item \alert{Adaptation} in fluctuating \alert{environments} is not fully understood yet.
-          \item Especially under \alert{demographic constraints}.
-          \item Paradigmatic setting to study the effects of \alert{fluctuations in biological processes}.
-        \end{itemize}
-      \end{block}
+      \onslide<1->{
+        \begin{block}{Motivation}
+          \begin{itemize}
+            \item \alert{Adaptation} in fluctuating \alert{environments} is not fully understood yet.
+            \item Especially under \alert{population limitations}.
+            \item Paradigmatic example of \alert{fluctuations in biological processes}.
+          \end{itemize}
+        \end{block}
+      }
     \end{column}
     \begin{column}{0.4\textwidth}
       \begin{figure}
-        \frame{\includegraphics[scale=0.12]{images/changing-environment.jpg}}
+        \onslide<1->{\frame{\includegraphics[scale=0.12]{images/changing-environment.jpg}}}
       \end{figure}
     \end{column}
   \end{columns}
 
-  \begin{block}{Objectives}
-    \begin{itemize}
-      \item Develop a minimal mathematical \alert{model} to study this problem.
-      \item Quantify how the \alert{evolutionary outcome} depends on these constraints.
-      \item Identify the main mechanisms shaping these results and seek ways to \alert{approximate} them.
-    \end{itemize}
-  \end{block}
+  \onslide<2->{
+    \begin{block}{Objectives}
+      \begin{itemize}
+        \item Develop a minimal mathematical \alert{model} to study this problem.
+        \item Model the emergence of \alert{bet-hedging} strategies in fluctuating environments.
+        \item Quantify how the \alert{evolutionary outcome} depends on these constraints.
+        \item Identify the main mechanisms shaping these results and seek ways to \alert{approximate} them.
+      \end{itemize}
+    \end{block}
+  }
 
   \note[item]{Adaptation in fluctuating environments is a \alert{central problem} in \alert{evolutionary biology}.}
   \note[item]{Natural populations experience fluctuating rather than constant environments.}
@@ -169,10 +174,6 @@
         \begin{itemize}
           \item Average growth rate $\langle\mu\rangle$
           \item Total extinction rate $r_{\text{ext}}$
-          \item Average strategy $\langle s(A)\rangle$
-          \item Distribution of phenotypic strategies $p(s(A))$
-          \item Distribution of phenotypes $p(A)$
-          \item Distribution of the number of agents $p(N/N_{\text{ini}})$
         \end{itemize}
       \end{block}
       \begin{block}{Take-home message}
@@ -205,12 +206,16 @@
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
+      \begin{block}{Observables}
+        \begin{itemize}
+          \item Average strategy $\langle s(A)\rangle$
+          \item Distribution of strategies $p(s(A))$
+        \end{itemize}
+      \end{block}
       \begin{block}{Evolutionary outcome}
         \begin{itemize}
           \item Convergence to a \alert{common average strategy}.
           \item \alert{Independent} of initial conditions.
-          \item \alert{Low instantaneous dispersion} across agents.
-          \item \alert{Moderate dispersion} over time and across runs.
         \end{itemize}
       \end{block}
       \begin{block}{Take-home message}
@@ -241,17 +246,20 @@
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
+      \begin{block}{Observables}
+        \begin{itemize}
+          \item Distribution of phenotypes $p(A)$
+          \item Distribution of the number of agents $p(N/N_{\text{ini}})$
+        \end{itemize}
+      \end{block}
       \begin{block}{Actual phenotype distribution}
         \begin{itemize}
           \item \alert{Distribution of phenotypes} $\neq$ \alert{strategy}.
-          \item Strategy fixes \alert{production}, death rates fix \alert{survival}.
-          \item Fluctuating environments interpolate \alert{between fixed-environment equilibria}.
         \end{itemize}
       \end{block}
       \begin{block}{Population-size fluctuations}
         \begin{itemize}
           \item Population is \alert{usually} close to the \alert{maximum size $N_{\text{ini}}$}.
-          \item Riskier strategies show a \alert{secondary peak} (bad environment).
         \end{itemize}
       \end{block}
     \end{column}
