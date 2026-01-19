@@ -95,7 +95,7 @@
 \section{The model: a Markov process}
 
 \begin{frame}
-  \begin{block}{State}
+  \begin{block}{System state}
     \begin{itemize}
       \item \alert{Environment}: $e\in\{1,2\}$
       \item \alert{Population}: $N$ agents, each one characterized by:
@@ -105,6 +105,11 @@
             \end{itemize}
     \end{itemize}
   \end{block}
+
+  \note[item]{\alert{Continuous-time} Markov process describing a population evolving in a fluctuating environment, that we will solve numerically using the \alert{Gillespie algorithm}.}
+  \note[item]{The population starts with an initial number of agents \alert{$N_{\text{ini}}$}.}
+  \note[item]{The environment is a \alert{discrete variable} that changes according to some transition rates.}
+  \note[item]{The phenotype takes \alert{discrete values} as well.}
 \end{frame}
 
 \begin{frame}
@@ -116,7 +121,7 @@
       \item \alert{Constraint}: population size \alert{capped at $N_{\text{ini}}$}
     \end{itemize}
   \end{block}
-
+  \vfill
   \begin{tikzpicture}[>=stealth, node distance=2.25cm]
     \node (e1) [draw, circle, minimum size=1cm]{$1$};
     \node (e2) [draw, circle, minimum size=1cm, right of=e1] {$2$};
@@ -141,10 +146,6 @@
     (offspring) -- node[sloped, midway, below] {$s(B)$} (B);
   \end{tikzpicture}
 
-  \note[item]{\alert{Continuous-time} Markov process describing a population evolving in a fluctuating environment, that we will solve numerically using the \alert{Gillespie algorithm}.}
-  \note[item]{The population starts with an initial number of agents \alert{$N_{\text{ini}}$}.}
-  \note[item]{The environment is a \alert{discrete variable} that changes according to some transition rates.}
-  \note[item]{The phenotype takes \alert{discrete values} as well.}
   \note[item]{When an agent reproduces, the \alert{offspring's phenotype is drawn from the parent's strategy}.}
   \note[item]{\alert{Offspring inherit} the same \alert{phenotypic strategy} as their parent, allowing natural selection to act on strategies.}
   \note[item]{To allow \alert{evolution}, mutations are introduced: with a small probability at duplication, an agent's strategy \alert{mutates to a new random strategy}.}
