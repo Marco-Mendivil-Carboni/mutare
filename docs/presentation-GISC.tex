@@ -34,7 +34,7 @@
 \title[XXII GISC Workshop]{Evolving Safely: Adaptation and Phenotypic Diversity under Environmental and Demographic Constraints}
 \author[]
 {
-  \texorpdfstring{{\large Mendívil Carboni, Marco\inst{1}}\\\vspace{1ex} Mazo Torres, Juan José\inst{1} (dir.) \and Dinis Vizcaíno, Luis Ignacio\inst{1} (dir.)}{Marco Mendívil Carboni}
+  \texorpdfstring{{\large Mendívil Carboni, Marco\inst{1}}\\\vspace{1ex} Dinis Vizcaíno, Luis Ignacio\inst{1} (dir.) \and Mazo Torres, Juan José\inst{1} (dir.)}{Marco Mendívil Carboni}
 } 
 \institute[Universidad Complutense de Madrid]
 {
@@ -105,7 +105,9 @@
             \end{itemize}
     \end{itemize}
   \end{block}
+\end{frame}
 
+\begin{frame}
   \begin{block}{Dynamics}
     \begin{itemize}
       \item \alert{Environment}: transition rates \alert{$\omega_t(e,e')$}
@@ -115,44 +117,72 @@
     \end{itemize}
   \end{block}
 
+  \begin{tikzpicture}[>=stealth, node distance=2.25cm]
+    \node (e1) [draw, circle, minimum size=1cm]{$1$};
+    \node (e2) [draw, circle, minimum size=1cm, right of=e1] {$2$};
+    \draw[->, bend left=20]
+    (e1) to node[above] {$\omega_t(1,2)$} (e2);
+    \draw[->, bend left=20]
+    (e2) to node[below] {$\omega_t(2,1)$} (e1);
+    \node[draw, circle, minimum size=1cm, right of=e2] (agent) {$\phi$};
+    \node[right of=agent, yshift=+1cm, draw, circle, minimum size=1cm] (death) {$\times$};
+    \node[right of=agent, yshift=-1cm, draw, circle, minimum size=1cm] (parent) {$\phi$};
+    \node[right=0cm of parent] (plus) {$+$};
+    \node[right=0cm of plus, draw, circle, minimum size=1cm] (offspring) {$\phi'$};
+    \node[right of=offspring, yshift=+1cm] (A) {$\phi'=A$};
+    \node[right of=offspring, yshift=-1cm] (B) {$\phi'=B$};
+    \draw[->]
+    (agent) -- node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
+    \draw[->]
+    (agent) -- node[sloped, midway, below] {$\omega_b(e,\phi)$} (parent);
+    \draw[->]
+    (offspring) -- node[sloped, midway, above] {$s(A)$} (A);
+    \draw[->]
+    (offspring) -- node[sloped, midway, below] {$s(B)$} (B);
+  \end{tikzpicture}
+
   \note[item]{\alert{Continuous-time} Markov process describing a population evolving in a fluctuating environment, that we will solve numerically using the \alert{Gillespie algorithm}.}
   \note[item]{The population starts with an initial number of agents \alert{$N_{\text{ini}}$}.}
   \note[item]{The environment is a \alert{discrete variable} that changes according to some transition rates.}
   \note[item]{The phenotype takes \alert{discrete values} as well.}
   \note[item]{When an agent reproduces, the \alert{offspring's phenotype is drawn from the parent's strategy}.}
-  \note[item]{\alert{Offspring inherit} the same p\alert{henotypic strategy} as their parent, allowing natural selection to act on strategies.}
+  \note[item]{\alert{Offspring inherit} the same \alert{phenotypic strategy} as their parent, allowing natural selection to act on strategies.}
   \note[item]{To allow \alert{evolution}, mutations are introduced: with a small probability at duplication, an agent's strategy \alert{mutates to a new random strategy}.}
   \note[item]{The total population size is \alert{capped at its initial value}, introducing a demographic constraint.}
 \end{frame}
 
 \begin{frame}
-  \begin{block}{Parameters -- resistant vs. persistent}
-    \begin{table}
-      \begin{tabular}{c c c}
-        \toprule
-        symbol             & name                         & value                                                        \\
-        \midrule
-        $\omega_t(e,e')$   & environment transition rates & $\begin{psmallmatrix}-1.0&+1.0\\+1.0&-1.0\end{psmallmatrix}$ \\
-        \addlinespace
-        $\omega_b(e,\phi)$ & birth rates                  & $\begin{psmallmatrix}1.0&0.2\\0.0&0.0\end{psmallmatrix}$     \\
-        \addlinespace
-        $\omega_d(e,\phi)$ & death rates                  & $\begin{psmallmatrix}0.0&0.0\\1.0&0.1\end{psmallmatrix}$     \\
-        \addlinespace
-        $p_{\text{mut}}$   & mutation probability         & $0.001$                                                      \\
-        \addlinespace
-        $N_{\text{ini}}$   & initial number of agents     & $100$                                                        \\
-        \bottomrule
-      \end{tabular}
-    \end{table}
-  \end{block}
+  \onslide<1->{
+    \begin{block}{Parameters -- resistant vs. persistent}
+      \begin{table}
+        \begin{tabular}{c c c}
+          \toprule
+          symbol             & name                         & value                                                        \\
+          \midrule
+          $\omega_t(e,e')$   & environment transition rates & $\begin{psmallmatrix}-1.0&+1.0\\+1.0&-1.0\end{psmallmatrix}$ \\
+          \addlinespace
+          $\omega_b(e,\phi)$ & birth rates                  & $\begin{psmallmatrix}1.0&0.2\\0.0&0.0\end{psmallmatrix}$     \\
+          \addlinespace
+          $\omega_d(e,\phi)$ & death rates                  & $\begin{psmallmatrix}0.0&0.0\\1.0&0.1\end{psmallmatrix}$     \\
+          \addlinespace
+          $p_{\text{mut}}$   & mutation probability         & $0.001$                                                      \\
+          \addlinespace
+          $N_{\text{ini}}$   & initial number of agents     & $100$                                                        \\
+          \bottomrule
+        \end{tabular}
+      \end{table}
+    \end{block}
+  }
 
-  \begin{block}{Types of simulations}
-    \begin{enumerate}
-      \item \alert{\texttt{fixed}}: \alert{common} initial strategy $s(\phi)_{\text{ini}}$, \alert{not evolving} ($p_{\text{mut}}=0$).
-      \item \alert{\texttt{evol}}: \alert{common} initial strategy $s(\phi)_{\text{ini}}$, \alert{evolving}.
-      \item \alert{\texttt{evol(r)}}: \alert{independent random} initial strategies, \alert{evolving}.
-    \end{enumerate}
-  \end{block}
+  \onslide<2->{
+    \begin{block}{Types of simulations}
+      \begin{enumerate}
+        \item \alert{\texttt{fixed}}: \alert{common} initial strategy $s(\phi)_{\text{ini}}$, \alert{not evolving} ($p_{\text{mut}}=0$).
+        \item \alert{\texttt{evol}}: \alert{common} initial strategy $s(\phi)_{\text{ini}}$, \alert{evolving}.
+        \item \alert{\texttt{evol(r)}}: \alert{independent random} initial strategies, \alert{evolving}.
+      \end{enumerate}
+    \end{block}
+  }
 
   \note[item]{We restrict ourselves to the case of \alert{two} environments and two phenotypes.}
   \note[item]{Environmental transition rates are equal and set to one, making \alert{both environments equally likely} for simplicity.}
@@ -170,30 +200,32 @@
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      \begin{block}{Observables}
-        \begin{itemize}
-          \item Average growth rate $\langle\mu\rangle$
-          \item Total extinction rate $r_{\text{ext}}$
-        \end{itemize}
-      \end{block}
-      \begin{block}{Take-home message}
-        \alert{Growth-maximization} $\neq$ \alert{extinction-minimization}
-      \end{block}
+      \onslide<1->{
+        \begin{block}{Observables}
+          \begin{itemize}
+            \item Average growth rate $\langle\mu\rangle$
+            \item Total extinction rate $r_{\text{ext}}$
+          \end{itemize}
+        \end{block}
+      }
+      \onslide<4->{
+        \begin{block}{Take-home message}
+          \alert{Growth-maximization} $\neq$ \alert{extinction-minimization}
+        \end{block}
+      }
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}}
+        \onslide<2->{\frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}}
+        \onslide<3->{\frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}}}
       \end{figure}
     \end{column}
   \end{columns}
 
   \note[item]{The population growth rate is defined as \alert{$\Delta N/(N\Delta t)$}.}
   \note[item]{The number of extinctions is recorded to compute the total extinction rate.}
-  \note[item]{We also compute the \alert{instantaneous standard deviation} of the strategy across agents.}
-  \note[item]{Because strategies and the phenotype distribution are \alert{two-dimensional and normalized}, only one component is independent.}
   \note[item]{These figures show the dependence of growth and extinction rates on the \alert{initial strategy} for different simulation types.}
   \note[item]{For \alert{evol(r)} simulations there is no common initial strategy, so they appear as strategy-independent horizontal lines.}
   \note[item]{Focusing on \alert{fixed} simulations we see that growth maximization and extinction minimization clearly \alert{do not coincide}.}
@@ -206,12 +238,14 @@
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      \begin{block}{Observables}
-        \begin{itemize}
-          \item Average strategy $\langle s(A)\rangle$
-          \item Distribution of strategies $p(s(A))$
-        \end{itemize}
-      \end{block}
+      \onslide<1->{
+        \begin{block}{Observables}
+          \begin{itemize}
+            \item Average strategy $\langle s(A)\rangle$
+            \item Distribution of strategies $p(s(A))$
+          \end{itemize}
+        \end{block}
+      }
       \begin{block}{Evolutionary outcome}
         \begin{itemize}
           \item Convergence to a \alert{common average strategy}.
@@ -232,6 +266,8 @@
     \end{column}
   \end{columns}
 
+  \note[item]{We also compute the \alert{instantaneous standard deviation} of the strategy across agents.}
+  \note[item]{Because strategies and the phenotype distribution are \alert{two-dimensional and normalized}, only one component is independent.}
   \note[item]{Both \alert{evol} and \alert{evol(r)} simulations converge to preety much the \alert{same average strategy}.}
   \note[item]{This indicates the presence of a \alert{stable attractor} in the space of strategies.}
   \note[item]{The \alert{strategy is common to almost all agents} at each instant, and thus talking about a \alert{common strategy} is meaningful.}
