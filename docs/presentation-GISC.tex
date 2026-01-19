@@ -353,9 +353,10 @@
 \begin{frame}
   \begin{block}{Conclusions}
     \begin{itemize}
+      \item Bet-hedging emerges \alert{naturally} from this minimal stochastic model.
+      \item Our model yields populations with \alert{common or very similar strategies}.
       \item Evolution does \alert{not always maximize growth}.
-      \item Finite populations favor \alert{safer strategies}.
-      \item \alert{Extinction risk} shapes the evolutionary outcome.
+      \item Demographic constraints shift selection toward \alert{safer strategies}.
     \end{itemize}
   \end{block}
 
@@ -364,9 +365,9 @@
     \begin{column}{0.45\textwidth}
       \begin{block}{Future work}
         \begin{itemize}
-          \item Measure extinction scaling with $N_i$.
-          \item Identify an effective optimization principle combining growth and extinction.
-          \item Investigate environment-dependent strategies (sensing).
+          \item Measure the \alert{scaling} of extinction rates with $N_i$.
+          \item Derive an \alert{effective fitness} function combining growth and extinction.
+          \item Extend the model to environment-dependent strategies (\alert{sensing}).
         \end{itemize}
       \end{block}
     \end{column}
@@ -377,10 +378,12 @@
     \end{column}
   \end{columns}
 
+  \note[item]{At any given time the population is \alert{concentrated around a common strategy}, possibly with a small spread for large $N$.}
   \note[item]{The results suggest the existence of an \alert{effective fitness} incorporating extinction risk.}
   \note[item]{The figure shows a \alert{candidate objective function} combining average growth and extinction rate.}
   \note[item]{For the simulations presented here, its maximum coincides with the \alert{selected strategy}.}
-  \note[item]{Deriving this optimization principle from theory is a key open problem, and \alert{large deviations theory} appears as a natural framework to address extinction.}
+  \note[item]{Deriving the \alert{effective fitness from theory} remains a key open problem.}
+  \note[item]{\alert{Large deviations theory} appears as a natural framework to describe extinction events and their impact on selection.}
 \end{frame}
 
 \section*{Acknowledgments}
