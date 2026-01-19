@@ -50,7 +50,7 @@ SIM_COLORS: dict[SimType, Any] = {
 SIM_LABELS: dict[SimType, str] = {
     SimType.FIXED: "\\texttt{fixed}",
     SimType.EVOL: "\\texttt{evol}",
-    SimType.RANDOM: "\\texttt{random}",
+    SimType.RANDOM: "\\texttt{evol(r)}",
 }
 
 COL_TEX_LABELS: dict[str, str] = {

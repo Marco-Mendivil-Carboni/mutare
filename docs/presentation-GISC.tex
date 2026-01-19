@@ -96,7 +96,7 @@
       \item \alert{Population}: $N$ agents, each one characterized by:
             \begin{itemize}
               \item \alert{phenotype}: $\phi\in\{A,B\}$
-              \item \alert{phenotypic strategy}: $s(\phi)$ (probability distribution)
+              \item \alert{strategy}: $s(\phi)$ (probability distribution)
             \end{itemize}
     \end{itemize}
   \end{block}
@@ -114,14 +114,14 @@
   \note[item]{The population starts with an initial number of agents \alert{$N_{\text{ini}}$}.}
   \note[item]{The environment is a \alert{discrete variable} that changes according to some transition rates.}
   \note[item]{The phenotype takes \alert{discrete values} as well.}
-  \note[item]{When an agent reproduces, the \alert{offspring's phenotype is drawn from the parent's phenotypic strategy}.}
+  \note[item]{When an agent reproduces, the \alert{offspring's phenotype is drawn from the parent's strategy}.}
   \note[item]{\alert{Offspring inherit} the same p\alert{henotypic strategy} as their parent, allowing natural selection to act on strategies.}
   \note[item]{To allow \alert{evolution}, mutations are introduced: with a small probability at duplication, an agent's strategy \alert{mutates to a new random strategy}.}
   \note[item]{The total population size is \alert{capped at its initial value}, introducing a demographic constraint.}
 \end{frame}
 
 \begin{frame}
-  \begin{block}{Parameters}
+  \begin{block}{Parameters -- resistant vs. persistent}
     \begin{table}
       \begin{tabular}{c c c}
         \toprule
@@ -143,9 +143,9 @@
 
   \begin{block}{Types of simulations}
     \begin{enumerate}
-      \item \alert{\texttt{random}}: \alert{independent random} initial strategies, \alert{evolving}.
-      \item \alert{\texttt{fixed}}: \alert{shared} initial strategy $s(\phi)_{\text{ini}}$, \alert{not evolving} ($p_{\text{mut}}=0$).
-      \item \alert{\texttt{evol}}: \alert{shared} initial strategy $s(\phi)_{\text{ini}}$, \alert{evolving}.
+      \item \alert{\texttt{fixed}}: \alert{common} initial strategy $s(\phi)_{\text{ini}}$, \alert{not evolving} ($p_{\text{mut}}=0$).
+      \item \alert{\texttt{evol}}: \alert{common} initial strategy $s(\phi)_{\text{ini}}$, \alert{evolving}.
+      \item \alert{\texttt{evol(r)}}: \alert{independent random} initial strategies, \alert{evolving}.
     \end{enumerate}
   \end{block}
 
@@ -155,7 +155,7 @@
   \note[item]{The \alert{resistant} phenotype grows fast in the good environment but dies quickly in the bad one, while the \alert{persistent} phenotype grows slowly but survives much better in bad conditions.}
   \note[item]{In \alert{fixed} simulations, all agents share the same strategy and \alert{evolution is suppressed}.}
   \note[item]{In \alert{evol} simulations, agents initially share a strategy, which evolves through \alert{mutation and selection}.}
-  \note[item]{In \alert{random} simulations, agents start with independent random strategies, which then evolve.}
+  \note[item]{In \alert{evol(r)} simulations, agents start with independent random strategies, which then evolve.}
   \note[item]{Comparing the results of these three cases reveals the properties of the \alert{strategies} favored by selection, as we will see next.}
 \end{frame}
 
@@ -169,7 +169,7 @@
         \begin{itemize}
           \item Average growth rate $\langle\mu\rangle$
           \item Total extinction rate $r_{\text{ext}}$
-          \item Average phenotypic strategy $\langle s(A)\rangle$
+          \item Average strategy $\langle s(A)\rangle$
           \item Distribution of phenotypic strategies $p(s(A))$
           \item Distribution of phenotypes $p(A)$
           \item Distribution of the number of agents $p(N/N_{\text{ini}})$
@@ -191,13 +191,13 @@
 
   \note[item]{The population growth rate is defined as \alert{$\Delta N/(N\Delta t)$}.}
   \note[item]{The number of extinctions is recorded to compute the total extinction rate.}
-  \note[item]{We also compute the \alert{instantaneous standard deviation} of the phenotypic strategy across agents.}
+  \note[item]{We also compute the \alert{instantaneous standard deviation} of the strategy across agents.}
   \note[item]{Because strategies and the phenotype distribution are \alert{two-dimensional and normalized}, only one component is independent.}
   \note[item]{These figures show the dependence of growth and extinction rates on the \alert{initial strategy} for different simulation types.}
-  \note[item]{For \alert{random} simulations there is no common initial strategy, so they appear as strategy-independent horizontal lines.}
+  \note[item]{For \alert{evol(r)} simulations there is no common initial strategy, so they appear as strategy-independent horizontal lines.}
   \note[item]{Focusing on \alert{fixed} simulations we see that growth maximization and extinction minimization clearly \alert{do not coincide}.}
   \note[item]{Maximum growth occurs for strategies dominated (about \alert{80\%}) by the \alert{resistant} phenotype, while extinction is minimized by fully \alert{persistent} strategies.}
-  \note[item]{Both \alert{evol} and \alert{random} simulations converge to similar growth and extinction rates, largely \alert{independent of the initial strategy}.}
+  \note[item]{Both \alert{evol} and \alert{evol(r)} simulations converge to similar growth and extinction rates, largely \alert{independent of the initial strategy}.}
   \note[item]{This indicates convergence toward a common \alert{evolutionary attractor}.}
 \end{frame}
 
@@ -227,7 +227,7 @@
     \end{column}
   \end{columns}
 
-  \note[item]{Both \alert{evolutive} and \alert{random} simulations converge to preety much the \alert{same average strategy}.}
+  \note[item]{Both \alert{evol} and \alert{evol(r)} simulations converge to preety much the \alert{same average strategy}.}
   \note[item]{This indicates the presence of a \alert{stable attractor} in the space of strategies.}
   \note[item]{The \alert{strategy is common to almost all agents} at each instant, and thus talking about a \alert{common strategy} is meaningful.}
   \note[item]{This justifies comparing evolutive simulations with fixed-strategy simulations.}
