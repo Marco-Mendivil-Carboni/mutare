@@ -92,10 +92,10 @@
 \begin{frame}
   \begin{block}{State}
     \begin{itemize}
-      \item \alert{Environment}: $e\in\{0,\dots,n_{\text{env}}-1\}$
+      \item \alert{Environment}: $e\in\{1,2\}$
       \item \alert{Population}: $N$ agents, each one characterized by:
             \begin{itemize}
-              \item \alert{phenotype}: $\phi\in\{0,\dots,n_{\text{phe}}-1\}$
+              \item \alert{phenotype}: $\phi\in\{A,B\}$
               \item \alert{phenotypic strategy}: $s(\phi)$ (probability distribution)
             \end{itemize}
     \end{itemize}
@@ -106,12 +106,12 @@
       \item \alert{Environment}: transition rates \alert{$\omega_t(e,e')$}
       \item \alert{Population}: environment- and phenotype-dependent birth and death rates \alert{$\omega_b(e,\phi)$} and \alert{$\omega_d(e,\phi)$}
       \item \alert{Evolution}: offsprings inherit the parent's strategy, mutations occur with probability \alert{$p_{\text{mut}}$}
-      \item \alert{Constraint}: population size \alert{capped at $N_i$}
+      \item \alert{Constraint}: population size \alert{capped at $N_{\text{ini}}$}
     \end{itemize}
   \end{block}
 
   \note[item]{\alert{Continuous-time} Markov process describing a population evolving in a fluctuating environment, that we will solve numerically using the \alert{Gillespie algorithm}.}
-  \note[item]{The population starts with an initial number of agents \alert{$N_i$}.}
+  \note[item]{The population starts with an initial number of agents \alert{$N_{\text{ini}}$}.}
   \note[item]{The environment is a \alert{discrete variable} that changes according to some transition rates.}
   \note[item]{The phenotype takes \alert{discrete values} as well.}
   \note[item]{When an agent reproduces, the \alert{offspring's phenotype is drawn from the parent's phenotypic strategy}.}
@@ -135,7 +135,7 @@
         \addlinespace
         $p_{\text{mut}}$   & mutation probability         & $0.001$                                                      \\
         \addlinespace
-        $N_i$              & initial number of agents     & $100$                                                        \\
+        $N_{\text{ini}}$   & initial number of agents     & $100$                                                        \\
         \bottomrule
       \end{tabular}
     \end{table}
@@ -144,8 +144,8 @@
   \begin{block}{Types of simulations}
     \begin{enumerate}
       \item \alert{\texttt{random}}: \alert{independent random} initial strategies, \alert{evolving}.
-      \item \alert{\texttt{fixed}}: \alert{shared} initial strategy $s(\phi)_i$, \alert{not evolving} ($p_{\text{mut}}=0$).
-      \item \alert{\texttt{evol}}: \alert{shared} initial strategy $s(\phi)_i$, \alert{evolving}.
+      \item \alert{\texttt{fixed}}: \alert{shared} initial strategy $s(\phi)_{\text{ini}}$, \alert{not evolving} ($p_{\text{mut}}=0$).
+      \item \alert{\texttt{evol}}: \alert{shared} initial strategy $s(\phi)_{\text{ini}}$, \alert{evolving}.
     \end{enumerate}
   \end{block}
 
@@ -168,11 +168,11 @@
       \begin{block}{Observables}
         \begin{itemize}
           \item Average growth rate $\langle\mu\rangle$
-          \item Total extinction rate $r_e$
-          \item Average phenotypic strategy $\langle s(0)\rangle$
-          \item Distribution of phenotypic strategies $p(s(0))$
-          \item Distribution of phenotypes $p_\phi(0)$
-          \item Distribution of the number of agents $p(N/N_i)$
+          \item Total extinction rate $r_{\text{ext}}$
+          \item Average phenotypic strategy $\langle s(A)\rangle$
+          \item Distribution of phenotypic strategies $p(s(A))$
+          \item Distribution of phenotypes $p(A)$
+          \item Distribution of the number of agents $p(N/N_{\text{ini}})$
         \end{itemize}
       \end{block}
       \begin{block}{Take-home message}
@@ -250,7 +250,7 @@
       \end{block}
       \begin{block}{Population-size fluctuations}
         \begin{itemize}
-          \item Population is \alert{usually} close to the \alert{maximum size $N_i$}.
+          \item Population is \alert{usually} close to the \alert{maximum size $N_{\text{ini}}$}.
           \item Riskier strategies show a \alert{secondary peak} (bad environment).
         \end{itemize}
       \end{block}
@@ -272,7 +272,7 @@
   \note[item]{The \alert{main peak} corresponds to growth in the \alert{good environment}.}
   \note[item]{The \alert{secondary peak} reflects extended periods spent in the \alert{bad environment}.}
   \note[item]{Riskier strategies increase the weight of this secondary peak.}
-  \note[item]{Since extinction corresponds to \alert{rare, large fluctuations} away from typical states near $N_i$, a \alert{large-deviation} framework is a natural theoretical approach.}
+  \note[item]{Since extinction corresponds to \alert{rare, large fluctuations} away from typical states near $N_{\text{ini}}$, a \alert{large-deviation} framework is a natural theoretical approach.}
 \end{frame}
 
 \begin{frame}
@@ -316,7 +316,7 @@
     \hfill
     \begin{column}{0.45\textwidth}
       \begin{block}{Large population limit}
-        With \alert{$N_i=1000$}:
+        With \alert{$N_{\text{ini}}=1000$}:
         \begin{itemize}
           \item Extinction is \alert{negligible}.
           \item Evolution converges to the \alert{growth-maximizing strategy}.
@@ -340,10 +340,10 @@
     \end{column}
   \end{columns}
 
-  \note[item]{Increasing $N_i$ strongly reduces the \alert{extinction risk} but does \alert{not} change the \alert{average growth rate}.}
+  \note[item]{Increasing $N_{\text{ini}}$ strongly reduces the \alert{extinction risk} but does \alert{not} change the \alert{average growth rate}.}
   \note[item]{In this regime, the evolved strategy coincides with the \alert{growth-maximizing} one.}
   \note[item]{The evolutionary outcome therefore depends on population size through its effect on extinction.}
-  \note[item]{Notice as well that the \alert{instantaneous dispersion} of strategies is still small, but larger than at small $N_i$.}
+  \note[item]{Notice as well that the \alert{instantaneous dispersion} of strategies is still small, but larger than at small $N_{\text{ini}}$.}
   \note[item]{This reflects the coexistence of several \alert{similar strategies} within the population.}
   \note[item]{In contrast, the \alert{long-term dispersion} is reduced and comparable to the instantaneous one.}
 \end{frame}
@@ -365,7 +365,7 @@
     \begin{column}{0.45\textwidth}
       \begin{block}{Future work}
         \begin{itemize}
-          \item Measure the \alert{scaling} of extinction rates with $N_i$.
+          \item Measure the \alert{scaling} of extinction rates with $N_{\text{ini}}$.
           \item Derive an \alert{effective fitness} function combining growth and extinction.
           \item Extend the model to environment-dependent strategies (\alert{sensing}).
         \end{itemize}
