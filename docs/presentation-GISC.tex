@@ -25,7 +25,7 @@
 \usetikzlibrary{calc, positioning}
 \AtBeginSection[]{\begin{frame}\tableofcontents[currentsection]\end{frame}}
 \setbeameroption{show notes}
-\setbeamertemplate{note page}{\vskip 0.5em \insertnote}
+\setbeamertemplate{note page}{\insertnote}
 \addtobeamertemplate{note page}{}{\thispdfpagelabel{notes:\insertframenumber}}
 \setbeamertemplate{navigation symbols}{}
 \usebackgroundtemplate{\tikz[overlay,remember picture]\node[opacity=0.03125]at (current page.center){\includegraphics[scale=0.5]{images/UCM-logo.png}};}
@@ -389,9 +389,16 @@
 \section*{Acknowledgments}
 
 \begin{frame}
+  \vfill
   \begin{center}
+    \vfill
     \Large{Thank you for your attention.}
+    \vfill
   \end{center}
+  \vfill
+  \begin{figure}
+    \includegraphics[width=0.4\textwidth]{images/MICIU-logo.pdf}
+  \end{figure}
 \end{frame}
 
 \appendix
@@ -480,6 +487,30 @@
       \end{figure}
       \begin{figure}
         \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/n_agents_i/dist_strat_phe_0.pdf}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\section*{Mutation probability dependence}
+
+\begin{frame}
+  \begin{columns}
+    \hfill
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/prob_mut/avg_strat_phe_0.pdf}}
+      \end{figure}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/prob_mut/dist_strat_phe_0.pdf}}
+      \end{figure}
+    \end{column}
+    \begin{column}{0.5\textwidth}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/prob_mut/avg_strat_phe_0.pdf}}
+      \end{figure}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/prob_mut/dist_strat_phe_0.pdf}}
       \end{figure}
     \end{column}
   \end{columns}
