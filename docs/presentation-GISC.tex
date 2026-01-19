@@ -398,16 +398,16 @@
 \begin{frame}
   \begin{block}{Gillespie algorithm}
     \begin{equation*}
-      a_j(\mathbf{X}) = c_j h_j(\mathbf{X}), \ a_0(\mathbf{X}) = \sum_{j=1}^M a_j(\mathbf{X})
+      \Omega(\mathbf{X})=\sum_{j=1}^M\omega_j(\mathbf{X})
     \end{equation*}
     \begin{equation*}
-      \tau = \frac{1}{a_0(\mathbf{X})}\ln\!\left(\frac{1}{r_1}\right), \ r_1 \sim U(0,1)
+      \tau=\frac{1}{\Omega(\mathbf{X})}\ln\frac{1}{r_1},\ r_1\sim U(0,1)
     \end{equation*}
     \begin{equation*}
-      \sum_{j=1}^{\mu-1} a_j(\mathbf{X})< r_2 a_0(\mathbf{X})\le \sum_{j=1}^{\mu} a_j(\mathbf{X}), \ r_2 \sim U(0,1)
+      \sum_{j=1}^{\mu-1}\omega_j(\mathbf{X})<r_2\Omega(\mathbf{X})\le\sum_{j=1}^{\mu}\omega_j(\mathbf{X}),\ r_2\sim U(0,1)
     \end{equation*}
     \begin{equation*}
-      \mathbf{X}(t+\tau) = \mathbf{X}(t) + \boldsymbol{\nu}_\mu
+      \mathbf{X}(t+\tau)=\mathbf{X}(t)+\boldsymbol{\nu}_\mu
     \end{equation*}
   \end{block}
 \end{frame}
