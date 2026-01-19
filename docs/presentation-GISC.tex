@@ -56,33 +56,30 @@
   \begin{columns}
     \hfill
     \begin{column}{0.6\textwidth}
-      \onslide<1->{
-        \begin{block}{Motivation}
-          \begin{itemize}
-            \item \alert{Adaptation} in fluctuating \alert{environments} is not fully understood yet.
-            \item Especially under \alert{population limitations}.
-            \item Paradigmatic example of \alert{fluctuations in biological processes}.
-          \end{itemize}
-        \end{block}
-      }
+      \begin{block}{Motivation}
+        \begin{itemize}
+          \item \alert{Adaptation} in fluctuating \alert{environments} is not fully understood yet.
+          \item Especially under \alert{population limitations}.
+          \item Paradigmatic example of \alert{fluctuations in biological processes}.
+        \end{itemize}
+      \end{block}
+
     \end{column}
     \begin{column}{0.4\textwidth}
       \begin{figure}
-        \onslide<1->{\frame{\includegraphics[scale=0.12]{images/changing-environment.jpg}}}
+        \frame{\includegraphics[scale=0.12]{images/changing-environment.jpg}}
       \end{figure}
     \end{column}
   \end{columns}
 
-  \onslide<2->{
-    \begin{block}{Objectives}
-      \begin{itemize}
-        \item Develop a minimal mathematical \alert{model} to study this problem.
-        \item Model the emergence of \alert{bet-hedging} strategies in fluctuating environments.
-        \item Quantify how the \alert{evolutionary outcome} depends on these constraints.
-        \item Identify the main mechanisms shaping these results and seek ways to \alert{approximate} them.
-      \end{itemize}
-    \end{block}
-  }
+  \begin{block}{Objectives}
+    \begin{itemize}
+      \item Develop a minimal mathematical \alert{model} to study this problem.
+      \item Model the emergence of \alert{bet-hedging} strategies in fluctuating environments.
+      \item Quantify how the \alert{evolutionary outcome} depends on these constraints.
+      \item Identify the main mechanisms shaping these results and seek ways to \alert{approximate} them.
+    \end{itemize}
+  \end{block}
 
   \note[item]{Adaptation in fluctuating environments is a \alert{central problem} in \alert{evolutionary biology}.}
   \note[item]{Natural populations experience fluctuating rather than constant environments.}
@@ -153,37 +150,33 @@
 \end{frame}
 
 \begin{frame}
-  \onslide<1->{
-    \begin{block}{Parameters -- resistant vs. persistent}
-      \begin{table}
-        \begin{tabular}{c c c}
-          \toprule
-          symbol             & name                         & value                                                        \\
-          \midrule
-          $\omega_t(e,e')$   & environment transition rates & $\begin{psmallmatrix}-1.0&+1.0\\+1.0&-1.0\end{psmallmatrix}$ \\
-          \addlinespace
-          $\omega_b(e,\phi)$ & birth rates                  & $\begin{psmallmatrix}1.0&0.2\\0.0&0.0\end{psmallmatrix}$     \\
-          \addlinespace
-          $\omega_d(e,\phi)$ & death rates                  & $\begin{psmallmatrix}0.0&0.0\\1.0&0.1\end{psmallmatrix}$     \\
-          \addlinespace
-          $p_{\text{mut}}$   & mutation probability         & $0.001$                                                      \\
-          \addlinespace
-          $N_{\text{ini}}$   & initial number of agents     & $100$                                                        \\
-          \bottomrule
-        \end{tabular}
-      \end{table}
-    \end{block}
-  }
+  \begin{block}{Parameters -- resistant vs. persistent}
+    \begin{table}
+      \begin{tabular}{c c c}
+        \toprule
+        symbol             & name                         & value                                                        \\
+        \midrule
+        $\omega_t(e,e')$   & environment transition rates & $\begin{psmallmatrix}-1.0&+1.0\\+1.0&-1.0\end{psmallmatrix}$ \\
+        \addlinespace
+        $\omega_b(e,\phi)$ & birth rates                  & $\begin{psmallmatrix}1.0&0.2\\0.0&0.0\end{psmallmatrix}$     \\
+        \addlinespace
+        $\omega_d(e,\phi)$ & death rates                  & $\begin{psmallmatrix}0.0&0.0\\1.0&0.1\end{psmallmatrix}$     \\
+        \addlinespace
+        $p_{\text{mut}}$   & mutation probability         & $0.001$                                                      \\
+        \addlinespace
+        $N_{\text{ini}}$   & initial number of agents     & $100$                                                        \\
+        \bottomrule
+      \end{tabular}
+    \end{table}
+  \end{block}
 
-  \onslide<2->{
-    \begin{block}{Types of simulations}
-      \begin{enumerate}
-        \item \alert{\texttt{fixed}}: \alert{common} initial strategy $s(\phi)_{\text{ini}}$, \alert{not evolving} ($p_{\text{mut}}=0$).
-        \item \alert{\texttt{evol}}: \alert{common} initial strategy $s(\phi)_{\text{ini}}$, \alert{evolving}.
-        \item \alert{\texttt{evol(r)}}: \alert{independent random} initial strategies, \alert{evolving}.
-      \end{enumerate}
-    \end{block}
-  }
+  \begin{block}{Types of simulations}
+    \begin{enumerate}
+      \item \alert{\texttt{fixed}}: \alert{common} initial strategy $s(\phi)_{\text{ini}}$, \alert{not evolving} ($p_{\text{mut}}=0$).
+      \item \alert{\texttt{evol}}: \alert{common} initial strategy $s(\phi)_{\text{ini}}$, \alert{evolving}.
+      \item \alert{\texttt{evol(r)}}: \alert{independent random} initial strategies, \alert{evolving}.
+    \end{enumerate}
+  \end{block}
 
   \note[item]{We restrict ourselves to the case of \alert{two} environments and two phenotypes.}
   \note[item]{Environmental transition rates are equal and set to one, making \alert{both environments equally likely} for simplicity.}
@@ -201,26 +194,22 @@
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      \onslide<1->{
-        \begin{block}{Observables}
-          \begin{itemize}
-            \item Average growth rate $\langle\mu\rangle$
-            \item Total extinction rate $r_{\text{ext}}$
-          \end{itemize}
-        \end{block}
-      }
-      \onslide<4->{
-        \begin{block}{Take-home message}
-          \alert{Growth-maximization} $\neq$ \alert{extinction-minimization}
-        \end{block}
-      }
+      \begin{block}{Observables}
+        \begin{itemize}
+          \item Average growth rate $\langle\mu\rangle$
+          \item Total extinction rate $r_{\text{ext}}$
+        \end{itemize}
+      \end{block}
+      \begin{block}{Take-home message}
+        \alert{Growth-maximization} $\neq$ \alert{extinction-minimization}
+      \end{block}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
-        \onslide<2->{\frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}}}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}}
       \end{figure}
       \begin{figure}
-        \onslide<3->{\frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}}}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}}
       \end{figure}
     \end{column}
   \end{columns}
@@ -239,14 +228,12 @@
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      \onslide<1->{
-        \begin{block}{Observables}
-          \begin{itemize}
-            \item Average strategy $\langle s(A)\rangle$
-            \item Distribution of strategies $p(s(A))$
-          \end{itemize}
-        \end{block}
-      }
+      \begin{block}{Observables}
+        \begin{itemize}
+          \item Average strategy $\langle s(A)\rangle$
+          \item Distribution of strategies $p(s(A))$
+        \end{itemize}
+      \end{block}
       \begin{block}{Evolutionary outcome}
         \begin{itemize}
           \item Convergence to a \alert{common average strategy}.
