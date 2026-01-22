@@ -27,6 +27,7 @@ SCALAR_OBSERVABLES = [
 ANALYSIS = [
     "dist_n_agents",
     "avg_growth_rate",
+    "std_dev_growth_rate",
     "extinct_rate",
     "avg_strat_phe",
     "std_dev_strat_phe",

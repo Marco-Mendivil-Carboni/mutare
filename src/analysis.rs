@@ -89,6 +89,9 @@ pub struct Analysis {
     /// Average population growth rate.
     pub avg_growth_rate: f64,
 
+    /// Standard deviation of the population growth rate.
+    pub std_dev_growth_rate: f64,
+
     /// Total extinction rate.
     pub extinct_rate: f64,
 
@@ -168,6 +171,8 @@ impl Analyzer {
             )
         };
 
+        let avg_growth_rate = obs_weighted_average(&|obs| obs.growth_rate);
+
         let analysis = Analysis {
             dist_n_agents: (0..self.cfg.output.hist_bins)
                 .map(|bin| {
@@ -181,7 +186,12 @@ impl Analyzer {
                 })
                 .collect(),
 
-            avg_growth_rate: obs_weighted_average(&|obs| obs.growth_rate),
+            avg_growth_rate,
+
+            std_dev_growth_rate: obs_weighted_average(&|obs| {
+                (obs.growth_rate - avg_growth_rate).powi(2) * obs.time_step
+            })
+            .sqrt(),
 
             extinct_rate: last_observables.n_extinct as f64 / last_observables.time,
 
