@@ -5,6 +5,7 @@ import subprocess
 from shutil import rmtree
 import psutil
 from dataclasses import dataclass
+from signal import SIGUSR1
 import time
 from textual import on, work
 from textual.worker import Worker, get_current_worker, WorkerCancelled
@@ -156,7 +157,7 @@ class SimsManager(App):
     ENABLE_COMMAND_PALETTE = False
     BINDINGS = [
         ("s", "start", "Start simulations"),
-        ("k", "stop", "Stop simulations"),
+        ("p", "pause", "Pause simulations"),
         ("q", "quit", "Quit"),
     ]
 
@@ -313,8 +314,8 @@ class SimsManager(App):
             return
 
     @work
-    async def action_stop(self) -> None:
-        if await self.push_screen_wait(DialogScreen("Stop simulations?")):
+    async def action_pause(self) -> None:
+        if await self.push_screen_wait(DialogScreen("Pause simulations?")):
             pids = sims_running()
 
             if not pids:
@@ -323,11 +324,11 @@ class SimsManager(App):
 
             for pid in pids:
                 try:
-                    psutil.Process(pid).terminate()
+                    psutil.Process(pid).send_signal(SIGUSR1)
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     continue
 
-            self.notify("Simulations stopped")
+            self.notify("Simulations paused")
             return
 
 

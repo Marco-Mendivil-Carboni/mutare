@@ -13,6 +13,9 @@ def _generate_sims_configs() -> list[SimsConfig]:
     n_agents_i_values = (
         np.logspace(start=1, stop=3, num=17).round().astype(int).tolist()
     )
+    fixed_n_agents_i_values = (
+        np.logspace(start=1.5, stop=2.5, num=5).round().astype(int).tolist()
+    )
 
     symmetric_sim_job = SimJob(
         base_dir=SIMS_DIR / "symmetric",
@@ -50,6 +53,7 @@ def _generate_sims_configs() -> list[SimsConfig]:
         strat_phe_0_i_values=strat_phe_0_i_values,
         prob_mut_values=prob_mut_values,
         n_agents_i_values=n_agents_i_values,
+        fixed_n_agents_i_values=[],
     )
 
     asymmetric_sim_job = deepcopy(symmetric_sim_job)
@@ -68,6 +72,7 @@ def _generate_sims_configs() -> list[SimsConfig]:
         strat_phe_0_i_values=strat_phe_0_i_values,
         prob_mut_values=prob_mut_values,
         n_agents_i_values=n_agents_i_values,
+        fixed_n_agents_i_values=fixed_n_agents_i_values,
     )
 
     extended_sim_job = deepcopy(asymmetric_sim_job)
@@ -79,6 +84,7 @@ def _generate_sims_configs() -> list[SimsConfig]:
         strat_phe_0_i_values=strat_phe_0_i_values,
         prob_mut_values=[],
         n_agents_i_values=[],
+        fixed_n_agents_i_values=[],
     )
 
     return [

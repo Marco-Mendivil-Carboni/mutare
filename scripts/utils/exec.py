@@ -5,7 +5,7 @@ from copy import deepcopy
 import psutil
 import os
 from datetime import datetime
-from signal import signal, SIGTERM
+from signal import signal, SIGUSR1
 import fcntl
 from dataclasses import dataclass
 from enum import Enum, auto
@@ -20,23 +20,23 @@ def print_process_msg(message: str) -> None:
     print(f"[{timestamp} PID:{os.getpid()}] {message}", flush=True)
 
 
-class StopRequested(Exception):
+class PauseRequested(Exception):
     pass
 
 
-stop_requested = False
+pause_requested = False
 
 
-def request_stop(signum: int, _: Optional[FrameType]) -> None:
-    print_process_msg(f"received signal {signum}: requesting stop")
+def request_pause(signum: int, _: Optional[FrameType]) -> None:
+    print_process_msg(f"received signal {signum}: requesting pause")
 
-    global stop_requested
-    stop_requested = True
+    global pause_requested
+    pause_requested = True
 
 
 def set_signal_handler():
     print_process_msg("setting signal handler")
-    signal(SIGTERM, request_stop)
+    signal(SIGUSR1, request_pause)
 
 
 def build_bin():
@@ -59,13 +59,13 @@ class SimRun:
 
 class RunResult(Enum):
     FINISHED = auto()
-    STOPPED = auto()
+    PAUSED = auto()
     FAILED = auto()
 
 
 def exec_bin(sim_run: SimRun, sim_cmd: str) -> None:
-    if stop_requested:
-        raise StopRequested()
+    if pause_requested:
+        raise PauseRequested()
 
     project_root = Path(__file__).resolve().parents[2]
     binary = str(project_root / "target" / "release" / "mutare")
@@ -113,9 +113,9 @@ def exec_sim_run(sim_run: SimRun):
         print_process_msg(f"run {run_idx} finished")
         return RunResult.FINISHED
 
-    except StopRequested:
-        print_process_msg(f"run {run_idx} stopped")
-        return RunResult.STOPPED
+    except PauseRequested:
+        print_process_msg(f"run {run_idx} paused")
+        return RunResult.PAUSED
 
     except Exception as exception:
         print_process_msg(f"run {run_idx} failed: {exception}")
@@ -143,6 +143,7 @@ class SimsConfig:
     strat_phe_0_i_values: list[float]
     prob_mut_values: list[float]
     n_agents_i_values: list[int]
+    fixed_n_agents_i_values: list[int]
 
 
 def create_sim_jobs(sims_config: SimsConfig) -> list[SimJob]:
@@ -161,6 +162,11 @@ def create_sim_jobs(sims_config: SimsConfig) -> list[SimJob]:
             sim_jobs.append(SimJob(base_dir, config, n_runs, n_files))
             config["model"]["prob_mut"] = 0.0
             sim_jobs.append(SimJob(base_dir, config, n_runs, n_files))
+            for n_agents_i in sims_config.fixed_n_agents_i_values:
+                if n_agents_i == init_sim_job.config["init"]["n_agents"]:
+                    continue
+                config["init"]["n_agents"] = n_agents_i
+                sim_jobs.append(SimJob(base_dir, config, n_runs, n_files))
 
     for prob_mut in sims_config.prob_mut_values:
         if prob_mut == init_sim_job.config["model"]["prob_mut"]:
@@ -197,8 +203,8 @@ def exec_sim_job(sim_job: SimJob) -> None:
     if run_results.count(RunResult.FAILED) > 0:
         raise RuntimeError("some run failed")
 
-    if run_results.count(RunResult.STOPPED) > 0:
-        raise RuntimeError("some run was stopped")
+    if run_results.count(RunResult.PAUSED) > 0:
+        raise RuntimeError("some run was paused")
 
     print_process_msg(f"job ({sim_job.sim_dir.name}) finished")
 
