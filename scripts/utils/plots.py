@@ -445,10 +445,7 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     ) -> float | pd.Series:
         return (A * (x + x0)) ** (-alpha)
 
-    strat_phe_0_i_list = []
-    alpha_list = []
-    alpha_err_list = []
-
+    fit_results = []
     for strat_phe_0_i, subgroup_df in scaling_df.groupby("strat_phe_0_i"):
         color = CMAP(cast(float, strat_phe_0_i))
         x = subgroup_df["n_agents_i"]
@@ -457,18 +454,19 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
         axs_5[0].errorbar(x, y, yerr, None, c=color, **PLOT_STYLE)
 
         x, y, yerr = x[y != 0], y[y != 0], yerr[y != 0]
-        strat_phe_0_i_list.append(strat_phe_0_i)
         popt, pcov = curve_fit(power_law, x, y, p0=(1.0, 10.0, 0.1), sigma=yerr)
+        perr = np.sqrt(np.diag(pcov))
         axs_5[0].errorbar(x, power_law(x, *popt), ls=":", **LINE_STYLE)
-        alpha_list.append(popt[0])
-        alpha_err_list.append(np.sqrt(np.diag(pcov)[0]))
+        fit_results.append(
+            {"strat_phe_0_i": strat_phe_0_i, "alpha": popt[0], "alpha_err": perr[0]}
+        )
 
+    fit_df = pd.DataFrame(fit_results)
     ax_6.errorbar(
-        strat_phe_0_i_list,
-        alpha_list,
-        alpha_err_list,
-        c=SIM_COLORS[SimType.FIXED],
-        label=SIM_LABELS[SimType.FIXED],
+        fit_df["strat_phe_0_i"],
+        fit_df["alpha"],
+        fit_df["alpha_err"],
+        c=COLORS["red"],
         **PLOT_STYLE,
     )
 
