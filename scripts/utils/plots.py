@@ -359,7 +359,10 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
             plot_dist_phe_0_lims(ax_7, subgroup_df, job)
 
     if param == "prob_mut":
-        subgroup_df = df[df["sim_type"] == SimType.FIXED].sort_values("strat_phe_0_i")
+        subgroup_df = df[
+            (df["sim_type"] == SimType.FIXED)
+            & (df["n_agents_i"] == job.config["init"]["n_agents"])
+        ].sort_values("strat_phe_0_i")
         plot_errorbar(ax_3, subgroup_df, "avg_growth_rate", "extinct_rate", True)
 
     if param in ["prob_mut", "n_agents_i"]:
