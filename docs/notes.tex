@@ -157,7 +157,7 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/dist_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/fitness.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/std_dev_growth_rate.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -170,7 +170,7 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/symmetric/plots/prob_mut/dist_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/dist_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/prob_mut/fitness.pdf}
+    \includegraphics{../sims/symmetric/plots/prob_mut/std_dev_growth_rate.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -183,7 +183,7 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/symmetric/plots/n_agents_i/dist_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/n_agents_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/n_agents_i/dist_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/n_agents_i/fitness.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents_i/std_dev_growth_rate.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -197,6 +197,17 @@ It remains to be explained as well the dependance of the evolved strategies on $
 
 \begin{figure*}[p]
     \centering
+    \caption{Results for the scaling with the symmetric parameters.} \label{fig:symmetric_scaling}
+    \includegraphics{../sims/symmetric/plots/scaling/avg_growth_rate.pdf}
+    \includegraphics{../sims/symmetric/plots/scaling/extinct_rate.pdf}
+    \includegraphics{../sims/symmetric/plots/scaling/dist_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/scaling/std_dev_growth_rate.pdf}
+    \includegraphics{../sims/symmetric/plots/scaling/extinct_rate_scaling.pdf}
+    \includegraphics{../sims/symmetric/plots/scaling/alpha.pdf}
+\end{figure*}
+
+\begin{figure*}[p]
+    \centering
     \caption{Results for the asymmetric parameters with different initial strategies.} \label{fig:asymmetric_strat_phe_0_i}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}
@@ -205,7 +216,7 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_phe_0.pdf}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/fitness.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/std_dev_growth_rate.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -218,7 +229,7 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/asymmetric/plots/prob_mut/dist_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/dist_phe_0.pdf}
-    \includegraphics{../sims/asymmetric/plots/prob_mut/fitness.pdf}
+    \includegraphics{../sims/asymmetric/plots/prob_mut/std_dev_growth_rate.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -231,12 +242,12 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_phe_0.pdf}
-    \includegraphics{../sims/asymmetric/plots/n_agents_i/fitness.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents_i/std_dev_growth_rate.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
     \centering
-    \caption{Results for the asymmetric parameters as a function of time.} \label{fig:ssymmetric_time_series}
+    \caption{Results for the asymmetric parameters as a function of time.} \label{fig:asymmetric_time_series}
     \includegraphics{../sims/asymmetric/plots/time_series/n_agents.pdf}
     \includegraphics{../sims/asymmetric/plots/time_series/n_extinct.pdf}
     \includegraphics{../sims/asymmetric/plots/time_series/avg_strat_phe_0.pdf}
@@ -245,11 +256,11 @@ It remains to be explained as well the dependance of the evolved strategies on $
 
 \begin{figure*}[p]
     \centering
-    \caption{Results for the scaling with the asymmetric parameters.} \label{fig:ssymmetric_scaling}
+    \caption{Results for the scaling with the asymmetric parameters.} \label{fig:asymmetric_scaling}
     \includegraphics{../sims/asymmetric/plots/scaling/avg_growth_rate.pdf}
     \includegraphics{../sims/asymmetric/plots/scaling/extinct_rate.pdf}
     \includegraphics{../sims/asymmetric/plots/scaling/dist_phe_0.pdf}
-    \includegraphics{../sims/asymmetric/plots/scaling/fitness.pdf}
+    \includegraphics{../sims/asymmetric/plots/scaling/std_dev_growth_rate.pdf}
     \includegraphics{../sims/asymmetric/plots/scaling/extinct_rate_scaling.pdf}
     \includegraphics{../sims/asymmetric/plots/scaling/alpha.pdf}
 \end{figure*}
@@ -264,7 +275,7 @@ It remains to be explained as well the dependance of the evolved strategies on $
     \includegraphics{../sims/extended/plots/strat_phe_0_i/dist_strat_phe_0.pdf}
     \includegraphics{../sims/extended/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/extended/plots/strat_phe_0_i/dist_phe_0.pdf}
-    \includegraphics{../sims/extended/plots/strat_phe_0_i/fitness.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe_0_i/std_dev_growth_rate.pdf}
 \end{figure*}
 
 \begin{figure*}[p]

@@ -53,7 +53,7 @@ def _generate_sims_configs() -> list[SimsConfig]:
         strat_phe_0_i_values=strat_phe_0_i_values,
         prob_mut_values=prob_mut_values,
         n_agents_i_values=n_agents_i_values,
-        fixed_n_agents_i_values=[],
+        fixed_n_agents_i_values=fixed_n_agents_i_values,
     )
 
     asymmetric_sim_job = deepcopy(symmetric_sim_job)

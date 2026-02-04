@@ -68,7 +68,7 @@ COL_TEX_LABELS: dict[str, str] = {
     "avg_strat_phe_0": "$\\langle s(A)\\rangle$",
     "dist_strat_phe_0": "$s(A)$",
     "dist_phe_0": "$p(A)$",
-    "fitness": "$w$",
+    "std_dev_growth_rate": "$\\sigma_{\\mu}$",
     "alpha": "$\\alpha$",
 }
 
@@ -286,7 +286,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_5, axs_5 = create_colorbar_figure(param, "dist_strat_phe_0", two_panels)
     fig_6, ax_6 = create_standard_figure(param, "avg_strat_phe_0")
     fig_7, ax_7 = create_standard_figure(param, "dist_phe_0")
-    fig_8, ax_8 = create_standard_figure(param, "fitness")
+    fig_8, ax_8 = create_standard_figure(param, "std_dev_growth_rate")
 
     if param in ["prob_mut", "n_agents_i"]:
         for ax in [axs_4[0], axs_5[0]]:
@@ -338,7 +338,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
 
         plot_mean_and_uncertainty(ax_6, "avg_strat_phe_0", "std_dev_strat_phe")
         plot_mean_and_uncertainty(ax_7, "dist_phe_0", None)
-        plot_mean_and_uncertainty(ax_8, "fitness", None)
+        plot_mean_and_uncertainty(ax_8, "std_dev_growth_rate", None)
 
         if param == "strat_phe_0_i" and sim_type == SimType.FIXED:
             min_extinct = subgroup_df[param][
@@ -347,14 +347,12 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
             max_avg_growth = subgroup_df[param][
                 subgroup_df[("avg_growth_rate", "mean")].idxmax()
             ]
-            max_fitness = subgroup_df[param][subgroup_df[("fitness", "mean")].idxmax()]
             for ax in [ax_1, ax_2, ax_8]:
                 ax.axvline(min_extinct, ls=":", **LINE_STYLE)
                 ax.axvline(max_avg_growth, ls="--", **LINE_STYLE)
             for ax in axs_5[:-1] + [ax_6]:
                 ax.axhline(min_extinct, ls=":", **LINE_STYLE)
                 ax.axhline(max_avg_growth, ls="--", **LINE_STYLE)
-            ax_8.axvline(max_fitness, ls="-.", **LINE_STYLE)
 
             plot_dist_phe_0_lims(ax_7, subgroup_df, job)
 
@@ -384,7 +382,7 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_5.savefig(fig_dir / "dist_strat_phe_0.pdf")
     fig_6.savefig(fig_dir / "avg_strat_phe_0.pdf")
     fig_7.savefig(fig_dir / "dist_phe_0.pdf")
-    fig_8.savefig(fig_dir / "fitness.pdf")
+    fig_8.savefig(fig_dir / "std_dev_growth_rate.pdf")
 
 
 def generate_time_series_plots(df: pd.DataFrame, job: SimJob) -> None:
@@ -409,7 +407,7 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_1, axs_1 = create_colorbar_figure("strat_phe_0_i", "avg_growth_rate", False)
     fig_2, axs_2 = create_colorbar_figure("strat_phe_0_i", "extinct_rate", False)
     fig_3, axs_3 = create_colorbar_figure("strat_phe_0_i", "dist_phe_0", False)
-    fig_4, axs_4 = create_colorbar_figure("strat_phe_0_i", "fitness", False)
+    fig_4, axs_4 = create_colorbar_figure("strat_phe_0_i", "std_dev_growth_rate", False)
 
     fig_5, axs_5 = create_colorbar_figure("n_agents_i", "extinct_rate", False)
     fig_6, ax_6 = create_standard_figure("strat_phe_0_i", "alpha")
@@ -431,7 +429,7 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
         plot_mean_and_uncertainty(axs_1[0], "avg_growth_rate")
         plot_mean_and_uncertainty(axs_2[0], "extinct_rate")
         plot_mean_and_uncertainty(axs_3[0], "dist_phe_0")
-        plot_mean_and_uncertainty(axs_4[0], "fitness")
+        plot_mean_and_uncertainty(axs_4[0], "std_dev_growth_rate")
 
     for ax in [axs_2[0]]:
         ax.set_yscale("log")
@@ -443,10 +441,8 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
 
     scaling_df = scaling_df.sort_values("n_agents_i")
 
-    def power_law(
-        x: float | pd.Series, alpha: float, x0: float, A: float
-    ) -> float | pd.Series:
-        return (A * (x + x0)) ** (-alpha)
+    def power_law(x: float | pd.Series, alpha: float, A: float) -> float | pd.Series:
+        return (A * x) ** (-alpha)
 
     fit_results = []
     for strat_phe_0_i, subgroup_df in scaling_df.groupby("strat_phe_0_i"):
@@ -457,7 +453,7 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
         axs_5[0].errorbar(x, y, yerr, None, c=color, **PLOT_STYLE)
 
         x, y, yerr = x[y != 0], y[y != 0], yerr[y != 0]
-        popt, pcov = curve_fit(power_law, x, y, p0=(1.0, 10.0, 0.1), sigma=yerr)
+        popt, pcov = curve_fit(power_law, x, y, p0=(2.0, 0.5), sigma=yerr)
         perr = np.sqrt(np.diag(pcov))
         axs_5[0].errorbar(x, power_law(x, *popt), ls=":", **LINE_STYLE)
         fit_results.append(
@@ -475,6 +471,7 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
 
     axs_5[0].set_xscale("log")
     axs_5[0].set_yscale("log")
+    axs_5[0].set_ylim(bottom=1e-8)
 
     sm = ScalarMappable(cmap=CMAP)
     cbar = fig_5.colorbar(sm, cax=axs_5[1], aspect=64)
@@ -486,7 +483,7 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_1.savefig(fig_dir / "avg_growth_rate.pdf")
     fig_2.savefig(fig_dir / "extinct_rate.pdf")
     fig_3.savefig(fig_dir / "dist_phe_0.pdf")
-    fig_4.savefig(fig_dir / "fitness.pdf")
+    fig_4.savefig(fig_dir / "std_dev_growth_rate.pdf")
     fig_5.savefig(fig_dir / "extinct_rate_scaling.pdf")
     fig_6.savefig(fig_dir / "alpha.pdf")
 
