@@ -129,6 +129,32 @@ This eigenvector gives the expected stable composition of phenotypes in a large 
 
 The time series plots are consistent with the previous results but don't show any fundamentally new information, they reassure us though that when the instantaneous dispersion is small the population is indeed almost monomorphic and thus talking about a common strategy for the population makes sense.
 
+In addition to the mean population growth rate $\mu$, we also measure fluctuations of growth along a stochastic trajectory. A naive definition based on the instantaneous rate $\Delta N/(N\,\Delta t)$ leads to extremely large and ill-behaved fluctuations due to the presence of arbitrarily small Gillespie waiting times. Instead, we define a variance associated with the \emph{integrated} growth process. Concretely, denoting by
+\begin{equation}
+    \mu_k=\frac{\Delta N_k}{N_k\,\Delta t_k}
+\end{equation}
+the growth rate measured over a Gillespie step $k$, we compute
+\begin{equation}
+    \sigma_\mu^2=\frac{1}{\sum_k \Delta t_k}\sum_k\left(\mu_k-\langle\mu\rangle\right)^2\Delta t_k^2.
+\end{equation}
+This definition corresponds to the variance growth rate of the cumulative per-capita growth,
+\begin{equation}
+    \log\frac{N(t)}{N(0)}=\sum_k \mu_k\,\Delta t_k,
+\end{equation}
+and is therefore a well-defined quantity in continuous-time jump processes. In this sense, $\sigma_\mu^2$ should be interpreted as the diffusion coefficient of log-population growth rather than as the variance of an instantaneous rate.
+
+Across all parameter regimes explored, $\sigma_\mu^2$ displays systematic and reproducible behavior. In particular, its dependence on strategy closely mirrors that of the extinction rate: strategies associated with higher extinction risk also exhibit larger growth-rate fluctuations. The two observables differ, however, in both scale and shape. While extinction rate is sensitive to rare, extreme demographic collapses, $\sigma_\mu^2$ captures the typical magnitude of stochastic fluctuations around the mean growth trajectory. As a result, $\sigma_\mu^2$ varies smoothly with strategy and remains finite even in regimes where extinction events are extremely rare.
+
+To further characterize the role of demographic noise and extinction risk, we performed fixed-strategy simulations for a range of population sizes $N_i$. As expected, observables associated with typical growth behavior (such as the mean growth rate $\langle\mu\rangle$ and the stationary phenotype distribution) show only weak dependence on $N_i$. By contrast, quantities controlled by rare events, namely the extinction rate $r_e$ and the growth-rate variance $\sigma_\mu^2$, depend strongly on population size.
+
+In all cases studied, the extinction rate decreases systematically as $N_i$ increases, and can be accurately approximated by a power law,
+\begin{equation}
+    r_e \sim N_i^{-\alpha},
+\end{equation}
+over the range of population sizes accessible to our simulations. This scaling is particularly transparent in the asymmetric parameter set. There, extinctions are primarily triggered by unfavorable environmental episodes rather than by purely demographic fluctuations. When the environment switches to the unfavorable state, the population is typically close to its carrying capacity $N_i$ (having grown during favorable periods) and subsequently decays approximately exponentially with an effective death rate. Extinction occurs if the unfavorable environment persists long enough for the population to decline from $N_i$ to $N=1$. Since the duration of environmental states is exponentially distributed, this mechanism directly leads to a power-law dependence of the extinction probability on the initial population size, with an exponent $\alpha$ determined by the effective decay rate and the environmental switching rate.
+
+This interpretation indicates that, for the parameters considered here, extinction is driven mainly by environmental fluctuations rather than by intrinsic demographic noise. Consequently, extinction statistics are not governed by exponentially small probabilities of large demographic fluctuations, and a large-deviation description with exponentially small extinction rates is not expected to be relevant in this regime.
+
 \section{Discussion and outlook} \label{sec:discussion}
 
 The numerical results presented here naturally raise the question of what quantity evolution is effectively optimizing in finite populations subject to demographic stochasticity and environmental fluctuations. While classical evolutionary theory predicts maximization of long-term growth rate in large populations, our results suggest that this principle breaks down once extinction becomes a relevant event (\cite{gillespieNaturalSelectionVariances1977} already pointed this out). In particular, the observed convergence toward safer, lower-growth strategies at small population sizes points to the existence of an alternative optimization principle that explicitly incorporates extinction risk. Identifying such a principle, and understanding how it interpolates between growth maximization and extinction avoidance as population size varies, remains an important open problem. Some possible expresions for the fitness are:
@@ -137,11 +163,13 @@ The numerical results presented here naturally raise the question of what quanti
 \end{equation}
 The last expression is the one suggest and the one I use in the figures although I do not know yet how to justify it, while the first two were proposed by \cite{gillespieNaturalSelectionVariances1977}.
 
-From a theoretical perspective, extinction in a growing population is a rare, large-fluctuation event. This places the problem squarely within the framework of large deviations theory for stochastic birth-death processes, as developed in works such as ASSAF \& MEERSON. In this framework, the extinction rate is expected to scale exponentially with population size, $r_e\sim\exp(-N_i\cdot S(s))$, where the action $S(s)$ depends on the underlying phenotypic strategy and the model parameters. This scaling provides a natural explanation for why small changes in strategy can lead to dramatic differences in extinction risk, even when average growth rates differ only slightly.
-
 Several extensions of the present work could help clarify these issues. A systematic study of the scaling of extinction rates with population size for fixed strategies would allow direct numerical estimation of the action $S(s)$. This would make it possible to test whether the evolved strategies indeed minimize extinction rate, and more broadly, connecting the observed evolutionary attractors to quasi-stationary distributions (as studied, for instance, by CHAZOTTES, COLLET \& MÉLEARD) could provide a rigorous theoretical foundation for understanding adaptation in fluctuating and risky environments.
 
 It remains to be explained as well the dependance of the evolved strategies on $p_{\text{mut}}$. For fixed strategies one could try to aproximate the growth rate and the extinction risk with the theoretical results for the fast and slow varying environment limits (and we could also make simulations in thsi two limits). We could also reintroduce small mutations (and thus another parameter) to check in more detail how similar the results are and whether the attractor is truly stable and does not depend on the mutation kernel. Finally, a very natural extension would be to allow strategies to depend on the current environment (with noise): sensing.
+
+An important open question raised by these results is whether the slow evolutionary dynamics of the average strategy $\langle s(0)\rangle$ can itself be described by an effective stochastic process. A natural idea is to model strategy evolution as a Markov process in strategy space, with transition rates induced by mutation and selection. However, such a description is not straightforward: the dynamics of strategies are mediated by population-level growth and extinction events, and therefore depend on the recent history of the environment and population size. This makes the effective dynamics generally non-Markovian.
+
+One possible avenue is to focus on transition statistics between quasi-monomorphic states. Since the instantaneous dispersion of strategies is typically small, the population spends most of its time near a single dominant strategy, occasionally transitioning to nearby strategies due to successful mutations. Measuring the rates of these transitions directly from simulations could allow the construction of an approximate coarse-grained dynamics in strategy space. Whether such an approach yields a closed and predictive description, and how it relates to the observed evolutionary attractors, remains an interesting direction for future work.
 
 \newpage
 
