@@ -82,7 +82,7 @@ def _generate_sims_configs() -> list[SimsConfig]:
     extended_sims_config = SimsConfig(
         init_sim_job=extended_sim_job,
         strat_phe_0_i_values=strat_phe_0_i_values,
-        prob_mut_values=[],
+        prob_mut_values=prob_mut_values,
         n_agents_i_values=[],
         fixed_n_agents_i_values=[],
     )
