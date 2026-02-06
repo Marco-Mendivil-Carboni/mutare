@@ -361,6 +361,20 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
             (df["sim_type"] == SimType.FIXED)
             & (df["n_agents_i"] == job.config["init"]["n_agents"])
         ].sort_values("strat_phe_0_i")
+
+        exp_extinct_rates = np.zeros(len(param_df))
+        hist_bins = count_hist_bins(df, "dist_strat_phe_0")
+        for bin in range(hist_bins - 1):
+            exp_extinct_rates += (
+                0.5
+                * (
+                    param_df[(f"dist_strat_phe_0_{bin + 1}", "mean")]
+                    + param_df[(f"dist_strat_phe_0_{bin}", "mean")]
+                )
+                * subgroup_df.iloc[bin][("extinct_rate", "mean")]
+            )
+        ax_2.plot(param_df["prob_mut"], exp_extinct_rates, ls="-.", **LINE_STYLE)
+
         plot_errorbar(ax_3, subgroup_df, "avg_growth_rate", "extinct_rate", True)
 
     if param in ["prob_mut", "n_agents_i"]:
