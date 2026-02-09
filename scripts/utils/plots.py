@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from scipy.optimize import curve_fit
+from scipy.interpolate import make_splrep
 from shutil import rmtree
 import matplotlib as mpl
 from matplotlib.figure import Figure
@@ -71,7 +72,8 @@ COL_TEX_LABELS: dict[str, str] = {
     "dist_strat_phe_0": "$p(s(A))$",
     "dist_phe_0": "$p(A)$",
     "std_dev_growth_rate": "$\\sigma_{\\mu}$",
-    "alpha": "$\\alpha$",
+    "ext_fit_alpha": "$\\alpha$",
+    "ext_fit_A": "$A$",
 }
 
 
@@ -425,8 +427,9 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_4, axs_4 = create_colorbar_figure("strat_phe_0_i", "std_dev_growth_rate", False)
 
     fig_5, axs_5 = create_colorbar_figure("n_agents_i", "extinct_rate", False)
-    fig_6, ax_6 = create_standard_figure("strat_phe_0_i", "alpha")
-    fig_7, axs_7 = create_colorbar_figure("strat_phe_0_i", "dist_strat_phe_0", False)
+    fig_6, ax_6 = create_standard_figure("strat_phe_0_i", "ext_fit_alpha")
+    fig_7, ax_7 = create_standard_figure("strat_phe_0_i", "ext_fit_A")
+    fig_8, axs_8 = create_colorbar_figure("strat_phe_0", "dist_strat_phe_0", False)
 
     norm = LogNorm(
         vmin=scaling_df["n_agents_i"].min() / 2.0,
@@ -475,21 +478,43 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
         fit_results.append(
             {
                 "strat_phe_0_i": strat_phe_0_i,
+                "avg_growth_rate": subgroup_df[("avg_growth_rate", "mean")].max(),
                 "alpha": popt[0],
                 "alpha_err": perr[0],
-                "avg_growth_rate": subgroup_df[("avg_growth_rate", "mean")].max(),
                 "A": popt[1],
+                "A_err": perr[1],
             }
         )
 
     fit_df = pd.DataFrame(fit_results)
+    smoothness = len(fit_df) - np.sqrt(4 * len(fit_df))
+    strat_phe_0_i_values = fit_df["strat_phe_0_i"].to_numpy()
+    avg_growth_rate_values = fit_df["avg_growth_rate"].to_numpy()
+    alpha_values = fit_df["alpha"].to_numpy()
+    alpha_err_values = fit_df["alpha_err"].to_numpy()
+    A_values = fit_df["A"].to_numpy()
+    A_err_values = fit_df["A_err"].to_numpy()
+
+    color = SIM_COLORS[SimType.FIXED]
     ax_6.errorbar(
-        fit_df["strat_phe_0_i"],
-        fit_df["alpha"],
-        fit_df["alpha_err"],
-        c=COLORS["red"],
-        **PLOT_STYLE,
+        strat_phe_0_i_values, alpha_values, alpha_err_values, c=color, **PLOT_STYLE
     )
+    ax_7.errorbar(strat_phe_0_i_values, A_values, A_err_values, c=color, **PLOT_STYLE)
+
+    avg_growth_rate_spline = make_splrep(strat_phe_0_i_values, avg_growth_rate_values)
+    alpha_spline = make_splrep(
+        strat_phe_0_i_values, alpha_values, w=1.0 / alpha_err_values, s=smoothness
+    )
+    A_spline = make_splrep(
+        strat_phe_0_i_values, A_values, w=1.0 / A_err_values, s=smoothness
+    )
+    strat_phe_0 = np.linspace(0.0, 1.0, 64)
+
+    axs_1[0].errorbar(
+        strat_phe_0, avg_growth_rate_spline(strat_phe_0), ls=":", **LINE_STYLE
+    )
+    ax_6.errorbar(strat_phe_0, alpha_spline(strat_phe_0), ls=":", **LINE_STYLE)
+    ax_7.errorbar(strat_phe_0, A_spline(strat_phe_0), ls=":", **LINE_STYLE)
 
     axs_5[0].set_xscale("log")
     axs_5[0].set_yscale("log")
@@ -502,18 +527,18 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     norm = LogNorm(vmin=1e1, vmax=1e4)
     for n_agents_i in np.logspace(start=2, stop=3, num=4):
         color = CMAP(norm(n_agents_i))
-        log_p_s = (
-            n_agents_i * fit_df["avg_growth_rate"]
-            - np.log(fit_df["A"])
-            + fit_df["alpha"] * np.log(n_agents_i)
+        log_dist_strat_phe_0 = (
+            n_agents_i * avg_growth_rate_spline(strat_phe_0)
+            - np.log(A_spline(strat_phe_0))
+            + alpha_spline(strat_phe_0) * np.log(n_agents_i)
         )
-        log_p_s -= np.max(log_p_s)
-        p_s = np.exp(log_p_s)
-        p_s /= np.sum(p_s)
-        axs_7[0].plot(fit_df["strat_phe_0_i"], p_s, c=color, **PLOT_STYLE)
+        log_dist_strat_phe_0 -= np.max(log_dist_strat_phe_0)
+        dist_strat_phe_0 = np.exp(log_dist_strat_phe_0)
+        dist_strat_phe_0 /= np.sum(dist_strat_phe_0) / len(strat_phe_0)
+        axs_8[0].plot(strat_phe_0, dist_strat_phe_0, c=color, ls="--")
 
     sm = ScalarMappable(norm=norm, cmap=CMAP)
-    cbar = fig_5.colorbar(sm, cax=axs_7[1], aspect=64)
+    cbar = fig_5.colorbar(sm, cax=axs_8[1], aspect=64)
     cbar.ax.set_ylabel(COL_TEX_LABELS["n_agents_i"])
 
     fig_dir = job.base_dir / "plots" / "scaling"
@@ -524,8 +549,9 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_3.savefig(fig_dir / "dist_phe_0.pdf")
     fig_4.savefig(fig_dir / "std_dev_growth_rate.pdf")
     fig_5.savefig(fig_dir / "extinct_rate_scaling.pdf")
-    fig_6.savefig(fig_dir / "alpha.pdf")
-    fig_7.savefig(fig_dir / "test.pdf")
+    fig_6.savefig(fig_dir / "ext_fit_alpha.pdf")
+    fig_7.savefig(fig_dir / "ext_fit_A.pdf")
+    fig_8.savefig(fig_dir / "exp_dist_strat_phe_0.pdf")
 
 
 def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
