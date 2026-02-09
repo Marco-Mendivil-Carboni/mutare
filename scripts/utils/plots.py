@@ -62,11 +62,13 @@ COL_TEX_LABELS: dict[str, str] = {
     "time": "$t$",
     "n_agents": "$N$",
     "n_extinct": "$n_{\\text{ext}}$",
-    "dist_n_agents": "$N/N_{\\text{ini}}$",
+    "norm_n_agents": "$N/N_{\\text{ini}}$",
+    "dist_n_agents": "$p(N/N_{\\text{ini}})$",
     "avg_growth_rate": "$\\langle\\mu\\rangle$",
     "extinct_rate": "$r_{\\text{ext}}$",
     "avg_strat_phe_0": "$\\langle s(A)\\rangle$",
-    "dist_strat_phe_0": "$s(A)$",
+    "strat_phe_0": "$s(A)$",
+    "dist_strat_phe_0": "$p(s(A))$",
     "dist_phe_0": "$p(A)$",
     "std_dev_growth_rate": "$\\sigma_{\\mu}$",
     "alpha": "$\\alpha$",
@@ -183,8 +185,7 @@ def plot_main_heatmap(
     im = ax_main.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP, shading="nearest")
     ax_main.set_xlim(hm_x[0], hm_x[-1])
     cbar = fig.colorbar(im, cax=ax_bar, aspect=64)
-    raw_y_label = COL_TEX_LABELS[y_col][1:-1]
-    cbar.ax.set_ylabel(f"$p({raw_y_label})$")
+    cbar.ax.set_ylabel(COL_TEX_LABELS[y_col])
 
 
 def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, y_col: str) -> None:
@@ -282,8 +283,8 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_1, ax_1 = create_standard_figure(param, "avg_growth_rate")
     fig_2, ax_2 = create_standard_figure(param, "extinct_rate")
     fig_3, ax_3 = create_standard_figure("avg_growth_rate", "extinct_rate")
-    fig_4, axs_4 = create_colorbar_figure(param, "dist_n_agents", two_panels)
-    fig_5, axs_5 = create_colorbar_figure(param, "dist_strat_phe_0", two_panels)
+    fig_4, axs_4 = create_colorbar_figure(param, "norm_n_agents", two_panels)
+    fig_5, axs_5 = create_colorbar_figure(param, "strat_phe_0", two_panels)
     fig_6, ax_6 = create_standard_figure(param, "avg_strat_phe_0")
     fig_7, ax_7 = create_standard_figure(param, "dist_phe_0")
     fig_8, ax_8 = create_standard_figure(param, "std_dev_growth_rate")
@@ -425,6 +426,7 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
 
     fig_5, axs_5 = create_colorbar_figure("n_agents_i", "extinct_rate", False)
     fig_6, ax_6 = create_standard_figure("strat_phe_0_i", "alpha")
+    fig_7, axs_7 = create_colorbar_figure("strat_phe_0_i", "dist_strat_phe_0", False)
 
     norm = LogNorm(
         vmin=scaling_df["n_agents_i"].min() / 2.0,
@@ -471,7 +473,13 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
         perr = np.sqrt(np.diag(pcov))
         axs_5[0].errorbar(x, power_law(x, *popt), ls=":", **LINE_STYLE)
         fit_results.append(
-            {"strat_phe_0_i": strat_phe_0_i, "alpha": popt[0], "alpha_err": perr[0]}
+            {
+                "strat_phe_0_i": strat_phe_0_i,
+                "alpha": popt[0],
+                "alpha_err": perr[0],
+                "avg_growth_rate": subgroup_df[("avg_growth_rate", "mean")].max(),
+                "A": popt[1],
+            }
         )
 
     fit_df = pd.DataFrame(fit_results)
@@ -491,6 +499,23 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     cbar = fig_5.colorbar(sm, cax=axs_5[1], aspect=64)
     cbar.ax.set_ylabel(COL_TEX_LABELS["strat_phe_0_i"])
 
+    norm = LogNorm(vmin=1e1, vmax=1e4)
+    for n_agents_i in np.logspace(start=2, stop=3, num=4):
+        color = CMAP(norm(n_agents_i))
+        log_p_s = (
+            n_agents_i * fit_df["avg_growth_rate"]
+            - np.log(fit_df["A"])
+            + fit_df["alpha"] * np.log(n_agents_i)
+        )
+        log_p_s -= np.max(log_p_s)
+        p_s = np.exp(log_p_s)
+        p_s /= np.sum(p_s)
+        axs_7[0].plot(fit_df["strat_phe_0_i"], p_s, c=color, **PLOT_STYLE)
+
+    sm = ScalarMappable(norm=norm, cmap=CMAP)
+    cbar = fig_5.colorbar(sm, cax=axs_7[1], aspect=64)
+    cbar.ax.set_ylabel(COL_TEX_LABELS["n_agents_i"])
+
     fig_dir = job.base_dir / "plots" / "scaling"
     fig_dir.mkdir(parents=True, exist_ok=True)
 
@@ -500,6 +525,7 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_4.savefig(fig_dir / "std_dev_growth_rate.pdf")
     fig_5.savefig(fig_dir / "extinct_rate_scaling.pdf")
     fig_6.savefig(fig_dir / "alpha.pdf")
+    fig_7.savefig(fig_dir / "test.pdf")
 
 
 def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
