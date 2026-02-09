@@ -181,7 +181,24 @@ An important open question raised by these results is whether the slow evolution
 
 One possible avenue is to focus on transition statistics between quasi-monomorphic states. Since the instantaneous dispersion of strategies is typically small, the population spends most of its time near a single dominant strategy, occasionally transitioning to nearby strategies due to successful mutations. Measuring the rates of these transitions directly from simulations could allow the construction of an approximate coarse-grained dynamics in strategy space. Whether such an approach yields a closed and predictive description, and how it relates to the observed evolutionary attractors, remains an interesting direction for future work.
 
-\newpage
+Motivated by the empirical convergence toward a stationary distribution of strategies in the regime of large population size and small mutation probability, we explored a simple heuristic approximation for the long-term distribution of strategies. Specifically, we consider the normalized weight
+\begin{equation}
+    p(s)\propto\frac{\exp(N_\text{ini}\cdot\langle\mu(s)\rangle)}{r_{\text{ext}}(s)},
+    \label{eq:heuristic_distribution}
+\end{equation}
+where $\langle\mu(s)\rangle$ is the mean growth rate and $r_{\text{ext}}(s)$ the extinction rate measured in fixed-strategy simulations.
+
+The logic underlying \autoref{eq:heuristic_distribution} is the following. The numerator is intended to represent the probability that a given strategy is selected during the initial competitive phase following reinitialization, when $N_\text{ini}$ independently drawn strategies compete and early growth advantages are exponentially amplified. Instead $1/r_{\text{ext}}(s)$ corresponds to the mean survival time of a population fixed at that strategy. Together, these factors approximate the total fraction of time the system spends in a quasi-monomorphic state characterized by strategy $s$.
+
+This argument is strictly valid only in the $p_{\mathrm{mut}}=0$ limit, where evolution proceeds as a sequence of fixation events separated by extinction and reinitialization. Even in this limit, \autoref{eq:heuristic_distribution} is not expected to provide an exact description. Nevertheless, when evaluated using growth and extinction rates measured independently from fixed-strategy simulations, it reproduces the qualitative structure of the observed strategy distributions and yields reasonable quantitative agreement. In particular, it correctly captures the location of the dominant strategy and the sharpness of the distribution as population size increases.
+
+A key feature of \autoref{eq:heuristic_distribution} is the competition between two terms with fundamentally different scaling behaviors. The growth contribution enters exponentially through $\exp(N_\text{ini}\cdot\langle\mu(s)\rangle)$, while extinction enters algebraically through $r_{\text{ext}}(s)$, which itself follows a power-law dependence on population size. This difference in scaling is essential: it allows extinction risk to dominate at small population sizes, leading to extinction-minimizing strategies, while ensuring that growth maximization inevitably prevails in the large-$N_i$ limit. If extinction were instead exponentially suppressed with population size, it could never overcome the exponential amplification associated with growth, and no such transition would be possible.
+
+To evaluate the distribution from \autoref{eq:heuristic_distribution} numerically, we fitted a smooth spline interpolations to the measured $\langle\mu(s)\rangle$ and to the parameters $\alpha(s)$ and $A(s)$ of the power-law extinction rate fits,
+\begin{equation}
+    r_{\mathrm{ext}}(s) = (A(s)N_\text{ini})^{-\alpha(s)}.
+\end{equation}
+The resulting expression was normalized in logarithmic form to avoid numerical overflow arising from the exponential dependence on $N_\text{ini}$. Despite the simplicity of this procedure, the resulting distributions are robust and display the correct qualitative dependence on population size and strategy.
 
 \printbibliography
 
