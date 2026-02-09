@@ -6,6 +6,7 @@ from shutil import rmtree
 from matplotlib.axes import Axes
 from matplotlib.colors import LogNorm
 from matplotlib.cm import ScalarMappable
+from concurrent.futures import ProcessPoolExecutor
 from typing import cast
 
 from ..exec import SimJob, print_process_msg
@@ -59,7 +60,7 @@ PARAM_FILTERS = {
 }
 
 
-def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
+def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     param_df = PARAM_FILTERS[param](df, job).sort_values(param)
     if len(param_df) < 2:
         return
@@ -184,8 +185,10 @@ def generate_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_7.savefig(fig_dir / "dist_phe_0.pdf")
     fig_8.savefig(fig_dir / "std_dev_growth_rate.pdf")
 
+    print_process_msg(f"made '{param}' plots")
 
-def generate_time_series_plots(df: pd.DataFrame, job: SimJob) -> None:
+
+def make_time_series_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_dir = job.base_dir / "plots" / "time_series"
     fig_dir.mkdir(parents=True, exist_ok=True)
 
@@ -198,8 +201,10 @@ def generate_time_series_plots(df: pd.DataFrame, job: SimJob) -> None:
         ax.legend()
         fig.savefig(fig_dir / f"{y_col}.pdf")
 
+    print_process_msg("made 'time_series' plots")
 
-def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
+
+def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     scaling_df = df[df["prob_mut"] == 0].sort_values("strat_phe_0_i")
     if scaling_df["n_agents_i"].nunique() < 2:
         return
@@ -307,7 +312,7 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     cbar = fig_5.colorbar(sm, cax=axs_5[1], aspect=64)
     cbar.ax.set_ylabel(COL_TEX_LABELS["strat_phe_0_i"])
 
-    norm = LogNorm(vmin=1e1, vmax=1e4)
+    norm = LogNorm(vmin=1e2 / 2.0, vmax=1e3 * 2.0)
     for n_agents_i in np.logspace(start=2, stop=3, num=4):
         color = CMAP(norm(n_agents_i))
         log_dist_strat_phe_0 = (
@@ -336,6 +341,8 @@ def generate_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_7.savefig(fig_dir / "ext_fit_A.pdf")
     fig_8.savefig(fig_dir / "exp_dist_strat_phe_0.pdf")
 
+    print_process_msg("made 'scaling' plots")
+
 
 def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
     avg_analyses = collect_avg_analyses(sim_jobs)
@@ -344,12 +351,11 @@ def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
 
     rmtree(init_sim_job.base_dir / "plots", ignore_errors=True)
 
-    generate_param_plots("strat_phe_0_i", avg_analyses, init_sim_job)
-    generate_param_plots("prob_mut", avg_analyses, init_sim_job)
-    generate_param_plots("n_agents_i", avg_analyses, init_sim_job)
+    with ProcessPoolExecutor() as pool:
+        pool.submit(make_param_plots, "strat_phe_0_i", avg_analyses, init_sim_job)
+        pool.submit(make_param_plots, "prob_mut", avg_analyses, init_sim_job)
+        pool.submit(make_param_plots, "n_agents_i", avg_analyses, init_sim_job)
 
-    generate_time_series_plots(run_time_series, init_sim_job)
+        pool.submit(make_time_series_plots, run_time_series, init_sim_job)
 
-    generate_scaling_plots(avg_analyses, init_sim_job)
-
-    print_process_msg("finished plots")
+        pool.submit(make_scaling_plots, avg_analyses, init_sim_job)
