@@ -317,8 +317,8 @@ def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
         color = CMAP(norm(n_agents_i))
         log_dist_strat_phe_0 = (
             n_agents_i * avg_growth_rate_spline(strat_phe_0)
-            - np.log(A_spline(strat_phe_0))
-            + alpha_spline(strat_phe_0) * np.log(n_agents_i)
+        ) + alpha_spline(strat_phe_0) * (
+            np.log(A_spline(strat_phe_0)) + np.log(n_agents_i)
         )
         log_dist_strat_phe_0 -= np.max(log_dist_strat_phe_0)
         dist_strat_phe_0 = np.exp(log_dist_strat_phe_0)
