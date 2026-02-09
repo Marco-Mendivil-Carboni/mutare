@@ -5,8 +5,7 @@ from dotenv import load_dotenv
 import os
 import requests
 
-from utils.exec import SimsConfig, create_sim_jobs, exec_sim_jobs
-from utils.plots import plot_sim_jobs
+from mutare_tools import SimsConfig, create_sim_jobs, exec_sim_jobs, plot_sim_jobs
 
 from sims_configs import SIMS_DIR, SIMS_CONFIGS
 

@@ -1,0 +1,244 @@
+import pandas as pd
+import numpy as np
+import matplotlib as mpl
+from matplotlib.figure import Figure
+from matplotlib.axes import Axes
+from matplotlib.gridspec import GridSpec
+from matplotlib.colors import PowerNorm
+from typing import Any
+
+from ..exec import SimJob
+from ..analysis import SimType
+
+mpl.use("pdf")
+
+mpl.rcParams["text.usetex"] = True
+mpl.rcParams["text.latex.preamble"] = "\\usepackage{lmodern}\\usepackage{mathtools}"
+mpl.rcParams["font.family"] = "lmodern"
+mpl.rcParams["font.size"] = 10
+mpl.rcParams["figure.dpi"] = 1200
+mpl.rcParams["figure.constrained_layout.use"] = True
+
+CM = 1 / 2.54
+FIGSIZE = (8.0 * CM, 5.0 * CM)
+
+PLOT_STYLE: dict[str, Any] = dict(ls="--", marker="o", markersize=2)
+FILL_STYLE: dict[str, Any] = dict(lw=0.0, alpha=0.5)
+LINE_STYLE: dict[str, Any] = dict(c="k", lw=1.0, alpha=0.5)
+
+COLORS = {
+    "blue": "#4e79a7",
+    "orange": "#f28e2b",
+    "red": "#e15759",
+    "teal": "#76b7b2",
+    "green": "#59a14f",
+    "yellow": "#edc948",
+    "mauve": "#b07aa1",
+    "pink": "#ff9da7",
+    "brown": "#9c755f",
+    "gray": "#bab0ac",
+}
+
+CMAP = mpl.colormaps["magma_r"]
+
+SIM_COLORS: dict[SimType, Any] = {
+    SimType.FIXED: COLORS["blue"],
+    SimType.EVOL: COLORS["teal"],
+    SimType.RANDOM: COLORS["green"],
+}
+SIM_LABELS: dict[SimType, str] = {
+    SimType.FIXED: "\\texttt{fixed}",
+    SimType.EVOL: "\\texttt{evol}",
+    SimType.RANDOM: "\\texttt{evol(r)}",
+}
+
+COL_TEX_LABELS: dict[str, str] = {
+    "strat_phe_0_i": "$s(A)_{\\text{ini}}$",
+    "prob_mut": "$p_{\\text{mut}}$",
+    "n_agents_i": "$N_{\\text{ini}}$",
+    "time": "$t$",
+    "n_agents": "$N$",
+    "n_extinct": "$n_{\\text{ext}}$",
+    "norm_n_agents": "$N/N_{\\text{ini}}$",
+    "dist_n_agents": "$p(N/N_{\\text{ini}})$",
+    "avg_growth_rate": "$\\langle\\mu\\rangle$",
+    "extinct_rate": "$r_{\\text{ext}}$",
+    "avg_strat_phe_0": "$\\langle s(A)\\rangle$",
+    "strat_phe_0": "$s(A)$",
+    "dist_strat_phe_0": "$p(s(A))$",
+    "dist_phe_0": "$p(A)$",
+    "std_dev_growth_rate": "$\\sigma_{\\mu}$",
+    "ext_fit_alpha": "$\\alpha$",
+    "ext_fit_A": "$A$",
+}
+
+
+def create_standard_figure(x_col: str, y_col: str) -> tuple[Figure, Axes]:
+    fig = Figure(figsize=FIGSIZE)
+    ax = fig.add_subplot()
+    ax.set_xlabel(COL_TEX_LABELS[x_col])
+    ax.set_ylabel(COL_TEX_LABELS[y_col])
+    return fig, ax
+
+
+def create_colorbar_figure(
+    x_col: str, y_col: str, two_panels: bool
+) -> tuple[Figure, list[Axes]]:
+    fig = Figure(figsize=FIGSIZE)
+
+    if two_panels:
+        gs = GridSpec(1, 3, figure=fig, width_ratios=[64, 4, 1], wspace=0)
+        ax_main = fig.add_subplot(gs[0, 0])
+        ax_side = fig.add_subplot(gs[0, 1])
+        ax_bar = fig.add_subplot(gs[0, 2])
+        ax_main.set_xlabel(COL_TEX_LABELS[x_col])
+        ax_main.set_ylabel(COL_TEX_LABELS[y_col])
+        ax_side.set_xticks([])
+        ax_side.set_yticks([])
+
+        return fig, [ax_main, ax_side, ax_bar]
+
+    else:
+        gs = GridSpec(1, 2, figure=fig, width_ratios=[64, 1], wspace=0)
+        ax_main = fig.add_subplot(gs[0, 0])
+        ax_bar = fig.add_subplot(gs[0, 1])
+        ax_main.set_xlabel(COL_TEX_LABELS[x_col])
+        ax_main.set_ylabel(COL_TEX_LABELS[y_col])
+
+        return fig, [ax_main, ax_bar]
+
+
+def add_top_label(ax: Axes, label: str) -> None:
+    sec_ax = ax.secondary_xaxis("top")
+    sec_ax.set_xticks([])
+    sec_ax.set_xticks([], minor=True)
+    sec_ax.set_xlabel(label)
+
+
+def get_sim_color_and_label(df: pd.DataFrame) -> tuple[str, str]:
+    sim_types = df["sim_type"].unique()
+    if len(sim_types) != 1:
+        raise ValueError("sim_type not unique")
+    sim_type = sim_types[0]
+    return SIM_COLORS[sim_type], SIM_LABELS[sim_type]
+
+
+def plot_horizontal_bands(
+    ax: Axes, df: pd.DataFrame, mean_col: tuple[str, str], span_col: tuple[str, str]
+) -> None:
+    color, label = get_sim_color_and_label(df)
+    for mean, span in df[[mean_col, span_col]].itertuples(index=False):
+        ax.axhline(mean, c=color, label=label, ls=PLOT_STYLE["ls"])
+        ax.axhspan(mean + span, mean - span, color=color, **FILL_STYLE)
+        label = None
+
+
+def plot_errorbar(
+    ax: Axes, df: pd.DataFrame, x_col: str, y_col: str, use_xerr: bool
+) -> None:
+    color, label = get_sim_color_and_label(df)
+    x = df[(x_col, "mean")] if use_xerr else df[x_col]
+    y = df[(y_col, "mean")]
+    xerr = df[(x_col, "sem")] if use_xerr else None
+    yerr = df[(y_col, "sem")]
+    ax.errorbar(x, y, yerr, xerr, c=color, label=label, **PLOT_STYLE)
+
+
+def plot_errorband(
+    ax: Axes, df: pd.DataFrame, x_col: str, y_col: str, y_span_col: str
+) -> None:
+    color, _ = get_sim_color_and_label(df)
+    x = df[x_col]
+    y = df[(y_col, "mean")]
+    y_span = df[(y_span_col, "mean")]
+    ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
+
+
+def count_hist_bins(df: pd.DataFrame, y_col: str) -> int:
+    hist_bins = 0
+    while (f"{y_col}_{hist_bins}", "mean") in df.columns:
+        hist_bins += 1
+    return hist_bins
+
+
+def generate_heatmap_matrix(
+    df: pd.DataFrame, y_col: str, hist_bins: int
+) -> list[list[float]]:
+    hm_z = []
+    for bin in range(hist_bins):
+        hm_z.append((hist_bins * df[(f"{y_col}_{bin}", "mean")]).tolist())
+    return hm_z
+
+
+def plot_main_heatmap(
+    fig: Figure, ax_main: Axes, ax_bar: Axes, df: pd.DataFrame, x_col: str, y_col: str
+) -> None:
+    _, label = get_sim_color_and_label(df)
+    add_top_label(ax_main, label)
+    hist_bins = count_hist_bins(df, y_col)
+    hm_x = df[x_col].tolist()
+    hm_y = [(i + 0.5) / hist_bins for i in range(hist_bins)]
+    hm_z = generate_heatmap_matrix(df, y_col, hist_bins)
+    norm = PowerNorm(gamma=0.5, vmin=0, vmax=hist_bins)
+    im = ax_main.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP, shading="nearest")
+    ax_main.set_xlim(hm_x[0], hm_x[-1])
+    cbar = fig.colorbar(im, cax=ax_bar, aspect=64)
+    cbar.ax.set_ylabel(COL_TEX_LABELS[y_col])
+
+
+def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, y_col: str) -> None:
+    _, label = get_sim_color_and_label(df)
+    add_top_label(ax_side, label)
+    hist_bins = count_hist_bins(df, y_col)
+    hm_x = [0.0, 1.0]
+    hm_y = [i / hist_bins for i in range(hist_bins + 1)]
+    hm_z = generate_heatmap_matrix(df, y_col, hist_bins)
+    norm = PowerNorm(gamma=0.5, vmin=0, vmax=hist_bins)
+    ax_side.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP)
+
+
+def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
+    n_env = job.config["model"]["n_env"]
+    n_phe = job.config["model"]["n_phe"]
+    if n_env != 2 or n_phe != 2:
+        return
+
+    strat_phe_0_i_values = df["strat_phe_0_i"].tolist()
+
+    for env in range(n_env):
+        rates_birth = np.array(job.config["model"]["rates_birth"][env])
+        rates_death = np.array(job.config["model"]["rates_death"][env])
+        dist_phe_0_lim_values = []
+        for strat_phe_0_i in strat_phe_0_i_values:
+            strat_phe_1_i = 1.0 - strat_phe_0_i
+            matrix = np.array(
+                [strat_phe_0_i * rates_birth, strat_phe_1_i * rates_birth]
+            )
+            matrix[0][0] -= rates_death[0]
+            matrix[1][1] -= rates_death[1]
+            eigenvalues, eigenvectors = np.linalg.eig(matrix)
+            max_index = np.argmax(eigenvalues)
+            max_eigenvector = eigenvectors[:, max_index]
+            dist_phe_0_lim_values.append(
+                float(max_eigenvector[0] / np.sum(max_eigenvector))
+            )
+
+        ax.plot(strat_phe_0_i_values, dist_phe_0_lim_values, ls="-.", **LINE_STYLE)
+
+
+def plot_extinct_times(ax: Axes, df: pd.DataFrame) -> None:
+    extinct_times = df["time"][df["n_extinct"].diff() > 0]
+    for extinct_time in extinct_times:
+        ax.axvline(extinct_time, ls=":", c="k", lw=0.25, alpha=0.5)
+
+
+def plot_time_series(
+    ax: Axes, df: pd.DataFrame, y_col: str, y_span_col: str | None
+) -> None:
+    color, label = get_sim_color_and_label(df)
+    x = df["time"]
+    y = df[y_col]
+    ax.scatter(x, y, c=color, label=label, lw=0.0, s=0.25)
+    if y_span_col is not None:
+        y_span = df[y_span_col]
+        ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
