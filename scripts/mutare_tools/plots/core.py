@@ -9,7 +9,7 @@ from matplotlib.cm import ScalarMappable
 from concurrent.futures import ProcessPoolExecutor
 from typing import cast
 
-from ..exec import SimJob, print_process_msg
+from ..exec import N_CORES, SimJob, print_process_msg
 from ..analysis import SimType, collect_avg_analyses, collect_run_time_series
 
 from .utils import (
@@ -351,7 +351,7 @@ def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
 
     rmtree(init_sim_job.base_dir / "plots", ignore_errors=True)
 
-    with ProcessPoolExecutor() as pool:
+    with ProcessPoolExecutor(max_workers=N_CORES) as pool:
         pool.submit(make_param_plots, "strat_phe_0_i", avg_analyses, init_sim_job)
         pool.submit(make_param_plots, "prob_mut", avg_analyses, init_sim_job)
         pool.submit(make_param_plots, "n_agents_i", avg_analyses, init_sim_job)

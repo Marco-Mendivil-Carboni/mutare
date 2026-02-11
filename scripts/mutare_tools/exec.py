@@ -14,6 +14,8 @@ from types import FrameType
 
 from .config import Config, hash_sim_dir
 
+N_CORES = psutil.cpu_count(logical=False)
+
 
 def print_process_msg(message: str) -> None:
     timestamp = datetime.now().isoformat(timespec="seconds")
@@ -190,12 +192,11 @@ def exec_sim_job(sim_job: SimJob) -> None:
 
     print_process_msg("starting process pool")
 
-    cores = psutil.cpu_count(logical=False)
     sim_runs = [
         SimRun(sim_job.sim_dir, run_idx, sim_job.n_files)
         for run_idx in range(sim_job.n_runs)
     ]
-    with mp.Pool(processes=cores) as pool:
+    with mp.Pool(processes=N_CORES) as pool:
         run_results = pool.map(exec_sim_run, sim_runs)
 
     print_process_msg("process pool finished")
