@@ -312,8 +312,10 @@ def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     for ax in [axs_2[0], axs_5[0]]:
         ax.set_yscale("log")
 
-    axs_2[0].set_ylim(bottom=10**-8.5)
-    axs_5[0].set_ylim(bottom=10**-8.5)
+    extinct_rates = scaling_df[("extinct_rate", "mean")]
+    min_extinct_rate = np.min(extinct_rates[extinct_rates > 0.0])
+    axs_2[0].set_ylim(bottom=min_extinct_rate)
+    axs_5[0].set_ylim(bottom=min_extinct_rate)
 
     sm = ScalarMappable(cmap=CMAP)
     cbar = fig_5.colorbar(sm, cax=axs_5[1], aspect=64)
