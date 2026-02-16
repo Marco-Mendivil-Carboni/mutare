@@ -173,6 +173,8 @@ as shown by the dash--dotted gray lines in the extinction panels of \autoref{fig
 
 Finally, simulations performed with larger populations ($N_i=1000$) show that, in this regime, the results depend only weakly on the mutation probability, aside from statistical noise. This insensitivity is in itself significant: it indicates that, for sufficiently large populations, the evolutionary outcome is robust and predictable, and that the pronounced dependence on $p_{\mathrm{mut}}$ observed at $N_i=100$ is a finite-size effect. At the same time, these finite-size effects remain biologically and theoretically interesting, as they modulate the crossover between extinction-dominated and growth-dominated evolutionary regimes.
 
+COMMENT THAT $\exp(-\langle\mu\rangle/\sigma_\mu)$ IS KIND OF SIMILAR TO $r_ext$ BUT DOES NOT COINCIDE VERY WELL.
+
 \section{Discussion and outlook} \label{sec:discussion}
 
 The numerical results presented here naturally raise the question of what quantity evolution is effectively optimizing in finite populations subject to demographic stochasticity and environmental fluctuations. While classical evolutionary theory predicts maximization of long-term growth rate in large populations, our results suggest that this principle breaks down once extinction becomes a relevant event (\cite{gillespieNaturalSelectionVariances1977} already pointed this out). In particular, the observed convergence toward safer, lower-growth strategies at small population sizes points to the existence of an alternative optimization principle that explicitly incorporates extinction risk. Identifying such a principle, and understanding how it interpolates between growth maximization and extinction avoidance as population size varies, remains an important open problem. Some possible expresions for the fitness are:
@@ -219,7 +221,7 @@ Incorporating the effect of small but nonzero values of $p_{\text{mut}}$ into \a
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/extinct_rate.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/rates.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/dist_n_agents.pdf}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/dist_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/std_dev_growth_rate.pdf}
@@ -232,7 +234,7 @@ Incorporating the effect of small but nonzero values of $p_{\text{mut}}$ into \a
     \includegraphics{../sims/symmetric/plots/prob_mut/extinct_rate.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/rates.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/dist_n_agents.pdf}
-    \includegraphics{../sims/symmetric/plots/prob_mut/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/prob_mut/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/dist_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/std_dev_growth_rate.pdf}
@@ -245,7 +247,7 @@ Incorporating the effect of small but nonzero values of $p_{\text{mut}}$ into \a
     \includegraphics{../sims/symmetric/plots/n_agents_i/extinct_rate.pdf}
     \includegraphics{../sims/symmetric/plots/n_agents_i/rates.pdf}
     \includegraphics{../sims/symmetric/plots/n_agents_i/dist_n_agents.pdf}
-    \includegraphics{../sims/symmetric/plots/n_agents_i/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/n_agents_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/n_agents_i/dist_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/n_agents_i/std_dev_growth_rate.pdf}
@@ -270,7 +272,7 @@ Incorporating the effect of small but nonzero values of $p_{\text{mut}}$ into \a
     \includegraphics{../sims/symmetric/plots/scaling/extinct_rate_scaling.pdf}
     \includegraphics{../sims/symmetric/plots/scaling/ext_fit_alpha.pdf}
     \includegraphics{../sims/symmetric/plots/scaling/ext_fit_A.pdf}
-    \includegraphics{../sims/symmetric/plots/scaling/exp_dist_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/scaling/dist_avg_strat_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}[p]
@@ -280,7 +282,7 @@ Incorporating the effect of small but nonzero values of $p_{\text{mut}}$ into \a
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_n_agents.pdf}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/std_dev_growth_rate.pdf}
@@ -293,7 +295,7 @@ Incorporating the effect of small but nonzero values of $p_{\text{mut}}$ into \a
     \includegraphics{../sims/asymmetric/plots/prob_mut/extinct_rate.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/rates.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/dist_n_agents.pdf}
-    \includegraphics{../sims/asymmetric/plots/prob_mut/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/prob_mut/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/dist_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/std_dev_growth_rate.pdf}
@@ -306,7 +308,7 @@ Incorporating the effect of small but nonzero values of $p_{\text{mut}}$ into \a
     \includegraphics{../sims/asymmetric/plots/n_agents_i/extinct_rate.pdf}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/rates.pdf}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_n_agents.pdf}
-    \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/std_dev_growth_rate.pdf}
@@ -331,7 +333,7 @@ Incorporating the effect of small but nonzero values of $p_{\text{mut}}$ into \a
     \includegraphics{../sims/asymmetric/plots/scaling/extinct_rate_scaling.pdf}
     \includegraphics{../sims/asymmetric/plots/scaling/ext_fit_alpha.pdf}
     \includegraphics{../sims/asymmetric/plots/scaling/ext_fit_A.pdf}
-    \includegraphics{../sims/asymmetric/plots/scaling/exp_dist_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/scaling/dist_avg_strat_phe_0.pdf}
 \end{figure*}
 
 \begin{figure*}
@@ -341,7 +343,7 @@ Incorporating the effect of small but nonzero values of $p_{\text{mut}}$ into \a
     \includegraphics{../sims/extended/plots/strat_phe_0_i/extinct_rate.pdf}
     \includegraphics{../sims/extended/plots/strat_phe_0_i/rates.pdf}
     \includegraphics{../sims/extended/plots/strat_phe_0_i/dist_n_agents.pdf}
-    \includegraphics{../sims/extended/plots/strat_phe_0_i/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/extended/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/extended/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/extended/plots/strat_phe_0_i/dist_phe_0.pdf}
     \includegraphics{../sims/extended/plots/strat_phe_0_i/std_dev_growth_rate.pdf}
@@ -354,7 +356,7 @@ Incorporating the effect of small but nonzero values of $p_{\text{mut}}$ into \a
     \includegraphics{../sims/extended/plots/prob_mut/extinct_rate.pdf}
     \includegraphics{../sims/extended/plots/prob_mut/rates.pdf}
     \includegraphics{../sims/extended/plots/prob_mut/dist_n_agents.pdf}
-    \includegraphics{../sims/extended/plots/prob_mut/dist_strat_phe_0.pdf}
+    \includegraphics{../sims/extended/plots/prob_mut/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/extended/plots/prob_mut/avg_strat_phe_0.pdf}
     \includegraphics{../sims/extended/plots/prob_mut/dist_phe_0.pdf}
     \includegraphics{../sims/extended/plots/prob_mut/std_dev_growth_rate.pdf}

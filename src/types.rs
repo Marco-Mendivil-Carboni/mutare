@@ -78,9 +78,6 @@ pub struct Observables {
     /// Standard deviation of the phenotypic strategy.
     pub std_dev_strat_phe: f64,
 
-    /// Distribution of phenotypic strategies.
-    pub dist_strat_phe: Vec<Vec<f64>>,
-
     /// Distribution of phenotypes.
     pub dist_phe: Vec<f64>,
 }

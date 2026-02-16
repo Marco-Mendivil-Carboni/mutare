@@ -14,14 +14,11 @@ OBSERVABLES = [
     "n_extinct",
     "avg_strat_phe",
     "std_dev_strat_phe",
-    "dist_strat_phe",
     "dist_phe",
 ]
 
 SCALAR_OBSERVABLES = [
-    obs
-    for obs in OBSERVABLES
-    if obs not in {"avg_strat_phe", "dist_strat_phe", "dist_phe"}
+    obs for obs in OBSERVABLES if obs not in {"avg_strat_phe", "dist_phe"}
 ]
 
 ANALYSIS = [
@@ -31,7 +28,7 @@ ANALYSIS = [
     "extinct_rate",
     "avg_strat_phe",
     "std_dev_strat_phe",
-    "dist_strat_phe",
+    "dist_avg_strat_phe",
     "dist_phe",
 ]
 
@@ -103,16 +100,12 @@ def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
             analysis.pop("dist_n_agents")
             analysis["avg_strat_phe_0"] = analysis["avg_strat_phe"][0]
             analysis.pop("avg_strat_phe")
-            for bin, ele in enumerate(analysis["dist_strat_phe"][0]):
-                analysis[f"dist_strat_phe_0_{bin}"] = ele
-            analysis.pop("dist_strat_phe")
+            for bin, ele in enumerate(analysis["dist_avg_strat_phe"][0]):
+                analysis[f"dist_avg_strat_phe_0_{bin}"] = ele
+            analysis.pop("dist_avg_strat_phe")
             analysis["dist_phe_0"] = analysis["dist_phe"][0]
             analysis.pop("dist_phe")
             analysis = pd.DataFrame(analysis, index=[run_idx])
-            analysis["fitness"] = (
-                analysis["avg_growth_rate"]
-                - sim_job.config["init"]["n_agents"] * analysis["extinct_rate"]
-            )
 
             analyses.append(analysis)
 

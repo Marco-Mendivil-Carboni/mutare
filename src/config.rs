@@ -101,7 +101,7 @@ impl Config {
         check_num(output.steps_per_save, 0..output.steps_per_file)
             .context("invalid number of steps per saved observables")?;
 
-        check_num(output.hist_bins, 1..=16).context("invalid number of histogram bins")?;
+        check_num(output.hist_bins, 1..).context("invalid number of histogram bins")?;
 
         Ok(())
     }

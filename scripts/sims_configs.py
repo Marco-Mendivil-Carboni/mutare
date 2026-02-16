@@ -9,9 +9,9 @@ SIMS_DIR = Path(__file__).resolve().parents[1] / "sims"
 
 def _generate_sims_configs() -> list[SimsConfig]:
     strat_phe_0_i_values = np.linspace(start=1 / 16, stop=15 / 16, num=15).tolist()
-    prob_mut_values = np.logspace(start=-8, stop=0, num=17).tolist()
+    prob_mut_values = np.logspace(start=-6, stop=-2, num=9).tolist()
     n_agents_i_values = (
-        np.logspace(start=1, stop=3, num=17).round().astype(int).tolist()
+        np.logspace(start=1.25, stop=3, num=15).round().astype(int).tolist()
     )
     fixed_n_agents_i_values = (
         np.logspace(start=1.5, stop=2.5, num=5).round().astype(int).tolist()
@@ -41,7 +41,7 @@ def _generate_sims_configs() -> list[SimsConfig]:
             "output": {
                 "steps_per_file": 1_048_576,
                 "steps_per_save": 1_024,
-                "hist_bins": 16,
+                "hist_bins": 64,
             },
         },
         n_runs=16,

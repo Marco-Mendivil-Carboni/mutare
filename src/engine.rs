@@ -69,7 +69,8 @@ pub struct Engine {
 impl Engine {
     /// Create a new `Engine` with the given configuration and a random initial state.
     pub fn new(cfg: Config) -> Result<Self> {
-        let mut rng = ChaCha12Rng::try_from_os_rng()?;
+        let mut sys_rng = rand::rngs::SysRng;
+        let mut rng = ChaCha12Rng::try_from_rng(&mut sys_rng)?;
 
         let env = rng.random_range(0..cfg.model.n_env);
 
@@ -268,7 +269,7 @@ impl Engine {
             let excess = diff as usize;
 
             // Randomly pick excess agents to delete.
-            let mut i_agents_del = (0..n_agents).choose_multiple(&mut self.rng, excess);
+            let mut i_agents_del = (0..n_agents).sample(&mut self.rng, excess);
 
             // Sort in reverse to safely remove by index.
             i_agents_del.sort_by(|a, b| b.cmp(a));

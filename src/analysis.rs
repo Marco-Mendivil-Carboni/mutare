@@ -35,6 +35,7 @@ pub fn calc_observables(
         }
     }
     avg_strat_phe.iter_mut().for_each(|ele| *ele /= n_agents);
+    avg_strat_phe.pop();
 
     let mut std_dev_strat_phe = 0.0;
     for agent in &state.agents {
@@ -48,24 +49,12 @@ pub fn calc_observables(
     std_dev_strat_phe /= n_agents;
     std_dev_strat_phe = std_dev_strat_phe.sqrt();
 
-    let hist_bins = cfg.output.hist_bins;
-
-    let mut dist_strat_phe = vec![vec![0.0; hist_bins]; n_phe];
-    for agent in &state.agents {
-        for (phe, ele) in agent.strat_phe().iter().enumerate() {
-            let bin = ((ele * hist_bins as f64) as usize).min(hist_bins - 1);
-            dist_strat_phe[phe][bin] += 1.0;
-        }
-    }
-    dist_strat_phe.iter_mut().for_each(|row| {
-        row.iter_mut().for_each(|ele| *ele /= n_agents);
-    });
-
     let mut dist_phe = vec![0.0; n_phe];
     for agent in &state.agents {
         dist_phe[agent.phe()] += 1.0;
     }
     dist_phe.iter_mut().for_each(|ele| *ele /= n_agents);
+    dist_phe.pop();
 
     Observables {
         time: state.time,
@@ -75,7 +64,6 @@ pub fn calc_observables(
         n_extinct,
         avg_strat_phe,
         std_dev_strat_phe,
-        dist_strat_phe,
         dist_phe,
     }
 }
@@ -101,8 +89,8 @@ pub struct Analysis {
     /// Standard deviation of the phenotypic strategy.
     pub std_dev_strat_phe: f64,
 
-    /// Distribution of phenotypic strategies.
-    pub dist_strat_phe: Vec<Vec<f64>>,
+    /// Distribution of average phenotypic strategies.
+    pub dist_avg_strat_phe: Vec<Vec<f64>>,
 
     /// Distribution of phenotypes.
     pub dist_phe: Vec<f64>,
@@ -195,21 +183,29 @@ impl Analyzer {
 
             extinct_rate: last_observables.n_extinct as f64 / last_observables.time,
 
-            avg_strat_phe: (0..self.cfg.model.n_phe)
+            avg_strat_phe: (0..self.cfg.model.n_phe - 1)
                 .map(|phe| obs_weighted_average(&|obs| obs.avg_strat_phe[phe]))
                 .collect(),
 
             std_dev_strat_phe: obs_weighted_average(&|obs| obs.std_dev_strat_phe),
 
-            dist_strat_phe: (0..self.cfg.model.n_phe)
+            dist_avg_strat_phe: (0..self.cfg.model.n_phe - 1)
                 .map(|phe| {
                     (0..self.cfg.output.hist_bins)
-                        .map(|bin| obs_weighted_average(&|obs| obs.dist_strat_phe[phe][bin]))
+                        .map(|bin| {
+                            obs_weighted_average(&|obs| {
+                                let obs_bin = ((obs.avg_strat_phe[phe]
+                                    * self.cfg.output.hist_bins as f64)
+                                    as usize)
+                                    .min(self.cfg.output.hist_bins - 1);
+                                if obs_bin == bin { 1.0 } else { 0.0 }
+                            })
+                        })
                         .collect()
                 })
                 .collect(),
 
-            dist_phe: (0..self.cfg.model.n_phe)
+            dist_phe: (0..self.cfg.model.n_phe - 1)
                 .map(|phe| obs_weighted_average(&|obs| obs.dist_phe[phe]))
                 .collect(),
         };
