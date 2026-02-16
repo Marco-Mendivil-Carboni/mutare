@@ -24,7 +24,6 @@ During the simulation, every `steps_per_save` steps, the following observables a
 - Number of extinctions so far
 - Average phenotypic strategy
 - Standard deviation of the phenotypic strategy
-- Distribution of phenotypic strategies
 - Distribution of phenotypes
 
 Every `steps_per_file` steps, the simulation is stopped and a new output file is written to disk.
