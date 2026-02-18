@@ -68,7 +68,7 @@ COL_TEX_LABELS: dict[str, str] = {
     "dist_phe_0": "$p(A)$",
     "std_dev_growth_rate": "$\\sigma_{\\mu}$",
     "ext_fit_alpha": "$\\alpha$",
-    "ext_fit_A": "$A$",
+    "ext_fit_k": "$k$",
 }
 
 
@@ -241,3 +241,12 @@ def plot_time_series(
     if y_span_col is not None:
         y_span = df[y_span_col]
         ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
+
+
+def get_dist(df: pd.DataFrame, y_col: str) -> tuple[list[Any], list[Any]]:
+    hist_bins = count_hist_bins(df, y_col)
+    x, y = [], []
+    for bin in range(hist_bins):
+        x.append((bin + 1 / 2) / hist_bins)
+        y.append(hist_bins * df[(f"{y_col}_{bin}", "mean")])
+    return x, y
