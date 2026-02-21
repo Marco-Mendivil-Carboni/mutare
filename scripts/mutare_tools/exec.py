@@ -170,19 +170,23 @@ def create_sim_jobs(sims_config: SimsConfig) -> list[SimJob]:
                 config["init"]["n_agents"] = n_agents_i
                 sim_jobs.append(SimJob(base_dir, config, n_runs, n_files))
 
-    for prob_mut in sims_config.prob_mut_values:
-        if prob_mut == init_sim_job.config["model"]["prob_mut"]:
-            continue
-        config = deepcopy(init_sim_job.config)
-        config["model"]["prob_mut"] = prob_mut
-        sim_jobs.append(SimJob(base_dir, config, n_runs, n_files))
-
-    for n_agents_i in sims_config.n_agents_i_values:
-        if n_agents_i == init_sim_job.config["init"]["n_agents"]:
-            continue
-        config = deepcopy(init_sim_job.config)
-        config["init"]["n_agents"] = n_agents_i
-        sim_jobs.append(SimJob(base_dir, config, n_runs, n_files))
+    prob_mut_values = set(sims_config.prob_mut_values) | {
+        init_sim_job.config["model"]["prob_mut"]
+    }
+    n_agents_i_values = set(sims_config.n_agents_i_values) | {
+        init_sim_job.config["init"]["n_agents"]
+    }
+    for prob_mut in prob_mut_values:
+        for n_agents_i in n_agents_i_values:
+            if (
+                n_agents_i == init_sim_job.config["init"]["n_agents"]
+                and prob_mut == init_sim_job.config["model"]["prob_mut"]
+            ):
+                continue
+            config = deepcopy(init_sim_job.config)
+            config["model"]["prob_mut"] = prob_mut
+            config["init"]["n_agents"] = n_agents_i
+            sim_jobs.append(SimJob(base_dir, config, n_runs, n_files))
 
     return sim_jobs
 

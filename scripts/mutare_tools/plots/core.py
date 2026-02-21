@@ -1,13 +1,13 @@
 import pandas as pd
 import numpy as np
 from scipy.optimize import curve_fit
-from scipy.interpolate import make_splrep
+from scipy.interpolate import make_splrep, LSQBivariateSpline
 from shutil import rmtree
 from matplotlib.axes import Axes
 from matplotlib.colors import LogNorm
 from matplotlib.cm import ScalarMappable
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import cast
+from typing import cast, Any
 
 from ..exec import N_CORES, SimJob, print_process_msg
 from ..analysis import SimType, collect_avg_analyses, collect_run_time_series
@@ -51,6 +51,10 @@ def n_agents_i_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
         (df["sim_type"] == SimType.RANDOM)
         & (df["prob_mut"] == job.config["model"]["prob_mut"])
     ]
+
+
+def heatmap_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
+    return df[(df["sim_type"] == SimType.RANDOM)]
 
 
 PARAM_FILTERS = {
@@ -224,10 +228,12 @@ def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_5, axs_5 = create_colorbar_figure("n_agents_i", "extinct_rate", False)
     fig_6, ax_6 = create_standard_figure("strat_phe_0_i", "ext_fit_alpha")
     fig_7, ax_7 = create_standard_figure("strat_phe_0_i", "ext_fit_k")
-    fig_8, ax_8 = create_standard_figure("n_agents_i", "avg_strat_phe_0")
-    fig_9, axs_9 = create_colorbar_figure(
-        "avg_strat_phe_0", "dist_avg_strat_phe_0", False
-    )
+    # fig_8, ax_8 = create_standard_figure("n_agents_i", "avg_strat_phe_0")
+    # fig_9, axs_9 = create_colorbar_figure(
+    #     "avg_strat_phe_0", "dist_avg_strat_phe_0", False
+    # )
+    fig_8, axs_8 = create_colorbar_figure("n_agents_i", "prob_mut", False)
+    fig_9, axs_9 = create_colorbar_figure("n_agents_i", "prob_mut", False)
 
     norm = LogNorm(
         vmin=scaling_df["n_agents_i"].min() / 2.0,
@@ -269,7 +275,7 @@ def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
         x, y, yerr = x[y != 0], y[y != 0], yerr[y != 0]
         popt, pcov = curve_fit(power_law, x, y, p0=(2.0, 0.5), sigma=yerr)
         perr = np.sqrt(np.diag(pcov))
-        axs_5[0].errorbar(x, power_law(x, *popt), ls=":", **LINE_STYLE)
+        # axs_5[0].errorbar(x, power_law(x, *popt), ls=":", **LINE_STYLE)
         fit_results.append(
             {
                 "strat_phe_0_i": strat_phe_0_i,
@@ -312,57 +318,122 @@ def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     ax_6.errorbar(avg_strat_phe_0, alpha, ls=":", **LINE_STYLE)
     ax_7.errorbar(avg_strat_phe_0, k, ls=":", **LINE_STYLE)
 
-    for ax in [axs_5[0], ax_8]:
+    for ax in [axs_5[0], axs_8[0], axs_9[0]]:
         ax.set_xscale("log")
-    for ax in [axs_2[0], axs_5[0]]:
+    for ax in [axs_2[0], axs_5[0], axs_8[0], axs_9[0]]:
         ax.set_yscale("log")
 
     extinct_rates = scaling_df[("extinct_rate", "mean")]
     min_extinct_rate = np.min(extinct_rates[extinct_rates > 0.0])
     axs_2[0].set_ylim(bottom=min_extinct_rate)
-    axs_5[0].set_ylim(bottom=min_extinct_rate)
+    axs_5[0].set_ylim(bottom=1e-10)
 
     sm = ScalarMappable(cmap=CMAP)
     cbar = fig_5.colorbar(sm, cax=axs_5[1], aspect=64)
     cbar.ax.set_ylabel(COL_TEX_LABELS["strat_phe_0_i"])
 
     norm = LogNorm(vmin=1e2 / 2.0, vmax=1e3 * 2.0)
-    n_agents_i_df = n_agents_i_filter(df, job)
-    n_agents_i_values = []
+    heatmap_df = heatmap_filter(df, job)
+
+    mask = scaling_df[("extinct_rate", "mean")] > 0
+    work_df = scaling_df[mask].copy()
+    x = np.log(work_df["n_agents_i"].values)
+    y = cast(Any, work_df["strat_phe_0_i"].values)
+    z = np.log(work_df[("extinct_rate", "mean")].values)
+    sem = work_df[("extinct_rate", "sem")]
+    mean = work_df[("extinct_rate", "mean")]
+    weights = ((mean / sem) ** 2).values
+
+    x_min = np.log(heatmap_df["n_agents_i"].min())
+    x_max = np.log(heatmap_df["n_agents_i"].max())
+    y_min, y_max = 0.0, 1.0
+    tx = []
+    ty = np.quantile(y, np.linspace(0.2, 0.8, 8))
+    print(tx, ty)
+
+    kx, ky = 2, 3
+
+    spl = LSQBivariateSpline(
+        x, y, z, tx, ty, w=weights, bbox=[x_min, x_max, y_min, y_max], kx=kx, ky=ky
+    )
+
+    target_strat = np.linspace(0.0, 1.0, 64)
+    n_agents_i_values = sorted(heatmap_df["n_agents_i"].unique())
+    prob_mut_values = sorted(heatmap_df["prob_mut"].unique())
+    log_n_vals = np.log(n_agents_i_values)
+    log_n_mesh, strat_mesh = np.meshgrid(log_n_vals, target_strat, indexing="ij")
+    log_extinct_flat = spl.ev(log_n_mesh.ravel(), strat_mesh.ravel())
+    extinct_rate_grid = np.exp(log_extinct_flat.reshape(log_n_mesh.shape))
+    for strat_phe_0_i, subgroup_df in scaling_df.groupby("strat_phe_0_i"):
+        color = CMAP(cast(float, strat_phe_0_i))
+        x = n_agents_i_values
+        y = np.exp(spl.ev(np.log(x), strat_phe_0_i))
+        axs_5[0].errorbar(x, y, ls="--", **LINE_STYLE)
+    axs_5[0].set_ylim(bottom=1e-8)
     avg_strat_phe_0_mean = []
-    avg_strat_phe_0_mean_ = []
-    for n_agents_i, subgroup_df in n_agents_i_df.groupby("n_agents_i"):
-        color = CMAP(norm(cast(int, n_agents_i)))
-        log_dist_avg_strat_phe_0 = (n_agents_i * avg_growth_rate) - np.log(
-            (k * n_agents_i) ** -alpha + 1e-3 * avg_growth_rate.mean()
-        )
-        log_dist_avg_strat_phe_0 -= np.max(log_dist_avg_strat_phe_0)
-        dist_avg_strat_phe_0 = np.exp(log_dist_avg_strat_phe_0)
-        dist_avg_strat_phe_0 /= np.sum(dist_avg_strat_phe_0) / len(avg_strat_phe_0)
-        n_agents_i_values.append(n_agents_i)
-        avg_strat_phe_0_mean.append(
-            (avg_strat_phe_0 * dist_avg_strat_phe_0 / len(avg_strat_phe_0)).sum()
-        )
-        axs_9[0].plot(avg_strat_phe_0, dist_avg_strat_phe_0, c=color, ls="--")
+    exp_avg_strat_phe_0_mean = []
+    for n_agents_i, subgroup_df in heatmap_df.groupby("n_agents_i"):
+        n_idx = n_agents_i_values.index(n_agents_i)
+        extinct_rate = extinct_rate_grid[n_idx, :]
+        avg_strat_phe_0_mean_row = []
+        exp_avg_strat_phe_0_mean_row = []
+        for prob_mut, subsubgroup_df in subgroup_df.groupby("prob_mut"):
+            log_dist_avg_strat_phe_0 = (n_agents_i * avg_growth_rate) - np.log(
+                extinct_rate + prob_mut * avg_growth_rate.mean()
+            )
+            log_dist_avg_strat_phe_0 -= np.max(log_dist_avg_strat_phe_0)
+            dist_avg_strat_phe_0 = np.exp(log_dist_avg_strat_phe_0)
+            dist_avg_strat_phe_0 /= np.sum(dist_avg_strat_phe_0) / len(avg_strat_phe_0)
+            exp_avg_strat_phe_0_mean_row.append(
+                (avg_strat_phe_0 * dist_avg_strat_phe_0 / len(avg_strat_phe_0)).sum()
+            )
+            strat_phe_0, dist_avg_strat_phe_0 = get_dist(
+                subsubgroup_df, "dist_avg_strat_phe_0"
+            )
+            avg_strat_phe_0_mean_row.append(
+                (
+                    np.array(strat_phe_0)
+                    * np.array(dist_avg_strat_phe_0).ravel()
+                    / len(strat_phe_0)
+                ).sum()
+            )
+        avg_strat_phe_0_mean.append(avg_strat_phe_0_mean_row)
+        exp_avg_strat_phe_0_mean.append(exp_avg_strat_phe_0_mean_row)
 
-        strat_phe_0, dist_avg_strat_phe_0 = get_dist(
-            subgroup_df, "dist_avg_strat_phe_0"
-        )
-        avg_strat_phe_0_mean_.append(
-            (
-                np.array(strat_phe_0)
-                * np.array(dist_avg_strat_phe_0).ravel()
-                / len(strat_phe_0)
-            ).sum()
-        )
-        axs_9[0].plot(strat_phe_0, dist_avg_strat_phe_0, c=color, ls=":")
+    vmin = np.array(avg_strat_phe_0_mean + exp_avg_strat_phe_0_mean).ravel().min()
+    vmax = np.array(avg_strat_phe_0_mean + exp_avg_strat_phe_0_mean).ravel().max()
 
-    ax_8.plot(n_agents_i_values, avg_strat_phe_0_mean)
-    ax_8.plot(n_agents_i_values, avg_strat_phe_0_mean_)
+    im = axs_8[0].pcolormesh(
+        n_agents_i_values,
+        prob_mut_values,
+        np.array(avg_strat_phe_0_mean).transpose(),
+        vmin=vmin,
+        vmax=vmax,
+        cmap=CMAP,
+        shading="nearest",
+    )
+    axs_8[0].set_xlim(n_agents_i_values[0], n_agents_i_values[-1])
+    axs_8[0].set_ylim(prob_mut_values[0], prob_mut_values[-1])
+    cbar = fig_8.colorbar(im, cax=axs_8[1], aspect=64)
+    cbar.ax.set_ylabel(COL_TEX_LABELS["avg_strat_phe_0"])
 
-    sm = ScalarMappable(norm=norm, cmap=CMAP)
-    cbar = fig_9.colorbar(sm, cax=axs_9[1], aspect=64)
-    cbar.ax.set_ylabel(COL_TEX_LABELS["n_agents_i"])
+    im = axs_9[0].pcolormesh(
+        n_agents_i_values,
+        prob_mut_values,
+        np.array(exp_avg_strat_phe_0_mean).transpose(),
+        vmin=vmin,
+        vmax=vmax,
+        cmap=CMAP,
+        shading="nearest",
+    )
+    axs_9[0].set_xlim(n_agents_i_values[0], n_agents_i_values[-1])
+    axs_9[0].set_ylim(prob_mut_values[0], prob_mut_values[-1])
+    cbar = fig_9.colorbar(im, cax=axs_9[1], aspect=64)
+    cbar.ax.set_ylabel(COL_TEX_LABELS["avg_strat_phe_0"])
+
+    # sm = ScalarMappable(norm=norm, cmap=CMAP)
+    # cbar = fig_9.colorbar(sm, cax=axs_9[1], aspect=64)
+    # cbar.ax.set_ylabel(COL_TEX_LABELS["n_agents_i"])
 
     fig_dir = job.base_dir / "plots" / "scaling"
     fig_dir.mkdir(parents=True, exist_ok=True)
@@ -374,8 +445,8 @@ def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_5.savefig(fig_dir / "extinct_rate_scaling.pdf")
     fig_6.savefig(fig_dir / "ext_fit_alpha.pdf")
     fig_7.savefig(fig_dir / "ext_fit_k.pdf")
-    fig_8.savefig(fig_dir / "exp_dist_avg_strat_phe_0.pdf")
-    fig_9.savefig(fig_dir / "dist_avg_strat_phe_0.pdf")
+    fig_8.savefig(fig_dir / "avg_strat_phe_0.pdf")
+    fig_9.savefig(fig_dir / "exp_avg_strat_phe_0.pdf")
 
     print_process_msg("made 'scaling' plots")
 
