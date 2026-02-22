@@ -30,6 +30,7 @@ ANALYSIS = [
     "std_dev_strat_phe",
     "dist_avg_strat_phe",
     "dist_phe",
+    "avg_birth_rate",
 ]
 
 

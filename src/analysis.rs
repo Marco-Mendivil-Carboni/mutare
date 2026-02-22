@@ -94,6 +94,9 @@ pub struct Analysis {
 
     /// Distribution of phenotypes.
     pub dist_phe: Vec<f64>,
+
+    /// Average population birth rate.
+    pub avg_birth_rate: f64,
 }
 
 /// Simulation analyzer.
@@ -208,6 +211,8 @@ impl Analyzer {
             dist_phe: (0..self.cfg.model.n_phe - 1)
                 .map(|phe| obs_weighted_average(&|obs| obs.dist_phe[phe]))
                 .collect(),
+
+            avg_birth_rate: obs_weighted_average(&|obs| obs.growth_rate.max(0.0)),
         };
 
         encode::write(&mut writer, &analysis).context("failed to serialize analysis")?;

@@ -47,6 +47,8 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_6, ax_6 = create_standard_figure(param, "avg_strat_phe_0")
     fig_7, ax_7 = create_standard_figure(param, "dist_phe_0")
     fig_8, ax_8 = create_standard_figure(param, "std_dev_growth_rate")
+    fig_9, ax_9 = create_standard_figure(param, "avg_birth_rate")
+    fig_10, ax_10 = create_standard_figure("avg_growth_rate", "std_dev_growth_rate")
 
     if param in ["prob_mut", "n_agents_i"]:
         for ax in [axs_4[0], axs_5[0]]:
@@ -97,6 +99,9 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         plot_mean_and_uncertainty(ax_6, "avg_strat_phe_0", "std_dev_strat_phe")
         plot_mean_and_uncertainty(ax_7, "dist_phe_0", None)
         plot_mean_and_uncertainty(ax_8, "std_dev_growth_rate", None)
+        plot_mean_and_uncertainty(ax_9, "avg_birth_rate", None)
+
+        plot_errorbar(ax_10, group_df, "avg_growth_rate", "std_dev_growth_rate", True)
 
     if param == "strat_phe_0_i":
         plot_dist_phe_0_lims(ax_7, param_df, job)
@@ -104,6 +109,7 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     if param == "prob_mut":
         fixed_i_df = FILTERS["fixed_i"](df, job).sort_values("strat_phe_0_i")
         plot_errorbar(ax_3, fixed_i_df, "avg_growth_rate", "extinct_rate", True)
+        plot_errorbar(ax_10, fixed_i_df, "avg_growth_rate", "std_dev_growth_rate", True)
         plot_expected_values(ax_1, df, job, param, "avg_growth_rate")
         plot_expected_values(ax_2, df, job, param, "extinct_rate")
 
@@ -118,12 +124,12 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         ax.axhline(min_extinct, ls=":", **LINE_STYLE)
 
     if param in ["prob_mut", "n_agents_i"]:
-        for ax in [ax_1, ax_2, ax_6, ax_7, ax_8]:
+        for ax in [ax_1, ax_2, ax_6, ax_7, ax_8, ax_9]:
             ax.set_xscale("log")
     for ax in [ax_2, ax_3]:
         ax.set_yscale("log")
 
-    for ax in [ax_1, ax_2, ax_3, ax_6, ax_7, ax_8]:
+    for ax in [ax_1, ax_2, ax_3, ax_6, ax_7, ax_8, ax_9, ax_10]:
         ax.legend()
 
     fig_dir = job.base_dir / "plots" / param
@@ -137,6 +143,8 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_6.savefig(fig_dir / "avg_strat_phe_0.pdf")
     fig_7.savefig(fig_dir / "dist_phe_0.pdf")
     fig_8.savefig(fig_dir / "std_dev_growth_rate.pdf")
+    fig_9.savefig(fig_dir / "avg_birth_rate.pdf")
+    fig_10.savefig(fig_dir / "growth_rates.pdf")
 
     print_process_msg(f"made '{param}' plots")
 

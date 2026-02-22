@@ -69,8 +69,7 @@ COL_TEX_LABELS: dict[str, str] = {
     "dist_avg_strat_phe_0": "$p(\\langle s(A)\\rangle)$",
     "dist_phe_0": "$p(A)$",
     "std_dev_growth_rate": "$\\sigma_{\\mu}$",
-    "ext_fit_alpha": "$\\alpha$",
-    "ext_fit_k": "$k$",
+    "avg_birth_rate": "$\\langle\\mu_b\\rangle$",
 }
 
 N_SPLINE_VALUES = 64
