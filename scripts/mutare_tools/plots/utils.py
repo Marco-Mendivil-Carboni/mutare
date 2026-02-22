@@ -4,8 +4,11 @@ import matplotlib as mpl
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.gridspec import GridSpec
-from matplotlib.colors import PowerNorm
-from typing import Any
+from matplotlib.colors import PowerNorm, LogNorm
+from matplotlib.cm import ScalarMappable
+from scipy.optimize import curve_fit
+from scipy.interpolate import make_splrep, LSQBivariateSpline
+from typing import Any, cast
 
 from ..exec import SimJob
 from ..analysis import SimType
@@ -69,6 +72,52 @@ COL_TEX_LABELS: dict[str, str] = {
     "std_dev_growth_rate": "$\\sigma_{\\mu}$",
     "ext_fit_alpha": "$\\alpha$",
     "ext_fit_k": "$k$",
+}
+
+
+def strat_phe_0_i_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
+    return df[
+        ((df["prob_mut"] == job.config["model"]["prob_mut"]) | (df["prob_mut"] == 0))
+        & (df["n_agents_i"] == job.config["init"]["n_agents"])
+    ]
+
+
+def prob_mut_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
+    return df[
+        (df["sim_type"] == SimType.RANDOM)
+        & (df["n_agents_i"] == job.config["init"]["n_agents"])
+    ]
+
+
+def n_agents_i_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
+    return df[
+        (df["sim_type"] == SimType.RANDOM)
+        & (df["prob_mut"] == job.config["model"]["prob_mut"])
+    ]
+
+
+def random_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
+    return df[(df["sim_type"] == SimType.RANDOM)]
+
+
+def fixed_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
+    return df[(df["sim_type"] == SimType.FIXED)]
+
+
+def fixed_i_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
+    return df[
+        (df["sim_type"] == SimType.FIXED)
+        & (df["n_agents_i"] == job.config["init"]["n_agents"])
+    ]
+
+
+FILTERS = {
+    "strat_phe_0_i": strat_phe_0_i_filter,
+    "prob_mut": prob_mut_filter,
+    "n_agents_i": n_agents_i_filter,
+    "random": random_filter,
+    "fixed": fixed_filter,
+    "fixed_i": fixed_i_filter,
 }
 
 
@@ -243,10 +292,10 @@ def plot_time_series(
         ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
 
 
-def get_dist(df: pd.DataFrame, y_col: str) -> tuple[list[Any], list[Any]]:
-    hist_bins = count_hist_bins(df, y_col)
+def get_dist_avg_strat_phe_0(df: pd.DataFrame) -> tuple[list[Any], list[Any]]:
+    hist_bins = count_hist_bins(df, "dist_avg_strat_phe_0")
     x, y = [], []
     for bin in range(hist_bins):
         x.append((bin + 1 / 2) / hist_bins)
-        y.append(hist_bins * df[(f"{y_col}_{bin}", "mean")])
+        y.append(hist_bins * df[(f"dist_avg_strat_phe_0_{bin}", "mean")])
     return x, y
