@@ -6,7 +6,7 @@ from matplotlib.axes import Axes
 from matplotlib.colors import LogNorm
 from matplotlib.cm import ScalarMappable
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import cast, Any
+from typing import cast
 
 from ..exec import N_CORES, SimJob, print_process_msg
 from ..analysis import SimType, collect_avg_analyses, collect_run_time_series
@@ -240,6 +240,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     extinct_rates = fixed_df[("extinct_rate", "mean")]
     min_extinct_rate = np.min(extinct_rates[extinct_rates > 0.0])
     axs_2[0].set_ylim(bottom=min_extinct_rate)
+    axs_5[0].set_ylim(bottom=min_extinct_rate)
 
     # use function for this -------------------------------------------------
     sm = ScalarMappable(cmap=CMAP)
@@ -247,19 +248,19 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     cbar.ax.set_ylabel(COL_TEX_LABELS["strat_phe_0_i"])
 
     norm = LogNorm(vmin=1e2 / 2.0, vmax=1e3 * 2.0)
-    heatmap_df = FILTERS["random"](df, job)
+    random_df = FILTERS["random"](df, job)
 
     mask = fixed_df[("extinct_rate", "mean")] > 0
     work_df = fixed_df[mask].copy()
-    x = np.log(work_df["n_agents_i"].values)
-    y = cast(Any, work_df["strat_phe_0_i"].values)
-    z = np.log(work_df[("extinct_rate", "mean")].values)
+    x = np.log(work_df["n_agents_i"])
+    y = work_df["strat_phe_0_i"]
+    z = np.log(work_df[("extinct_rate", "mean")])
     sem = work_df[("extinct_rate", "sem")]
     mean = work_df[("extinct_rate", "mean")]
-    weights = ((mean / sem) ** 2).values
+    weights = mean / sem
 
-    x_min = np.log(heatmap_df["n_agents_i"].min())
-    x_max = np.log(heatmap_df["n_agents_i"].max())
+    x_min = np.log(random_df["n_agents_i"].min())
+    x_max = np.log(random_df["n_agents_i"].max())
     y_min, y_max = 0.0, 1.0
     tx = []
     ty = np.linspace(0.2, 0.8, 8).tolist()
@@ -271,8 +272,8 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     )
 
     target_strat = np.linspace(0.0, 1.0, 64)
-    n_agents_i_values = sorted(heatmap_df["n_agents_i"].unique())
-    prob_mut_values = sorted(heatmap_df["prob_mut"].unique())
+    n_agents_i_values = sorted(random_df["n_agents_i"].unique())
+    prob_mut_values = sorted(random_df["prob_mut"].unique())
     log_n_vals = np.log(n_agents_i_values)
     log_n_mesh, strat_mesh = np.meshgrid(log_n_vals, target_strat, indexing="ij")
     log_extinct_flat = spl.ev(log_n_mesh.ravel(), strat_mesh.ravel())
@@ -285,7 +286,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
 
     avg_strat_phe_0_mean = []
     exp_avg_strat_phe_0_mean = []
-    for n_agents_i, group_df in heatmap_df.groupby("n_agents_i"):
+    for n_agents_i, group_df in random_df.groupby("n_agents_i"):
         n_idx = n_agents_i_values.index(n_agents_i)
         extinct_rate = extinct_rate_grid[n_idx, :]
         avg_strat_phe_0_mean_row = []
@@ -310,8 +311,6 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
             )
         avg_strat_phe_0_mean.append(avg_strat_phe_0_mean_row)
         exp_avg_strat_phe_0_mean.append(exp_avg_strat_phe_0_mean_row)
-
-    axs_5[0].set_ylim(bottom=1e-10)
 
     vmin = 0.2
     vmax = 0.8

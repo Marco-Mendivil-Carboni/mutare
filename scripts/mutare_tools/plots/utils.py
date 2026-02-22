@@ -6,7 +6,6 @@ from matplotlib.axes import Axes
 from matplotlib.gridspec import GridSpec
 from matplotlib.colors import PowerNorm, LogNorm
 from matplotlib.cm import ScalarMappable
-from scipy.optimize import curve_fit
 from scipy.interpolate import make_splrep, LSQBivariateSpline
 from typing import Any, Literal, cast
 
