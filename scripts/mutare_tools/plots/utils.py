@@ -298,6 +298,23 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
         ax.plot(strat_phe_0_i_values, dist_phe_0_lim_values, ls="-.", **LINE_STYLE)
 
 
+def plot_expected_values(
+    ax: Axes, df: pd.DataFrame, job: SimJob, param: str, y_col: str
+) -> None:
+    param_df = FILTERS[param](df, job).sort_values(param)
+    fixed_i_df = FILTERS["fixed_i"](df, job).sort_values("strat_phe_0_i")
+
+    spline = make_splrep(fixed_i_df["strat_phe_0_i"], fixed_i_df[(y_col, "mean")])
+    strat_phe_0, dist_avg_strat_phe_0 = get_dist_avg_strat_phe_0(param_df)
+
+    exp_values = np.zeros(len(param_df))
+    hist_bins = len(strat_phe_0)
+    for bin in range(hist_bins):
+        exp_values += dist_avg_strat_phe_0[bin] * spline(strat_phe_0[bin]) / hist_bins
+
+    ax.plot(param_df[param], exp_values, ls="-.", **LINE_STYLE)
+
+
 def plot_extinct_times(ax: Axes, df: pd.DataFrame) -> None:
     extinct_times = df["time"][df["n_extinct"].diff() > 0]
     for extinct_time in extinct_times:

@@ -26,6 +26,7 @@ from .utils import (
     plot_side_heatmap,
     get_optimal_strat_phe_0,
     plot_dist_phe_0_lims,
+    plot_expected_values,
     plot_extinct_times,
     plot_time_series,
     get_dist_avg_strat_phe_0,
@@ -101,25 +102,10 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         plot_dist_phe_0_lims(ax_7, param_df, job)
 
     if param == "prob_mut":
-        group_df = FILTERS["fixed_i"](df, job).sort_values("strat_phe_0_i")
-
-        exp_extinct_rates = np.zeros(len(param_df))
-        extinct_rate_spline = make_splrep(
-            group_df["strat_phe_0_i"], group_df[("extinct_rate", "mean")]
-        )
-        # refactor this and do the same for the average growth rate ------------------
-        strat_phe_0, dist_avg_strat_phe_0 = get_dist_avg_strat_phe_0(param_df)
-        hist_bins = len(strat_phe_0)
-        for idx in range(hist_bins):
-            exp_extinct_rates += (
-                dist_avg_strat_phe_0[idx]
-                * extinct_rate_spline(strat_phe_0[idx])
-                / hist_bins
-            )
-
-        ax_2.plot(param_df["prob_mut"], exp_extinct_rates, ls="-.", **LINE_STYLE)
-
-        plot_errorbar(ax_3, group_df, "avg_growth_rate", "extinct_rate", True)
+        fixed_i_df = FILTERS["fixed_i"](df, job).sort_values("strat_phe_0_i")
+        plot_errorbar(ax_3, fixed_i_df, "avg_growth_rate", "extinct_rate", True)
+        plot_expected_values(ax_1, df, job, param, "avg_growth_rate")
+        plot_expected_values(ax_2, df, job, param, "extinct_rate")
 
     max_avg_growth = get_optimal_strat_phe_0(df, job, "avg_growth_rate", "max")
     min_extinct = get_optimal_strat_phe_0(df, job, "extinct_rate", "min")
