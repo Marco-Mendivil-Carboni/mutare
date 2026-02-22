@@ -157,9 +157,9 @@ def make_time_series_plots(df: pd.DataFrame, job: SimJob) -> None:
     print_process_msg("made 'time_series' plots")
 
 
-def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
-    scaling_df = FILTERS["fixed"](df, job).sort_values("strat_phe_0_i")
-    if scaling_df["n_agents_i"].nunique() < 2:
+def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
+    fixed_df = FILTERS["fixed"](df, job).sort_values("strat_phe_0_i")
+    if fixed_df["n_agents_i"].nunique() < 2:
         return
 
     fig_1, axs_1 = create_colorbar_figure("strat_phe_0_i", "avg_growth_rate", False)
@@ -180,11 +180,10 @@ def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_9, axs_9 = create_colorbar_figure("n_agents_i", "prob_mut", False)
 
     norm = LogNorm(
-        vmin=scaling_df["n_agents_i"].min() / 2.0,
-        vmax=scaling_df["n_agents_i"].max() * 2.0,
+        vmin=fixed_df["n_agents_i"].min() / 2, vmax=fixed_df["n_agents_i"].max() * 2
     )
 
-    for n_agents_i, group_df in scaling_df.groupby("n_agents_i"):
+    for n_agents_i, group_df in fixed_df.groupby("n_agents_i"):
 
         def plot_mean_and_uncertainty(ax: Axes, y_col: str) -> None:
             color = CMAP(norm(cast(float, n_agents_i)))
@@ -204,10 +203,10 @@ def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
         cbar = fig.colorbar(sm, cax=axs[1], aspect=64)
         cbar.ax.set_ylabel(COL_TEX_LABELS["n_agents_i"])
 
-    scaling_df = scaling_df.sort_values("n_agents_i")
+    fixed_df = fixed_df.sort_values("n_agents_i")
 
     fit_results = []
-    for strat_phe_0_i, group_df in scaling_df.groupby("strat_phe_0_i"):
+    for strat_phe_0_i, group_df in fixed_df.groupby("strat_phe_0_i"):
         color = CMAP(cast(float, strat_phe_0_i))
         x = group_df["n_agents_i"]
         y = group_df[("extinct_rate", "mean")]
@@ -231,14 +230,14 @@ def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     avg_strat_phe_0 = np.linspace(0.0, 1.0, 64)
     avg_growth_rate = avg_growth_rate_spline(avg_strat_phe_0)
 
-    axs_1[0].errorbar(avg_strat_phe_0, avg_growth_rate, ls=":", **LINE_STYLE)
+    axs_1[0].errorbar(avg_strat_phe_0, avg_growth_rate, ls="--", **LINE_STYLE)
 
     for ax in [axs_5[0], axs_8[0], axs_9[0]]:
         ax.set_xscale("log")
     for ax in [axs_2[0], axs_5[0], axs_8[0], axs_9[0]]:
         ax.set_yscale("log")
 
-    extinct_rates = scaling_df[("extinct_rate", "mean")]
+    extinct_rates = fixed_df[("extinct_rate", "mean")]
     min_extinct_rate = np.min(extinct_rates[extinct_rates > 0.0])
     axs_2[0].set_ylim(bottom=min_extinct_rate)
 
@@ -250,8 +249,8 @@ def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     norm = LogNorm(vmin=1e2 / 2.0, vmax=1e3 * 2.0)
     heatmap_df = FILTERS["random"](df, job)
 
-    mask = scaling_df[("extinct_rate", "mean")] > 0
-    work_df = scaling_df[mask].copy()
+    mask = fixed_df[("extinct_rate", "mean")] > 0
+    work_df = fixed_df[mask].copy()
     x = np.log(work_df["n_agents_i"].values)
     y = cast(Any, work_df["strat_phe_0_i"].values)
     z = np.log(work_df[("extinct_rate", "mean")].values)
@@ -278,7 +277,7 @@ def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     log_n_mesh, strat_mesh = np.meshgrid(log_n_vals, target_strat, indexing="ij")
     log_extinct_flat = spl.ev(log_n_mesh.ravel(), strat_mesh.ravel())
     extinct_rate_grid = np.exp(log_extinct_flat.reshape(log_n_mesh.shape))
-    for strat_phe_0_i, group_df in scaling_df.groupby("strat_phe_0_i"):
+    for strat_phe_0_i, group_df in fixed_df.groupby("strat_phe_0_i"):
         color = CMAP(cast(float, strat_phe_0_i))
         x = n_agents_i_values
         y = np.exp(spl.ev(np.log(x), strat_phe_0_i))
@@ -345,7 +344,7 @@ def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     cbar = fig_9.colorbar(im, cax=axs_9[1], aspect=64)
     cbar.ax.set_ylabel(COL_TEX_LABELS["avg_strat_phe_0"])
 
-    fig_dir = job.base_dir / "plots" / "scaling"
+    fig_dir = job.base_dir / "plots" / "fixed"
     fig_dir.mkdir(parents=True, exist_ok=True)
 
     fig_1.savefig(fig_dir / "avg_growth_rate.pdf")
@@ -356,7 +355,7 @@ def make_scaling_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_8.savefig(fig_dir / "avg_strat_phe_0.pdf")
     fig_9.savefig(fig_dir / "exp_avg_strat_phe_0.pdf")
 
-    print_process_msg("made 'scaling' plots")
+    print_process_msg("made 'fixed' plots")
 
 
 def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
@@ -372,7 +371,7 @@ def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
             pool.submit(make_param_plots, "prob_mut", avg_analyses, init_sim_job),
             pool.submit(make_param_plots, "n_agents_i", avg_analyses, init_sim_job),
             pool.submit(make_time_series_plots, run_time_series, init_sim_job),
-            pool.submit(make_scaling_plots, avg_analyses, init_sim_job),
+            pool.submit(make_fixed_plots, avg_analyses, init_sim_job),
         ]
 
         for future in as_completed(futures):

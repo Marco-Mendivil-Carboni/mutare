@@ -295,7 +295,7 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
                 float(max_eigenvector[0] / np.sum(max_eigenvector))
             )
 
-        ax.plot(strat_phe_0_i_values, dist_phe_0_lim_values, ls="-.", **LINE_STYLE)
+        ax.plot(strat_phe_0_i_values, dist_phe_0_lim_values, ls="--", **LINE_STYLE)
 
 
 def plot_expected_values(
@@ -312,7 +312,7 @@ def plot_expected_values(
     for bin in range(hist_bins):
         exp_values += dist_avg_strat_phe_0[bin] * spline(strat_phe_0[bin]) / hist_bins
 
-    ax.plot(param_df[param], exp_values, ls="-.", **LINE_STYLE)
+    ax.plot(param_df[param], exp_values, ls="--", **LINE_STYLE)
 
 
 def plot_extinct_times(ax: Axes, df: pd.DataFrame) -> None:
