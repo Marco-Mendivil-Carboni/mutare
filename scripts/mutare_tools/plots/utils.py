@@ -8,7 +8,7 @@ from matplotlib.colors import PowerNorm, LogNorm
 from matplotlib.cm import ScalarMappable
 from scipy.optimize import curve_fit
 from scipy.interpolate import make_splrep, LSQBivariateSpline
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 from ..exec import SimJob
 from ..analysis import SimType
@@ -23,7 +23,7 @@ mpl.rcParams["figure.dpi"] = 1200
 mpl.rcParams["figure.constrained_layout.use"] = True
 
 CM = 1 / 2.54
-FIGSIZE = (8.0 * CM, 5.0 * CM)
+FIGSIZE = (8.0 * CM, 4.94 * CM)
 
 PLOT_STYLE: dict[str, Any] = dict(ls="--", marker="o", markersize=2)
 FILL_STYLE: dict[str, Any] = dict(lw=0.0, alpha=0.5)
@@ -73,6 +73,8 @@ COL_TEX_LABELS: dict[str, str] = {
     "ext_fit_alpha": "$\\alpha$",
     "ext_fit_k": "$k$",
 }
+
+N_SPLINE_VALUES = 64
 
 
 def strat_phe_0_i_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:
@@ -245,13 +247,42 @@ def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, y_col: str) -> None:
     ax_side.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP)
 
 
+def get_optimal_strat_phe_0(
+    df: pd.DataFrame, job: SimJob, y_col: str, opt: Literal["max"] | Literal["min"]
+) -> float:
+    fixed_i_df = FILTERS["fixed_i"](df, job).sort_values("strat_phe_0_i")
+
+    x = fixed_i_df["strat_phe_0_i"]
+    y_mean = fixed_i_df[(y_col, "mean")]
+    y_sem = fixed_i_df[(y_col, "sem")]
+    if y_col == "extinct_rate":
+        mask = y_mean > 0
+        x, y_mean, y_sem = x[mask], y_mean[mask], y_sem[mask]
+        y = np.log(y_mean)
+        w = 1.0 / (y_sem / y_mean)
+    else:
+        y = y_mean
+        w = 1.0 / y_sem
+
+    spline = make_splrep(x, y, w=w, s=len(x))
+
+    x = np.linspace(0, 1, N_SPLINE_VALUES)
+    y = spline(x)
+    if opt == "max":
+        opt_idx = np.argmax(y)
+    else:
+        opt_idx = np.argmin(y)
+
+    return x[opt_idx]
+
+
 def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
     n_env = job.config["model"]["n_env"]
     n_phe = job.config["model"]["n_phe"]
     if n_env != 2 or n_phe != 2:
         return
 
-    strat_phe_0_i_values = df["strat_phe_0_i"].tolist()
+    strat_phe_0_i_values = df["strat_phe_0_i"].dropna().unique().tolist()
 
     for env in range(n_env):
         rates_birth = np.array(job.config["model"]["rates_birth"][env])
