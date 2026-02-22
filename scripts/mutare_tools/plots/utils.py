@@ -253,18 +253,11 @@ def get_optimal_strat_phe_0(
     fixed_i_df = FILTERS["fixed_i"](df, job).sort_values("strat_phe_0_i")
 
     x = fixed_i_df["strat_phe_0_i"]
-    y_mean = fixed_i_df[(y_col, "mean")]
-    y_sem = fixed_i_df[(y_col, "sem")]
+    y = fixed_i_df[(y_col, "mean")]
     if y_col == "extinct_rate":
-        mask = y_mean > 0
-        x, y_mean, y_sem = x[mask], y_mean[mask], y_sem[mask]
-        y = np.log(y_mean)
-        w = 1.0 / (y_sem / y_mean)
-    else:
-        y = y_mean
-        w = 1.0 / y_sem
+        x, y = x[y > 0], y[y > 0]
 
-    spline = make_splrep(x, y, w=w, s=len(x))
+    spline = make_splrep(x, y)
 
     x = np.linspace(0, 1, N_SPLINE_VALUES)
     y = spline(x)
