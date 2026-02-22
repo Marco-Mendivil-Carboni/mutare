@@ -351,6 +351,8 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_3.savefig(fig_dir / "dist_phe_0.pdf")
     fig_4.savefig(fig_dir / "std_dev_growth_rate.pdf")
     fig_5.savefig(fig_dir / "extinct_rate_scaling.pdf")
+    fig_6.savefig(fig_dir / "dist_avg_strat_phe_0.pdf")
+    fig_7.savefig(fig_dir / "exp_dist_avg_strat_phe_0.pdf")
     fig_8.savefig(fig_dir / "avg_strat_phe_0.pdf")
     fig_9.savefig(fig_dir / "exp_avg_strat_phe_0.pdf")
 
@@ -359,18 +361,18 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
 
 def plot_sim_jobs(sim_jobs: list[SimJob]) -> None:
     avg_analyses = collect_avg_analyses(sim_jobs)
-    init_sim_job = sim_jobs[0]
-    run_time_series = collect_run_time_series(init_sim_job, 0)
+    job = sim_jobs[0]
+    run_time_series = collect_run_time_series(job, 0)
 
-    rmtree(init_sim_job.base_dir / "plots", ignore_errors=True)
+    rmtree(job.base_dir / "plots", ignore_errors=True)
 
     with ProcessPoolExecutor(max_workers=N_CORES) as pool:
         futures = [
-            pool.submit(make_param_plots, "strat_phe_0_i", avg_analyses, init_sim_job),
-            pool.submit(make_param_plots, "prob_mut", avg_analyses, init_sim_job),
-            pool.submit(make_param_plots, "n_agents_i", avg_analyses, init_sim_job),
-            pool.submit(make_time_series_plots, run_time_series, init_sim_job),
-            pool.submit(make_fixed_plots, avg_analyses, init_sim_job),
+            pool.submit(make_param_plots, "strat_phe_0_i", avg_analyses, job),
+            pool.submit(make_param_plots, "prob_mut", avg_analyses, job),
+            pool.submit(make_param_plots, "n_agents_i", avg_analyses, job),
+            pool.submit(make_time_series_plots, run_time_series, job),
+            pool.submit(make_fixed_plots, avg_analyses, job),
         ]
 
         for future in as_completed(futures):
