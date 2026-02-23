@@ -22,6 +22,7 @@ from .utils import (
     plot_horizontal_bands,
     plot_errorbar,
     plot_errorband,
+    set_heatmap_colorbar,
     plot_main_heatmap,
     plot_side_heatmap,
     get_optimal_strat_phe_0,
@@ -205,11 +206,9 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
         plot_mean_and_uncertainty(axs_3[0], "dist_phe_0")
         plot_mean_and_uncertainty(axs_4[0], "std_dev_growth_rate")
 
-    # use function for this -------------------------------------------------
     sm = ScalarMappable(norm=norm, cmap=CMAP)
     for fig, axs in [(fig_1, axs_1), (fig_2, axs_2), (fig_3, axs_3), (fig_4, axs_4)]:
-        cbar = fig.colorbar(sm, cax=axs[1], aspect=64)
-        cbar.ax.set_ylabel(COL_TEX_LABELS["n_agents_i"])
+        set_heatmap_colorbar(fig, axs[1], "n_agents_i", sm)
 
     fixed_df = fixed_df.sort_values("n_agents_i")
 
@@ -250,10 +249,8 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     axs_2[0].set_ylim(bottom=min_extinct_rate)
     axs_5[0].set_ylim(bottom=min_extinct_rate)
 
-    # use function for this -------------------------------------------------
     sm = ScalarMappable(cmap=CMAP)
-    cbar = fig_5.colorbar(sm, cax=axs_5[1], aspect=64)
-    cbar.ax.set_ylabel(COL_TEX_LABELS["strat_phe_0_i"])
+    set_heatmap_colorbar(fig_5, axs_5[1], "strat_phe_0_i", sm)
 
     norm = LogNorm(vmin=1e2 / 2.0, vmax=1e3 * 2.0)
     random_df = FILTERS["random"](df, job)
@@ -334,8 +331,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     )
     axs_8[0].set_xlim(n_agents_i_values[0], n_agents_i_values[-1])
     axs_8[0].set_ylim(prob_mut_values[0], prob_mut_values[-1])
-    cbar = fig_8.colorbar(im, cax=axs_8[1], aspect=64)
-    cbar.ax.set_ylabel(COL_TEX_LABELS["avg_strat_phe_0"])
+    set_heatmap_colorbar(fig_8, axs_8[1], "avg_strat_phe_0", im)
 
     im = axs_9[0].pcolormesh(
         n_agents_i_values,
@@ -348,8 +344,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     )
     axs_9[0].set_xlim(n_agents_i_values[0], n_agents_i_values[-1])
     axs_9[0].set_ylim(prob_mut_values[0], prob_mut_values[-1])
-    cbar = fig_9.colorbar(im, cax=axs_9[1], aspect=64)
-    cbar.ax.set_ylabel(COL_TEX_LABELS["avg_strat_phe_0"])
+    set_heatmap_colorbar(fig_9, axs_9[1], "avg_strat_phe_0", im)
 
     fig_dir = job.base_dir / "plots" / "fixed"
     fig_dir.mkdir(parents=True, exist_ok=True)

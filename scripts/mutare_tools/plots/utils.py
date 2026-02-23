@@ -210,37 +210,43 @@ def count_hist_bins(df: pd.DataFrame, y_col: str) -> int:
 
 
 def generate_heatmap_matrix(
-    df: pd.DataFrame, y_col: str, hist_bins: int
+    df: pd.DataFrame, z_col: str, hist_bins: int
 ) -> list[list[float]]:
     hm_z = []
     for bin in range(hist_bins):
-        hm_z.append((hist_bins * df[(f"{y_col}_{bin}", "mean")]).tolist())
+        hm_z.append((hist_bins * df[(f"{z_col}_{bin}", "mean")]).tolist())
     return hm_z
 
 
+def set_heatmap_colorbar(
+    fig: Figure, ax_bar: Axes, z_col: str, sm: ScalarMappable
+) -> None:
+    cbar = fig.colorbar(sm, cax=ax_bar, aspect=64)
+    cbar.ax.set_ylabel(COL_TEX_LABELS[z_col])
+
+
 def plot_main_heatmap(
-    fig: Figure, ax_main: Axes, ax_bar: Axes, df: pd.DataFrame, x_col: str, y_col: str
+    fig: Figure, ax_main: Axes, ax_bar: Axes, df: pd.DataFrame, x_col: str, z_col: str
 ) -> None:
     _, label = get_sim_color_and_label(df)
     add_top_label(ax_main, label)
-    hist_bins = count_hist_bins(df, y_col)
+    hist_bins = count_hist_bins(df, z_col)
     hm_x = df[x_col].tolist()
     hm_y = [(i + 0.5) / hist_bins for i in range(hist_bins)]
-    hm_z = generate_heatmap_matrix(df, y_col, hist_bins)
+    hm_z = generate_heatmap_matrix(df, z_col, hist_bins)
     norm = PowerNorm(gamma=0.5, vmin=0, vmax=hist_bins)
     im = ax_main.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP, shading="nearest")
     ax_main.set_xlim(hm_x[0], hm_x[-1])
-    cbar = fig.colorbar(im, cax=ax_bar, aspect=64)
-    cbar.ax.set_ylabel(COL_TEX_LABELS[y_col])
+    set_heatmap_colorbar(fig, ax_bar, z_col, im)
 
 
-def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, y_col: str) -> None:
+def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, z_col: str) -> None:
     _, label = get_sim_color_and_label(df)
     add_top_label(ax_side, label)
-    hist_bins = count_hist_bins(df, y_col)
+    hist_bins = count_hist_bins(df, z_col)
     hm_x = [0.0, 1.0]
     hm_y = [i / hist_bins for i in range(hist_bins + 1)]
-    hm_z = generate_heatmap_matrix(df, y_col, hist_bins)
+    hm_z = generate_heatmap_matrix(df, z_col, hist_bins)
     norm = PowerNorm(gamma=0.5, vmin=0, vmax=hist_bins)
     ax_side.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP)
 
