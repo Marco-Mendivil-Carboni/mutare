@@ -15,7 +15,6 @@ from .utils import (
     CMAP,
     PLOT_STYLE,
     LINE_STYLE,
-    COL_TEX_LABELS,
     FILTERS,
     create_standard_figure,
     create_colorbar_figure,
@@ -31,6 +30,7 @@ from .utils import (
     plot_extinct_times,
     plot_time_series,
     get_dist_avg_strat_phe_0,
+    plot_avg_strat_phe_0,
 )
 
 
@@ -278,7 +278,6 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
 
     target_strat = np.linspace(0.0, 1.0, 64)
     n_agents_i_values = sorted(random_df["n_agents_i"].unique())
-    prob_mut_values = sorted(random_df["prob_mut"].unique())
     log_n_vals = np.log(n_agents_i_values)
     log_n_mesh, strat_mesh = np.meshgrid(log_n_vals, target_strat, indexing="ij")
     log_extinct_flat = spl.ev(log_n_mesh.ravel(), strat_mesh.ravel())
@@ -317,34 +316,8 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
         avg_strat_phe_0_mean.append(avg_strat_phe_0_mean_row)
         exp_avg_strat_phe_0_mean.append(exp_avg_strat_phe_0_mean_row)
 
-    vmin = 0.2
-    vmax = 0.8
-
-    im = axs_8[0].pcolormesh(
-        n_agents_i_values,
-        prob_mut_values,
-        np.array(avg_strat_phe_0_mean).transpose(),
-        vmin=vmin,
-        vmax=vmax,
-        cmap=CMAP,
-        shading="nearest",
-    )
-    axs_8[0].set_xlim(n_agents_i_values[0], n_agents_i_values[-1])
-    axs_8[0].set_ylim(prob_mut_values[0], prob_mut_values[-1])
-    set_heatmap_colorbar(fig_8, axs_8[1], "avg_strat_phe_0", im)
-
-    im = axs_9[0].pcolormesh(
-        n_agents_i_values,
-        prob_mut_values,
-        np.array(exp_avg_strat_phe_0_mean).transpose(),
-        vmin=vmin,
-        vmax=vmax,
-        cmap=CMAP,
-        shading="nearest",
-    )
-    axs_9[0].set_xlim(n_agents_i_values[0], n_agents_i_values[-1])
-    axs_9[0].set_ylim(prob_mut_values[0], prob_mut_values[-1])
-    set_heatmap_colorbar(fig_9, axs_9[1], "avg_strat_phe_0", im)
+    plot_avg_strat_phe_0(fig_8, axs_8[0], axs_8[1], random_df, exp_avg_strat_phe_0_mean)
+    plot_avg_strat_phe_0(fig_9, axs_9[0], axs_9[1], random_df, avg_strat_phe_0_mean)
 
     fig_dir = job.base_dir / "plots" / "fixed"
     fig_dir.mkdir(parents=True, exist_ok=True)
@@ -354,10 +327,10 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_3.savefig(fig_dir / "dist_phe_0.pdf")
     fig_4.savefig(fig_dir / "std_dev_growth_rate.pdf")
     fig_5.savefig(fig_dir / "extinct_rate_scaling.pdf")
-    fig_6.savefig(fig_dir / "dist_avg_strat_phe_0.pdf")
-    fig_7.savefig(fig_dir / "exp_dist_avg_strat_phe_0.pdf")
-    fig_8.savefig(fig_dir / "avg_strat_phe_0.pdf")
-    fig_9.savefig(fig_dir / "exp_avg_strat_phe_0.pdf")
+    fig_6.savefig(fig_dir / "exp_dist_avg_strat_phe_0.pdf")
+    fig_7.savefig(fig_dir / "dist_avg_strat_phe_0.pdf")
+    fig_8.savefig(fig_dir / "exp_avg_strat_phe_0.pdf")
+    fig_9.savefig(fig_dir / "avg_strat_phe_0.pdf")
 
     print_process_msg("made 'fixed' plots")
 

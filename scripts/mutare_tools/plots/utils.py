@@ -7,7 +7,7 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.colors import PowerNorm, LogNorm
 from matplotlib.cm import ScalarMappable
 from scipy.interpolate import make_splrep, LSQBivariateSpline
-from typing import Any, Literal, cast
+from typing import Any, Literal
 
 from ..exec import SimJob
 from ..analysis import SimType
@@ -344,3 +344,22 @@ def get_dist_avg_strat_phe_0(df: pd.DataFrame) -> tuple[list[Any], list[Any]]:
         x.append((bin + 1 / 2) / hist_bins)
         y.append(hist_bins * df[(f"dist_avg_strat_phe_0_{bin}", "mean")])
     return x, y
+
+
+def plot_avg_strat_phe_0(
+    fig: Figure, ax_main: Axes, ax_bar: Axes, df: pd.DataFrame, data: list[Any]
+) -> None:
+    n_agents_i_values = sorted(df["n_agents_i"].unique())
+    prob_mut_values = sorted(df["prob_mut"].unique())
+    im = ax_main.pcolormesh(
+        n_agents_i_values,
+        prob_mut_values,
+        np.array(data).transpose(),
+        vmin=0.2,
+        vmax=0.8,
+        cmap=CMAP,
+        shading="nearest",
+    )
+    ax_main.set_xlim(n_agents_i_values[0], n_agents_i_values[-1])
+    ax_main.set_ylim(prob_mut_values[0], prob_mut_values[-1])
+    set_heatmap_colorbar(fig, ax_bar, "avg_strat_phe_0", im)
