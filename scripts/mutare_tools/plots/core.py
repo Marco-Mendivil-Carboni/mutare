@@ -39,19 +39,19 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         return
 
     two_panels = param == "strat_phe_0_i"
-    fig_1, ax_1 = create_standard_figure(param, "avg_growth_rate")
-    fig_2, ax_2 = create_standard_figure(param, "extinct_rate")
-    fig_3, ax_3 = create_standard_figure("avg_growth_rate", "extinct_rate")
-    fig_4, axs_4 = create_colorbar_figure(param, "norm_n_agents", two_panels)
-    fig_5, axs_5 = create_colorbar_figure(param, "avg_strat_phe_0", two_panels)
-    fig_6, ax_6 = create_standard_figure(param, "avg_strat_phe_0")
-    fig_7, ax_7 = create_standard_figure(param, "dist_phe_0")
-    fig_8, ax_8 = create_standard_figure(param, "std_dev_growth_rate")
-    fig_9, ax_9 = create_standard_figure(param, "avg_birth_rate")
-    fig_10, ax_10 = create_standard_figure("avg_growth_rate", "std_dev_growth_rate")
+    fig_0, ax_0 = create_standard_figure(param, "avg_growth_rate")
+    fig_1, ax_1 = create_standard_figure(param, "extinct_rate")
+    fig_2, ax_2 = create_standard_figure("avg_growth_rate", "extinct_rate")
+    fig_3, axs_3 = create_colorbar_figure(param, "norm_n_agents", two_panels)
+    fig_4, axs_4 = create_colorbar_figure(param, "avg_strat_phe_0", two_panels)
+    fig_5, ax_5 = create_standard_figure(param, "avg_strat_phe_0")
+    fig_6, ax_6 = create_standard_figure(param, "dist_phe_0")
+    fig_7, ax_7 = create_standard_figure(param, "std_dev_growth_rate")
+    fig_8, ax_8 = create_standard_figure(param, "avg_birth_rate")
+    fig_9, ax_9 = create_standard_figure("avg_growth_rate", "std_dev_growth_rate")
 
     if param in ["prob_mut", "n_agents_i"]:
-        for ax in [axs_4[0], axs_5[0]]:
+        for ax in [axs_3[0], axs_4[0]]:
             ax.set_xscale("log")
 
     for sim_type, group_df in param_df.groupby("sim_type"):
@@ -71,80 +71,80 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
                 if y_span_col is not None:
                     plot_errorband(ax, group_df, param, y_col, y_span_col)
 
-        plot_mean_and_uncertainty(ax_1, "avg_growth_rate", None)
-        plot_mean_and_uncertainty(ax_2, "extinct_rate", None)
+        plot_mean_and_uncertainty(ax_0, "avg_growth_rate", None)
+        plot_mean_and_uncertainty(ax_1, "extinct_rate", None)
 
-        plot_errorbar(ax_3, group_df, "avg_growth_rate", "extinct_rate", True)
+        plot_errorbar(ax_2, group_df, "avg_growth_rate", "extinct_rate", True)
 
         if param == "strat_phe_0_i":
             if sim_type == SimType.FIXED:
                 plot_main_heatmap(
-                    fig_4, axs_4[0], axs_4[2], group_df, param, "dist_n_agents"
+                    fig_3, axs_3[0], axs_3[2], group_df, param, "dist_n_agents"
                 )
             elif sim_type == SimType.EVOL:
                 plot_main_heatmap(
-                    fig_5, axs_5[0], axs_5[2], group_df, param, "dist_avg_strat_phe_0"
+                    fig_4, axs_4[0], axs_4[2], group_df, param, "dist_avg_strat_phe_0"
                 )
             elif sim_type == SimType.RANDOM:
-                plot_side_heatmap(axs_4[1], group_df, "dist_n_agents")
-                plot_side_heatmap(axs_5[1], group_df, "dist_avg_strat_phe_0")
+                plot_side_heatmap(axs_3[1], group_df, "dist_n_agents")
+                plot_side_heatmap(axs_4[1], group_df, "dist_avg_strat_phe_0")
         else:
             plot_main_heatmap(
-                fig_4, axs_4[0], axs_4[1], group_df, param, "dist_n_agents"
+                fig_3, axs_3[0], axs_3[1], group_df, param, "dist_n_agents"
             )
             plot_main_heatmap(
-                fig_5, axs_5[0], axs_5[1], group_df, param, "dist_avg_strat_phe_0"
+                fig_4, axs_4[0], axs_4[1], group_df, param, "dist_avg_strat_phe_0"
             )
 
-        plot_mean_and_uncertainty(ax_6, "avg_strat_phe_0", "std_dev_strat_phe")
-        plot_mean_and_uncertainty(ax_7, "dist_phe_0", None)
-        plot_mean_and_uncertainty(ax_8, "std_dev_growth_rate", None)
-        plot_mean_and_uncertainty(ax_9, "avg_birth_rate", None)
+        plot_mean_and_uncertainty(ax_5, "avg_strat_phe_0", "std_dev_strat_phe")
+        plot_mean_and_uncertainty(ax_6, "dist_phe_0", None)
+        plot_mean_and_uncertainty(ax_7, "std_dev_growth_rate", None)
+        plot_mean_and_uncertainty(ax_8, "avg_birth_rate", None)
 
-        plot_errorbar(ax_10, group_df, "avg_growth_rate", "std_dev_growth_rate", True)
+        plot_errorbar(ax_9, group_df, "avg_growth_rate", "std_dev_growth_rate", True)
 
     if param == "strat_phe_0_i":
-        plot_dist_phe_0_lims(ax_7, param_df, job)
+        plot_dist_phe_0_lims(ax_6, param_df, job)
 
     if param == "prob_mut":
         fixed_i_df = FILTERS["fixed_i"](df, job).sort_values("strat_phe_0_i")
-        plot_errorbar(ax_3, fixed_i_df, "avg_growth_rate", "extinct_rate", True)
-        plot_errorbar(ax_10, fixed_i_df, "avg_growth_rate", "std_dev_growth_rate", True)
-        plot_expected_values(ax_1, df, job, param, "avg_growth_rate")
-        plot_expected_values(ax_2, df, job, param, "extinct_rate")
+        plot_errorbar(ax_2, fixed_i_df, "avg_growth_rate", "extinct_rate", True)
+        plot_errorbar(ax_9, fixed_i_df, "avg_growth_rate", "std_dev_growth_rate", True)
+        plot_expected_values(ax_0, df, job, param, "avg_growth_rate")
+        plot_expected_values(ax_1, df, job, param, "extinct_rate")
 
     max_avg_growth = get_optimal_strat_phe_0(df, job, "avg_growth_rate", "max")
     min_extinct = get_optimal_strat_phe_0(df, job, "extinct_rate", "min")
     if param == "strat_phe_0_i":
-        for ax in [ax_1, ax_2, ax_8]:
+        for ax in [ax_0, ax_1, ax_7]:
             ax.axvline(max_avg_growth, ls="--", **LINE_STYLE)
             ax.axvline(min_extinct, ls=":", **LINE_STYLE)
-    for ax in axs_5[:-1] + [ax_6]:
+    for ax in axs_4[:-1] + [ax_5]:
         ax.axhline(max_avg_growth, ls="--", **LINE_STYLE)
         ax.axhline(min_extinct, ls=":", **LINE_STYLE)
 
     if param in ["prob_mut", "n_agents_i"]:
-        for ax in [ax_1, ax_2, ax_6, ax_7, ax_8, ax_9]:
+        for ax in [ax_0, ax_1, ax_5, ax_6, ax_7, ax_8]:
             ax.set_xscale("log")
-    for ax in [ax_2, ax_3]:
+    for ax in [ax_1, ax_2]:
         ax.set_yscale("log")
 
-    for ax in [ax_1, ax_2, ax_3, ax_6, ax_7, ax_8, ax_9, ax_10]:
+    for ax in [ax_0, ax_1, ax_2, ax_5, ax_6, ax_7, ax_8, ax_9]:
         ax.legend()
 
     fig_dir = job.base_dir / "plots" / param
     fig_dir.mkdir(parents=True, exist_ok=True)
 
-    fig_1.savefig(fig_dir / "avg_growth_rate.pdf")
-    fig_2.savefig(fig_dir / "extinct_rate.pdf")
-    fig_3.savefig(fig_dir / "rates.pdf")
-    fig_4.savefig(fig_dir / "dist_n_agents.pdf")
-    fig_5.savefig(fig_dir / "dist_avg_strat_phe_0.pdf")
-    fig_6.savefig(fig_dir / "avg_strat_phe_0.pdf")
-    fig_7.savefig(fig_dir / "dist_phe_0.pdf")
-    fig_8.savefig(fig_dir / "std_dev_growth_rate.pdf")
-    fig_9.savefig(fig_dir / "avg_birth_rate.pdf")
-    fig_10.savefig(fig_dir / "growth_rates.pdf")
+    fig_0.savefig(fig_dir / "avg_growth_rate.pdf")
+    fig_1.savefig(fig_dir / "extinct_rate.pdf")
+    fig_2.savefig(fig_dir / "rates.pdf")
+    fig_3.savefig(fig_dir / "dist_n_agents.pdf")
+    fig_4.savefig(fig_dir / "dist_avg_strat_phe_0.pdf")
+    fig_5.savefig(fig_dir / "avg_strat_phe_0.pdf")
+    fig_6.savefig(fig_dir / "dist_phe_0.pdf")
+    fig_7.savefig(fig_dir / "std_dev_growth_rate.pdf")
+    fig_8.savefig(fig_dir / "avg_birth_rate.pdf")
+    fig_9.savefig(fig_dir / "growth_rates.pdf")
 
     print_process_msg(f"made '{param}' plots")
 
