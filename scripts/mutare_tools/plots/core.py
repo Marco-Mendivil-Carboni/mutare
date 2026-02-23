@@ -171,10 +171,11 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     if fixed_df["n_agents_i"].nunique() < 2:
         return
 
-    fig_1, axs_1 = create_colorbar_figure("strat_phe_0_i", "avg_growth_rate", False)
-    fig_2, axs_2 = create_colorbar_figure("strat_phe_0_i", "extinct_rate", False)
-    fig_3, axs_3 = create_colorbar_figure("strat_phe_0_i", "dist_phe_0", False)
-    fig_4, axs_4 = create_colorbar_figure("strat_phe_0_i", "std_dev_growth_rate", False)
+    fig_0, axs_0 = create_colorbar_figure("strat_phe_0_i", "avg_growth_rate", False)
+    fig_1, axs_1 = create_colorbar_figure("strat_phe_0_i", "extinct_rate", False)
+    fig_2, axs_2 = create_colorbar_figure("strat_phe_0_i", "dist_phe_0", False)
+    fig_3, axs_3 = create_colorbar_figure("strat_phe_0_i", "std_dev_growth_rate", False)
+    fig_4, axs_4 = create_colorbar_figure("strat_phe_0_i", "avg_birth_rate", False)
 
     fig_5, axs_5 = create_colorbar_figure("n_agents_i", "extinct_rate", False)
 
@@ -201,13 +202,16 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
             yerr = group_df[(y_col, "sem")]
             ax.errorbar(x, y, yerr, None, c=color, **PLOT_STYLE)
 
-        plot_mean_and_uncertainty(axs_1[0], "avg_growth_rate")
-        plot_mean_and_uncertainty(axs_2[0], "extinct_rate")
-        plot_mean_and_uncertainty(axs_3[0], "dist_phe_0")
-        plot_mean_and_uncertainty(axs_4[0], "std_dev_growth_rate")
+        plot_mean_and_uncertainty(axs_0[0], "avg_growth_rate")
+        plot_mean_and_uncertainty(axs_1[0], "extinct_rate")
+        plot_mean_and_uncertainty(axs_2[0], "dist_phe_0")
+        plot_mean_and_uncertainty(axs_3[0], "std_dev_growth_rate")
+        plot_mean_and_uncertainty(axs_4[0], "avg_birth_rate")
 
     sm = ScalarMappable(norm=norm, cmap=CMAP)
-    for fig, axs in [(fig_1, axs_1), (fig_2, axs_2), (fig_3, axs_3), (fig_4, axs_4)]:
+    for fig, axs in zip(
+        [fig_0, fig_1, fig_2, fig_3, fig_4], [axs_0, axs_1, axs_2, axs_3, axs_4]
+    ):
         set_heatmap_colorbar(fig, axs[1], "n_agents_i", sm)
 
     fixed_df = fixed_df.sort_values("n_agents_i")
@@ -237,16 +241,16 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     avg_strat_phe_0 = np.linspace(0.0, 1.0, 64)
     avg_growth_rate = avg_growth_rate_spline(avg_strat_phe_0)
 
-    axs_1[0].errorbar(avg_strat_phe_0, avg_growth_rate, ls="--", **LINE_STYLE)
+    axs_0[0].errorbar(avg_strat_phe_0, avg_growth_rate, ls="--", **LINE_STYLE)
 
     for ax in [axs_5[0], axs_8[0], axs_9[0]]:
         ax.set_xscale("log")
-    for ax in [axs_2[0], axs_5[0], axs_8[0], axs_9[0]]:
+    for ax in [axs_1[0], axs_5[0], axs_8[0], axs_9[0]]:
         ax.set_yscale("log")
 
     extinct_rates = fixed_df[("extinct_rate", "mean")]
     min_extinct_rate = np.min(extinct_rates[extinct_rates > 0.0])
-    axs_2[0].set_ylim(bottom=min_extinct_rate)
+    axs_1[0].set_ylim(bottom=min_extinct_rate)
     axs_5[0].set_ylim(bottom=min_extinct_rate)
 
     sm = ScalarMappable(cmap=CMAP)
@@ -322,10 +326,11 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_dir = job.base_dir / "plots" / "fixed"
     fig_dir.mkdir(parents=True, exist_ok=True)
 
-    fig_1.savefig(fig_dir / "avg_growth_rate.pdf")
-    fig_2.savefig(fig_dir / "extinct_rate.pdf")
-    fig_3.savefig(fig_dir / "dist_phe_0.pdf")
-    fig_4.savefig(fig_dir / "std_dev_growth_rate.pdf")
+    fig_0.savefig(fig_dir / "avg_growth_rate.pdf")
+    fig_1.savefig(fig_dir / "extinct_rate.pdf")
+    fig_2.savefig(fig_dir / "dist_phe_0.pdf")
+    fig_3.savefig(fig_dir / "std_dev_growth_rate.pdf")
+    fig_4.savefig(fig_dir / "avg_birth_rate.pdf")
     fig_5.savefig(fig_dir / "extinct_rate_scaling.pdf")
     fig_6.savefig(fig_dir / "exp_dist_avg_strat_phe_0.pdf")
     fig_7.savefig(fig_dir / "dist_avg_strat_phe_0.pdf")
