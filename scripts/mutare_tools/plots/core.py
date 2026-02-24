@@ -3,7 +3,6 @@ import numpy as np
 from scipy.interpolate import make_splrep, LSQBivariateSpline
 from shutil import rmtree
 from matplotlib.axes import Axes
-from matplotlib.cm import ScalarMappable
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import cast
 
@@ -11,7 +10,6 @@ from ..exec import N_CORES, SimJob, print_process_msg
 from ..analysis import SimType, collect_avg_analyses, collect_run_time_series
 
 from .utils import (
-    CMAP,
     LINE_STYLE,
     FILTERS,
     create_standard_figure,
@@ -206,11 +204,10 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
         plot_mean_and_uncertainty(axs_3[0], "std_dev_growth_rate")
         plot_mean_and_uncertainty(axs_4[0], "avg_birth_rate")
 
-    sm = ScalarMappable(norm=n_norm, cmap=CMAP)
     for fig, axs in zip(
         [fig_0, fig_1, fig_2, fig_3, fig_4], [axs_0, axs_1, axs_2, axs_3, axs_4]
     ):
-        set_heatmap_colorbar(fig, axs[1], "n_agents_i", sm)
+        set_heatmap_colorbar(fig, axs[1], "n_agents_i", n_norm)
 
     fixed_df = fixed_df.sort_values("n_agents_i")
 
@@ -241,8 +238,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     axs_1[0].set_ylim(bottom=min_extinct_rate)
     axs_5[0].set_ylim(bottom=min_extinct_rate)
 
-    sm = ScalarMappable(cmap=CMAP)
-    set_heatmap_colorbar(fig_5, axs_5[1], "strat_phe_0_i", sm)
+    set_heatmap_colorbar(fig_5, axs_5[1], "strat_phe_0_i", s_norm)
 
     random_df = FILTERS["random"](df, job)
 

@@ -127,18 +127,19 @@ def get_heatmap_norm(
     vmax: float,
 ) -> Normalize:
     if type == "log":
-        norm = LogNorm(vmin, vmax)
+        return LogNorm(vmin, vmax)
     elif type == "power":
-        norm = PowerNorm(0.5, vmin, vmax)
+        return PowerNorm(0.5, vmin, vmax)
     else:
-        norm = Normalize(vmin, vmax)
-    return norm
+        return Normalize(vmin, vmax)
 
 
 def set_heatmap_colorbar(
-    fig: Figure, ax_bar: Axes, z_col: str, sm: ScalarMappable
+    fig: Figure, ax_bar: Axes, z_col: str, color_data: ScalarMappable | Normalize
 ) -> None:
-    cbar = fig.colorbar(sm, cax=ax_bar, aspect=64)
+    if isinstance(color_data, Normalize):
+        color_data = ScalarMappable(norm=color_data, cmap=CMAP)
+    cbar = fig.colorbar(color_data, cax=ax_bar, aspect=64)
     cbar.ax.set_ylabel(COL_TEX_LABELS[z_col])
 
 
@@ -152,9 +153,11 @@ def plot_main_heatmap(
     hm_y = [(i + 0.5) / hist_bins for i in range(hist_bins)]
     hm_z = generate_heatmap_matrix(df, z_col, hist_bins)
     norm = get_heatmap_norm("power", 0, hist_bins)
-    im = ax_main.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP, shading="nearest")
+    image = ax_main.pcolormesh(
+        hm_x, hm_y, hm_z, norm=norm, cmap=CMAP, shading="nearest"
+    )
     ax_main.set_xlim(hm_x[0], hm_x[-1])
-    set_heatmap_colorbar(fig, ax_bar, z_col, im)
+    set_heatmap_colorbar(fig, ax_bar, z_col, image)
 
 
 def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, z_col: str) -> None:
@@ -172,13 +175,10 @@ def create_1D_spline(df: pd.DataFrame, x_col: str, y_col: str) -> BSpline:
     x = df[x_col]
     y = df[(y_col, "mean")]
     w = 1 / df[(y_col, "sem")]
-
     if y_col == "extinct_rate":
         x, y, w = x[y > 0], y[y > 0], w[y > 0]
 
-    spline = make_splrep(x, y, w=w, s=len(w))
-
-    return spline
+    return make_splrep(x, y, w=w, s=len(w))
 
 
 def get_optimal_strat_phe_0(
@@ -276,7 +276,7 @@ def plot_avg_strat_phe_0(
 ) -> None:
     n_agents_i_values = sorted(df["n_agents_i"].unique())
     prob_mut_values = sorted(df["prob_mut"].unique())
-    im = ax_main.pcolormesh(
+    image = ax_main.pcolormesh(
         n_agents_i_values,
         prob_mut_values,
         np.array(data).transpose(),
@@ -287,7 +287,7 @@ def plot_avg_strat_phe_0(
     )
     ax_main.set_xlim(n_agents_i_values[0], n_agents_i_values[-1])
     ax_main.set_ylim(prob_mut_values[0], prob_mut_values[-1])
-    set_heatmap_colorbar(fig, ax_bar, "avg_strat_phe_0", im)
+    set_heatmap_colorbar(fig, ax_bar, "avg_strat_phe_0", image)
 
 
 def plot_colored_errorbar(
