@@ -187,16 +187,15 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_8, axs_8 = create_colorbar_figure("n_agents_i", "prob_mut", False)
     fig_9, axs_9 = create_colorbar_figure("n_agents_i", "prob_mut", False)
 
-    n_norm = get_heatmap_norm(
+    log_norm = get_heatmap_norm(
         "log", fixed_df["n_agents_i"].min() / 2, fixed_df["n_agents_i"].max() * 2
     )
 
     for n_agents_i, group_df in fixed_df.groupby("n_agents_i"):
 
         def plot_mean_and_uncertainty(ax: Axes, y_col: str) -> None:
-            plot_colored_errorbar(
-                ax, group_df, "strat_phe_0_i", y_col, n_norm, cast(float, n_agents_i)
-            )
+            value = cast(float, n_agents_i)
+            plot_colored_errorbar(ax, group_df, "strat_phe_0_i", y_col, log_norm, value)
 
         plot_mean_and_uncertainty(axs_0[0], "avg_growth_rate")
         plot_mean_and_uncertainty(axs_1[0], "extinct_rate")
@@ -207,16 +206,19 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     for fig, axs in zip(
         [fig_0, fig_1, fig_2, fig_3, fig_4], [axs_0, axs_1, axs_2, axs_3, axs_4]
     ):
-        set_heatmap_colorbar(fig, axs[1], "n_agents_i", n_norm)
+        set_heatmap_colorbar(fig, axs[1], "n_agents_i", log_norm)
 
     fixed_df = fixed_df.sort_values("n_agents_i")
 
-    s_norm = get_heatmap_norm("linear", 0, 1)
+    linear_norm = get_heatmap_norm("linear", 0, 1)
+
     for strat_phe_0_i, group_df in fixed_df.groupby("strat_phe_0_i"):
-        strat_phe_0_i = cast(float, strat_phe_0_i)
+        value = cast(float, strat_phe_0_i)
         plot_colored_errorbar(
-            axs_5[0], group_df, "n_agents_i", "extinct_rate", s_norm, strat_phe_0_i
+            axs_5[0], group_df, "n_agents_i", "extinct_rate", linear_norm, value
         )
+
+    set_heatmap_colorbar(fig_5, axs_5[1], "strat_phe_0_i", linear_norm)
 
     fixed_df = fixed_df.sort_values("strat_phe_0_i")
     last_N_df = fixed_df[fixed_df["n_agents_i"] == fixed_df["n_agents_i"].max()]
@@ -237,8 +239,6 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     min_extinct_rate = np.min(extinct_rates[extinct_rates > 0.0])
     axs_1[0].set_ylim(bottom=min_extinct_rate)
     axs_5[0].set_ylim(bottom=min_extinct_rate)
-
-    set_heatmap_colorbar(fig_5, axs_5[1], "strat_phe_0_i", s_norm)
 
     random_df = FILTERS["random"](df, job)
 

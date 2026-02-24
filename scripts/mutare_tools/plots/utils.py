@@ -177,6 +177,8 @@ def create_1D_spline(df: pd.DataFrame, x_col: str, y_col: str) -> BSpline:
     w = 1 / df[(y_col, "sem")]
     if y_col == "extinct_rate":
         x, y, w = x[y > 0], y[y > 0], w[y > 0]
+        w *= y
+        y = np.log(y)
 
     return make_splrep(x, y, w=w, s=len(w))
 
@@ -239,7 +241,10 @@ def plot_expected_values(
     exp_values = np.zeros(len(param_df))
     hist_bins = len(strat_phe_0)
     for bin in range(hist_bins):
-        exp_values += dist_avg_strat_phe_0[bin] * spline(strat_phe_0[bin]) / hist_bins
+        bin_value = spline(strat_phe_0[bin])
+        if y_col == "extinct_rate":
+            bin_value = np.exp(bin_value)
+        exp_values += dist_avg_strat_phe_0[bin] * bin_value / hist_bins
 
     ax.plot(param_df[param], exp_values, ls="--", **LINE_STYLE)
 
