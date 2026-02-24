@@ -4,7 +4,7 @@ import matplotlib as mpl
 from matplotlib.figure import Figure
 from matplotlib.axes import Axes
 from matplotlib.gridspec import GridSpec
-from matplotlib.colors import PowerNorm, LogNorm
+from matplotlib.colors import Normalize, PowerNorm, LogNorm
 from matplotlib.cm import ScalarMappable
 from scipy.interpolate import make_splrep, LSQBivariateSpline
 from typing import Any, Literal
@@ -218,6 +218,20 @@ def generate_heatmap_matrix(
     return hm_z
 
 
+def get_heatmap_norm(
+    type: Literal["linear"] | Literal["power"] | Literal["log"],
+    vmin: float,
+    vmax: float,
+) -> Normalize:
+    if type == "log":
+        norm = LogNorm(vmin, vmax)
+    elif type == "power":
+        norm = PowerNorm(0.5, vmin, vmax)
+    else:
+        norm = Normalize(vmin, vmax)
+    return norm
+
+
 def set_heatmap_colorbar(
     fig: Figure, ax_bar: Axes, z_col: str, sm: ScalarMappable
 ) -> None:
@@ -234,7 +248,7 @@ def plot_main_heatmap(
     hm_x = df[x_col].tolist()
     hm_y = [(i + 0.5) / hist_bins for i in range(hist_bins)]
     hm_z = generate_heatmap_matrix(df, z_col, hist_bins)
-    norm = PowerNorm(gamma=0.5, vmin=0, vmax=hist_bins)
+    norm = get_heatmap_norm("power", 0, hist_bins)
     im = ax_main.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP, shading="nearest")
     ax_main.set_xlim(hm_x[0], hm_x[-1])
     set_heatmap_colorbar(fig, ax_bar, z_col, im)
@@ -247,7 +261,7 @@ def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, z_col: str) -> None:
     hm_x = [0.0, 1.0]
     hm_y = [i / hist_bins for i in range(hist_bins + 1)]
     hm_z = generate_heatmap_matrix(df, z_col, hist_bins)
-    norm = PowerNorm(gamma=0.5, vmin=0, vmax=hist_bins)
+    norm = get_heatmap_norm("power", 0, hist_bins)
     ax_side.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP)
 
 
@@ -363,3 +377,13 @@ def plot_avg_strat_phe_0(
     ax_main.set_xlim(n_agents_i_values[0], n_agents_i_values[-1])
     ax_main.set_ylim(prob_mut_values[0], prob_mut_values[-1])
     set_heatmap_colorbar(fig, ax_bar, "avg_strat_phe_0", im)
+
+
+def plot_colored_errorbar(
+    ax: Axes, df: pd.DataFrame, x_col: str, y_col: str, norm: Normalize, value: float
+) -> None:
+    color = CMAP(norm(value))
+    x = df[x_col]
+    y = df[(y_col, "mean")]
+    yerr = df[(y_col, "sem")]
+    ax.errorbar(x, y, yerr, None, c=color, **PLOT_STYLE)

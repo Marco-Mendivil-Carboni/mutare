@@ -3,7 +3,6 @@ import numpy as np
 from scipy.interpolate import make_splrep, LSQBivariateSpline
 from shutil import rmtree
 from matplotlib.axes import Axes
-from matplotlib.colors import LogNorm
 from matplotlib.cm import ScalarMappable
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from typing import cast
@@ -13,7 +12,6 @@ from ..analysis import SimType, collect_avg_analyses, collect_run_time_series
 
 from .utils import (
     CMAP,
-    PLOT_STYLE,
     LINE_STYLE,
     FILTERS,
     create_standard_figure,
@@ -22,6 +20,7 @@ from .utils import (
     plot_errorbar,
     plot_errorband,
     set_heatmap_colorbar,
+    get_heatmap_norm,
     plot_main_heatmap,
     plot_side_heatmap,
     get_optimal_strat_phe_0,
@@ -31,6 +30,7 @@ from .utils import (
     plot_time_series,
     get_dist_avg_strat_phe_0,
     plot_avg_strat_phe_0,
+    plot_colored_errorbar,
 )
 
 
@@ -189,18 +189,16 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_8, axs_8 = create_colorbar_figure("n_agents_i", "prob_mut", False)
     fig_9, axs_9 = create_colorbar_figure("n_agents_i", "prob_mut", False)
 
-    norm = LogNorm(
-        vmin=fixed_df["n_agents_i"].min() / 2, vmax=fixed_df["n_agents_i"].max() * 2
+    n_norm = get_heatmap_norm(
+        "log", fixed_df["n_agents_i"].min() / 2, fixed_df["n_agents_i"].max() * 2
     )
 
     for n_agents_i, group_df in fixed_df.groupby("n_agents_i"):
 
         def plot_mean_and_uncertainty(ax: Axes, y_col: str) -> None:
-            color = CMAP(norm(cast(float, n_agents_i)))
-            x = group_df["strat_phe_0_i"]
-            y = group_df[(y_col, "mean")]
-            yerr = group_df[(y_col, "sem")]
-            ax.errorbar(x, y, yerr, None, c=color, **PLOT_STYLE)
+            plot_colored_errorbar(
+                ax, group_df, "strat_phe_0_i", y_col, n_norm, cast(float, n_agents_i)
+            )
 
         plot_mean_and_uncertainty(axs_0[0], "avg_growth_rate")
         plot_mean_and_uncertainty(axs_1[0], "extinct_rate")
@@ -208,7 +206,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
         plot_mean_and_uncertainty(axs_3[0], "std_dev_growth_rate")
         plot_mean_and_uncertainty(axs_4[0], "avg_birth_rate")
 
-    sm = ScalarMappable(norm=norm, cmap=CMAP)
+    sm = ScalarMappable(norm=n_norm, cmap=CMAP)
     for fig, axs in zip(
         [fig_0, fig_1, fig_2, fig_3, fig_4], [axs_0, axs_1, axs_2, axs_3, axs_4]
     ):
@@ -216,27 +214,17 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
 
     fixed_df = fixed_df.sort_values("n_agents_i")
 
-    fit_results = []
+    s_norm = get_heatmap_norm("linear", 0, 1)
     for strat_phe_0_i, group_df in fixed_df.groupby("strat_phe_0_i"):
-        color = CMAP(cast(float, strat_phe_0_i))
-        x = group_df["n_agents_i"]
-        y = group_df[("extinct_rate", "mean")]
-        yerr = group_df[("extinct_rate", "sem")]
-        axs_5[0].errorbar(x, y, yerr, None, c=color, **PLOT_STYLE)
-
-        x, y, yerr = x[y != 0], y[y != 0], yerr[y != 0]
-        fit_results.append(
-            {
-                "strat_phe_0_i": strat_phe_0_i,
-                "avg_growth_rate": group_df[
-                    ("avg_growth_rate", "mean")
-                ].max(),  # maybe I should use the last N instead of taking the max value -----------
-            }
+        strat_phe_0_i = cast(float, strat_phe_0_i)
+        plot_colored_errorbar(
+            axs_5[0], group_df, "n_agents_i", "extinct_rate", s_norm, strat_phe_0_i
         )
 
-    fit_df = pd.DataFrame(fit_results)
-    strat_phe_0_i_values = fit_df["strat_phe_0_i"].to_numpy()
-    avg_growth_rate_values = fit_df["avg_growth_rate"].to_numpy()
+    fixed_df = fixed_df.sort_values("strat_phe_0_i")
+    last_N_df = fixed_df[fixed_df["n_agents_i"] == fixed_df["n_agents_i"].max()]
+    strat_phe_0_i_values = last_N_df["strat_phe_0_i"]
+    avg_growth_rate_values = last_N_df[("avg_growth_rate", "mean")]
     avg_growth_rate_spline = make_splrep(strat_phe_0_i_values, avg_growth_rate_values)
     avg_strat_phe_0 = np.linspace(0.0, 1.0, 64)
     avg_growth_rate = avg_growth_rate_spline(avg_strat_phe_0)
@@ -256,7 +244,6 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     sm = ScalarMappable(cmap=CMAP)
     set_heatmap_colorbar(fig_5, axs_5[1], "strat_phe_0_i", sm)
 
-    norm = LogNorm(vmin=1e2 / 2.0, vmax=1e3 * 2.0)
     random_df = FILTERS["random"](df, job)
 
     mask = fixed_df[("extinct_rate", "mean")] > 0
@@ -287,7 +274,6 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     log_extinct_flat = spl.ev(log_n_mesh.ravel(), strat_mesh.ravel())
     extinct_rate_grid = np.exp(log_extinct_flat.reshape(log_n_mesh.shape))
     for strat_phe_0_i, group_df in fixed_df.groupby("strat_phe_0_i"):
-        color = CMAP(cast(float, strat_phe_0_i))
         x = n_agents_i_values
         y = np.exp(spl.ev(np.log(x), strat_phe_0_i))
         axs_5[0].errorbar(x, y, ls="--", **LINE_STYLE)
