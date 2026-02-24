@@ -5,7 +5,7 @@ from matplotlib.axes import Axes
 from matplotlib.gridspec import GridSpec
 from matplotlib.colors import Normalize, PowerNorm, LogNorm
 from matplotlib.cm import ScalarMappable
-from scipy.interpolate import make_splrep, LSQBivariateSpline
+from scipy.interpolate import BSpline, make_splrep, LSQBivariateSpline
 from typing import Any, Literal
 
 from ..exec import SimJob
@@ -168,17 +168,25 @@ def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, z_col: str) -> None:
     ax_side.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP)
 
 
+def create_1D_spline(df: pd.DataFrame, x_col: str, y_col: str) -> BSpline:
+    x = df[x_col]
+    y = df[(y_col, "mean")]
+    w = 1 / df[(y_col, "sem")]
+
+    if y_col == "extinct_rate":
+        x, y, w = x[y > 0], y[y > 0], w[y > 0]
+
+    spline = make_splrep(x, y, w=w, s=len(w))
+
+    return spline
+
+
 def get_optimal_strat_phe_0(
     df: pd.DataFrame, job: SimJob, y_col: str, opt: Literal["max"] | Literal["min"]
 ) -> float:
     fixed_i_df = FILTERS["fixed_i"](df, job).sort_values("strat_phe_0_i")
 
-    x = fixed_i_df["strat_phe_0_i"]
-    y = fixed_i_df[(y_col, "mean")]
-    if y_col == "extinct_rate":
-        x, y = x[y > 0], y[y > 0]
-
-    spline = make_splrep(x, y)
+    spline = create_1D_spline(fixed_i_df, "strat_phe_0_i", y_col)
 
     x = np.linspace(0, 1, N_SPLINE_VALUES)
     y = spline(x)
@@ -225,7 +233,7 @@ def plot_expected_values(
     param_df = FILTERS[param](df, job).sort_values(param)
     fixed_i_df = FILTERS["fixed_i"](df, job).sort_values("strat_phe_0_i")
 
-    spline = make_splrep(fixed_i_df["strat_phe_0_i"], fixed_i_df[(y_col, "mean")])
+    spline = create_1D_spline(fixed_i_df, "strat_phe_0_i", y_col)
     strat_phe_0, dist_avg_strat_phe_0 = get_dist_avg_strat_phe_0(param_df)
 
     exp_values = np.zeros(len(param_df))
