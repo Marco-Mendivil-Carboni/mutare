@@ -8,5 +8,7 @@ __pycache__/
 /sims/
 
 .LaTeX/
+*.pdf
+*.synctex.gz
 
 images/
