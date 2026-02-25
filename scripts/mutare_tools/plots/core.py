@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from scipy.interpolate import make_splrep, LSQBivariateSpline
+from scipy.interpolate import LSQBivariateSpline
 from shutil import rmtree
 from matplotlib.axes import Axes
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -11,6 +11,7 @@ from ..analysis import SimType, collect_avg_analyses, collect_run_time_series
 
 from .utils import (
     LINE_STYLE,
+    N_SPLINE_VALUES,
     FILTERS,
     create_standard_figure,
     create_colorbar_figure,
@@ -29,6 +30,7 @@ from .utils import (
     get_dist_avg_strat_phe_0,
     plot_avg_strat_phe_0,
     plot_colored_errorbar,
+    interpolate_values,
 )
 
 
@@ -203,6 +205,13 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
         plot_mean_and_uncertainty(axs_3[0], "std_dev_growth_rate")
         plot_mean_and_uncertainty(axs_4[0], "avg_birth_rate")
 
+        y = group_df["n_agents_i"] ** (
+            -group_df[("avg_growth_rate", "mean")]
+            / (4 * (group_df[("std_dev_growth_rate", "mean")] ** 2))
+        )
+        y *= float(group_df[("extinct_rate", "mean")].iloc[-1] / y.iloc[-1])
+        axs_1[0].errorbar(group_df["strat_phe_0_i"], y, ls=":", **LINE_STYLE)
+
     for fig, axs in zip(
         [fig_0, fig_1, fig_2, fig_3, fig_4], [axs_0, axs_1, axs_2, axs_3, axs_4]
     ):
@@ -221,14 +230,10 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     set_heatmap_colorbar(fig_5, axs_5[1], "strat_phe_0_i", linear_norm)
 
     fixed_df = fixed_df.sort_values("strat_phe_0_i")
-    last_N_df = fixed_df[fixed_df["n_agents_i"] == fixed_df["n_agents_i"].max()]
-    strat_phe_0_i_values = last_N_df["strat_phe_0_i"]
-    avg_growth_rate_values = last_N_df[("avg_growth_rate", "mean")]
-    avg_growth_rate_spline = make_splrep(strat_phe_0_i_values, avg_growth_rate_values)
-    avg_strat_phe_0 = np.linspace(0.0, 1.0, 64)
-    avg_growth_rate = avg_growth_rate_spline(avg_strat_phe_0)
-
-    axs_0[0].errorbar(avg_strat_phe_0, avg_growth_rate, ls="--", **LINE_STYLE)
+    max_N_df = fixed_df[fixed_df["n_agents_i"] == fixed_df["n_agents_i"].max()]
+    avg_strat_phe_0 = np.linspace(0.0, 1.0, N_SPLINE_VALUES)
+    avg_growth_rate = interpolate_values(axs_0[0], max_N_df, "avg_growth_rate")
+    avg_birth_rate = interpolate_values(axs_4[0], max_N_df, "avg_birth_rate")
 
     for ax in [axs_5[0], axs_8[0], axs_9[0]]:
         ax.set_xscale("log")
@@ -237,11 +242,13 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
 
     extinct_rates = fixed_df[("extinct_rate", "mean")]
     min_extinct_rate = np.min(extinct_rates[extinct_rates > 0.0])
-    axs_1[0].set_ylim(bottom=min_extinct_rate)
-    axs_5[0].set_ylim(bottom=min_extinct_rate)
+    max_extinct_rate = np.max(extinct_rates)
+    axs_1[0].set_ylim(bottom=min_extinct_rate, top=max_extinct_rate)
+    axs_5[0].set_ylim(bottom=min_extinct_rate, top=max_extinct_rate)
 
     random_df = FILTERS["random"](df, job)
 
+    # make a function for this -------------------------------------------------------------
     mask = fixed_df[("extinct_rate", "mean")] > 0
     work_df = fixed_df[mask].copy()
     x = np.log(work_df["n_agents_i"])
@@ -263,7 +270,8 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
         x, y, z, tx, ty, w=weights, bbox=[x_min, x_max, y_min, y_max], kx=kx, ky=ky
     )
 
-    target_strat = np.linspace(0.0, 1.0, 64)
+    # clean up this horrible mess and add distribution plots. -----------------------------
+    target_strat = np.linspace(0.0, 1.0, N_SPLINE_VALUES)
     n_agents_i_values = sorted(random_df["n_agents_i"].unique())
     log_n_vals = np.log(n_agents_i_values)
     log_n_mesh, strat_mesh = np.meshgrid(log_n_vals, target_strat, indexing="ij")
@@ -273,7 +281,6 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
         x = n_agents_i_values
         y = np.exp(spl.ev(np.log(x), strat_phe_0_i))
         axs_5[0].errorbar(x, y, ls="--", **LINE_STYLE)
-
     avg_strat_phe_0_mean = []
     exp_avg_strat_phe_0_mean = []
     for n_agents_i, group_df in random_df.groupby("n_agents_i"):
@@ -283,7 +290,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
         exp_avg_strat_phe_0_mean_row = []
         for prob_mut, subgroup_df in group_df.groupby("prob_mut"):
             log_dist_avg_strat_phe_0 = (n_agents_i * avg_growth_rate) - np.log(
-                extinct_rate + prob_mut * avg_growth_rate.mean()
+                extinct_rate + prob_mut * avg_birth_rate
             )
             log_dist_avg_strat_phe_0 -= np.max(log_dist_avg_strat_phe_0)
             dist_avg_strat_phe_0 = np.exp(log_dist_avg_strat_phe_0)

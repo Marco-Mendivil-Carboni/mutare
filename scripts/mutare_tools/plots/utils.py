@@ -285,8 +285,8 @@ def plot_avg_strat_phe_0(
         n_agents_i_values,
         prob_mut_values,
         np.array(data).transpose(),
-        vmin=0.2,
-        vmax=0.8,
+        vmin=0,
+        vmax=1,
         cmap=CMAP,
         shading="nearest",
     )
@@ -303,3 +303,39 @@ def plot_colored_errorbar(
     y = df[(y_col, "mean")]
     yerr = df[(y_col, "sem")]
     ax.errorbar(x, y, yerr, None, c=color, **PLOT_STYLE)
+
+
+def interpolate_values(ax: Axes, df: pd.DataFrame, y_col: str) -> Any:
+    spline = create_1D_spline(df, "strat_phe_0_i", y_col)
+    x_interp = np.linspace(0.0, 1.0, N_SPLINE_VALUES)
+    y_interp = spline(x_interp)
+    ax.errorbar(x_interp, y_interp, ls="--", **LINE_STYLE)
+    return y_interp
+
+
+def create_extinct_rate_spline(df: pd.DataFrame, job: SimJob) -> LSQBivariateSpline:
+    fixed_df = FILTERS["fixed"](df, job)
+    random_df = FILTERS["random"](df, job)
+
+    mask = fixed_df[("extinct_rate", "mean")] > 0
+    work_df = fixed_df[mask].copy()
+    x = np.log(work_df["n_agents_i"])
+    y = work_df["strat_phe_0_i"]
+    z = np.log(work_df[("extinct_rate", "mean")])
+    sem = work_df[("extinct_rate", "sem")]
+    mean = work_df[("extinct_rate", "mean")]
+    weights = mean / sem
+
+    x_min = np.log(random_df["n_agents_i"].min())
+    x_max = np.log(random_df["n_agents_i"].max())
+    y_min, y_max = 0.0, 1.0
+    tx = []
+    ty = np.linspace(0.2, 0.8, 8).tolist()
+
+    kx, ky = 2, 3
+
+    spl = LSQBivariateSpline(
+        x, y, z, tx, ty, w=weights, bbox=[x_min, x_max, y_min, y_max], kx=kx, ky=ky
+    )
+
+    return spl
