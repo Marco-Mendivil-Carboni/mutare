@@ -286,7 +286,7 @@ def plot_colored_errorbar(
     ax.errorbar(x, y, yerr, None, c=color, **PLOT_STYLE)
 
 
-def interpolate_values(ax: Axes, df: pd.DataFrame, y_col: str) -> Any:
+def interpolate_values(ax: Axes, df: pd.DataFrame, y_col: str) -> np.ndarray:
     spline = create_1D_spline(df, "strat_phe_0_i", y_col)
     x_interp = np.linspace(0.0, 1.0, N_SPLINE_VALUES)
     y_interp = spline(x_interp)
@@ -294,9 +294,10 @@ def interpolate_values(ax: Axes, df: pd.DataFrame, y_col: str) -> Any:
     return y_interp
 
 
-def extrapolate_extinct_rate(df: pd.DataFrame, job: SimJob) -> LSQBivariateSpline:
+def extrapolate_extinct_rate(ax: Axes, df: pd.DataFrame, job: SimJob) -> np.ndarray:
     fixed_df = FILTERS["fixed"](df, job).sort_values("strat_phe_0_i")
     fixed_df = fixed_df[fixed_df[("extinct_rate", "mean")] > 0]
+    random_df = FILTERS["random"](df, job).sort_values("n_agents_i")
 
     x = np.log(fixed_df["n_agents_i"])
     y = fixed_df["strat_phe_0_i"]
@@ -305,8 +306,10 @@ def extrapolate_extinct_rate(df: pd.DataFrame, job: SimJob) -> LSQBivariateSplin
 
     tx, ty = [], np.linspace(0.2, 0.8, 8).tolist()
 
-    n_agents_i = FILTERS["random"](df, job)["n_agents_i"]
-    x_min, x_max = (np.log(n_agents_i.min()), np.log(n_agents_i.max()))
+    x_interp = np.log(random_df["n_agents_i"].unique())
+    y_interp = np.linspace(0.0, 1.0, N_SPLINE_VALUES)
+
+    x_min, x_max = x_interp.min(), x_interp.max()
     y_min, y_max = 0.0, 1.0
 
     kx, ky = 2, 3
@@ -315,7 +318,15 @@ def extrapolate_extinct_rate(df: pd.DataFrame, job: SimJob) -> LSQBivariateSplin
         x, y, z, tx, ty, w=w, bbox=[x_min, x_max, y_min, y_max], kx=kx, ky=ky
     )
 
-    return spline
+    x_mesh, y_mesh = np.meshgrid(x_interp, y_interp, indexing="ij")  # -----------------
+    log_extinct_rates = spline.ev(x_mesh.ravel(), y_mesh.ravel())
+    extinct_rate_grid = np.exp(log_extinct_rates.reshape(x_mesh.shape))
+
+    for strat_phe_0_i in fixed_df["strat_phe_0_i"].unique():
+        extinct_rates = np.exp(spline.ev(x_interp, strat_phe_0_i))
+        ax.errorbar(np.exp(x_interp), extinct_rates, ls="--", **LINE_STYLE)
+
+    return extinct_rate_grid
 
 
 def plot_avg_strat_phe_0(

@@ -246,21 +246,10 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     axs_1[0].set_ylim(bottom=min_extinct_rate, top=max_extinct_rate)
     axs_5[0].set_ylim(bottom=min_extinct_rate, top=max_extinct_rate)
 
-    random_df = FILTERS["random"](df, job)
-
-    spl = extrapolate_extinct_rate(df, job)
-
-    # clean up this horrible mess and add distribution plots. -----------------------------
+    # ---------------------------------------------------------------------------------
+    random_df = FILTERS["random"](df, job).sort_values("n_agents_i")
     n_agents_i_values = sorted(random_df["n_agents_i"].unique())
-    log_n_vals = np.log(n_agents_i_values)
-    log_n_mesh, strat_mesh = np.meshgrid(log_n_vals, avg_strat_phe_0, indexing="ij")
-    log_extinct_flat = spl.ev(log_n_mesh.ravel(), strat_mesh.ravel())
-    extinct_rate_grid = np.exp(log_extinct_flat.reshape(log_n_mesh.shape))
-
-    for strat_phe_0_i, group_df in fixed_df.groupby("strat_phe_0_i"):
-        x = n_agents_i_values
-        y = np.exp(spl.ev(np.log(x), strat_phe_0_i))
-        axs_5[0].errorbar(x, y, ls="--", **LINE_STYLE)
+    extinct_rate_grid = extrapolate_extinct_rate(axs_5[0], df, job)
 
     avg_strat_phe_0_mean = []
     exp_avg_strat_phe_0_mean = []
@@ -270,9 +259,9 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
         avg_strat_phe_0_mean_row = []
         exp_avg_strat_phe_0_mean_row = []
         for prob_mut, subgroup_df in group_df.groupby("prob_mut"):
-            log_dist_avg_strat_phe_0 = (n_agents_i * avg_growth_rate) - np.log(
-                extinct_rate + prob_mut * avg_birth_rate
-            )
+            log_dist_avg_strat_phe_0: np.ndarray = (
+                n_agents_i * avg_growth_rate
+            ) - np.log(extinct_rate + prob_mut * avg_birth_rate)
             log_dist_avg_strat_phe_0 -= np.max(log_dist_avg_strat_phe_0)
             dist_avg_strat_phe_0 = np.exp(log_dist_avg_strat_phe_0)
             dist_avg_strat_phe_0 /= np.sum(dist_avg_strat_phe_0) / len(avg_strat_phe_0)
