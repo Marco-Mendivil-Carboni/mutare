@@ -229,6 +229,15 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
         ax.plot(strat_phe_0_i_values, dist_phe_0_lim_values, ls="--", **LINE_STYLE)
 
 
+def get_dist_avg_strat_phe_0(df: pd.DataFrame) -> tuple[list[Any], list[Any]]:
+    hist_bins = count_hist_bins(df, "dist_avg_strat_phe_0")
+    x, y = [], []
+    for bin in range(hist_bins):
+        x.append((bin + 1 / 2) / hist_bins)
+        y.append(hist_bins * df[(f"dist_avg_strat_phe_0_{bin}", "mean")])
+    return x, y
+
+
 def plot_expected_values(
     ax: Axes, df: pd.DataFrame, job: SimJob, param: str, y_col: str
 ) -> None:
@@ -265,34 +274,6 @@ def plot_time_series(
     if y_span_col is not None:
         y_span = df[y_span_col]
         ax.fill_between(x, y - y_span, y + y_span, color=color, **FILL_STYLE)
-
-
-def get_dist_avg_strat_phe_0(df: pd.DataFrame) -> tuple[list[Any], list[Any]]:
-    hist_bins = count_hist_bins(df, "dist_avg_strat_phe_0")
-    x, y = [], []
-    for bin in range(hist_bins):
-        x.append((bin + 1 / 2) / hist_bins)
-        y.append(hist_bins * df[(f"dist_avg_strat_phe_0_{bin}", "mean")])
-    return x, y
-
-
-def plot_avg_strat_phe_0(
-    fig: Figure, ax_main: Axes, ax_bar: Axes, df: pd.DataFrame, data: list[Any]
-) -> None:
-    n_agents_i_values = sorted(df["n_agents_i"].unique())
-    prob_mut_values = sorted(df["prob_mut"].unique())
-    image = ax_main.pcolormesh(
-        n_agents_i_values,
-        prob_mut_values,
-        np.array(data).transpose(),
-        vmin=0,
-        vmax=1,
-        cmap=CMAP,
-        shading="nearest",
-    )
-    ax_main.set_xlim(n_agents_i_values[0], n_agents_i_values[-1])
-    ax_main.set_ylim(prob_mut_values[0], prob_mut_values[-1])
-    set_heatmap_colorbar(fig, ax_bar, "avg_strat_phe_0", image)
 
 
 def plot_colored_errorbar(
@@ -335,3 +316,22 @@ def extrapolate_extinct_rate(df: pd.DataFrame, job: SimJob) -> LSQBivariateSplin
     )
 
     return spline
+
+
+def plot_avg_strat_phe_0(
+    fig: Figure, ax_main: Axes, ax_bar: Axes, df: pd.DataFrame, data: list[Any]
+) -> None:
+    n_agents_i_values = sorted(df["n_agents_i"].unique())
+    prob_mut_values = sorted(df["prob_mut"].unique())
+    image = ax_main.pcolormesh(
+        n_agents_i_values,
+        prob_mut_values,
+        np.array(data).transpose(),
+        vmin=0,
+        vmax=1,
+        cmap=CMAP,
+        shading="nearest",
+    )
+    ax_main.set_xlim(n_agents_i_values[0], n_agents_i_values[-1])
+    ax_main.set_ylim(prob_mut_values[0], prob_mut_values[-1])
+    set_heatmap_colorbar(fig, ax_bar, "avg_strat_phe_0", image)

@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from scipy.interpolate import LSQBivariateSpline
 from shutil import rmtree
 from matplotlib.axes import Axes
 from concurrent.futures import ProcessPoolExecutor, as_completed
@@ -24,14 +23,14 @@ from .utils import (
     plot_side_heatmap,
     get_optimal_strat_phe_0,
     plot_dist_phe_0_lims,
+    get_dist_avg_strat_phe_0,
     plot_expected_values,
     plot_extinct_times,
     plot_time_series,
-    get_dist_avg_strat_phe_0,
-    plot_avg_strat_phe_0,
     plot_colored_errorbar,
     interpolate_values,
     extrapolate_extinct_rate,
+    plot_avg_strat_phe_0,
 )
 
 
@@ -252,16 +251,17 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     spl = extrapolate_extinct_rate(df, job)
 
     # clean up this horrible mess and add distribution plots. -----------------------------
-    target_strat = np.linspace(0.0, 1.0, N_SPLINE_VALUES)
     n_agents_i_values = sorted(random_df["n_agents_i"].unique())
     log_n_vals = np.log(n_agents_i_values)
-    log_n_mesh, strat_mesh = np.meshgrid(log_n_vals, target_strat, indexing="ij")
+    log_n_mesh, strat_mesh = np.meshgrid(log_n_vals, avg_strat_phe_0, indexing="ij")
     log_extinct_flat = spl.ev(log_n_mesh.ravel(), strat_mesh.ravel())
     extinct_rate_grid = np.exp(log_extinct_flat.reshape(log_n_mesh.shape))
+
     for strat_phe_0_i, group_df in fixed_df.groupby("strat_phe_0_i"):
         x = n_agents_i_values
         y = np.exp(spl.ev(np.log(x), strat_phe_0_i))
         axs_5[0].errorbar(x, y, ls="--", **LINE_STYLE)
+
     avg_strat_phe_0_mean = []
     exp_avg_strat_phe_0_mean = []
     for n_agents_i, group_df in random_df.groupby("n_agents_i"):
