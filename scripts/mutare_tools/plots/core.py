@@ -31,6 +31,7 @@ from .utils import (
     plot_avg_strat_phe_0,
     plot_colored_errorbar,
     interpolate_values,
+    extrapolate_extinct_rate,
 )
 
 
@@ -231,7 +232,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
 
     fixed_df = fixed_df.sort_values("strat_phe_0_i")
     max_N_df = fixed_df[fixed_df["n_agents_i"] == fixed_df["n_agents_i"].max()]
-    avg_strat_phe_0 = np.linspace(0.0, 1.0, N_SPLINE_VALUES)
+    avg_strat_phe_0 = np.linspace(0.0, 1.0, N_SPLINE_VALUES)  # --------------------
     avg_growth_rate = interpolate_values(axs_0[0], max_N_df, "avg_growth_rate")
     avg_birth_rate = interpolate_values(axs_4[0], max_N_df, "avg_birth_rate")
 
@@ -248,27 +249,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
 
     random_df = FILTERS["random"](df, job)
 
-    # make a function for this -------------------------------------------------------------
-    mask = fixed_df[("extinct_rate", "mean")] > 0
-    work_df = fixed_df[mask].copy()
-    x = np.log(work_df["n_agents_i"])
-    y = work_df["strat_phe_0_i"]
-    z = np.log(work_df[("extinct_rate", "mean")])
-    sem = work_df[("extinct_rate", "sem")]
-    mean = work_df[("extinct_rate", "mean")]
-    weights = mean / sem
-
-    x_min = np.log(random_df["n_agents_i"].min())
-    x_max = np.log(random_df["n_agents_i"].max())
-    y_min, y_max = 0.0, 1.0
-    tx = []
-    ty = np.linspace(0.2, 0.8, 8).tolist()
-
-    kx, ky = 2, 3
-
-    spl = LSQBivariateSpline(
-        x, y, z, tx, ty, w=weights, bbox=[x_min, x_max, y_min, y_max], kx=kx, ky=ky
-    )
+    spl = extrapolate_extinct_rate(df, job)
 
     # clean up this horrible mess and add distribution plots. -----------------------------
     target_strat = np.linspace(0.0, 1.0, N_SPLINE_VALUES)

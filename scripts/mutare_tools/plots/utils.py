@@ -313,29 +313,25 @@ def interpolate_values(ax: Axes, df: pd.DataFrame, y_col: str) -> Any:
     return y_interp
 
 
-def create_extinct_rate_spline(df: pd.DataFrame, job: SimJob) -> LSQBivariateSpline:
-    fixed_df = FILTERS["fixed"](df, job)
-    random_df = FILTERS["random"](df, job)
+def extrapolate_extinct_rate(df: pd.DataFrame, job: SimJob) -> LSQBivariateSpline:
+    fixed_df = FILTERS["fixed"](df, job).sort_values("strat_phe_0_i")
+    fixed_df = fixed_df[fixed_df[("extinct_rate", "mean")] > 0]
 
-    mask = fixed_df[("extinct_rate", "mean")] > 0
-    work_df = fixed_df[mask].copy()
-    x = np.log(work_df["n_agents_i"])
-    y = work_df["strat_phe_0_i"]
-    z = np.log(work_df[("extinct_rate", "mean")])
-    sem = work_df[("extinct_rate", "sem")]
-    mean = work_df[("extinct_rate", "mean")]
-    weights = mean / sem
+    x = np.log(fixed_df["n_agents_i"])
+    y = fixed_df["strat_phe_0_i"]
+    z = np.log(fixed_df[("extinct_rate", "mean")])
+    w = fixed_df[("extinct_rate", "mean")] / fixed_df[("extinct_rate", "sem")]
 
-    x_min = np.log(random_df["n_agents_i"].min())
-    x_max = np.log(random_df["n_agents_i"].max())
+    tx, ty = [], np.linspace(0.2, 0.8, 8).tolist()
+
+    n_agents_i = FILTERS["random"](df, job)["n_agents_i"]
+    x_min, x_max = (np.log(n_agents_i.min()), np.log(n_agents_i.max()))
     y_min, y_max = 0.0, 1.0
-    tx = []
-    ty = np.linspace(0.2, 0.8, 8).tolist()
 
     kx, ky = 2, 3
 
-    spl = LSQBivariateSpline(
-        x, y, z, tx, ty, w=weights, bbox=[x_min, x_max, y_min, y_max], kx=kx, ky=ky
+    spline = LSQBivariateSpline(
+        x, y, z, tx, ty, w=w, bbox=[x_min, x_max, y_min, y_max], kx=kx, ky=ky
     )
 
-    return spl
+    return spline
