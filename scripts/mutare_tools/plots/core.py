@@ -230,21 +230,17 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
 
     set_heatmap_colorbar(fig_5, axs_5[1], "strat_phe_0_i", linear_norm)
 
-    fixed_df = fixed_df.sort_values("strat_phe_0_i")
-    max_N_df = fixed_df[fixed_df["n_agents_i"] == fixed_df["n_agents_i"].max()]
-    avg_growth_rate = interpolate_values(axs_0[0], max_N_df, "avg_growth_rate")
-    avg_birth_rate = interpolate_values(axs_4[0], max_N_df, "avg_birth_rate")
-
     for ax in [axs_5[0], axs_8[0], axs_9[0]]:
         ax.set_xscale("log")
     for ax in [axs_1[0], axs_5[0], axs_8[0], axs_9[0]]:
         ax.set_yscale("log")
+    for ax in (axs_1[0], axs_5[0]):
+        ax.set_ylim(1e-9, 1e-1)
 
-    extinct_rates = fixed_df[("extinct_rate", "mean")]
-    min_extinct_rate = np.min(extinct_rates[extinct_rates > 0.0])
-    max_extinct_rate = np.max(extinct_rates)
-    axs_1[0].set_ylim(bottom=min_extinct_rate, top=max_extinct_rate)
-    axs_5[0].set_ylim(bottom=min_extinct_rate, top=max_extinct_rate)
+    fixed_df = fixed_df.sort_values("strat_phe_0_i")
+    max_N_df = fixed_df[fixed_df["n_agents_i"] == fixed_df["n_agents_i"].max()]
+    avg_growth_rate = interpolate_values(axs_0[0], max_N_df, "avg_growth_rate")
+    avg_birth_rate = interpolate_values(axs_4[0], max_N_df, "avg_birth_rate")
 
     random_df = FILTERS["random"](df, job).sort_values("n_agents_i")
     extinct_rates = interpolate_extinct_rates(axs_5[0], df, job)
@@ -254,41 +250,37 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
         "log", random_df["n_agents_i"].min() / 2, random_df["n_agents_i"].max() * 2
     )
 
-    avg_strat_phe_0_mean = []
-    exp_avg_strat_phe_0_mean = []
+    avg_s_exp, avg_s = [], []
     for idx, (n_agents_i, group_df) in enumerate(random_df.groupby("n_agents_i")):
         extinct_rate = extinct_rates[idx]
         value = cast(float, n_agents_i)
 
-        avg_strat_phe_0_mean_row = []
-        exp_avg_strat_phe_0_mean_row = []
+        avg_s_exp_row, avg_s_row = [], []
         for prob_mut, subgroup_df in group_df.groupby("prob_mut"):
             log_p_s_exp: np.ndarray = (n_agents_i * avg_growth_rate) - np.log(
                 extinct_rate + prob_mut * avg_birth_rate
             )
             p_s_exp = np.exp(log_p_s_exp - np.max(log_p_s_exp))
             p_s_exp /= np.sum(p_s_exp) / len(s_exp)
-
-            exp_avg_strat_phe_0_mean_row.append((s_exp * p_s_exp / len(s_exp)).sum())
+            avg_s_exp_row.append((s_exp * p_s_exp / len(s_exp)).sum())
 
             s, p_s = get_dist_avg_strat_phe_0(subgroup_df)
             s = np.array(s)
             p_s = np.array(p_s).ravel()
-
-            avg_strat_phe_0_mean_row.append((s * p_s / len(s)).sum())
+            avg_s_row.append((s * p_s / len(s)).sum())
 
             if prob_mut == job.config["model"]["prob_mut"]:
                 plot_colored_curve(axs_6[0], s_exp, p_s_exp, log_norm, value)
                 plot_colored_curve(axs_7[0], s, p_s, log_norm, value)
 
-        avg_strat_phe_0_mean.append(avg_strat_phe_0_mean_row)
-        exp_avg_strat_phe_0_mean.append(exp_avg_strat_phe_0_mean_row)
+        avg_s_exp.append(avg_s_exp_row)
+        avg_s.append(avg_s_row)
 
     for fig, axs in zip([fig_6, fig_7], [axs_6, axs_7]):
         set_heatmap_colorbar(fig, axs[1], "n_agents_i", log_norm)
 
-    plot_avg_strat_phe_0(fig_8, axs_8[0], axs_8[1], random_df, exp_avg_strat_phe_0_mean)
-    plot_avg_strat_phe_0(fig_9, axs_9[0], axs_9[1], random_df, avg_strat_phe_0_mean)
+    plot_avg_strat_phe_0(fig_8, axs_8[0], axs_8[1], random_df, np.array(avg_s_exp))
+    plot_avg_strat_phe_0(fig_9, axs_9[0], axs_9[1], random_df, np.array(avg_s))
 
     fig_dir = job.base_dir / "plots" / "fixed"
     fig_dir.mkdir(parents=True, exist_ok=True)

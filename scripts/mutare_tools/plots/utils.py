@@ -153,9 +153,7 @@ def plot_main_heatmap(
     hm_y = [(i + 0.5) / hist_bins for i in range(hist_bins)]
     hm_z = generate_heatmap_matrix(df, z_col, hist_bins)
     norm = get_heatmap_norm("power", 0, hist_bins)
-    image = ax_main.pcolormesh(
-        hm_x, hm_y, hm_z, norm=norm, cmap=CMAP, shading="nearest"
-    )
+    image = ax_main.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP)
     ax_main.set_xlim(hm_x[0], hm_x[-1])
     set_heatmap_colorbar(fig, ax_bar, z_col, image)
 
@@ -294,7 +292,7 @@ def plot_colored_curve(
     ax: Axes, x: np.ndarray, y: np.ndarray, norm: Normalize, value: float
 ) -> None:
     color = CMAP(norm(value))
-    ax.plot(x, y, ls="--", c=color, lw=1.0, alpha=0.5)
+    ax.plot(x, y, ls="--", c=color, lw=1.0)
 
 
 def interpolate_values(ax: Axes, df: pd.DataFrame, y_col: str) -> np.ndarray:
@@ -317,18 +315,15 @@ def interpolate_extinct_rates(
     z = np.log(fixed_df[("extinct_rate", "mean")])
     w = fixed_df[("extinct_rate", "mean")] / fixed_df[("extinct_rate", "sem")]
 
-    tx, ty = [], np.linspace(0.2, 0.8, 8).tolist()
+    tx, ty = [], np.linspace(1 / 8, 7 / 8, 7).tolist()
 
     x_eval = np.log(random_df["n_agents_i"].unique())
     y_eval = get_strat_eval()
 
     x_min, x_max = x_eval.min(), x_eval.max()
-    y_min, y_max = 0.0, 1.0
-
-    kx, ky = 2, 3
 
     spline = LSQBivariateSpline(
-        x, y, z, tx, ty, w=w, bbox=[x_min, x_max, y_min, y_max], kx=kx, ky=ky
+        x, y, z, tx, ty, w=w, bbox=[x_min, x_max, 0.0, 1.0], kx=2, ky=3
     )
 
     for strat_phe_0_i in fixed_df["strat_phe_0_i"].unique():
@@ -341,19 +336,13 @@ def interpolate_extinct_rates(
 
 
 def plot_avg_strat_phe_0(
-    fig: Figure, ax_main: Axes, ax_bar: Axes, df: pd.DataFrame, data: list[Any]
+    fig: Figure, ax_main: Axes, ax_bar: Axes, df: pd.DataFrame, avg_s: np.ndarray
 ) -> None:
-    n_agents_i_values = sorted(df["n_agents_i"].unique())
-    prob_mut_values = sorted(df["prob_mut"].unique())
+    n_agents_i = sorted(df["n_agents_i"].unique())
+    prob_mut = sorted(df["prob_mut"].unique())
     image = ax_main.pcolormesh(
-        n_agents_i_values,
-        prob_mut_values,
-        np.array(data).transpose(),
-        vmin=0,
-        vmax=1,
-        cmap=CMAP,
-        shading="nearest",
+        n_agents_i, prob_mut, avg_s.transpose(), vmin=0, vmax=1, cmap=CMAP
     )
-    ax_main.set_xlim(n_agents_i_values[0], n_agents_i_values[-1])
-    ax_main.set_ylim(prob_mut_values[0], prob_mut_values[-1])
+    ax_main.set_xlim(n_agents_i[0], n_agents_i[-1])
+    ax_main.set_ylim(prob_mut[0], prob_mut[-1])
     set_heatmap_colorbar(fig, ax_bar, "avg_strat_phe_0", image)
