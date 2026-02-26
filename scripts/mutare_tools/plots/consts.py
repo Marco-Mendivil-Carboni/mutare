@@ -65,7 +65,7 @@ COL_TEX_LABELS: dict[str, str] = {
     "avg_birth_rate": "$\\langle\\mu_b\\rangle$",
 }
 
-N_SPLINE_VALUES = 64
+N_EVALS = 64
 
 
 def strat_phe_0_i_filter(df: pd.DataFrame, job: SimJob) -> pd.DataFrame:

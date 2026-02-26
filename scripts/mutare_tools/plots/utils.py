@@ -19,7 +19,7 @@ from .consts import (
     SIM_COLORS,
     SIM_LABELS,
     COL_TEX_LABELS,
-    N_SPLINE_VALUES,
+    N_EVALS,
     FILTERS,
 )
 
@@ -183,6 +183,10 @@ def create_1D_spline(df: pd.DataFrame, x_col: str, y_col: str) -> BSpline:
     return make_splrep(x, y, w=w, s=len(w))
 
 
+def get_strat_eval() -> np.ndarray:
+    return np.linspace(0, 1, N_EVALS)
+
+
 def get_optimal_strat_phe_0(
     df: pd.DataFrame, job: SimJob, y_col: str, opt: Literal["max"] | Literal["min"]
 ) -> float:
@@ -190,7 +194,7 @@ def get_optimal_strat_phe_0(
 
     spline = create_1D_spline(fixed_i_df, "strat_phe_0_i", y_col)
 
-    x = np.linspace(0, 1, N_SPLINE_VALUES)
+    x = get_strat_eval()
     y = spline(x)
     if opt == "max":
         opt_idx = np.argmax(y)
@@ -245,12 +249,12 @@ def plot_expected_values(
     fixed_i_df = FILTERS["fixed_i"](df, job).sort_values("strat_phe_0_i")
 
     spline = create_1D_spline(fixed_i_df, "strat_phe_0_i", y_col)
-    strat_phe_0, dist_avg_strat_phe_0 = get_dist_avg_strat_phe_0(param_df)
+    avg_strat_phe_0, dist_avg_strat_phe_0 = get_dist_avg_strat_phe_0(param_df)
 
     exp_values = np.zeros(len(param_df))
-    hist_bins = len(strat_phe_0)
+    hist_bins = len(avg_strat_phe_0)
     for bin in range(hist_bins):
-        bin_value = spline(strat_phe_0[bin])
+        bin_value = spline(avg_strat_phe_0[bin])
         if y_col == "extinct_rate":
             bin_value = np.exp(bin_value)
         exp_values += dist_avg_strat_phe_0[bin] * bin_value / hist_bins
@@ -288,13 +292,15 @@ def plot_colored_errorbar(
 
 def interpolate_values(ax: Axes, df: pd.DataFrame, y_col: str) -> np.ndarray:
     spline = create_1D_spline(df, "strat_phe_0_i", y_col)
-    x_interp = np.linspace(0.0, 1.0, N_SPLINE_VALUES)
-    y_interp = spline(x_interp)
-    ax.errorbar(x_interp, y_interp, ls="--", **LINE_STYLE)
-    return y_interp
+    x_eval = get_strat_eval()
+    values = spline(x_eval)
+    ax.errorbar(x_eval, values, ls="--", **LINE_STYLE)
+    return values
 
 
-def extrapolate_extinct_rate(ax: Axes, df: pd.DataFrame, job: SimJob) -> np.ndarray:
+def interpolate_extinct_rates(
+    ax: Axes, df: pd.DataFrame, job: SimJob
+) -> list[np.ndarray]:
     fixed_df = FILTERS["fixed"](df, job).sort_values("strat_phe_0_i")
     fixed_df = fixed_df[fixed_df[("extinct_rate", "mean")] > 0]
     random_df = FILTERS["random"](df, job).sort_values("n_agents_i")
@@ -306,10 +312,10 @@ def extrapolate_extinct_rate(ax: Axes, df: pd.DataFrame, job: SimJob) -> np.ndar
 
     tx, ty = [], np.linspace(0.2, 0.8, 8).tolist()
 
-    x_interp = np.log(random_df["n_agents_i"].unique())
-    y_interp = np.linspace(0.0, 1.0, N_SPLINE_VALUES)
+    x_eval = np.log(random_df["n_agents_i"].unique())
+    y_eval = get_strat_eval()
 
-    x_min, x_max = x_interp.min(), x_interp.max()
+    x_min, x_max = x_eval.min(), x_eval.max()
     y_min, y_max = 0.0, 1.0
 
     kx, ky = 2, 3
@@ -318,15 +324,13 @@ def extrapolate_extinct_rate(ax: Axes, df: pd.DataFrame, job: SimJob) -> np.ndar
         x, y, z, tx, ty, w=w, bbox=[x_min, x_max, y_min, y_max], kx=kx, ky=ky
     )
 
-    x_mesh, y_mesh = np.meshgrid(x_interp, y_interp, indexing="ij")  # -----------------
-    log_extinct_rates = spline.ev(x_mesh.ravel(), y_mesh.ravel())
-    extinct_rate_grid = np.exp(log_extinct_rates.reshape(x_mesh.shape))
-
     for strat_phe_0_i in fixed_df["strat_phe_0_i"].unique():
-        extinct_rates = np.exp(spline.ev(x_interp, strat_phe_0_i))
-        ax.errorbar(np.exp(x_interp), extinct_rates, ls="--", **LINE_STYLE)
+        extinct_rate = np.exp(spline.ev(x_eval, strat_phe_0_i))
+        ax.errorbar(np.exp(x_eval), extinct_rate, ls="--", **LINE_STYLE)
 
-    return extinct_rate_grid
+    extinct_rates = [np.exp(spline.ev(x, y_eval)) for x in x_eval]
+
+    return extinct_rates
 
 
 def plot_avg_strat_phe_0(

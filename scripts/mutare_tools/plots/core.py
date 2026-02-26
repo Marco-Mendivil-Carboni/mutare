@@ -10,7 +10,6 @@ from ..analysis import SimType, collect_avg_analyses, collect_run_time_series
 
 from .utils import (
     LINE_STYLE,
-    N_SPLINE_VALUES,
     FILTERS,
     create_standard_figure,
     create_colorbar_figure,
@@ -21,6 +20,7 @@ from .utils import (
     get_heatmap_norm,
     plot_main_heatmap,
     plot_side_heatmap,
+    get_strat_eval,
     get_optimal_strat_phe_0,
     plot_dist_phe_0_lims,
     get_dist_avg_strat_phe_0,
@@ -29,7 +29,7 @@ from .utils import (
     plot_time_series,
     plot_colored_errorbar,
     interpolate_values,
-    extrapolate_extinct_rate,
+    interpolate_extinct_rates,
     plot_avg_strat_phe_0,
 )
 
@@ -231,7 +231,6 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
 
     fixed_df = fixed_df.sort_values("strat_phe_0_i")
     max_N_df = fixed_df[fixed_df["n_agents_i"] == fixed_df["n_agents_i"].max()]
-    avg_strat_phe_0 = np.linspace(0.0, 1.0, N_SPLINE_VALUES)  # --------------------
     avg_growth_rate = interpolate_values(axs_0[0], max_N_df, "avg_growth_rate")
     avg_birth_rate = interpolate_values(axs_4[0], max_N_df, "avg_birth_rate")
 
@@ -248,14 +247,14 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
 
     # ---------------------------------------------------------------------------------
     random_df = FILTERS["random"](df, job).sort_values("n_agents_i")
-    n_agents_i_values = sorted(random_df["n_agents_i"].unique())
-    extinct_rate_grid = extrapolate_extinct_rate(axs_5[0], df, job)
+    extinct_rates = interpolate_extinct_rates(axs_5[0], df, job)
+    avg_strat_phe_0 = get_strat_eval()
 
     avg_strat_phe_0_mean = []
     exp_avg_strat_phe_0_mean = []
-    for n_agents_i, group_df in random_df.groupby("n_agents_i"):
-        n_idx = n_agents_i_values.index(n_agents_i)
-        extinct_rate = extinct_rate_grid[n_idx, :]
+    for idx, (n_agents_i, group_df) in enumerate(random_df.groupby("n_agents_i")):
+        extinct_rate = extinct_rates[idx]
+
         avg_strat_phe_0_mean_row = []
         exp_avg_strat_phe_0_mean_row = []
         for prob_mut, subgroup_df in group_df.groupby("prob_mut"):
@@ -268,6 +267,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
             exp_avg_strat_phe_0_mean_row.append(
                 (avg_strat_phe_0 * dist_avg_strat_phe_0 / len(avg_strat_phe_0)).sum()
             )
+
             strat_phe_0, dist_avg_strat_phe_0 = get_dist_avg_strat_phe_0(subgroup_df)
             avg_strat_phe_0_mean_row.append(
                 (
@@ -276,6 +276,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
                     / len(strat_phe_0)
                 ).sum()
             )
+
         avg_strat_phe_0_mean.append(avg_strat_phe_0_mean_row)
         exp_avg_strat_phe_0_mean.append(exp_avg_strat_phe_0_mean_row)
 
