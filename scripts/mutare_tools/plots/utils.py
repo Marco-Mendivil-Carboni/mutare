@@ -235,11 +235,11 @@ def plot_dist_phe_0_lims(ax: Axes, df: pd.DataFrame, job: SimJob) -> None:
 
 def get_dist_avg_strat_phe_0(df: pd.DataFrame) -> tuple[list[Any], list[Any]]:
     hist_bins = count_hist_bins(df, "dist_avg_strat_phe_0")
-    x, y = [], []
+    s, p_s = [], []
     for bin in range(hist_bins):
-        x.append((bin + 1 / 2) / hist_bins)
-        y.append(hist_bins * df[(f"dist_avg_strat_phe_0_{bin}", "mean")])
-    return x, y
+        s.append((bin + 1 / 2) / hist_bins)
+        p_s.append(hist_bins * df[(f"dist_avg_strat_phe_0_{bin}", "mean")])
+    return s, p_s
 
 
 def plot_expected_values(
@@ -249,15 +249,15 @@ def plot_expected_values(
     fixed_i_df = FILTERS["fixed_i"](df, job).sort_values("strat_phe_0_i")
 
     spline = create_1D_spline(fixed_i_df, "strat_phe_0_i", y_col)
-    avg_strat_phe_0, dist_avg_strat_phe_0 = get_dist_avg_strat_phe_0(param_df)
+    s, p_s = get_dist_avg_strat_phe_0(param_df)
 
     exp_values = np.zeros(len(param_df))
-    hist_bins = len(avg_strat_phe_0)
+    hist_bins = len(s)
     for bin in range(hist_bins):
-        bin_value = spline(avg_strat_phe_0[bin])
+        bin_value = spline(s[bin])
         if y_col == "extinct_rate":
             bin_value = np.exp(bin_value)
-        exp_values += dist_avg_strat_phe_0[bin] * bin_value / hist_bins
+        exp_values += p_s[bin] * bin_value / hist_bins
 
     ax.plot(param_df[param], exp_values, ls="--", **LINE_STYLE)
 
@@ -288,6 +288,13 @@ def plot_colored_errorbar(
     y = df[(y_col, "mean")]
     yerr = df[(y_col, "sem")]
     ax.errorbar(x, y, yerr, None, c=color, **PLOT_STYLE)
+
+
+def plot_colored_curve(
+    ax: Axes, x: np.ndarray, y: np.ndarray, norm: Normalize, value: float
+) -> None:
+    color = CMAP(norm(value))
+    ax.plot(x, y, ls="--", c=color, lw=1.0, alpha=0.5)
 
 
 def interpolate_values(ax: Axes, df: pd.DataFrame, y_col: str) -> np.ndarray:

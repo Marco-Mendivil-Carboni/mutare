@@ -28,6 +28,7 @@ from .utils import (
     plot_extinct_times,
     plot_time_series,
     plot_colored_errorbar,
+    plot_colored_curve,
     interpolate_values,
     interpolate_extinct_rates,
     plot_avg_strat_phe_0,
@@ -245,40 +246,46 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     axs_1[0].set_ylim(bottom=min_extinct_rate, top=max_extinct_rate)
     axs_5[0].set_ylim(bottom=min_extinct_rate, top=max_extinct_rate)
 
-    # ---------------------------------------------------------------------------------
     random_df = FILTERS["random"](df, job).sort_values("n_agents_i")
     extinct_rates = interpolate_extinct_rates(axs_5[0], df, job)
-    avg_strat_phe_0 = get_strat_eval()
+    s_exp = get_strat_eval()
+
+    log_norm = get_heatmap_norm(
+        "log", random_df["n_agents_i"].min() / 2, random_df["n_agents_i"].max() * 2
+    )
 
     avg_strat_phe_0_mean = []
     exp_avg_strat_phe_0_mean = []
     for idx, (n_agents_i, group_df) in enumerate(random_df.groupby("n_agents_i")):
         extinct_rate = extinct_rates[idx]
+        value = cast(float, n_agents_i)
 
         avg_strat_phe_0_mean_row = []
         exp_avg_strat_phe_0_mean_row = []
         for prob_mut, subgroup_df in group_df.groupby("prob_mut"):
-            log_dist_avg_strat_phe_0: np.ndarray = (
-                n_agents_i * avg_growth_rate
-            ) - np.log(extinct_rate + prob_mut * avg_birth_rate)
-            log_dist_avg_strat_phe_0 -= np.max(log_dist_avg_strat_phe_0)
-            dist_avg_strat_phe_0 = np.exp(log_dist_avg_strat_phe_0)
-            dist_avg_strat_phe_0 /= np.sum(dist_avg_strat_phe_0) / len(avg_strat_phe_0)
-            exp_avg_strat_phe_0_mean_row.append(
-                (avg_strat_phe_0 * dist_avg_strat_phe_0 / len(avg_strat_phe_0)).sum()
+            log_p_s_exp: np.ndarray = (n_agents_i * avg_growth_rate) - np.log(
+                extinct_rate + prob_mut * avg_birth_rate
             )
+            p_s_exp = np.exp(log_p_s_exp - np.max(log_p_s_exp))
+            p_s_exp /= np.sum(p_s_exp) / len(s_exp)
 
-            strat_phe_0, dist_avg_strat_phe_0 = get_dist_avg_strat_phe_0(subgroup_df)
-            avg_strat_phe_0_mean_row.append(
-                (
-                    np.array(strat_phe_0)
-                    * np.array(dist_avg_strat_phe_0).ravel()
-                    / len(strat_phe_0)
-                ).sum()
-            )
+            exp_avg_strat_phe_0_mean_row.append((s_exp * p_s_exp / len(s_exp)).sum())
+
+            s, p_s = get_dist_avg_strat_phe_0(subgroup_df)
+            s = np.array(s)
+            p_s = np.array(p_s).ravel()
+
+            avg_strat_phe_0_mean_row.append((s * p_s / len(s)).sum())
+
+            if prob_mut == job.config["model"]["prob_mut"]:
+                plot_colored_curve(axs_6[0], s_exp, p_s_exp, log_norm, value)
+                plot_colored_curve(axs_7[0], s, p_s, log_norm, value)
 
         avg_strat_phe_0_mean.append(avg_strat_phe_0_mean_row)
         exp_avg_strat_phe_0_mean.append(exp_avg_strat_phe_0_mean_row)
+
+    for fig, axs in zip([fig_6, fig_7], [axs_6, axs_7]):
+        set_heatmap_colorbar(fig, axs[1], "n_agents_i", log_norm)
 
     plot_avg_strat_phe_0(fig_8, axs_8[0], axs_8[1], random_df, exp_avg_strat_phe_0_mean)
     plot_avg_strat_phe_0(fig_9, axs_9[0], axs_9[1], random_df, avg_strat_phe_0_mean)
