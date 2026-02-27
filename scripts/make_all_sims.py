@@ -67,6 +67,8 @@ if __name__ == "__main__":
     plots_only = args.plots_only
     notify = args.notify
 
+    log("starting 'make_all_sims'", notify)
+
     try:
         for sims_config in SIMS_CONFIGS:
             make_sims(sims_config, plots_only, notify)
