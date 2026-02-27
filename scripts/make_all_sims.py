@@ -16,6 +16,9 @@ def parse_args() -> argparse.Namespace:
         prog="make_all_sims", description="make all the simulations for the project"
     )
     parser.add_argument(
+        "--plots-only", action="store_true", help="only generate simulation plots"
+    )
+    parser.add_argument(
         "--notify", action="store_true", help="send Telegram notifications"
     )
     return parser.parse_args()
@@ -43,13 +46,16 @@ def log(message: str, notify: bool) -> None:
         print("failed to find Telegram credentials")
 
 
-def make_sims(sims_config: SimsConfig, notify: bool) -> None:
+def make_sims(sims_config: SimsConfig, plots_only: bool, notify: bool) -> None:
     base_dir = sims_config.init_sim_job.base_dir
     if not base_dir.resolve().is_relative_to(SIMS_DIR.resolve()):
         raise ValueError(f"'{base_dir}' must be inside '{SIMS_DIR}'")
 
     sim_jobs = create_sim_jobs(sims_config)
-    exec_sim_jobs(sim_jobs)
+
+    if not plots_only:
+        exec_sim_jobs(sim_jobs)
+
     plot_sim_jobs(sim_jobs)
 
     log(f"'{base_dir.name}' simulations finished", notify)
@@ -57,11 +63,13 @@ def make_sims(sims_config: SimsConfig, notify: bool) -> None:
 
 if __name__ == "__main__":
     args = parse_args()
+
+    plots_only = args.plots_only
     notify = args.notify
 
     try:
         for sims_config in SIMS_CONFIGS:
-            make_sims(sims_config, notify)
+            make_sims(sims_config, plots_only, notify)
 
     except Exception as exception:
         log(f"'make_all_sims' failed: {exception}", notify)

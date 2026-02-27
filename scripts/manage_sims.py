@@ -288,13 +288,17 @@ class SimsManager(App):
                 self.notify("Simulations are already running", severity="warning")
                 return
 
+            command = [str(MAKE_ALL_SIMS)]
+
             if await self.push_screen_wait(
                 DialogScreen("Remove previous analysis files?")
             ):
                 for file in SIMS_DIR.rglob("analysis.msgpack"):
                     file.unlink()
+            elif self._background_worker.result:
+                if self._background_worker.result.n_missing_msgpacks == 0:
+                    command.append("--plots-only")
 
-            command = [str(MAKE_ALL_SIMS)]
             if await self.push_screen_wait(
                 DialogScreen("Send Telegram notifications?")
             ):
