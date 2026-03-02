@@ -1,0 +1,48 @@
+\documentclass[a4paper,10pt,twocolumn]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage[backend=biber]{biblatex}
+\addbibresource{mutare.bib}
+
+\usepackage{lmodern}
+
+\usepackage[margin=2cm]{geometry}
+
+\usepackage{mathtools,amssymb}
+
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+\usepackage[hidelinks,pdfusetitle]{hyperref}
+
+\title{Evolutionary adaptation through bet-hedging in finite populations under fluctuating environments}
+\author{Marco Mendívil Carboni}
+
+\begin{document}
+
+\maketitle
+
+% Possible Journals:
+% 1. Proceedings of the National Academy of Sciences
+% 2. Physical Review E
+% 3. Journal of Theoretical Biology
+
+\section{Introduction and objectives} \label{sec:introduction}
+
+Adaptation in fluctuating environments is a central problem in evolutionary biology \cite{dinisPhaseTransitionsOptimal2020}. Natural populations rarely experience constant conditions: rather, they face environments that change unpredictably over time, often on ecological or evolutionary timescales. In such contexts, the success of a population depends not only on the intrinsic fitness of individual phenotypes but also on their ability to persist and grow across variable conditions.
+
+A classical view of evolution suggests that populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$ (also called fitness). However, when environmental fluctuations are strong and extinction risk is non-negligible, selection may favor strategies that sacrifice some fitness in exchange for a lower extinction rate $r_e$.
+
+The purpose of this work is to investigate, through numerical simulations, how adaptation in uncertain environments gives rise to phenotypic diversity and whether the strategies that emerge correspond to those of maximal fitness or to safer, more resilient alternatives. The tool \emph{mutare} provides a framework to simulate and analyze such evolutionary dynamics with a simple stochastic model that we will describe in detail in \autoref{sec:model}.
+
+\section{The model: a Markov process} \label{sec:model}
+
+\section{Results: phenotypic diversity and safe strategies} \label{sec:results}
+
+\section{Discussion and outlook} \label{sec:discussion}
+
+\printbibliography
+
+\end{document}

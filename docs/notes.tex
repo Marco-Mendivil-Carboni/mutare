@@ -193,7 +193,7 @@ One possible avenue is to focus on transition statistics between quasi-monomorph
 
 Motivated by the empirical convergence toward a stationary distribution of strategies in the regime of large population size and small mutation probability, we explored a simple heuristic approximation for the long-term distribution of strategies. Specifically, we consider the normalized weight
 \begin{equation}
-    p(s)\propto\frac{\exp(N_\text{ini}\cdot\langle\mu(s)\rangle)}{r_{\text{ext}}(s)},
+    p(s)\propto\frac{\exp(N_\text{ini}\cdot\langle\mu(s)\rangle)}{r_{\text{ext}}(N_\text{ini},s)+p_\text{mut}\langle\mu_b\rangle},
     \label{eq:heuristic_distribution}
 \end{equation}
 where $\langle\mu(s)\rangle$ is the mean growth rate and $r_{\text{ext}}(s)$ the extinction rate measured in fixed-strategy simulations.
@@ -201,6 +201,8 @@ where $\langle\mu(s)\rangle$ is the mean growth rate and $r_{\text{ext}}(s)$ the
 The logic underlying \autoref{eq:heuristic_distribution} is the following. The numerator is intended to represent the probability that a given strategy is selected during the initial competitive phase following reinitialization, when $N_\text{ini}$ independently drawn strategies compete and early growth advantages are exponentially amplified. Instead $1/r_{\text{ext}}(s)$ corresponds to the mean survival time of a population fixed at that strategy. Together, these factors approximate the total fraction of time the system spends in a quasi-monomorphic state characterized by strategy $s$.
 
 This argument is strictly valid only in the $p_{\mathrm{mut}}=0$ limit, where evolution proceeds as a sequence of fixation events separated by extinction and reinitialization. Even in this limit, \autoref{eq:heuristic_distribution} is not expected to provide an exact description. Nevertheless, when evaluated using growth and extinction rates measured independently from fixed-strategy simulations, it reproduces the qualitative structure of the observed strategy distributions and yields reasonable quantitative agreement. In particular, it correctly captures the location of the dominant strategy and the sharpness of the distribution as population size increases.
+
+COMMENT how we consider that for $p_\text{mut}>0$ we can add to \autoref{eq:heuristic_distribution} a term to the denominator which represents the rate at which a strategy dissapears, not because the population goes extinct as a whole but beacuse a particular mutation has fixed in the population.
 
 A key feature of \autoref{eq:heuristic_distribution} is the competition between two terms with fundamentally different scaling behaviors. The growth contribution enters exponentially through $\exp(N_\text{ini}\cdot\langle\mu(s)\rangle)$, while extinction enters algebraically through $r_{\text{ext}}(s)$, which itself follows a power-law dependence on population size. This difference in scaling is essential: it allows extinction risk to dominate at small population sizes, leading to extinction-minimizing strategies, while ensuring that growth maximization inevitably prevails in the large-$N_i$ limit. If extinction were instead exponentially suppressed with population size, it could never overcome the exponential amplification associated with growth, and no such transition would be possible.
 
