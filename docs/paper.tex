@@ -14,8 +14,14 @@
 
 \usepackage{graphicx}
 \usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc, positioning}
+
+\usepackage{booktabs}
 
 \usepackage[hidelinks,pdfusetitle]{hyperref}
+
+\usepackage{lipsum}
 
 \title{Evolutionary adaptation through bet-hedging in finite populations under fluctuating environments}
 \author{Marco Mendívil Carboni}
@@ -24,6 +30,10 @@
 
 \maketitle
 
+\begin{abstract}
+    \dots
+\end{abstract}
+
 % Possible Journals:
 % 1. Proceedings of the National Academy of Sciences
 % 2. Physical Review E
@@ -31,17 +41,119 @@
 
 \section{Introduction and objectives} \label{sec:introduction}
 
-Adaptation in fluctuating environments is a central problem in evolutionary biology \cite{dinisPhaseTransitionsOptimal2020}. Natural populations rarely experience constant conditions: rather, they face environments that change unpredictably over time, often on ecological or evolutionary timescales. In such contexts, the success of a population depends not only on the intrinsic fitness of individual phenotypes but also on their ability to persist and grow across variable conditions.
+Adaptation in fluctuating environments is a central problem in evolutionary biology [SEARCH STANDARD REFERENCE FOR EVOLUTIONARY BIOLOGY]. Natural populations rarely experience constant conditions: rather, they face environments that change unpredictably over time, often on ecological or evolutionary timescales. In such contexts, the success of a population depends not only on the intrinsic fitness of individual phenotypes but also on their ability to persist and grow across variable conditions.
 
-A classical view of evolution suggests that populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$ (also called fitness). However, when environmental fluctuations are strong and extinction risk is non-negligible, selection may favor strategies that sacrifice some fitness in exchange for a lower extinction rate $r_e$.
+A classical view of evolution suggests that populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$. However, when environmental fluctuations are strong and extinction risk is non-negligible, selection may favor strategies that sacrifice some fitness in exchange for a lower extinction rate $r_\text{ext}$.
 
-The purpose of this work is to investigate, through numerical simulations, how adaptation in uncertain environments gives rise to phenotypic diversity and whether the strategies that emerge correspond to those of maximal fitness or to safer, more resilient alternatives. The tool \emph{mutare} provides a framework to simulate and analyze such evolutionary dynamics with a simple stochastic model that we will describe in detail in \autoref{sec:model}.
+The purpose of this work is to investigate, through numerical simulations, how adaptation in uncertain environments gives rise to phenotypic diversity and whether the strategies that emerge correspond to those of maximal fitness or to safer, more resilient alternatives.
+
+Example cite: \autocite{dinisPhaseTransitionsOptimal2020}.
 
 \section{The model: a Markov process} \label{sec:model}
 
-\section{Results: phenotypic diversity and safe strategies} \label{sec:results}
+\lipsum[1-2]
+
+\begin{figure*}
+    \centering
+    \caption{Schematic diagram of our model.} \label{fig:model_diagram}
+    \vspace{1ex}
+    \begin{tikzpicture}[>=stealth, node distance=2.25cm]
+        \node (e1) [draw, circle, minimum size=1cm]{$1$};
+        \node (e2) [draw, circle, minimum size=1cm, right of=e1] {$2$};
+        \draw[->, bend left=20]
+        (e1) to node[above] {$\omega_t(1,2)$} (e2);
+        \draw[->, bend left=20]
+        (e2) to node[below] {$\omega_t(2,1)$} (e1);
+        \node[draw, circle, minimum size=1cm, right of=e2] (agent) {$\phi$};
+        \node[right of=agent, yshift=+1cm, draw, circle, minimum size=1cm] (death) {$\times$};
+        \node[right of=agent, yshift=-1cm, draw, circle, minimum size=1cm] (parent) {$\phi$};
+        \node[right=0cm of parent] (plus) {$+$};
+        \node[right=0cm of plus, draw, circle, minimum size=1cm] (offspring) {$\phi'$};
+        \node[right of=offspring, yshift=+1cm] (A) {$\phi'=A$};
+        \node[right of=offspring, yshift=-1cm] (B) {$\phi'=B$};
+        \draw[->]
+        (agent) -- node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
+        \draw[->]
+        (agent) -- node[sloped, midway, below] {$\omega_b(e,\phi)$} (parent);
+        \draw[->]
+        (offspring) -- node[sloped, midway, above] {$s(A)$} (A);
+        \draw[->]
+        (offspring) -- node[sloped, midway, below] {$s(B)$} (B);
+    \end{tikzpicture}
+\end{figure*}
+
+\lipsum[1-2]
+
+\section{Behaviour of the model without evolution} \label{sec:no_evolution}
+
+[MYBE REMOVE THE EVOL SIMULATIONS FOR THIS FIRST FIGURES AND TALK JUST ABOUT THE FIEX SIMULATIONS FOR NOW]
+
+\lipsum[1-2]
+
+\begin{figure}
+    \centering
+    \caption{\dots} \label{fig:main_observables}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}
+\end{figure}
+
+\lipsum[1-2]
+
+\section{Outcome of the evolutionary dynamics} \label{sec:evol_outcome}
+
+\lipsum[1-2]
+
+\begin{figure}
+    \centering
+    \caption{\dots} \label{fig:evol_results}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/growth_rates.pdf}
+\end{figure}
+
+\lipsum[1-2]
+
+\begin{figure}
+    \centering
+    \caption{\dots} \label{fig:dependence_on_N_ini_and_p_mut}
+    \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/n_agents_i/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/prob_mut/dist_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/prob_mut/avg_strat_phe_0.pdf}
+\end{figure}
+
+\lipsum[1-2]
+
+\begin{figure}
+    \centering
+    \caption{\dots} \label{fig:evidence_of_common_strategy}
+    \includegraphics{../sims/asymmetric/plots/time_series/dist_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/prob_mut/avg_growth_rate.pdf}
+\end{figure}
+
+\lipsum[1-2]
+
+\section{Explanation of the evolutionary outcome and a heuristic approximation} \label{sec:explanation_and_heuristic_approx}
+
+\lipsum[1-2]
+
+\begin{figure*}
+    \centering
+    \caption{\dots} \label{fig:fixed_simulation_results}
+    \includegraphics{../sims/asymmetric/plots/fixed/avg_growth_rate.pdf}
+    \includegraphics{../sims/asymmetric/plots/fixed/extinct_rate_scaling.pdf}
+    \includegraphics{../sims/asymmetric/plots/fixed/exp_dist_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/fixed/dist_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/fixed/exp_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/fixed/avg_strat_phe_0.pdf}
+\end{figure*}
+
+\lipsum[1-2]
 
 \section{Discussion and outlook} \label{sec:discussion}
+
+\lipsum[1-2]
 
 \printbibliography
 
