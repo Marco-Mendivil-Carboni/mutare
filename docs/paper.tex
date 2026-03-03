@@ -21,8 +21,6 @@
 
 \usepackage[hidelinks,pdfusetitle]{hyperref}
 
-\usepackage{lipsum}
-
 \title{Evolutionary adaptation through bet-hedging in finite populations under fluctuating environments}
 \author{Marco Mendívil Carboni}
 
@@ -51,7 +49,21 @@ Example cite: \autocite{dinisPhaseTransitionsOptimal2020}.
 
 \section{The model: a Markov process} \label{sec:model}
 
-\lipsum[1-2]
+We consider a population with an initial number of agents $N_i$ evolving in an environment that fluctuates randomly over time. The \emph{environment} is modeled as a discrete variable with $n_{\text{env}}$ possible states, $e\in\{0,\dots,n_{\text{env}}-1\}$, which evolve according to a continuous-time Markov chain with transition rates $\omega_t(e,e')$ between states $e$ and $e'$.
+
+Each agent is characterized by a \emph{phenotype} $\phi\in\{0,\dots,n_{\text{phe}}-1\}$ and a \emph{phenotypic strategy} $s(\phi)$, which represents a probability distribution (see \autoref{eq:phenotypic_strategy}) over the possible phenotypes:
+\begin{equation} \label{eq:phenotypic_strategy}
+    \sum_{\phi=0}^{n_{\text{phe}}-1}s(\phi) = 1.
+\end{equation}
+The phenotypic strategy determines the phenotype of the offspring, introducing a mechanism for stochastic phenotype switching between generations.
+
+Population dynamics occur through stochastic birth and death processes that depend on both the current environment and the phenotype of the agent. The matrices $\omega_b(e,\phi)$ and $\omega_d(e,\phi)$ denote the birth and death rates of phenotype $\phi$ in environment $e$, respectively. The net growth rate in a given environment thus depends on the phenotypic composition of the population.
+
+When an agent replicates, its offspring inherits the parent's phenotypic strategy $s(\phi)$, but with probability $p_{\text{mut}}$ a mutation occurs, leading to a new random strategy. This mechanism allows for evolutionary exploration of the space of possible strategies.
+
+The total population size is capped at the initial value $N_i$: whenever replication would cause the population to exceed this value, a random agent is removed. This mimics a form of ecological carrying capacity. If the population goes extinct, it is reinitialized, allowing for long-term statistical characterization of the dynamics.
+
+We will restrict ourselves to the case $n_{\text{env}}=n_{\text{phe}}=2$. To solve the stochastic model we will use the Gillespie algorithm [ADD CITE].
 
 \begin{figure*}
     \centering
@@ -82,65 +94,85 @@ Example cite: \autocite{dinisPhaseTransitionsOptimal2020}.
     \end{tikzpicture}
 \end{figure*}
 
-\lipsum[1-2]
+The model intentionally strips the problem down to its minimal ingredients. We consider only two environmental states and two phenotypes, and we restrict strategies to environment-independent stochastic switching. This simplicity is deliberate: our goal is not to reproduce the full biological complexity of real systems, but rather to isolate the fundamental tension between growth maximization and extinction avoidance in a fluctuating environment.
+
+The crucial ingredient distinguishing our framework from standard models of bet-hedging is the explicit cap on population size. By imposing a maximum population size $N_i$, we effectively introduce a carrying capacity. Under this constraint, extinction becomes inevitable over sufficiently long times, even for strategies with positive mean growth rate. As a result, extinction is not a rare pathological event but an integral part of the long-term dynamics. This allows us to study how extinction risk feeds back into evolutionary selection.
+
+Throughout the paper we focus on understanding whether evolution favors strategies that maximize mean growth rate, minimize extinction probability, or balance both objectives. The simplicity of the model allows us to compute and compare these quantities directly and to identify the regimes in which they conflict.
 
 \section{Behaviour of the model without evolution} \label{sec:no_evolution}
 
-[MYBE REMOVE THE EVOL SIMULATIONS FOR THIS FIRST FIGURES AND TALK JUST ABOUT THE FIEX SIMULATIONS FOR NOW]
-
-\lipsum[1-2]
+[MYBE REMOVE THE EVOL SIMULATIONS FOR THIS FIRST FIGURES AND TALK JUST ABOUT THE FIXED SIMULATIONS FOR NOW]
 
 \begin{figure}
     \centering
-    \caption{\dots} \label{fig:main_observables}
+    \caption{Mean growth rate (top) and extinction rate (bottom) as a function of the fixed phenotypic strategy in the asymmetric parameter set. The strategy maximizing mean growth differs from the one minimizing extinction, revealing a clear trade-off between growth and survival.} \label{fig:main_observables}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}
 \end{figure}
 
-\lipsum[1-2]
+We begin by analyzing the model in the absence of evolution, that is, for fixed phenotypic strategies. This allows us to disentangle ecological effects from evolutionary ones and to characterize the trade-off between mean growth and extinction risk for each strategy independently.
+
+Figure~\ref{fig:main_observables} shows the mean growth rate $\langle\mu\rangle$ and the extinction rate $r_e$ measured in fixed-strategy simulations for the asymmetric parameter set. The growth-maximizing strategy is, in general, distinct from the extinction-minimizing strategy. In particular, strategies that yield the highest average growth rate often exhibit substantially larger extinction rates. Conversely, safer strategies reduce extinction risk at the cost of lower mean growth.
+
+This conflict demonstrates that, in finite populations subject to environmental fluctuations, growth maximization and survival maximization are not equivalent criteria. The existence of this trade off is the central ecological ingredient that will later shape the evolutionary outcome.
 
 \section{Outcome of the evolutionary dynamics} \label{sec:evol_outcome}
 
-\lipsum[1-2]
+We now enable evolution by allowing strategies to mutate and compete. Starting either from a monomorphic population or from a random distribution of strategies, the system consistently converges toward a well-defined stationary distribution in strategy space.
+
+A key observation is that the instantaneous dispersion of strategies remains small for sufficiently low mutation probabilities. At any given time, the population is therefore almost monomorphic, characterized by a single dominant strategy. Over long times, however, mutation-driven exploration causes the dominant strategy to drift through strategy space. In this sense, the evolutionary simulations can be viewed as a temporal concatenation of quasi-monomorphic fixed-strategy realizations.
+
+The average evolved strategy typically lies between the growth maximizing and extinction minimizing strategies identified in the fixed strategy simulations. This shows that evolution does not optimize instantaneous growth alone, but rather selects strategies reflecting a compromise between growth and extinction avoidance.
 
 \begin{figure}
     \centering
-    \caption{\dots} \label{fig:evol_results}
+    \caption{Evolutionary dynamics in the asymmetric parameter set. The distribution and average of the phenotypic strategy converge to a stationary value independent of initial conditions. The evolved strategy lies between the growth-optimal and extinction-minimizing strategies, reflecting a trade-off between growth and survival.} \label{fig:evol_results}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/growth_rates.pdf}
 \end{figure}
 
-\lipsum[1-2]
-
 \begin{figure}
     \centering
-    \caption{\dots} \label{fig:dependence_on_N_ini_and_p_mut}
+    \caption{Dependence of the evolved strategy on population size $N_i$ (top panels) and mutation probability $p_{\mathrm{mut}}$ (bottom panels). Increasing $N_i$ drives the system toward growth maximization, while smaller populations favor safer strategies.} \label{fig:dependence_on_N_ini_and_p_mut}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/avg_strat_phe_0.pdf}
 \end{figure}
 
-\lipsum[1-2]
+The evolutionary outcome depends systematically on both the population size $N_i$ and the mutation probability $p_{\mathrm{mut}}$ (Fig.~\ref{fig:dependence_on_N_ini_and_p_mut}). As $N_i$ increases, the evolved average strategy approaches the growth-maximizing value obtained from fixed simulations. This behavior is consistent with the rapid decrease of extinction risk with increasing population size.
+
+By contrast, smaller populations experience stronger extinction pressure and evolve toward safer strategies. The mutation probability primarily controls the exploration of strategy space: for very large values, the population behaves almost as a randomized ensemble, while for very small values the system spends long periods near quasi-fixed strategies. Importantly, for sufficiently large $N_i$, the dependence on $p_{\mathrm{mut}}$ becomes weak, indicating that the evolutionary attractor is robust in the large-population regime.
 
 \begin{figure}
     \centering
     \caption{\dots} \label{fig:evidence_of_common_strategy}
-    \includegraphics{../sims/asymmetric/plots/time_series/dist_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/time_series/avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/avg_growth_rate.pdf}
 \end{figure}
 
-\lipsum[1-2]
+Time series data confirm that, in the low-mutation regime, the population is effectively characterized by a common strategy at each instant (Fig.~\ref{fig:evidence_of_common_strategy}). The apparent breadth of the long-term strategy distribution arises from averaging over time and across realizations, not from coexistence of widely different strategies at a single moment.
+
+This quasi-monomorphic behavior justifies interpreting the evolutionary process as a stochastic trajectory in strategy space, driven by rare successful mutations and shaped by extinction events. The fact that extinction events typically occur while the population is near a single strategy further supports this coarse-grained description.
 
 \section{Explanation of the evolutionary outcome and a heuristic approximation} \label{sec:explanation_and_heuristic_approx}
 
-\lipsum[1-2]
+To understand the evolutionary outcome, we return to fixed-strategy simulations and examine how growth and extinction scale with population size. While the mean growth rate $\langle\mu\rangle$ depends only weakly on $N_i$, the extinction rate $r_{\mathrm{ext}}$ decreases approximately as a power law, $r_{\mathrm{ext}}\sim N_i^{-\alpha}$. This strong size dependence implies that extinction pressure is significant for small populations but rapidly weakens as $N_i$ increases.
+
+This observation suggests that the evolutionary attractor emerges from the competition between exponential growth amplification and algebraically suppressed extinction risk. Motivated by this idea, we propose the heuristic stationary distribution
+\[
+    p(s)\propto\frac{\exp(N_i\langle\mu(s)\rangle)}{r_{\mathrm{ext}}(s)+p_{\mathrm{mut}}\langle\mu_b\rangle},
+\]
+constructed solely from quantities measured in fixed-strategy simulations.
+
+The numerator captures the amplification of early growth differences when multiple strategies compete after reinitialization, while the denominator approximates the rate at which a strategy disappears, either through population extinction or mutation-driven replacement. Despite its simplicity, this expression reproduces the qualitative location and sharpening of the evolved distribution as $N_i$ increases.
 
 \begin{figure*}
     \centering
-    \caption{\dots} \label{fig:fixed_simulation_results}
+    \caption{Fixed-strategy results used to construct the heuristic approximation. Mean growth rate depends weakly on $N_i$, whereas extinction rate follows an approximate power-law scaling. Using these inputs, the heuristic distribution captures the qualitative features of the evolutionary stationary distribution, although quantitative discrepancies remain.} \label{fig:fixed_simulation_results}
     \includegraphics{../sims/asymmetric/plots/fixed/avg_growth_rate.pdf}
     \includegraphics{../sims/asymmetric/plots/fixed/extinct_rate_scaling.pdf}
     \includegraphics{../sims/asymmetric/plots/fixed/exp_dist_avg_strat_phe_0.pdf}
@@ -149,11 +181,15 @@ Example cite: \autocite{dinisPhaseTransitionsOptimal2020}.
     \includegraphics{../sims/asymmetric/plots/fixed/avg_strat_phe_0.pdf}
 \end{figure*}
 
-\lipsum[1-2]
-
 \section{Discussion and outlook} \label{sec:discussion}
 
-\lipsum[1-2]
+Our results provide a minimal and explicit example of how evolutionary outcomes in finite populations cannot be inferred solely from average instantaneous growth. The long-term dominant strategy depends not only on mean behavior, but also on the magnitude and direction of fluctuations, particularly those leading to extinction. In fluctuating environments with bounded population size, extinction is unavoidable over long times and therefore acts as a genuine selective force.
+
+As population size increases, extinction risk becomes negligible and classical growth maximization is recovered. For smaller populations, however, extinction risk reshapes the adaptive landscape and biases evolution toward safer, lower-growth strategies. This crossover illustrates how demographic constraints fundamentally alter evolutionary optimization.
+
+The heuristic approximation proposed here clarifies the competing scaling behaviors underlying this transition, even though it does not provide an exact quantitative description. The remaining discrepancies indicate that evolutionary dynamics cannot, in general, be reduced entirely to fixed-strategy observables. Developing a more systematic coarse-grained theory of strategy dynamics, possibly linked to quasi-stationary distributions, remains an important direction for future work.
+
+More broadly, this study highlights that the effective fitness governing evolution in realistic finite populations must incorporate extinction risk explicitly. Understanding how such survival-weighted fitness functions emerge from stochastic ecological dynamics is essential for building a predictive theory of adaptation in fluctuating environments.
 
 \printbibliography
 
