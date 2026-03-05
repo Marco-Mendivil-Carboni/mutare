@@ -12,7 +12,8 @@
 - Each agent carries a **phenotype**, a discrete variable with `n_phe` possible values, and a **phenotypic strategy**, a distribution over phenotypes.
 - Agents may **duplicate** or **die** according to environment and phenotype specific rates (`rates_birth` and `rates_death`).
 - The offspring's phenotype is sampled from the parent's phenotypic strategy.
-- The offspring inherits the parent's phenotypic strategy, but with probability `prob_mut` it suffers a random mutation and changes completely.
+- The offspring inherits the parent's phenotypic strategy, but with probability `prob_mut` it suffers a random mutation.
+- When the strategy mutates, if `std_dev_mut` is set, a random vector with that standard deviation is added; otherwise, it changes completely.
 - At every simulation step, the population is capped at its initial size (`n_agents`) and reinitialized if extinction is reached.
 - Initially, if `strat_phe` is set, all agents will share that same strategy; otherwise, they will each have a random strategy.
 
