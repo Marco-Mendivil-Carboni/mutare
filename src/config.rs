@@ -32,6 +32,8 @@ pub struct ModelParams {
 
     /// Mutation probability.
     pub prob_mut: f64,
+    /// Mutation standard deviation.
+    pub std_dev_mut: Option<f64>,
 }
 
 /// State initialization parameters.
@@ -88,6 +90,9 @@ impl Config {
             .context("invalid agent death rates")?;
 
         check_num(model.prob_mut, 0.0..=1.0).context("invalid mutation probability")?;
+        if let Some(std_dev_mut) = model.std_dev_mut {
+            check_num(std_dev_mut, 0.0..).context("invalid mutation standard deviation")?;
+        }
 
         check_num(init.n_agents, 1..=16_384).context("invalid number of agents")?;
 

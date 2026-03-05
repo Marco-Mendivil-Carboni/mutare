@@ -87,10 +87,24 @@ def _generate_sims_configs() -> list[SimsConfig]:
         fixed_n_agents_i_values=[],
     )
 
+    incremental_sim_job = deepcopy(asymmetric_sim_job)
+    incremental_sim_job.base_dir = SIMS_DIR / "incremental"
+    incremental_sim_job.config["model"]["prob_mut"] = 0.01
+    incremental_sim_job.config["model"]["std_dev_mut"] = 0.1
+
+    incremental_sims_config = SimsConfig(
+        init_sim_job=incremental_sim_job,
+        strat_phe_0_i_values=strat_phe_0_i_values,
+        prob_mut_values=[],
+        n_agents_i_values=n_agents_i_values,
+        fixed_n_agents_i_values=[],
+    )
+
     return [
         symmetric_sims_config,
         asymmetric_sims_config,
         extended_sims_config,
+        incremental_sims_config,
     ]
 
 

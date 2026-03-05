@@ -42,6 +42,7 @@ class SimType(IntEnum):
 
 def add_sim_info(df_or_dict: pd.DataFrame | dict[str, Any], sim_job: SimJob) -> None:
     df_or_dict["prob_mut"] = sim_job.config["model"]["prob_mut"]
+    df_or_dict["std_dev_mut"] = sim_job.config["model"].get("std_dev_mut")
     df_or_dict["n_agents_i"] = sim_job.config["init"]["n_agents"]
 
     strat_phe_i = sim_job.config["init"].get("strat_phe")

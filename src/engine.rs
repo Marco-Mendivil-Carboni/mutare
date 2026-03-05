@@ -6,7 +6,7 @@ use crate::types::{Agent, Event, Observables, State};
 use anyhow::{Context, Result};
 use rand::prelude::*;
 use rand_chacha::ChaCha12Rng;
-use rand_distr::{Exp, weighted::WeightedIndex};
+use rand_distr::{Exp, Normal, weighted::WeightedIndex};
 use rmp_serde::{decode, encode};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -240,9 +240,17 @@ impl Engine {
         let mut strat_phe_new = strat_phe.clone();
 
         if self.rng.random_bool(self.cfg.model.prob_mut) {
-            strat_phe_new = (0..self.cfg.model.n_phe)
-                .map(|_| self.rng.random_range(0.0..1.0))
-                .collect();
+            if let Some(std_dev_mut) = self.cfg.model.std_dev_mut {
+                let ele_mut_dist = Normal::new(0.0, std_dev_mut)?;
+                strat_phe_new = strat_phe_new
+                    .iter()
+                    .map(|ele| (ele + ele_mut_dist.sample(&mut self.rng)).abs())
+                    .collect();
+            } else {
+                strat_phe_new = (0..self.cfg.model.n_phe)
+                    .map(|_| self.rng.random_range(0.0..1.0))
+                    .collect();
+            }
             let sum: f64 = strat_phe_new.iter().sum();
             strat_phe_new.iter_mut().for_each(|ele| *ele /= sum);
         }

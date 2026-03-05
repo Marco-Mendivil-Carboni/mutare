@@ -12,6 +12,7 @@ class ModelParams(TypedDict):
     rates_birth: list[list[float]]
     rates_death: list[list[float]]
     prob_mut: float
+    std_dev_mut: NotRequired[float]
 
 
 class InitParams(TypedDict):
