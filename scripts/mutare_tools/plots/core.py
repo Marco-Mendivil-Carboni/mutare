@@ -73,8 +73,9 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
                 if y_span_col is not None:
                     plot_errorband(ax, group_df, param, y_col, y_span_col)
 
-        plot_mean_and_uncertainty(ax_0, "avg_growth_rate", None)
-        plot_mean_and_uncertainty(ax_1, "extinct_rate", None)
+        if not (param == "strat_phe_0_i" and sim_type != SimType.FIXED):
+            plot_mean_and_uncertainty(ax_0, "avg_growth_rate", None)
+            plot_mean_and_uncertainty(ax_1, "extinct_rate", None)
 
         plot_errorbar(ax_2, group_df, "avg_growth_rate", "extinct_rate", True)
 

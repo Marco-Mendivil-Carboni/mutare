@@ -49,6 +49,31 @@ Example cite: \autocite{dinisPhaseTransitionsOptimal2020}.
 
 \section{The model: a Markov process} \label{sec:model}
 
+\begin{figure}
+    \centering
+    \caption{Schematic diagram of our model.} \label{fig:model_diagram}
+    \vspace{2ex}
+    \begin{tikzpicture}[>=stealth, node distance=2.5cm]
+        \node[draw, circle, minimum size=1.25cm] (agent) {$\phi$, $s$};
+        \node[right of=agent, yshift=+1cm, draw, circle, minimum size=1.25cm] (death) {$\times$};
+        \node[right of=agent, yshift=-1cm, draw, circle, minimum size=1.25cm] (parent) {$\phi$, $s$};
+        \node[right=0cm of parent] (plus) {$+$};
+        \node[right=0cm of plus, draw, circle, minimum size=1.25cm] (offspring) {$\phi'$, $s'$};
+        \draw[->] (agent) -- node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
+        \draw[->] (agent) -- node[sloped, midway, below] {$\omega_b(e,\phi)$} (parent);
+        \node[below=2.5cm of agent, xshift=-0.75cm] (phi_prime) {$\phi'$};
+        \node[right of=phi_prime, yshift=+1cm] (A) {$A$};
+        \node[right of=phi_prime, yshift=-1cm] (B) {$B$};
+        \draw[->] (phi_prime) -- node[sloped, midway, above] {$s(A)$} (A);
+        \draw[->] (phi_prime) -- node[sloped, midway, below] {$s(B)$} (B);
+        \node[right=2.5cm of phi_prime, xshift=+0.75cm] (s_prime) {$s'$};
+        \node[right of=s_prime, yshift=+1cm] (s_parent) {$s$};
+        \node[right of=s_prime, yshift=-1cm] (s_mut) {$s_{\text{mut}}$};
+        \draw[->] (s_prime) -- node[sloped, midway, above] {$1-p_{\text{mut}}$} (s_parent);
+        \draw[->] (s_prime) -- node[sloped, midway, below] {$p_{\text{mut}}$} (s_mut);
+    \end{tikzpicture}
+\end{figure}
+
 We consider a population with an initial number of agents $N_i$ evolving in an environment that fluctuates randomly over time. The \emph{environment} is modeled as a discrete variable with $n_{\text{env}}$ possible states, $e\in\{0,\dots,n_{\text{env}}-1\}$, which evolve according to a continuous-time Markov chain with transition rates $\omega_t(e,e')$ between states $e$ and $e'$.
 
 Each agent is characterized by a \emph{phenotype} $\phi\in\{0,\dots,n_{\text{phe}}-1\}$ and a \emph{phenotypic strategy} $s(\phi)$, which represents a probability distribution (see \autoref{eq:phenotypic_strategy}) over the possible phenotypes:
@@ -64,35 +89,6 @@ When an agent replicates, its offspring inherits the parent's phenotypic strateg
 The total population size is capped at the initial value $N_i$: whenever replication would cause the population to exceed this value, a random agent is removed. This mimics a form of ecological carrying capacity. If the population goes extinct, it is reinitialized, allowing for long-term statistical characterization of the dynamics.
 
 We will restrict ourselves to the case $n_{\text{env}}=n_{\text{phe}}=2$. To solve the stochastic model we will use the Gillespie algorithm [ADD CITE].
-
-\begin{figure*}
-    \centering
-    \caption{Schematic diagram of our model.} \label{fig:model_diagram}
-    \vspace{1ex}
-    \begin{tikzpicture}[>=stealth, node distance=2.25cm]
-        \node (e1) [draw, circle, minimum size=1cm]{$1$};
-        \node (e2) [draw, circle, minimum size=1cm, right of=e1] {$2$};
-        \draw[->, bend left=20]
-        (e1) to node[above] {$\omega_t(1,2)$} (e2);
-        \draw[->, bend left=20]
-        (e2) to node[below] {$\omega_t(2,1)$} (e1);
-        \node[draw, circle, minimum size=1cm, right of=e2] (agent) {$\phi$};
-        \node[right of=agent, yshift=+1cm, draw, circle, minimum size=1cm] (death) {$\times$};
-        \node[right of=agent, yshift=-1cm, draw, circle, minimum size=1cm] (parent) {$\phi$};
-        \node[right=0cm of parent] (plus) {$+$};
-        \node[right=0cm of plus, draw, circle, minimum size=1cm] (offspring) {$\phi'$};
-        \node[right of=offspring, yshift=+1cm] (A) {$\phi'=A$};
-        \node[right of=offspring, yshift=-1cm] (B) {$\phi'=B$};
-        \draw[->]
-        (agent) -- node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
-        \draw[->]
-        (agent) -- node[sloped, midway, below] {$\omega_b(e,\phi)$} (parent);
-        \draw[->]
-        (offspring) -- node[sloped, midway, above] {$s(A)$} (A);
-        \draw[->]
-        (offspring) -- node[sloped, midway, below] {$s(B)$} (B);
-    \end{tikzpicture}
-\end{figure*}
 
 The model intentionally strips the problem down to its minimal ingredients. We consider only two environmental states and two phenotypes, and we restrict strategies to environment-independent stochastic switching. This simplicity is deliberate: our goal is not to reproduce the full biological complexity of real systems, but rather to isolate the fundamental tension between growth maximization and extinction avoidance in a fluctuating environment.
 
@@ -192,5 +188,30 @@ The heuristic approximation proposed here clarifies the competing scaling behavi
 More broadly, this study highlights that the effective fitness governing evolution in realistic finite populations must incorporate extinction risk explicitly. Understanding how such survival-weighted fitness functions emerge from stochastic ecological dynamics is essential for building a predictive theory of adaptation in fluctuating environments.
 
 \printbibliography
+
+\appendix
+
+\section{Different model parameters}
+
+\dots
+
+\section{Incremental mutations}
+
+\dots
+
+\begin{figure*}[p]
+    \centering
+    \caption{\dots} \label{fig:incremental_mutations}
+    \includegraphics{../sims/incremental/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/incremental/plots/strat_phe_0_i/avg_strat_phe_0.pdf}
+    \includegraphics{../sims/incremental/plots/n_agents_i/dist_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/incremental/plots/n_agents_i/avg_strat_phe_0.pdf}
+\end{figure*}
+
+\dots
+
+\section{The Gillespie algorithm and time series analysis}
+
+\dots
 
 \end{document}
