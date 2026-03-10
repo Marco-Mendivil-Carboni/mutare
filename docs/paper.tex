@@ -43,13 +43,15 @@
 
 Adaptation in fluctuating environments is a central problem in evolutionary biology \autocite{kingscollegeRiskUncertaintyEvolutionary1982}. Natural populations rarely experience constant conditions: rather, they face environments that change unpredictably over time, often on ecological or evolutionary timescales. In such contexts, the success of a population depends not only on the intrinsic fitness of individual phenotypes but also on their ability to persist and grow across variable conditions.
 
+MENTION BET-HEDGING.
+
 Even in the presence of fluctuating environments our current understanding of evolution suggests that populations tend to evolve toward the strategy that maximizes their mean growth rate \autocite{gillespieNaturalSelectionVariances1977} \footnote{More precisely, \autocite{gillespieNaturalSelectionVariances1977} argues that what gets maximized is the geometric mean of the offspring number $\mu'$ (where $N(t+\Delta t)=\mu'\cdot N(t)$) but this is equivalent to maximizing the arithmetic mean of the growth rate $\langle\mu\rangle$ as we have defined it in \autoref{eq:avg_growth_rate}.}
 \begin{equation} \label{eq:avg_growth_rate}
     \langle\mu\rangle=\left\langle\frac{1}{N(t)}\frac{dN}{dt}(t)\right\rangle.
 \end{equation}
-However, when environmental fluctuations are strong and extinction risk is non-negligible, natural selection may favor strategies that sacrifice some average growth rate in exchange for a lower extinction rate $r_\text{ext}$.
+However, when environmental fluctuations are strong and extinction risk is non-negligible (like in limited-size populations), natural selection may favor strategies that sacrifice some average growth rate in exchange for a lower extinction rate $r_\text{ext}$.
 
-The purpose of this work is to investigate, through numerical simulations, how adaptation in uncertain environments gives rise to phenotypic diversity and understand to what extent the strategies that emerge correspond to those of maximal growth or to safer, more resilient alternatives.
+The purpose of this work is to investigate, through numerical simulations, how the adaptation of finite populations in uncertain environments gives rise to phenotypic diversity and understand to what extent the strategies that emerge correspond to those of maximal growth or to safer, more resilient alternatives.
 
 \section{The model: a Markov process} \label{sec:model}
 
@@ -58,19 +60,23 @@ The purpose of this work is to investigate, through numerical simulations, how a
     \caption{Schematic diagram of our model.} \label{fig:model_diagram}
     \vspace{2ex}
     \begin{tikzpicture}[>=stealth, node distance=2.5cm]
-        \node[draw, circle, minimum size=1.25cm] (agent) {$\phi$, $s$};
+        \node[draw, circle, minimum size=1cm] (e1) {$1$};
+        \node[draw, circle, minimum size=1cm, right of=e1] (e2) {$2$};
+        \draw[->, bend left=20] (e1) to node[above] {$\omega_t(1,2)$} (e2);
+        \draw[->, bend left=20] (e2) to node[below] {$\omega_t(2,1)$} (e1);
+        \node[draw, circle, minimum size=1.25cm, below of=e1, xshift=-0.5cm, yshift=-0.25cm] (agent) {$\phi$, $s$};
         \node[right of=agent, yshift=+1cm, draw, circle, minimum size=1.25cm] (death) {$\times$};
         \node[right of=agent, yshift=-1cm, draw, circle, minimum size=1.25cm] (parent) {$\phi$, $s$};
         \node[right=0cm of parent] (plus) {$+$};
         \node[right=0cm of plus, draw, circle, minimum size=1.25cm] (offspring) {$\phi'$, $s'$};
         \draw[->] (agent) -- node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
         \draw[->] (agent) -- node[sloped, midway, below] {$\omega_b(e,\phi)$} (parent);
-        \node[below=2.5cm of agent, xshift=-0.75cm] (phi_prime) {$\phi'$};
+        \node[below of=agent, xshift=-0.75cm, yshift=-0.5cm] (phi_prime) {$\phi'$};
         \node[right of=phi_prime, yshift=+1cm] (A) {$A$};
         \node[right of=phi_prime, yshift=-1cm] (B) {$B$};
         \draw[->] (phi_prime) -- node[sloped, midway, above] {$s(A)$} (A);
         \draw[->] (phi_prime) -- node[sloped, midway, below] {$s(B)$} (B);
-        \node[right=2.5cm of phi_prime, xshift=+0.75cm] (s_prime) {$s'$};
+        \node[right of=phi_prime, xshift=+0.75cm] (s_prime) {$s'$};
         \node[right of=s_prime, yshift=+1cm] (s_parent) {$s$};
         \node[right of=s_prime, yshift=-1cm] (s_mut) {$s_{\text{mut}}$};
         \draw[->] (s_prime) -- node[sloped, midway, above] {$1-p_{\text{mut}}$} (s_parent);
@@ -78,9 +84,11 @@ The purpose of this work is to investigate, through numerical simulations, how a
     \end{tikzpicture}
 \end{figure}
 
-To investigate this problem we propose the following (very simple) agent-based population model.
+To investigate this problem we propose the simple agent-based population model outlined in the diagram of \autoref{fig:model_diagram}.
 
-Firstly, we will model the \emph{environment} as a discrete variable with $n_{\text{env}}$ possible states, $e\in\{0,\dots,n_{\text{env}}-1\}$, which evolve according to a continuous-time Markov chain with transition rates $\omega_t(e,e')$ between states $e$ and $e'$ \footnote{The possibility that this environment variable follows non-Markovian dynamics or takes continuous values is outside of the scope of this work.}.
+In this model the \emph{environment} is a discrete variable with two possible values \footnote{Of course this is easily generalizable to the case of $n_{\text{env}}$ different environments.}, $e\in\{1,2\}$, which evolves according to a continuous-time Markov chain with transition rates $\omega_t(e,e')$ between states $e$ and $e'$ \footnote{The possibility that this environment variable follows non-Markovian dynamics or takes continuous values is outside of the scope of this work.}.
+
+% $\phi\in\{A,B\}$
 
 In this fluctuating environment a population of $N$ agents (initially $N_\text{ini}$) grows, shrinks and evolves.
 
