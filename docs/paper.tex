@@ -18,6 +18,7 @@
 \usetikzlibrary{calc, positioning}
 
 \usepackage{booktabs}
+\usepackage{subcaption}
 
 \usepackage[hidelinks,pdfusetitle]{hyperref}
 
@@ -41,14 +42,13 @@
 
 \section{Introduction and objectives} \label{sec:introduction}
 
-Adaptation in fluctuating environments is a central problem in evolutionary biology \autocite{kingscollegeRiskUncertaintyEvolutionary1982}. Natural populations rarely experience constant conditions: rather, they face environments that change unpredictably over time, often on ecological or evolutionary timescales. In such contexts, the success of a population depends not only on the intrinsic fitness of individual phenotypes but also on their ability to persist and grow across variable conditions.
+Adaptation in fluctuating environments is a central problem in evolutionary biology \autocite{kingscollegeRiskUncertaintyEvolutionary1982}. Natural populations rarely experience constant conditions: rather, they face environments that change \emph{unpredictably} over time, often on ecological or evolutionary timescales. In such contexts, if sensing the changes in the environment is infeasible or too costly, it is well established in the ecology and population genetics literature that bet-hedging (i.e. investing only a fraction of the population to each possible phenotype) offers a good alternative to adapt to this fluctuating environment \autocite{kussellPhenotypicDiversityPopulation2005}.
 
-MENTION BET-HEDGING.
-
-Even in the presence of fluctuating environments our current understanding of evolution suggests that populations tend to evolve toward the strategy that maximizes their mean growth rate \autocite{gillespieNaturalSelectionVariances1977} \footnote{More precisely, \autocite{gillespieNaturalSelectionVariances1977} argues that what gets maximized is the geometric mean of the offspring number $\mu'$ (where $N(t+\Delta t)=\mu'\cdot N(t)$) but this is equivalent to maximizing the arithmetic mean of the growth rate $\langle\mu\rangle$ as we have defined it in \autoref{eq:avg_growth_rate}.}
+In these circumstances our current understanding of evolutionary adaptation suggests that populations tend to evolve toward whatever strategy maximizes their mean growth rate \autocite{gillespieNaturalSelectionVariances1977} \footnote{More precisely, \autocite{gillespieNaturalSelectionVariances1977} argues that what gets maximized is the geometric mean of the offspring number $\mu'$ (where $N(t+\Delta t)=\mu'\cdot N(t)$) but this is equivalent to maximizing the arithmetic mean of the growth rate $\langle\mu\rangle$ as we have defined it in \autoref{eq:avg_growth_rate}.}
 \begin{equation} \label{eq:avg_growth_rate}
     \langle\mu\rangle=\left\langle\frac{1}{N(t)}\frac{dN}{dt}(t)\right\rangle.
 \end{equation}
+% FINISHED UP TO HERE
 However, when environmental fluctuations are strong and extinction risk is non-negligible (like in limited-size populations), natural selection may favor strategies that sacrifice some average growth rate in exchange for a lower extinction rate $r_\text{ext}$.
 
 The purpose of this work is to investigate, through numerical simulations, how the adaptation of finite populations in uncertain environments gives rise to phenotypic diversity and understand to what extent the strategies that emerge correspond to those of maximal growth or to safer, more resilient alternatives.
@@ -58,30 +58,45 @@ The purpose of this work is to investigate, through numerical simulations, how t
 \begin{figure}
     \centering
     \caption{Schematic diagram of our model.} \label{fig:model_diagram}
-    \vspace{2ex}
-    \begin{tikzpicture}[>=stealth, node distance=2.5cm]
-        \node[draw, circle, minimum size=1cm] (e1) {$1$};
-        \node[draw, circle, minimum size=1cm, right of=e1] (e2) {$2$};
-        \draw[->, bend left=20] (e1) to node[above] {$\omega_t(1,2)$} (e2);
-        \draw[->, bend left=20] (e2) to node[below] {$\omega_t(2,1)$} (e1);
-        \node[draw, circle, minimum size=1.25cm, below of=e1, xshift=-0.5cm, yshift=-0.25cm] (agent) {$\phi$, $s$};
-        \node[right of=agent, yshift=+1cm, draw, circle, minimum size=1.25cm] (death) {$\times$};
-        \node[right of=agent, yshift=-1cm, draw, circle, minimum size=1.25cm] (parent) {$\phi$, $s$};
-        \node[right=0cm of parent] (plus) {$+$};
-        \node[right=0cm of plus, draw, circle, minimum size=1.25cm] (offspring) {$\phi'$, $s'$};
-        \draw[->] (agent) -- node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
-        \draw[->] (agent) -- node[sloped, midway, below] {$\omega_b(e,\phi)$} (parent);
-        \node[below of=agent, xshift=-0.75cm, yshift=-0.5cm] (phi_prime) {$\phi'$};
-        \node[right of=phi_prime, yshift=+1cm] (A) {$A$};
-        \node[right of=phi_prime, yshift=-1cm] (B) {$B$};
-        \draw[->] (phi_prime) -- node[sloped, midway, above] {$s(A)$} (A);
-        \draw[->] (phi_prime) -- node[sloped, midway, below] {$s(B)$} (B);
-        \node[right of=phi_prime, xshift=+0.75cm] (s_prime) {$s'$};
-        \node[right of=s_prime, yshift=+1cm] (s_parent) {$s$};
-        \node[right of=s_prime, yshift=-1cm] (s_mut) {$s_{\text{mut}}$};
-        \draw[->] (s_prime) -- node[sloped, midway, above] {$1-p_{\text{mut}}$} (s_parent);
-        \draw[->] (s_prime) -- node[sloped, midway, below] {$p_{\text{mut}}$} (s_mut);
-    \end{tikzpicture}
+    \begin{subfigure}{\linewidth}
+        \centering
+        \begin{tikzpicture}[environment/.style={draw, minimum size=0.75cm, fill=lightgray!25}, >=stealth, node distance=2.25cm]
+            \node[environment] (e1) {$1$};
+            \node[environment, right of=e1] (e2) {$2$};
+            \draw[->, bend left=20] (e1) to node[above] {$\omega_t(1,2)$} (e2);
+            \draw[->, bend left=20] (e2) to node[below] {$\omega_t(2,1)$} (e1);
+        \end{tikzpicture}
+        \caption{Environment dynamics}
+    \end{subfigure}
+    \begin{subfigure}{\linewidth}
+        \centering
+        \begin{tikzpicture}[agent/.style={draw, minimum height=0.75cm, minimum width=1.25cm, fill=lightgray!25}, >=stealth, node distance=2.75cm]
+            \node[agent] (parent) {$\phi_p$, $s_p$};
+            \node[agent, right of=parent, yshift=+0.75cm] (death) {$\times$};
+            \node[agent, right of=parent, yshift=-0.75cm] (parent_copy) {$\phi_p$, $s_p$};
+            \node[right=0cm of parent_copy, draw=none] (plus) {$+$};
+            \node[agent, right=0cm of plus] (offspring) {$\phi_o$, $s_o$};
+            \draw[->] (parent) -- node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
+            \draw[->] (parent) -- node[sloped, midway, below] {$\omega_b(e,\phi)$} (parent_copy);
+        \end{tikzpicture}
+        \caption{Birth-death process}
+    \end{subfigure}
+    \begin{subfigure}{\linewidth}
+        \centering
+        \begin{tikzpicture}[trait/.style={draw, minimum height=0.75cm, minimum width=1cm, fill=lightgray!25}, >=stealth, node distance=2.5cm]
+            \node[trait] (phi_o) {$\phi_o$};
+            \node[trait, right of=phi_o, yshift=+0.75cm] (A) {$A$};
+            \node[trait, right of=phi_o, yshift=-0.75cm] (B) {$B$};
+            \draw[->] (phi_o) -- node[sloped, midway, above] {$s(A)$} (A);
+            \draw[->] (phi_o) -- node[sloped, midway, below] {$s(B)$} (B);
+            \node[trait, right of=phi_o, xshift=1.5cm] (s_o) {$s_o$};
+            \node[trait, right of=s_o, yshift=+0.75cm] (s_p) {$s_p$};
+            \node[trait, right of=s_o, yshift=-0.75cm] (s_mut) {$s_{\text{mut}}$};
+            \draw[->] (s_o) -- node[sloped, midway, above] {$1-p_{\text{mut}}$} (s_p);
+            \draw[->] (s_o) -- node[sloped, midway, below] {$p_{\text{mut}}$} (s_mut);
+        \end{tikzpicture}
+        \caption{Phenotype and strategy of the offspring}
+    \end{subfigure}
 \end{figure}
 
 To investigate this problem we propose the simple agent-based population model outlined in the diagram of \autoref{fig:model_diagram}.
