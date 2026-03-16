@@ -63,11 +63,10 @@
           \item Paradigmatic example of \alert{fluctuations in biological processes}.
         \end{itemize}
       \end{block}
-
     \end{column}
     \begin{column}{0.4\textwidth}
       \begin{figure}
-        \frame{\includegraphics[scale=0.12]{images/changing-environment.jpg}}
+        \frame{\includegraphics[scale=0.08]{images/changing-environment.png}}
       \end{figure}
     \end{column}
   \end{columns}
@@ -86,7 +85,7 @@
   \note[item]{We will use a minimal mathematical model, \alert{not a detailed biological one}.}
   \note[item]{To investigate this, we will use \alert{numerical simulations}.}
   \note[item]{The main objective is to understand \alert{how populations adapt in fluctuating environments under demographic constraints}.}
-  \note[item]{A key question is whether these outcomes can be described using an \alert{effective notion of fitness}.}
+  \note[item]{We wish to understand as well to what extent the strategies that emerge correspond to those of maximal growth or to safer, more resilient alternatives.}
 \end{frame}
 
 \section{The model: a Markov process}
@@ -130,7 +129,7 @@
   \begin{figure}
     \begin{tikzpicture}[agent/.style={draw, minimum height=0.75cm, minimum width=1.25cm, fill=lightgray!25}, >=stealth, node distance=2.75cm]
       \node[agent] (parent) {$\phi_p$, $s_p$};
-      \node[agent, right of=parent, yshift=+0.5cm] (death) {$\times$};
+      \node[agent, right of=parent, yshift=+0.5cm] (death) {$\varnothing$};
       \node[agent, right of=parent, yshift=-0.5cm] (parent_copy) {$\phi_p$, $s_p$};
       \node[right=0cm of parent_copy, draw=none] (plus) {$+$};
       \node[agent, right=0cm of plus] (offspring) {$\phi_o$, $s_o$};
@@ -186,7 +185,6 @@
     \end{enumerate}
   \end{block}
 
-  \note[item]{We restrict ourselves to the case of \alert{two} environments and two phenotypes.}
   \note[item]{Environmental transition rates are equal and set to one, making \alert{both environments equally likely} for simplicity.}
   \note[item]{The environment alternates between a \alert{good} and a \alert{bad} state.}
   \note[item]{The \alert{resistant} phenotype grows fast in the good environment but dies quickly in the bad one, while the \alert{persistent} phenotype grows slowly but survives much better in bad conditions.}
@@ -204,7 +202,7 @@
     \begin{column}{0.45\textwidth}
       \begin{block}{Observables}
         \begin{itemize}
-          \item Average growth rate $\langle\mu\rangle$
+          \item Average growth rate $\langle\mu\rangle=\left\langle\frac{1}{N(t)}\frac{dN}{dt}(t)\right\rangle$
           \item Total extinction rate $r_{\text{ext}}$
         \end{itemize}
       \end{block}
@@ -222,13 +220,10 @@
     \end{column}
   \end{columns}
 
-  \note[item]{The population growth rate is defined as \alert{$\Delta N/(N\Delta t)$}.}
-  \note[item]{The number of extinctions is recorded to compute the total extinction rate.}
   \note[item]{These figures show the dependence of growth and extinction rates on the \alert{initial strategy} for different simulations.}
   \note[item]{Focusing on \alert{fixed} simulations we see that growth maximization and extinction minimization clearly \alert{do not coincide}.}
   \note[item]{Maximum growth occurs for strategies dominated (about \alert{80\%}) by the \alert{resistant} phenotype, while extinction is minimized by fully \alert{persistent} strategies.}
-  \note[item]{Both \alert{evol} and \alert{evol(r)} simulations converge to similar growth and extinction rates, largely \alert{independent of the initial strategy}.}
-  \note[item]{This indicates convergence toward a common \alert{evolutionary attractor}.}
+  \note[item]{This already indicates that we will have \alert{bet-hedging}.}
 \end{frame}
 
 \begin{frame}
@@ -247,19 +242,17 @@
           \item \alert{Independent} of initial conditions.
         \end{itemize}
       \end{block}
-      \begin{block}{Take-home message}
-        Evolution selects a \alert{compromise} between growth-maximization and extinction-minimization.
-      \end{block}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
         \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
       \end{figure}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}}
-      \end{figure}
     \end{column}
   \end{columns}
+  \vfill
+  \begin{block}{Take-home message}
+    Evolution selects a \alert{compromise} between growth-maximization and extinction-minimization.
+  \end{block}
 
   \note[item]{We also compute the \alert{instantaneous standard deviation} of the strategy across agents.}
   \note[item]{Because strategies and the phenotype distribution are \alert{two-dimensional and normalized}, only one component is independent.}
@@ -267,9 +260,6 @@
   \note[item]{This indicates the presence of a \alert{stable attractor} in the space of strategies.}
   \note[item]{The \alert{strategy is common to almost all agents} at each instant, and thus talking about a \alert{common strategy} is meaningful.}
   \note[item]{This justifies comparing evolutive simulations with fixed-strategy simulations.}
-  \note[item]{The \alert{histogram} of strategies however shows a bigger dispersion over time and across runs, but with a clear \alert{well-defined mean}.}
-  \note[item]{The \alert{time-series} analysis will clarify the different kinds of dispersion.}
-  \note[item]{The secondary peak directly reflects the \alert{initial strategy}, while the main peak is initial-condition independent.}
   \note[item]{The \alert{selected strategy} lies \alert{between} the growth-maximizing and extinction-minimizing strategies.}
 \end{frame}
 
@@ -391,79 +381,21 @@
         \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}}
-      \end{figure}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\begin{frame}
-  \begin{columns}
-    \begin{column}{0.5\textwidth}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/dist_phe_0.pdf}}
-      \end{figure}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/dist_n_agents.pdf}}
-      \end{figure}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/time_series/n_extinct.pdf}}
-      \end{figure}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/time_series/avg_strat_phe_0.pdf}}
-      \end{figure}
-    \end{column}
-  \end{columns}
-\end{frame}
-
-\section*{Population-size dependence}
-
-\begin{frame}
-  \begin{columns}
-    \hfill
-    \begin{column}{0.5\textwidth}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/n_agents_i/avg_strat_phe_0.pdf}}
-      \end{figure}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/n_agents_i/dist_avg_strat_phe_0.pdf}}
-      \end{figure}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \begin{figure}
         \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/n_agents_i/avg_strat_phe_0.pdf}}
       \end{figure}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/n_agents_i/dist_avg_strat_phe_0.pdf}}
-      \end{figure}
     \end{column}
   \end{columns}
 \end{frame}
 
-\section*{Mutation probability dependence}
+\section*{Incremental mutations}
 
 \begin{frame}
-  \begin{columns}
-    \hfill
-    \begin{column}{0.5\textwidth}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/prob_mut/avg_strat_phe_0.pdf}}
-      \end{figure}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/prob_mut/dist_avg_strat_phe_0.pdf}}
-      \end{figure}
-    \end{column}
-    \begin{column}{0.5\textwidth}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/prob_mut/avg_strat_phe_0.pdf}}
-      \end{figure}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/prob_mut/dist_avg_strat_phe_0.pdf}}
-      \end{figure}
-    \end{column}
-  \end{columns}
+  \begin{figure}
+    \frame{\includegraphics[scale=0.75]{../sims/incremental/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
+  \end{figure}
+  \begin{figure}
+    \frame{\includegraphics[scale=0.75]{../sims/incremental/plots/n_agents_i/avg_strat_phe_0.pdf}}
+  \end{figure}
 \end{frame}
 
 \end{document}

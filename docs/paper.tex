@@ -71,7 +71,7 @@ Thus, the purpose of this work is to investigate, through numerical simulations,
         \centering
         \begin{tikzpicture}[agent/.style={draw, minimum height=0.75cm, minimum width=1.25cm, fill=lightgray!25}, >=stealth, node distance=2.75cm]
             \node[agent] (parent) {$\phi_p$, $s_p$};
-            \node[agent, right of=parent, yshift=+0.5cm] (death) {$\times$};
+            \node[agent, right of=parent, yshift=+0.5cm] (death) {$\varnothing$};
             \node[agent, right of=parent, yshift=-0.5cm] (parent_copy) {$\phi_p$, $s_p$};
             \node[right=0cm of parent_copy, draw=none] (plus) {$+$};
             \node[agent, right=0cm of plus] (offspring) {$\phi_o$, $s_o$};
@@ -215,13 +215,15 @@ More broadly, this study highlights that the effective fitness governing evoluti
 
 \appendix
 
+\section{The Gillespie algorithm and time series analysis}
+
+\dots
+
 \section{Different model parameters}
 
 \dots
 
 \section{Incremental mutations}
-
-\dots
 
 \begin{figure*}[p]
     \centering
@@ -231,10 +233,6 @@ More broadly, this study highlights that the effective fitness governing evoluti
     \includegraphics{../sims/incremental/plots/n_agents_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/incremental/plots/n_agents_i/avg_strat_phe_0.pdf}
 \end{figure*}
-
-\dots
-
-\section{The Gillespie algorithm and time series analysis}
 
 \dots
 
