@@ -12,6 +12,7 @@
 \usepackage{tikz}
 
 \usepackage{booktabs}
+\usepackage{subcaption}
 
 \usepackage{appendixnumberbeamer}
 
@@ -267,37 +268,75 @@
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      \begin{block}{Large population limit}
-        With \alert{$N_{\text{ini}}=1000$}:
+      \begin{block}{Population size}
         \begin{itemize}
-          \item Extinction is \alert{negligible}.
-          \item Evolution converges to the \alert{growth-maximizing strategy}.
-          \item Multiple similar \alert{strategies can coexist}.
+          \item Increasing \alert{$N_{\text{ini}}$} reduces \alert{extinction risk}.
+          \item Evolution shifts toward the \alert{growth-maximizing strategy}.
+          \item Small populations favor \alert{safer strategies}.
         \end{itemize}
       \end{block}
-      \begin{block}{Take-home message}
+      \begin{block}{Mutation probability}
         \begin{itemize}
-          \item The \alert{evolutionary outcome} depends on population size.
-          \item \alert{Extinction risk} controls which strategies are selected.
+          \item Controls \alert{exploration} of strategy space.
+          \item Reduces the effective lifespan of strategies.
         \end{itemize}
       \end{block}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/extended/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/n_agents_i/avg_strat_phe_0.pdf}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/extended/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/prob_mut/avg_strat_phe_0.pdf}}
       \end{figure}
     \end{column}
   \end{columns}
 
-  \note[item]{Increasing $N_{\text{ini}}$ strongly reduces the \alert{extinction risk} but does \alert{not} change the \alert{average growth rate}.}
-  \note[item]{In this regime, the evolved strategy coincides with the \alert{growth-maximizing} one.}
-  \note[item]{The evolutionary outcome therefore depends on population size through its effect on extinction.}
-  \note[item]{Notice as well that the \alert{instantaneous dispersion} of strategies is still small, but larger than at small $N_{\text{ini}}$.}
-  \note[item]{This reflects the coexistence of several \alert{similar strategies} within the population.}
-  \note[item]{In contrast, the \alert{long-term dispersion} is reduced and comparable to the instantaneous one.}
+  \note[item]{The evolutionary outcome depends systematically on both the \alert{population size} and the \alert{mutation probability}.}
+  \note[item]{As $N_{\text{ini}}$ increases, extinction becomes increasingly rare and the selected strategy approaches the \alert{growth-maximizing one}.}
+  \note[item]{For \alert{small populations}, extinction risk is significant and evolution favors \alert{safer strategies} with lower extinction probability.}
+  \note[item]{The mutation probability mainly controls the \alert{exploration of strategy space}.}
+  \note[item]{When $p_{\text{mut}}$ is large the population behaves almost as a \alert{random ensemble} of strategies.}
+  \note[item]{When $p_{\text{mut}}$ is small the population spends long periods near \alert{quasi-monomorphic states}.}
+  \note[item]{For sufficiently large $N_{\text{ini}}$, the dependence on $p_{\text{mut}}$ becomes weak, indicating a \alert{robust evolutionary attractor}.}
+\end{frame}
+
+\begin{frame}
+  \begin{columns}
+    \hfill
+    \begin{column}{0.45\textwidth}
+      \begin{block}{Heuristic approximation}
+        Stationary distribution of strategies:
+        \begin{equation*}
+          p(s)\propto\frac{\exp\left(N_i\langle\mu(s)\rangle\right)}{r_{\text{ext}}(s)+p_{\text{mut}}\langle\mu_b\rangle}
+        \end{equation*}
+      \end{block}
+      \begin{block}{Interpretation}
+        \begin{itemize}
+          \item \alert{Numerator}: amplification of growth differences.
+          \item \alert{Denominator}: loss of strategies by
+                \begin{itemize}
+                  \item extinction
+                  \item mutation
+                \end{itemize}
+        \end{itemize}
+      \end{block}
+    \end{column}
+    \begin{column}{0.55\textwidth}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/fixed/exp_avg_strat_phe_0.pdf}}
+      \end{figure}
+      \begin{figure}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/fixed/avg_strat_phe_0.pdf}}
+      \end{figure}
+    \end{column}
+  \end{columns}
+
+  \note[item]{To explain the evolutionary outcome we construct a \alert{heuristic approximation} for the stationary distribution of strategies.}
+  \note[item]{The idea is to combine the effects of \alert{growth amplification} and \alert{extinction suppression}.}
+  \note[item]{The numerator represents the \alert{exponential amplification} of strategies with higher growth rates during competition.}
+  \note[item]{The denominator represents the \alert{loss rate} of strategies due to extinction and mutation-driven replacement.}
+  \note[item]{All the ingredients of this expression are obtained from \alert{fixed-strategy simulations}.}
 \end{frame}
 
 \section{Conclusions and future work}
