@@ -268,17 +268,17 @@
   \begin{columns}
     \hfill
     \begin{column}{0.45\textwidth}
-      \begin{block}{Population size}
+      \begin{block}{Population size dependence}
         \begin{itemize}
           \item Increasing \alert{$N_{\text{ini}}$} reduces \alert{extinction risk}.
           \item Evolution shifts toward the \alert{growth-maximizing strategy}.
-          \item Small populations favor \alert{safer strategies}.
+          \item \alert{Small populations} favor \alert{safer strategies}.
         \end{itemize}
       \end{block}
-      \begin{block}{Mutation probability}
+      \begin{block}{Mutation probability dependence}
         \begin{itemize}
-          \item Controls \alert{exploration} of strategy space.
-          \item Reduces the effective lifespan of strategies.
+          \item \alert{Very weak} dependence.
+          \item Mainly changes the \alert{effective lifetime} of strategies.
         \end{itemize}
       \end{block}
     \end{column}
@@ -292,13 +292,11 @@
     \end{column}
   \end{columns}
 
-  \note[item]{The evolutionary outcome depends systematically on both the \alert{population size} and the \alert{mutation probability}.}
-  \note[item]{As $N_{\text{ini}}$ increases, extinction becomes increasingly rare and the selected strategy approaches the \alert{growth-maximizing one}.}
-  \note[item]{For \alert{small populations}, extinction risk is significant and evolution favors \alert{safer strategies} with lower extinction probability.}
+  \note[item]{The evolutionary outcome depends on both the \alert{population size} and the \alert{mutation probability}.}
+  \note[item]{As $N_{\text{ini}}$ increases, extinction becomes rare and the selected strategy approaches the \alert{growth-maximizing one}.}
+  \note[item]{For \alert{small populations}, extinction risk is substantial, and evolution favors \alert{safer strategies} with lower extinction probability.}
   \note[item]{The mutation probability mainly controls the \alert{exploration of strategy space}.}
-  \note[item]{When $p_{\text{mut}}$ is large the population behaves almost as a \alert{random ensemble} of strategies.}
-  \note[item]{When $p_{\text{mut}}$ is small the population spends long periods near \alert{quasi-monomorphic states}.}
-  \note[item]{For sufficiently large $N_{\text{ini}}$, the dependence on $p_{\text{mut}}$ becomes weak, indicating a \alert{robust evolutionary attractor}.}
+  \note[item]{The dependence on $p_{\text{mut}}$ is very weak, indicating a \alert{robust evolutionary attractor} that does not depend strongly on the mutation kernel. This is confirmed by simulations with \alert{incremental mutations}.}
 \end{frame}
 
 \begin{frame}
@@ -308,35 +306,31 @@
       \begin{block}{Heuristic approximation}
         Stationary distribution of strategies:
         \begin{equation*}
-          p(s)\propto\frac{\exp\left(N_i\langle\mu(s)\rangle\right)}{r_{\text{ext}}(s)+p_{\text{mut}}\langle\mu_b\rangle}
+          p(s)\propto\frac{\exp\left(N_\text{ini}\langle\mu(s)\rangle\right)}{r_{\text{ext}}(s)+p_{\text{mut}}\langle\mu_b\rangle}
         \end{equation*}
       \end{block}
       \begin{block}{Interpretation}
         \begin{itemize}
-          \item \alert{Numerator}: amplification of growth differences.
-          \item \alert{Denominator}: loss of strategies by
-                \begin{itemize}
-                  \item extinction
-                  \item mutation
-                \end{itemize}
+          \item \alert{Numerator}: expected exponential growth of a strategy during competition.
+          \item \alert{Denominator}: loss of strategies through extinction and mutation fixation.
         \end{itemize}
       \end{block}
     \end{column}
     \begin{column}{0.55\textwidth}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/fixed/exp_avg_strat_phe_0.pdf}}
-      \end{figure}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/fixed/avg_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.66]{../sims/asymmetric/plots/fixed/exp_avg_strat_phe_0.pdf}}
+        \caption*{\footnotesize Expected average strategy}
+        \frame{\includegraphics[scale=0.66]{../sims/asymmetric/plots/fixed/avg_strat_phe_0.pdf}}
+        \caption*{\footnotesize Measured average strategy}
       \end{figure}
     \end{column}
   \end{columns}
 
-  \note[item]{To explain the evolutionary outcome we construct a \alert{heuristic approximation} for the stationary distribution of strategies.}
-  \note[item]{The idea is to combine the effects of \alert{growth amplification} and \alert{extinction suppression}.}
-  \note[item]{The numerator represents the \alert{exponential amplification} of strategies with higher growth rates during competition.}
+  \note[item]{To explain the evolutionary outcome we have come up with a \alert{heuristic approximation} for the stationary distribution of strategies.}
+  \note[item]{The numerator represents the expected exponential expansion of a strategy.}
+  \note[item]{When several strategies compete, this exponential growth determines the probability that a given strategy is selected.}
   \note[item]{The denominator represents the \alert{loss rate} of strategies due to extinction and mutation-driven replacement.}
-  \note[item]{All the ingredients of this expression are obtained from \alert{fixed-strategy simulations}.}
+  \note[item]{All quantities entering this expression are measured in \alert{fixed-strategy simulations}.}
 \end{frame}
 
 \section{Conclusions and future work}
@@ -344,27 +338,23 @@
 \begin{frame}
   \begin{block}{Conclusions}
     \begin{itemize}
-      \item Bet-hedging emerges \alert{naturally} from this minimal stochastic model.
-      \item Our model yields populations with \alert{common or very similar strategies}.
-      \item Evolution does \alert{not always maximize growth}.
+      \item Bet-hedging emerges \alert{naturally} in this minimal stochastic model.
+      \item Populations evolve toward \alert{common or very similar strategies}.
+      \item Evolution does \alert{not necessarily maximize growth}.
       \item Demographic constraints shift selection toward \alert{safer strategies}.
+      \item We quantitatively understand the interplay between \alert{selection, extinction, and mutation}.
     \end{itemize}
   \end{block}
 
   \begin{block}{Future work}
     \begin{itemize}
-      \item Measure the \alert{scaling} of extinction rates with $N_{\text{ini}}$.
-      \item Derive an \alert{effective fitness} function combining growth and extinction.
+      \item Improve the heuristic stationary \alert{distribution of strategies}.
       \item Extend the model to environment-dependent strategies (\alert{sensing}).
     \end{itemize}
   \end{block}
 
-  \note[item]{At any given time the population is \alert{concentrated around a common strategy}, possibly with a small spread for large $N$.}
-  \note[item]{The results suggest the existence of an \alert{effective fitness} incorporating extinction risk.}
-  \note[item]{The figure shows a \alert{candidate objective function} combining average growth and extinction rate.}
-  \note[item]{For the simulations presented here, its maximum coincides with the \alert{selected strategy}.}
-  \note[item]{Deriving the \alert{effective fitness from theory} remains a key open problem.}
-  \note[item]{\alert{Large deviations theory} appears as a natural framework to describe extinction events and their impact on selection.}
+  \note[item]{The evolutionary outcome depends \alert{not only on average instantaneous} properties.}
+  \note[item]{It is also shaped by the frequency of rare events such as \alert{extinction} and \alert{mutation fixation}.}
 \end{frame}
 
 \section*{Acknowledgments}
