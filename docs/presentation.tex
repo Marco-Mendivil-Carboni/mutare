@@ -31,7 +31,7 @@
 \usebackgroundtemplate{\tikz[overlay,remember picture]\node[opacity=0.03125]at (current page.center){\includegraphics[scale=0.5]{images/UCM-logo.png}};}
 \renewcommand\appendixname{Appendix}
 
-\title[XXII GISC Workshop]{Evolving Safely: Adaptation and Phenotypic Diversity under Environmental and Demographic Constraints}
+\title[Jornadas de doctorandos]{Evolving Safely: Adaptation and Phenotypic Diversity under Environmental and Demographic Constraints}
 \author[]
 {
   \texorpdfstring{{\large Mendívil Carboni, Marco\inst{1}}\\\vspace{1ex} Dinis Vizcaíno, Luis Ignacio\inst{1} (dir.) \and Mazo Torres, Juan José\inst{1} (dir.)}{Marco Mendívil Carboni}
@@ -94,7 +94,7 @@
 \begin{frame}
   \begin{block}{System state}
     \begin{itemize}
-      \item \alert{Environment}: $e\in\{1,2\}$
+      \item \alert{Environment}: $e\in\{1,2\}$, transition rates \alert{$\omega_t(e,e')$}
       \item \alert{Population}: $N$ agents, each one characterized by:
             \begin{itemize}
               \item \alert{phenotype}: $\phi\in\{A,B\}$
@@ -102,6 +102,15 @@
             \end{itemize}
     \end{itemize}
   \end{block}
+  \vfill
+  \begin{figure}
+    \begin{tikzpicture}[environment/.style={draw, minimum size=0.75cm, fill=lightgray!25}, >=stealth, node distance=2.25cm]
+      \node[environment] (e1) {$1$};
+      \node[environment, right of=e1] (e2) {$2$};
+      \draw[->, bend left=20] (e1) to node[above] {$\omega_t(1,2)$} (e2);
+      \draw[->, bend left=20] (e2) to node[below] {$\omega_t(2,1)$} (e1);
+    \end{tikzpicture}
+  \end{figure}
 
   \note[item]{\alert{Continuous-time} Markov process describing a population evolving in a fluctuating environment, that we will solve numerically using the \alert{Gillespie algorithm}.}
   \note[item]{The population starts with an initial number of agents \alert{$N_{\text{ini}}$}.}
@@ -110,38 +119,37 @@
 \end{frame}
 
 \begin{frame}
-  \begin{block}{Dynamics}
+  \begin{block}{Population Dynamics}
     \begin{itemize}
-      \item \alert{Environment}: transition rates \alert{$\omega_t(e,e')$}
-      \item \alert{Population}: environment- and phenotype-dependent birth and death rates \alert{$\omega_b(e,\phi)$} and \alert{$\omega_d(e,\phi)$}
+      \item \alert{Birth-Death}: environment- and phenotype-dependent birth and death rates \alert{$\omega_b(e,\phi)$} and \alert{$\omega_d(e,\phi)$}
       \item \alert{Evolution}: offsprings inherit the parent's strategy, mutations occur with probability \alert{$p_{\text{mut}}$}
       \item \alert{Constraint}: population size \alert{capped at $N_{\text{ini}}$}
     \end{itemize}
   \end{block}
   \vfill
-  \begin{tikzpicture}[>=stealth, node distance=2.25cm]
-    \node (e1) [draw, circle, minimum size=1cm]{$1$};
-    \node (e2) [draw, circle, minimum size=1cm, right of=e1] {$2$};
-    \draw[->, bend left=20]
-    (e1) to node[above] {$\omega_t(1,2)$} (e2);
-    \draw[->, bend left=20]
-    (e2) to node[below] {$\omega_t(2,1)$} (e1);
-    \node[draw, circle, minimum size=1cm, right of=e2] (agent) {$\phi$};
-    \node[right of=agent, yshift=+1cm, draw, circle, minimum size=1cm] (death) {$\times$};
-    \node[right of=agent, yshift=-1cm, draw, circle, minimum size=1cm] (parent) {$\phi$};
-    \node[right=0cm of parent] (plus) {$+$};
-    \node[right=0cm of plus, draw, circle, minimum size=1cm] (offspring) {$\phi'$};
-    \node[right of=offspring, yshift=+1cm] (A) {$\phi'=A$};
-    \node[right of=offspring, yshift=-1cm] (B) {$\phi'=B$};
-    \draw[->]
-    (agent) -- node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
-    \draw[->]
-    (agent) -- node[sloped, midway, below] {$\omega_b(e,\phi)$} (parent);
-    \draw[->]
-    (offspring) -- node[sloped, midway, above] {$s(A)$} (A);
-    \draw[->]
-    (offspring) -- node[sloped, midway, below] {$s(B)$} (B);
-  \end{tikzpicture}
+  \begin{figure}
+    \begin{tikzpicture}[agent/.style={draw, minimum height=0.75cm, minimum width=1.25cm, fill=lightgray!25}, >=stealth, node distance=2.75cm]
+      \node[agent] (parent) {$\phi_p$, $s_p$};
+      \node[agent, right of=parent, yshift=+0.5cm] (death) {$\times$};
+      \node[agent, right of=parent, yshift=-0.5cm] (parent_copy) {$\phi_p$, $s_p$};
+      \node[right=0cm of parent_copy, draw=none] (plus) {$+$};
+      \node[agent, right=0cm of plus] (offspring) {$\phi_o$, $s_o$};
+      \draw[->] (parent) -- node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
+      \draw[->] (parent) -- node[sloped, midway, below] {$\omega_b(e,\phi)$} (parent_copy);
+    \end{tikzpicture}
+    \begin{tikzpicture}[trait/.style={draw, minimum height=0.75cm, minimum width=1cm, fill=lightgray!25}, >=stealth, node distance=2.5cm]
+      \node[trait] (phi_o) {$\phi_o$};
+      \node[trait, right of=phi_o, yshift=+0.5cm] (A) {$A$};
+      \node[trait, right of=phi_o, yshift=-0.5cm] (B) {$B$};
+      \draw[->] (phi_o) -- node[sloped, midway, above] {$s(A)$} (A);
+      \draw[->] (phi_o) -- node[sloped, midway, below] {$s(B)$} (B);
+      \node[trait, right of=phi_o, xshift=1.5cm] (s_o) {$s_o$};
+      \node[trait, right of=s_o, yshift=+0.5cm] (s_p) {$s_p$};
+      \node[trait, right of=s_o, yshift=-0.5cm] (s_mut) {$s_{\text{mut}}$};
+      \draw[->] (s_o) -- node[sloped, midway, above] {$1-p_{\text{mut}}$} (s_p);
+      \draw[->] (s_o) -- node[sloped, midway, below] {$p_{\text{mut}}$} (s_mut);
+    \end{tikzpicture}
+  \end{figure}
 
   \note[item]{When an agent reproduces, the \alert{offspring's phenotype is drawn from the parent's strategy}.}
   \note[item]{\alert{Offspring inherit} the same \alert{phenotypic strategy} as their parent, allowing natural selection to act on strategies.}
@@ -216,8 +224,7 @@
 
   \note[item]{The population growth rate is defined as \alert{$\Delta N/(N\Delta t)$}.}
   \note[item]{The number of extinctions is recorded to compute the total extinction rate.}
-  \note[item]{These figures show the dependence of growth and extinction rates on the \alert{initial strategy} for different simulation types.}
-  \note[item]{For \alert{evol(r)} simulations there is no common initial strategy, so they appear as strategy-independent horizontal lines.}
+  \note[item]{These figures show the dependence of growth and extinction rates on the \alert{initial strategy} for different simulations.}
   \note[item]{Focusing on \alert{fixed} simulations we see that growth maximization and extinction minimization clearly \alert{do not coincide}.}
   \note[item]{Maximum growth occurs for strategies dominated (about \alert{80\%}) by the \alert{resistant} phenotype, while extinction is minimized by fully \alert{persistent} strategies.}
   \note[item]{Both \alert{evol} and \alert{evol(r)} simulations converge to similar growth and extinction rates, largely \alert{independent of the initial strategy}.}
@@ -249,7 +256,7 @@
         \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}}
       \end{figure}
     \end{column}
   \end{columns}
@@ -264,83 +271,6 @@
   \note[item]{The \alert{time-series} analysis will clarify the different kinds of dispersion.}
   \note[item]{The secondary peak directly reflects the \alert{initial strategy}, while the main peak is initial-condition independent.}
   \note[item]{The \alert{selected strategy} lies \alert{between} the growth-maximizing and extinction-minimizing strategies.}
-\end{frame}
-
-\begin{frame}
-  \begin{columns}
-    \hfill
-    \begin{column}{0.45\textwidth}
-      \begin{block}{Observables}
-        \begin{itemize}
-          \item Distribution of phenotypes $p(A)$
-          \item Distribution of the number of agents $p(N/N_{\text{ini}})$
-        \end{itemize}
-      \end{block}
-      \begin{block}{Actual phenotype distribution}
-        \begin{itemize}
-          \item \alert{Distribution of phenotypes} $\neq$ \alert{strategy}.
-        \end{itemize}
-      \end{block}
-      \begin{block}{Population-size fluctuations}
-        \begin{itemize}
-          \item Population is \alert{usually} close to the \alert{maximum size $N_{\text{ini}}$}.
-        \end{itemize}
-      \end{block}
-    \end{column}
-    \begin{column}{0.55\textwidth}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/dist_phe_0.pdf}}
-      \end{figure}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/dist_n_agents.pdf}}
-      \end{figure}
-    \end{column}
-  \end{columns}
-
-  \note[item]{I would also like to show some \alert{complementary results} that help clarify how the system behaves.}
-  \note[item]{For a \alert{fixed strategy} and a \alert{fixed environment}, the phenotype distribution is easily obtained \alert{analytically} from the dominant eigenvector of a certain matrix.}
-  \note[item]{The \alert{dash-dotted lines} show these two fixed-environment equilibria.}
-  \note[item]{\alert{As expected}, with a \alert{fluctuating environment}, the observed phenotype distribution lies \alert{between} the two lines.}
-  \note[item]{The \alert{main peak} corresponds to growth in the \alert{good environment}.}
-  \note[item]{The \alert{secondary peak} reflects extended periods spent in the \alert{bad environment}.}
-  \note[item]{Riskier strategies increase the weight of this secondary peak.}
-  \note[item]{Since extinction corresponds to \alert{rare, large fluctuations} away from typical states near $N_{\text{ini}}$, a \alert{large-deviation} framework is a natural theoretical approach.}
-\end{frame}
-
-\begin{frame}
-  \begin{columns}
-    \hfill
-    \begin{column}{0.45\textwidth}
-      \begin{block}{Time series}
-        \begin{itemize}
-          \item \alert{Independent simulations} concatenated in time.
-          \item Each run ends at an \alert{extinction event}.
-          \item New runs start from a \alert{random initial condition}.
-        \end{itemize}
-      \end{block}
-      \begin{block}{Strategy dynamics}
-        \begin{itemize}
-          \item Long \alert{plateaus} with a \alert{common strategy}.
-          \item \alert{Abrupt switches} between strategies.
-        \end{itemize}
-      \end{block}
-    \end{column}
-    \begin{column}{0.55\textwidth}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/time_series/n_extinct.pdf}}
-      \end{figure}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/time_series/avg_strat_phe_0.pdf}}
-      \end{figure}
-    \end{column}
-  \end{columns}
-
-  \note[item]{The \alert{vertical dotted lines} mark extinction times.}
-  \note[item]{The lower panel shows the \alert{average strategy} as a function of time.}
-  \note[item]{Error bands indicate the \alert{instantaneous dispersion} across agents and are barely visible.}
-  \note[item]{As we anticipated, at any given time, the population shares a \alert{common strategy}, with negligible instantaneous dispersion.}
-  \note[item]{This time-series also reveals a \alert{less obvious feature}: strategies remain almost \alert{constant over long times} and \alert{change abruptly} when a different strategy takes over.}
-  \note[item]{Over long times and across runs, the explored strategies show a \alert{moderate dispersion}, consistent with the histogram we showed previously.}
 \end{frame}
 
 \begin{frame}
@@ -367,7 +297,7 @@
         \frame{\includegraphics[scale=0.75]{../sims/extended/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/extended/plots/strat_phe_0_i/dist_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/extended/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}}
       \end{figure}
     \end{column}
   \end{columns}
@@ -392,23 +322,13 @@
     \end{itemize}
   \end{block}
 
-  \begin{columns}
-    \hfill
-    \begin{column}{0.45\textwidth}
-      \begin{block}{Future work}
-        \begin{itemize}
-          \item Measure the \alert{scaling} of extinction rates with $N_{\text{ini}}$.
-          \item Derive an \alert{effective fitness} function combining growth and extinction.
-          \item Extend the model to environment-dependent strategies (\alert{sensing}).
-        \end{itemize}
-      \end{block}
-    \end{column}
-    \begin{column}{0.55\textwidth}
-      \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/strat_phe_0_i/fitness.pdf}}
-      \end{figure}
-    \end{column}
-  \end{columns}
+  \begin{block}{Future work}
+    \begin{itemize}
+      \item Measure the \alert{scaling} of extinction rates with $N_{\text{ini}}$.
+      \item Derive an \alert{effective fitness} function combining growth and extinction.
+      \item Extend the model to environment-dependent strategies (\alert{sensing}).
+    \end{itemize}
+  \end{block}
 
   \note[item]{At any given time the population is \alert{concentrated around a common strategy}, possibly with a small spread for large $N$.}
   \note[item]{The results suggest the existence of an \alert{effective fitness} incorporating extinction risk.}
@@ -458,7 +378,6 @@
 
 \begin{frame}
   \begin{columns}
-    \hfill
     \begin{column}{0.5\textwidth}
       \begin{figure}
         \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}}
@@ -472,7 +391,7 @@
         \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/avg_strat_phe_0.pdf}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/dist_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}}
       \end{figure}
     \end{column}
   \end{columns}
@@ -480,7 +399,6 @@
 
 \begin{frame}
   \begin{columns}
-    \hfill
     \begin{column}{0.5\textwidth}
       \begin{figure}
         \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/strat_phe_0_i/dist_phe_0.pdf}}
@@ -510,7 +428,7 @@
         \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/n_agents_i/avg_strat_phe_0.pdf}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/n_agents_i/dist_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/n_agents_i/dist_avg_strat_phe_0.pdf}}
       \end{figure}
     \end{column}
     \begin{column}{0.5\textwidth}
@@ -518,7 +436,7 @@
         \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/n_agents_i/avg_strat_phe_0.pdf}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/n_agents_i/dist_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/n_agents_i/dist_avg_strat_phe_0.pdf}}
       \end{figure}
     \end{column}
   \end{columns}
@@ -534,7 +452,7 @@
         \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/prob_mut/avg_strat_phe_0.pdf}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/prob_mut/dist_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/asymmetric/plots/prob_mut/dist_avg_strat_phe_0.pdf}}
       \end{figure}
     \end{column}
     \begin{column}{0.5\textwidth}
@@ -542,7 +460,7 @@
         \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/prob_mut/avg_strat_phe_0.pdf}}
       \end{figure}
       \begin{figure}
-        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/prob_mut/dist_strat_phe_0.pdf}}
+        \frame{\includegraphics[scale=0.75]{../sims/symmetric/plots/prob_mut/dist_avg_strat_phe_0.pdf}}
       \end{figure}
     \end{column}
   \end{columns}
