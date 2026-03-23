@@ -26,10 +26,10 @@ ANALYSIS = [
     "avg_growth_rate",
     "std_dev_growth_rate",
     "extinct_rate",
-    "avg_strat_phe",
-    "std_dev_strat_phe",
+    "avg_avg_strat_phe",
+    "avg_std_dev_strat_phe",
     "dist_avg_strat_phe",
-    "dist_phe",
+    "avg_dist_phe",
     "avg_birth_rate",
 ]
 
@@ -100,13 +100,13 @@ def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
             for bin, ele in enumerate(analysis["dist_n_agents"]):
                 analysis[f"dist_n_agents_{bin}"] = ele
             analysis.pop("dist_n_agents")
-            analysis["avg_strat_phe_0"] = analysis["avg_strat_phe"][0]
-            analysis.pop("avg_strat_phe")
+            analysis["avg_avg_strat_phe_0"] = analysis["avg_avg_strat_phe"][0]
+            analysis.pop("avg_avg_strat_phe")
             for bin, ele in enumerate(analysis["dist_avg_strat_phe"][0]):
                 analysis[f"dist_avg_strat_phe_0_{bin}"] = ele
             analysis.pop("dist_avg_strat_phe")
-            analysis["dist_phe_0"] = analysis["dist_phe"][0]
-            analysis.pop("dist_phe")
+            analysis["avg_dist_phe_0"] = analysis["avg_dist_phe"][0]
+            analysis.pop("avg_dist_phe")
             analysis = pd.DataFrame(analysis, index=[run_idx])
 
             analyses.append(analysis)

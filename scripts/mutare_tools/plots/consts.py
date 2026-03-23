@@ -58,9 +58,11 @@ COL_TEX_LABELS: dict[str, str] = {
     "dist_n_agents": "$p(N/N_{\\text{ini}})$",
     "avg_growth_rate": "$\\langle\\mu\\rangle$",
     "extinct_rate": "$r_{\\text{ext}}$",
-    "avg_strat_phe_0": "$\\langle s(A)\\rangle$",
-    "dist_avg_strat_phe_0": "$p(\\langle s(A)\\rangle)$",
+    "avg_strat_phe_0": "$\\overline{s}(A)$",
+    "avg_avg_strat_phe_0": "$\\langle\\overline{s}\\rangle(A)$",
+    "dist_avg_strat_phe_0": "$p(\\overline{s}(A))$",
     "dist_phe_0": "$p(A)$",
+    "avg_dist_phe_0": "$\\langle p(A)\\rangle$",
     "std_dev_growth_rate": "$\\sigma_{\\mu}$",
     "avg_birth_rate": "$\\langle\\mu_b\\rangle$",
 }

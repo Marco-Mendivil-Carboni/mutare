@@ -31,7 +31,7 @@ from .utils import (
     plot_colored_curve,
     interpolate_values,
     interpolate_extinct_rates,
-    plot_avg_strat_phe_0,
+    plot_avg_s_heatmap,
 )
 
 
@@ -46,8 +46,8 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_2, ax_2 = create_standard_figure("avg_growth_rate", "extinct_rate")
     fig_3, axs_3 = create_colorbar_figure(param, "norm_n_agents", two_panels)
     fig_4, axs_4 = create_colorbar_figure(param, "avg_strat_phe_0", two_panels)
-    fig_5, ax_5 = create_standard_figure(param, "avg_strat_phe_0")
-    fig_6, ax_6 = create_standard_figure(param, "dist_phe_0")
+    fig_5, ax_5 = create_standard_figure(param, "avg_avg_strat_phe_0")
+    fig_6, ax_6 = create_standard_figure(param, "avg_dist_phe_0")
     fig_7, ax_7 = create_standard_figure(param, "std_dev_growth_rate")
     fig_8, ax_8 = create_standard_figure(param, "avg_birth_rate")
     fig_9, ax_9 = create_standard_figure("avg_growth_rate", "std_dev_growth_rate")
@@ -99,8 +99,8 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
                 fig_4, axs_4[0], axs_4[1], group_df, param, "dist_avg_strat_phe_0"
             )
 
-        plot_mean_and_uncertainty(ax_5, "avg_strat_phe_0", "std_dev_strat_phe")
-        plot_mean_and_uncertainty(ax_6, "dist_phe_0", None)
+        plot_mean_and_uncertainty(ax_5, "avg_avg_strat_phe_0", "avg_std_dev_strat_phe")
+        plot_mean_and_uncertainty(ax_6, "avg_dist_phe_0", None)
         plot_mean_and_uncertainty(ax_7, "std_dev_growth_rate", None)
         plot_mean_and_uncertainty(ax_8, "avg_birth_rate", None)
 
@@ -143,8 +143,8 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_2.savefig(fig_dir / "rates.pdf")
     fig_3.savefig(fig_dir / "dist_n_agents.pdf")
     fig_4.savefig(fig_dir / "dist_avg_strat_phe_0.pdf")
-    fig_5.savefig(fig_dir / "avg_strat_phe_0.pdf")
-    fig_6.savefig(fig_dir / "dist_phe_0.pdf")
+    fig_5.savefig(fig_dir / "avg_avg_strat_phe_0.pdf")
+    fig_6.savefig(fig_dir / "avg_dist_phe_0.pdf")
     fig_7.savefig(fig_dir / "std_dev_growth_rate.pdf")
     fig_8.savefig(fig_dir / "avg_birth_rate.pdf")
     fig_9.savefig(fig_dir / "growth_rates.pdf")
@@ -175,7 +175,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
 
     fig_0, axs_0 = create_colorbar_figure("strat_phe_0_i", "avg_growth_rate", False)
     fig_1, axs_1 = create_colorbar_figure("strat_phe_0_i", "extinct_rate", False)
-    fig_2, axs_2 = create_colorbar_figure("strat_phe_0_i", "dist_phe_0", False)
+    fig_2, axs_2 = create_colorbar_figure("strat_phe_0_i", "avg_dist_phe_0", False)
     fig_3, axs_3 = create_colorbar_figure("strat_phe_0_i", "std_dev_growth_rate", False)
     fig_4, axs_4 = create_colorbar_figure("strat_phe_0_i", "avg_birth_rate", False)
 
@@ -203,7 +203,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
 
         plot_mean_and_uncertainty(axs_0[0], "avg_growth_rate")
         plot_mean_and_uncertainty(axs_1[0], "extinct_rate")
-        plot_mean_and_uncertainty(axs_2[0], "dist_phe_0")
+        plot_mean_and_uncertainty(axs_2[0], "avg_dist_phe_0")
         plot_mean_and_uncertainty(axs_3[0], "std_dev_growth_rate")
         plot_mean_and_uncertainty(axs_4[0], "avg_birth_rate")
 
@@ -280,22 +280,22 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     for fig, axs in zip([fig_6, fig_7], [axs_6, axs_7]):
         set_heatmap_colorbar(fig, axs[1], "n_agents_i", log_norm)
 
-    plot_avg_strat_phe_0(fig_8, axs_8[0], axs_8[1], random_df, np.array(avg_s_exp))
-    plot_avg_strat_phe_0(fig_9, axs_9[0], axs_9[1], random_df, np.array(avg_s))
+    plot_avg_s_heatmap(fig_8, axs_8[0], axs_8[1], random_df, np.array(avg_s_exp))
+    plot_avg_s_heatmap(fig_9, axs_9[0], axs_9[1], random_df, np.array(avg_s))
 
     fig_dir = job.base_dir / "plots" / "fixed"
     fig_dir.mkdir(parents=True, exist_ok=True)
 
     fig_0.savefig(fig_dir / "avg_growth_rate.pdf")
     fig_1.savefig(fig_dir / "extinct_rate.pdf")
-    fig_2.savefig(fig_dir / "dist_phe_0.pdf")
+    fig_2.savefig(fig_dir / "avg_dist_phe_0.pdf")
     fig_3.savefig(fig_dir / "std_dev_growth_rate.pdf")
     fig_4.savefig(fig_dir / "avg_birth_rate.pdf")
     fig_5.savefig(fig_dir / "extinct_rate_scaling.pdf")
     fig_6.savefig(fig_dir / "exp_dist_avg_strat_phe_0.pdf")
     fig_7.savefig(fig_dir / "dist_avg_strat_phe_0.pdf")
-    fig_8.savefig(fig_dir / "exp_avg_strat_phe_0.pdf")
-    fig_9.savefig(fig_dir / "avg_strat_phe_0.pdf")
+    fig_8.savefig(fig_dir / "exp_avg_avg_strat_phe_0.pdf")
+    fig_9.savefig(fig_dir / "avg_avg_strat_phe_0.pdf")
 
     print_process_msg("made 'fixed' plots")
 

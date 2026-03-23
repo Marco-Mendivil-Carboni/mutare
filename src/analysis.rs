@@ -83,17 +83,17 @@ pub struct Analysis {
     /// Total extinction rate.
     pub extinct_rate: f64,
 
-    /// Average phenotypic strategy.
-    pub avg_strat_phe: Vec<f64>,
+    /// Average average phenotypic strategy.
+    pub avg_avg_strat_phe: Vec<f64>,
 
-    /// Standard deviation of the phenotypic strategy.
-    pub std_dev_strat_phe: f64,
+    /// Average standard deviation of the phenotypic strategy.
+    pub avg_std_dev_strat_phe: f64,
 
     /// Distribution of average phenotypic strategies.
     pub dist_avg_strat_phe: Vec<Vec<f64>>,
 
-    /// Distribution of phenotypes.
-    pub dist_phe: Vec<f64>,
+    /// Average distribution of phenotypes.
+    pub avg_dist_phe: Vec<f64>,
 
     /// Average population birth rate.
     pub avg_birth_rate: f64,
@@ -186,11 +186,11 @@ impl Analyzer {
 
             extinct_rate: last_observables.n_extinct as f64 / last_observables.time,
 
-            avg_strat_phe: (0..self.cfg.model.n_phe - 1)
+            avg_avg_strat_phe: (0..self.cfg.model.n_phe - 1)
                 .map(|phe| obs_weighted_average(&|obs| obs.avg_strat_phe[phe]))
                 .collect(),
 
-            std_dev_strat_phe: obs_weighted_average(&|obs| obs.std_dev_strat_phe),
+            avg_std_dev_strat_phe: obs_weighted_average(&|obs| obs.std_dev_strat_phe),
 
             dist_avg_strat_phe: (0..self.cfg.model.n_phe - 1)
                 .map(|phe| {
@@ -208,7 +208,7 @@ impl Analyzer {
                 })
                 .collect(),
 
-            dist_phe: (0..self.cfg.model.n_phe - 1)
+            avg_dist_phe: (0..self.cfg.model.n_phe - 1)
                 .map(|phe| obs_weighted_average(&|obs| obs.dist_phe[phe]))
                 .collect(),
 
