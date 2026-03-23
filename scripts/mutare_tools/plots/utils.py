@@ -335,9 +335,9 @@ def interpolate_extinct_rates(
     return extinct_rates
 
 
-def plot_avg_s_heatmap(
-    fig: Figure, ax_main: Axes, ax_bar: Axes, df: pd.DataFrame, avg_s: np.ndarray
-) -> None:
+def plot_avg_avg_strat_phe_0(
+    ax_main: Axes, df: pd.DataFrame, avg_s: np.ndarray
+) -> ScalarMappable:
     n_agents_i = sorted(df["n_agents_i"].unique())
     prob_mut = sorted(df["prob_mut"].unique())
     image = ax_main.pcolormesh(
@@ -345,4 +345,4 @@ def plot_avg_s_heatmap(
     )
     ax_main.set_xlim(n_agents_i[0], n_agents_i[-1])
     ax_main.set_ylim(prob_mut[0], prob_mut[-1])
-    set_heatmap_colorbar(fig, ax_bar, "avg_avg_strat_phe_0", image)
+    return image

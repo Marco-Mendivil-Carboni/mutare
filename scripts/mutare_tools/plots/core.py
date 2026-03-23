@@ -31,7 +31,7 @@ from .utils import (
     plot_colored_curve,
     interpolate_values,
     interpolate_extinct_rates,
-    plot_avg_s_heatmap,
+    plot_avg_avg_strat_phe_0,
 )
 
 
@@ -182,7 +182,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_5, axs_5 = create_colorbar_figure("n_agents_i", "extinct_rate", False)
 
     fig_6, axs_6 = create_colorbar_figure(
-        "avg_strat_phe_0", "dist_avg_strat_phe_0", False
+        "avg_strat_phe_0", "exp_dist_avg_strat_phe_0", False
     )
     fig_7, axs_7 = create_colorbar_figure(
         "avg_strat_phe_0", "dist_avg_strat_phe_0", False
@@ -280,8 +280,10 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     for fig, axs in zip([fig_6, fig_7], [axs_6, axs_7]):
         set_heatmap_colorbar(fig, axs[1], "n_agents_i", log_norm)
 
-    plot_avg_s_heatmap(fig_8, axs_8[0], axs_8[1], random_df, np.array(avg_s_exp))
-    plot_avg_s_heatmap(fig_9, axs_9[0], axs_9[1], random_df, np.array(avg_s))
+    image = plot_avg_avg_strat_phe_0(axs_8[0], random_df, np.array(avg_s_exp))
+    set_heatmap_colorbar(fig_8, axs_8[1], "exp_avg_avg_strat_phe_0", image)
+    image = plot_avg_avg_strat_phe_0(axs_9[0], random_df, np.array(avg_s))
+    set_heatmap_colorbar(fig_9, axs_9[1], "avg_avg_strat_phe_0", image)
 
     fig_dir = job.base_dir / "plots" / "fixed"
     fig_dir.mkdir(parents=True, exist_ok=True)
