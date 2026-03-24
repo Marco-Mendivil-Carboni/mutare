@@ -102,15 +102,15 @@ To adress the questions outlined in the introduction we introduce the simple age
 
 The \emph{environment} is simply a discrete variable with two possible values \footnote{Of course this is easily generalizable to the case of $n_{\text{env}}$ different environments.}, $e\in\{1,2\}$, which evolves according to a continuous-time Markov chain with transition rates $\omega_t(e,e')$ between states $e$ and $e'$ \footnote{The possibility that this environment variable follows non-Markovian dynamics or takes continuous values is outside of the scope of this work.}.
 
-The \emph{population} is made up of $N$ agents, each one of which will be characterized just by two traits: a \emph{phenotype} $\phi\in\{A,B\}$\footnote{Again this could easily be generalized to more than two phenotypes.} and a \emph{phenotypic strategy} $s(\phi)$, which represents a probability distribution over the possible phenotypes. The phenotype will determine the response of the agent to the environment while the phenotypic strategy will determine the phenotype of the offsprings of that agent, introducing a mechanism for phenotypic diversity to appear and be mantained \emph{across generations}.
+The \emph{population} is made up of $N$ agents, each one of which will be characterized just by two traits: a \emph{phenotype} $\phi\in\{A,B\}$ \footnote{Again this could easily be generalized to more than two phenotypes.} and a \emph{phenotypic strategy} $s(\phi)$, which represents a probability distribution over the possible phenotypes. The phenotype will determine the response of the agent to the environment while the phenotypic strategy will determine the phenotype of the offsprings of that agent, introducing a mechanism for phenotypic diversity to appear and be mantained \emph{across generations}.
 
-As we pointed out in the introduction we expect to see deviations from the already known principles of evolution when the population size does not grow indefinitely. Therefore, we will limit the population size to its initial value, $N_\text{ini}$: whenever replication would cause the population to exceed this value, a randomly chosen agent is simultaneously removed. This mechanism mimics continuous-culture evolution experiments \autocite{collectiveEconomicPrinciplesCell}, and can be interpreted as imposing an effective ecological carrying capacity.
+In particular the population will follow a stochastic birth-death process in which the birth and death rates ($\omega_b(e,\phi)$ and $\omega_d(e,\phi)$ respectively) depend explicitly on both the current environment and the phenotype of each agent. Therefore, the behaviour of the population as a whole in a given environment will depend on its phenotypic composition.
 
-% FINISHED UP TO HERE
+Additionally, when an agent replicates, its offspring will generally inherit the parent's phenotypic strategy $s(\phi)$, but with probability $p_{\text{mut}}$ a mutation will occur, leading to a new random strategy \footnote{Thus, for simplicity, mutations in this model are assumed to be abrupt, even though this may not be the most common situation in biological systems. In \autoref{sec:incremental_mutations}, we extend the model by introducing an additional parameter to allow for incremental mutations, and show that this modification leads to qualitatively similar results, with only minor quantitative differences.}. This mechanism enables the evolutionary exploration of the space of possible phenotypic strategies, which constitute the heritable traits subject to selection, and therefore play the role of the \emph{genotype}.
 
-Population dynamics occur through stochastic birth and death processes that depend on both the current environment and the phenotype of the agent. The matrices $\omega_b(e,\phi)$ and $\omega_d(e,\phi)$ denote the birth and death rates of phenotype $\phi$ in environment $e$, respectively. The net growth rate in a given environment thus depends on the phenotypic composition of the population.
+Finally, as we pointed out in the introduction we expect to see deviations from the already known principles of evolution when the population size does not grow indefinitely. Therefore, we will limit the population size to its initial value, $N_\text{ini}$: whenever replication would cause the population to exceed this value, a randomly chosen agent is simultaneously removed. This mechanism mimics continuous-culture evolution experiments \autocite{collectiveEconomicPrinciplesCell}, and can be interpreted as imposing an effective ecological carrying capacity.
 
-When an agent replicates, its offspring inherits the parent's phenotypic strategy $s(\phi)$, but with probability $p_{\text{mut}}$ a mutation occurs, leading to a new random strategy. This mechanism allows for evolutionary exploration of the space of possible strategies.
+FINISHED UP TO HERE
 
 If the population goes extinct, it is reinitialized, allowing for long-term statistical characterization of the dynamics.
 
@@ -215,15 +215,15 @@ More broadly, this study highlights that the effective fitness governing evoluti
 
 \appendix
 
-\section{The Gillespie algorithm and time series analysis}
+\section{The Gillespie algorithm and time series analysis} \label{sec:gillespie_algorithm}
 
 \dots
 
-\section{Different model parameters}
+\section{Different model parameters} \label{sec:symmetric_parameters}
 
 \dots
 
-\section{Incremental mutations}
+\section{Incremental mutations} \label{sec:incremental_mutations}
 
 \begin{figure*}[p]
     \centering
