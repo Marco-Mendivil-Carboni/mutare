@@ -110,19 +110,11 @@ Additionally, when an agent replicates, its offspring will generally inherit the
 
 Finally, as we pointed out in the introduction we expect to see deviations from the already known principles of evolution when the population size does not grow indefinitely. Therefore, we will limit the population size to its initial value, $N_\text{ini}$: whenever replication would cause the population to exceed this value, a randomly chosen agent is simultaneously removed. This mechanism mimics continuous-culture evolution experiments \autocite{collectiveEconomicPrinciplesCell}, and can be interpreted as imposing an effective ecological carrying capacity.
 
-FINISHED UP TO HERE
-
-If the population goes extinct, it is reinitialized, allowing for long-term statistical characterization of the dynamics.
-
-To solve the stochastic model we will use the Gillespie algorithm [ADD CITE].
-
-The model intentionally strips the problem down to its minimal ingredients. We consider only two environmental states and two phenotypes, and we restrict strategies to environment-independent stochastic switching. This simplicity is deliberate: our goal is not to reproduce the full biological complexity of real systems, but rather to isolate the fundamental tension between growth maximization and extinction avoidance in a fluctuating environment.
-
-The crucial ingredient distinguishing our framework from standard models of bet-hedging is the explicit cap on population size. By imposing a maximum population size $N_i$, we effectively introduce a carrying capacity. Under this constraint, extinction becomes inevitable over sufficiently long times, even for strategies with positive mean growth rate. As a result, extinction is not a rare pathological event but an integral part of the long-term dynamics. This allows us to study how extinction risk feeds back into evolutionary selection.
-
-Throughout the paper we focus on understanding whether evolution favors strategies that maximize mean growth rate, minimize extinction probability, or balance both objectives. The simplicity of the model allows us to compute and compare these quantities directly and to identify the regimes in which they conflict.
+Despite the minimalism of the model, it is definitely impossible to solve it analytically. Therefore, we will perform simulations using the Gillespie algorithm \autocite{toralStochasticNumericalMethods} \footnote{More details about the simulations and the algorithm can be found in \autoref{sec:gillespie_algorithm}}. Still, as we will see in the next sections, the model is simple enough that its behavior can be readily analyzed, and at the same time it contains all the necessary elements to provide insight into the questions that motivate this work.
 
 \section{Behaviour of the model without evolution} \label{sec:no_evolution}
+
+% FINISHED UP TO HERE
 
 \begin{figure}
     \centering
