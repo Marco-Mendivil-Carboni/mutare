@@ -114,18 +114,39 @@ Despite the minimalism of the model, it is definitely impossible to solve it ana
 
 \section{Behaviour of the model without evolution} \label{sec:no_evolution}
 
-% FINISHED UP TO HERE
+\begin{table}
+    \caption{Set of parameters used in the simulations, which we will refer to as the ``assymetric parameters''. They represent a common biological situation in which there is a ``resistant'' phenotype and a ``persistent'' one.} \label{tab:assymetric_parameters}
+    \begin{tabular}{c c c}
+        \toprule
+        symbol             & name                     & value                                                        \\
+        \midrule
+        $\omega_t(e,e')$   & transition rates         & $\begin{psmallmatrix}-1.0&+1.0\\+1.0&-1.0\end{psmallmatrix}$ \\
+        \addlinespace
+        $\omega_b(e,\phi)$ & birth rates              & $\begin{psmallmatrix}1.0&0.2\\0.0&0.0\end{psmallmatrix}$     \\
+        \addlinespace
+        $\omega_d(e,\phi)$ & death rates              & $\begin{psmallmatrix}0.0&0.0\\1.0&0.1\end{psmallmatrix}$     \\
+        \addlinespace
+        $p_{\text{mut}}$   & mutation probability     & $0.001$                                                      \\
+        \addlinespace
+        $N_{\text{ini}}$   & initial number of agents & $100$                                                        \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 \begin{figure}
     \centering
-    \caption{Mean growth rate (top) and extinction rate (bottom) as a function of the fixed phenotypic strategy in the asymmetric parameter set. The strategy maximizing mean growth differs from the one minimizing extinction, revealing a clear trade-off between growth and survival.} \label{fig:main_observables}
+    \caption{Mean growth rate (top) and extinction rate (bottom) as a function of the initial phenotypic strategy in the fixed simulations for the parameter set in \autoref{tab:assymetric_parameters}. The strategy that maximizes mean growth differs from the one that minimizes extinction, revealing a clear trade-off between these two possible objectives.} \label{fig:main_observables}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}
 \end{figure}
 
+% FINISHED UP TO HERE
+
+\footnote{A completely different set of parameters is considered in \autoref{sec:symmetric_parameters}, which leads to the same main conclusions despite some differences.}
+
 We begin by analyzing the model in the absence of evolution, that is, for fixed phenotypic strategies. This allows us to disentangle ecological effects from evolutionary ones and to characterize the trade-off between mean growth and extinction risk for each strategy independently.
 
-Figure~\ref{fig:main_observables} shows the mean growth rate $\langle\mu\rangle$ and the extinction rate $r_e$ measured in fixed-strategy simulations for the asymmetric parameter set. The growth-maximizing strategy is, in general, distinct from the extinction-minimizing strategy. In particular, strategies that yield the highest average growth rate often exhibit substantially larger extinction rates. Conversely, safer strategies reduce extinction risk at the cost of lower mean growth.
+\autoref{fig:main_observables} shows the mean growth rate $\langle\mu\rangle$ and the extinction rate $r_e$ measured in fixed-strategy simulations for the asymmetric parameter set. The growth-maximizing strategy is, in general, distinct from the extinction-minimizing strategy. In particular, strategies that yield the highest average growth rate often exhibit substantially larger extinction rates. Conversely, safer strategies reduce extinction risk at the cost of lower mean growth.
 
 This conflict demonstrates that, in finite populations subject to environmental fluctuations, growth maximization and survival maximization are not equivalent criteria. The existence of this trade off is the central ecological ingredient that will later shape the evolutionary outcome.
 
