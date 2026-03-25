@@ -133,26 +133,24 @@ Despite the minimalism of the model, it is definitely impossible to solve it ana
     \end{tabular}
 \end{table}
 
-\begin{figure}
-    \centering
-    \caption{Mean growth rate (top) and extinction rate (bottom) as a function of the initial phenotypic strategy for \texttt{fixed} simulations with the parameter set in \autoref{tab:assymetric_parameters}. The strategy that maximizes mean growth differs from the one that minimizes extinction, revealing a clear trade-off between these two possible objectives.} \label{fig:main_observables}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}
-\end{figure}
-
 We begin by solving the model without evolution, i.e. with $p_{\text{mut}}=0$ and assuming that all agents initially share the same strategy, $s_\text{ini}$. This kind of simulations (which we will call \texttt{fixed}) allow us to study the properties of individual strategies in isolation and, in turn, better understand the evolutionary outcomes that follow.
 
 To proceed, we must first choose a specific set of model parameters. We start with the set shown in \autoref{tab:assymetric_parameters} \footnote{A completely different set of parameters is considered in \autoref{sec:symmetric_parameters}, which leads to the same main conclusions despite some differences.}. These parameters represent a common biological scenario in which there is a “resistant” phenotype and a “persistent” one \autocite{huftonPhenotypicSwitchingPopulations2018}.
 
+\begin{figure}
+    \centering
+    \caption{Mean growth rate (top) and extinction rate (bottom) as a function of the initial phenotypic strategy for \texttt{fixed} simulations with the parameter set in \autoref{tab:assymetric_parameters}. The strategy that maximizes mean growth (marked with a dashed line) differs from the one that minimizes extinction (marked with a dotted line), revealing a clear trade-off between these two possible objectives.} \label{fig:main_observables}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}
+\end{figure}
+
+\autoref{fig:main_observables} shows the mean growth rate $\langle\mu\rangle$ and the extinction rate $r_e$ measured in fixed-strategy simulations for this parameter set. The growth-maximizing strategy is, in general, distinct from the extinction-minimizing strategy and in particular for this parameters $\langle\mu\rangle$ is maximized for $s(A)\sim0.8$ while $r_{\text{ext}}$ is minimized for $s(A)\sim0.0$. As we will see later, this trade off (and more precisely de different scaling of this two quantities with the population limit) will shape the evolutionary outcome.
+
+\section{Outcome of the evolutionary dynamics} \label{sec:evol_outcome}
+
 \bigskip
 \textcolor{red}{FINISHED UP TO HERE}
 \bigskip
-
-\autoref{fig:main_observables} shows the mean growth rate $\langle\mu\rangle$ and the extinction rate $r_e$ measured in fixed-strategy simulations for this parameter set. The growth-maximizing strategy is, in general, distinct from the extinction-minimizing strategy. In particul
-
-This conflict demonstrates that, in finite populations subject to environmental fluctuations, growth maximization and survival maximization are not equivalent criteria. The existence of this trade off is the central ecological ingredient that will later shape the evolutionary outcome.
-
-\section{Outcome of the evolutionary dynamics} \label{sec:evol_outcome}
 
 We now enable evolution by allowing strategies to mutate and compete. Starting either from a monomorphic population or from a random distribution of strategies, the system consistently converges toward a well-defined stationary distribution in strategy space.
 
