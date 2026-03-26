@@ -163,16 +163,12 @@ The average evolved strategy typically lies between the growth maximizing and ex
     \caption{Evolutionary dynamics in the asymmetric parameter set. The distribution and average of the phenotypic strategy converge to a stationary value independent of initial conditions. The evolved strategy lies between the growth-optimal and extinction-minimizing strategies, reflecting a trade-off between growth and survival.} \label{fig:evol_results}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/growth_rates.pdf}
 \end{figure}
 
 \begin{figure}
     \centering
     \caption{Dependence of the evolved strategy on population size $N_i$ (top panels) and mutation probability $p_{\mathrm{mut}}$ (bottom panels). Increasing $N_i$ drives the system toward growth maximization, while smaller populations favor safer strategies.} \label{fig:dependence_on_N_ini_and_p_mut}
-    \includegraphics{../sims/asymmetric/plots/n_agents_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
-    \includegraphics{../sims/asymmetric/plots/prob_mut/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/avg_avg_strat_phe_0.pdf}
 \end{figure}
 
@@ -196,9 +192,9 @@ This quasi-monomorphic behavior justifies interpreting the evolutionary process 
 To understand the evolutionary outcome, we return to fixed-strategy simulations and examine how growth and extinction scale with population size. While the mean growth rate $\langle\mu\rangle$ depends only weakly on $N_i$, the extinction rate $r_{\mathrm{ext}}$ decreases approximately as a power law, $r_{\mathrm{ext}}\sim N_i^{-\alpha}$. This strong size dependence implies that extinction pressure is significant for small populations but rapidly weakens as $N_i$ increases.
 
 This observation suggests that the evolutionary attractor emerges from the competition between exponential growth amplification and algebraically suppressed extinction risk. Motivated by this idea, we propose the heuristic stationary distribution
-\[
-    p(s)\propto\frac{\exp(N_i\langle\mu(s)\rangle)}{r_{\mathrm{ext}}(s)+p_{\mathrm{mut}}\langle\mu_b(s)\rangle},
-\]
+\begin{equation} \label{eq:heuristic_strategy_distribution}
+    p(\overline{s})\propto\frac{\exp(N_{\text{ini}}\cdot\langle\mu(\overline{s})\rangle)}{r_{\text{ext}}(N_{\text{ini}},\overline{s})+p_{\text{mut}}\cdot\langle\mu_b(\overline{s})\rangle},
+\end{equation}
 constructed solely from quantities measured in fixed-strategy simulations.
 
 The numerator captures the amplification of early growth differences when multiple strategies compete after reinitialization, while the denominator approximates the rate at which a strategy disappears, either through population extinction or mutation-driven replacement. Despite its simplicity, this expression reproduces the qualitative location and sharpening of the evolved distribution as $N_i$ increases.
@@ -208,8 +204,6 @@ The numerator captures the amplification of early growth differences when multip
     \caption{Fixed-strategy results used to construct the heuristic approximation. Mean growth rate depends weakly on $N_i$, whereas extinction rate follows an approximate power-law scaling. Using these inputs, the heuristic distribution captures the qualitative features of the evolutionary stationary distribution, although quantitative discrepancies remain.} \label{fig:fixed_simulation_results}
     \includegraphics{../sims/asymmetric/plots/fixed/avg_growth_rate.pdf}
     \includegraphics{../sims/asymmetric/plots/fixed/extinct_rate_scaling.pdf}
-    \includegraphics{../sims/asymmetric/plots/fixed/exp_dist_avg_strat_phe_0.pdf}
-    \includegraphics{../sims/asymmetric/plots/fixed/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/fixed/exp_avg_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/fixed/avg_avg_strat_phe_0.pdf}
 \end{figure*}
@@ -238,14 +232,12 @@ More broadly, this study highlights that the effective fitness governing evoluti
 
 \section{Incremental mutations} \label{sec:incremental_mutations}
 
-\begin{figure*}[p]
+\begin{figure}
     \centering
     \caption{\dots} \label{fig:incremental_mutations}
-    \includegraphics{../sims/incremental/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/incremental/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
-    \includegraphics{../sims/incremental/plots/n_agents_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/incremental/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
-\end{figure*}
+\end{figure}
 
 \dots
 
