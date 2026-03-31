@@ -59,40 +59,55 @@ Thus, the purpose of this work is to investigate, through numerical simulations,
     \caption{Schematic diagram of our model.} \label{fig:model_diagram}
     \begin{subfigure}{\linewidth}
         \centering
-        \begin{tikzpicture}[environment/.style={draw, minimum size=0.75cm, fill=lightgray!25}, >=stealth, node distance=2.25cm]
+        \begin{tikzpicture}
+            \tikzset{
+                environment/.style={draw, rounded corners, minimum size=0.75cm, fill=lightgray!25},
+                rate/.style={->, >=stealth, thick},
+                node distance=2.25cm
+            }
             \node[environment] (e1) {$1$};
             \node[environment, right of=e1] (e2) {$2$};
-            \draw[->, bend left=20] (e1) to node[above] {$\omega_t(1,2)$} (e2);
-            \draw[->, bend left=20] (e2) to node[below] {$\omega_t(2,1)$} (e1);
+            \draw[rate, bend left=20] (e1) to node[above] {$\omega_t(1,2)$} (e2);
+            \draw[rate, bend left=20] (e2) to node[below] {$\omega_t(2,1)$} (e1);
         \end{tikzpicture}
         \caption{Environment dynamics}
     \end{subfigure}
     \begin{subfigure}{\linewidth}
         \centering
-        \begin{tikzpicture}[agent/.style={draw, minimum height=0.75cm, minimum width=1.25cm, fill=lightgray!25}, >=stealth, node distance=2.75cm]
-            \node[agent] (parent) {$\phi_p$, $s_p$};
-            \node[agent, right of=parent, yshift=+0.5cm] (death) {$\varnothing$};
-            \node[agent, right of=parent, yshift=-0.5cm] (parent_copy) {$\phi_p$, $s_p$};
-            \node[right=0cm of parent_copy, draw=none] (plus) {$+$};
+        \begin{tikzpicture}
+            \tikzset{
+                agent/.style={draw, rounded corners, minimum height=0.75cm, minimum width=1.25cm, fill=lightgray!25},
+                rate/.style={->, >=stealth, thick},
+                node distance=2.75cm
+            }
+            \node[agent] (agent) {$\phi$, $s$};
+            \node[agent, right of=agent, yshift=+0.5cm] (death) {$\varnothing$};
+            \node[agent, right of=agent, yshift=-0.5cm] (agent_copy) {$\phi$, $s$};
+            \node[right=0cm of agent_copy, draw=none] (plus) {$+$};
             \node[agent, right=0cm of plus] (offspring) {$\phi_o$, $s_o$};
-            \draw[->] (parent) -- node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
-            \draw[->] (parent) -- node[sloped, midway, below] {$\omega_b(e,\phi)$} (parent_copy);
+            \draw[rate, bend left=10] (agent) to node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
+            \draw[rate, bend right=10] (agent) to node[sloped, midway, below] {$\omega_b(e,\phi)$} (agent_copy);
         \end{tikzpicture}
         \caption{Birth-death process}
     \end{subfigure}
     \begin{subfigure}{\linewidth}
         \centering
-        \begin{tikzpicture}[trait/.style={draw, minimum height=0.75cm, minimum width=1cm, fill=lightgray!25}, >=stealth, node distance=2.5cm]
-            \node[trait] (phi_o) {$\phi_o$};
+        \begin{tikzpicture}
+            \tikzset{
+                trait/.style={},
+                prob/.style={->},
+                node distance=2.5cm
+            }
+            \node[trait] (phi_o) {$\phi_o=$};
             \node[trait, right of=phi_o, yshift=+0.5cm] (A) {$A$};
             \node[trait, right of=phi_o, yshift=-0.5cm] (B) {$B$};
-            \draw[->] (phi_o) -- node[sloped, midway, above] {$s(A)$} (A);
-            \draw[->] (phi_o) -- node[sloped, midway, below] {$s(B)$} (B);
-            \node[trait, right of=phi_o, xshift=1.5cm] (s_o) {$s_o$};
-            \node[trait, right of=s_o, yshift=+0.5cm] (s_p) {$s_p$};
+            \draw[prob] (phi_o) -- node[sloped, midway, above] {$s(A)$} (A);
+            \draw[prob] (phi_o) -- node[sloped, midway, below] {$s(B)$} (B);
+            \node[trait, right of=phi_o, xshift=1.5cm] (s_o) {$s_o=$};
+            \node[trait, right of=s_o, yshift=+0.5cm] (s) {$s$};
             \node[trait, right of=s_o, yshift=-0.5cm] (s_mut) {$s_{\text{mut}}$};
-            \draw[->] (s_o) -- node[sloped, midway, above] {$1-p_{\text{mut}}$} (s_p);
-            \draw[->] (s_o) -- node[sloped, midway, below] {$p_{\text{mut}}$} (s_mut);
+            \draw[prob] (s_o) -- node[sloped, midway, above] {$1-p_{\text{mut}}$} (s);
+            \draw[prob] (s_o) -- node[sloped, midway, below] {$p_{\text{mut}}$} (s_mut);
         \end{tikzpicture}
         \caption{Phenotype and strategy of the offspring}
     \end{subfigure}
