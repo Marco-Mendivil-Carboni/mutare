@@ -32,19 +32,14 @@
 \maketitle
 
 \begin{abstract}
-    Natural populations rarely evolve under stable conditions, but instead face fluctuating and unpredictable environments, sometimes, under severe demographic constraints. In this work, we introduce a minimal stochastic model to study how evolutionary adaptation unfolds in such settings. The model combines environmental switching and population dynamics within a continuous-time Markov framework, while allowing heritable phenotypic strategies to evolve through mutation and selection.
+    Natural populations rarely evolve under stable conditions and without limitations: environments fluctuate unpredictably and resources constrain population size. In this work, we introduce a minimal stochastic model to study how evolutionary adaptation unfolds under these conditions. The model consists of a population undergoing a birth--death process in a randomly switching environment, where individuals carry heritable phenotypic strategies that determine the distribution of phenotypes across generations.
 
     By first analyzing fixed strategies, we show that environmental variability can favor phenotypic diversity through bet-hedging, and that strategies maximizing mean growth rate generally differ from those minimizing extinction risk. When evolution is enabled, populations do not simply maximize growth, but instead converge to intermediate strategies that balance reproductive performance and survival. This trade-off becomes particularly relevant in finite populations, where extinction risk acts as an additional selective pressure.
 
     We further demonstrate that population size controls the relative importance of these effects: large populations recover the classical growth-maximizing behavior, while smaller populations evolve toward safer, more resilient strategies. A simple heuristic approximation, constructed from fixed-strategy observables, captures the main features of the evolutionary outcome and clarifies the competing roles of growth and extinction.
 
-    Overall, our results provide a mechanistic picture of how environmental fluctuations and demographic constraints jointly shape evolutionary adaptation, highlighting the central role of extinction risk in determining effective fitness and the emergence of phenotypic diversity.
+    Overall, our results provide a clear picture of how environmental fluctuations and demographic constraints jointly shape evolutionary adaptation, highlighting the central role of extinction risk in determining evolutionary outcomes in finite populations.
 \end{abstract}
-
-% Possible Journals:
-% 1. Proceedings of the National Academy of Sciences
-% 2. Physical Review E
-% 3. Journal of Theoretical Biology
 
 \section{Introduction and objectives} \label{sec:introduction}
 
@@ -169,6 +164,8 @@ To proceed, we must first choose a specific set of model parameters. We start wi
 
 Secondly, we observe that the growth-maximizing strategy differs from the extinction-minimizing one \footnote{Again, this occurs for other parameter sets, as discussed in \autoref{sec:symmetric_parameters}.}. In particular, $\langle\mu\rangle$ is maximized at $s(A)\sim0.8$, while $r_{\text{ext}}$ is minimized at $s(A)\sim0.0$. As we will show later, this trade-off (and more precisely the different scaling of these two quantities with the population limit) plays a key role in shaping the evolutionary outcome.
 
+We are not going to investigate further the dependence of this results on the parameters of the model since that's not the main objective of this work (since it has already been studied) and instead we are going to focus in the next section on what the evolutionary process selects in this setting.
+
 \section{Outcome of the evolutionary dynamics} \label{sec:evol_outcome}
 
 \bigskip
@@ -263,5 +260,10 @@ More broadly, this study highlights that the effective fitness governing evoluti
 \end{figure}
 
 \dots
+
+% Possible Journals:
+% 1. Proceedings of the National Academy of Sciences
+% 2. Physical Review E
+% 3. Journal of Theoretical Biology
 
 \end{document}
