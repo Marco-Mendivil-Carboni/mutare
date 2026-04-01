@@ -106,9 +106,9 @@ Thus, the purpose of this work is to investigate, through numerical simulations,
             \draw[prob] (phi_o) -- node[sloped, midway, below] {$s(B)$} (B);
             \node[trait, right of=phi_o, xshift=1.5cm] (s_o) {$s_o=$};
             \node[trait, right of=s_o, yshift=+0.5cm] (s) {$s$};
-            \node[trait, right of=s_o, yshift=-0.5cm] (s_mut) {$s_{\text{mut}}$};
-            \draw[prob] (s_o) -- node[sloped, midway, above] {$1-p_{\text{mut}}$} (s);
-            \draw[prob] (s_o) -- node[sloped, midway, below] {$p_{\text{mut}}$} (s_mut);
+            \node[trait, right of=s_o, yshift=-0.5cm] (s_mut) {$s_\text{mut}$};
+            \draw[prob] (s_o) -- node[sloped, midway, above] {$1-p_\text{mut}$} (s);
+            \draw[prob] (s_o) -- node[sloped, midway, below] {$p_\text{mut}$} (s_mut);
         \end{tikzpicture}
         \caption{Phenotype and strategy of the offspring}
     \end{subfigure}
@@ -116,13 +116,13 @@ Thus, the purpose of this work is to investigate, through numerical simulations,
 
 To adress the questions outlined in the introduction we introduce the simple agent-based model illustrated in \autoref{fig:model_diagram}. The state of the system consists of only two components: the \emph{environment} and the \emph{population}.
 
-The \emph{environment} is simply a discrete variable with two possible values \footnote{Of course this is easily generalizable to the case of $n_{\text{env}}$ different environments.}, $e\in\{1,2\}$, which evolves according to a continuous-time Markov chain with transition rates $\omega_t(e,e')$ between states $e$ and $e'$ \footnote{The possibility that this environment variable follows non-Markovian dynamics or takes continuous values is outside of the scope of this work.}.
+The \emph{environment} is simply a discrete variable with two possible values \footnote{Of course this is easily generalizable to the case of $n_\text{env}$ different environments.}, $e\in\{1,2\}$, which evolves according to a continuous-time Markov chain with transition rates $\omega_t(e,e')$ between states $e$ and $e'$ \footnote{The possibility that this environment variable follows non-Markovian dynamics or takes continuous values is outside of the scope of this work.}.
 
 The \emph{population} is made up of $N$ agents, each one of which will be characterized just by two traits: a \emph{phenotype} $\phi\in\{A,B\}$ \footnote{Again this could easily be generalized to more than two phenotypes.} and a \emph{phenotypic strategy} $s(\phi)$, which represents a probability distribution over the possible phenotypes \footnote{Since we restrict ourselves to two phenotypes, the strategy is fully specified by a single parameter, $s(A)$, as $s(B)=1-s(A)$. Throughout this work, we will therefore specify only this first component.}. The phenotype will determine the response of the agent to the environment while the phenotypic strategy will determine the phenotype of the offsprings of that agent, introducing a mechanism for phenotypic diversity to appear and be mantained \emph{across generations}.
 
 In particular the population will follow a stochastic birth-death process in which the birth and death rates ($\omega_b(e,\phi)$ and $\omega_d(e,\phi)$ respectively) depend explicitly on both the current environment and the phenotype of each agent. Therefore, the behaviour of the population as a whole in a given environment will depend on its phenotypic composition.
 
-Additionally, when an agent replicates, its offspring will generally inherit the parent's phenotypic strategy $s(\phi)$, but with probability $p_{\text{mut}}$ a mutation will occur, leading to a new random strategy \footnote{Thus, for simplicity, mutations in this model are assumed to be abrupt, even though this may not be the most common situation in biological systems. In \autoref{sec:incremental_mutations}, we extend the model by introducing an additional parameter to allow for incremental mutations, and show that this modification leads to qualitatively similar results, with only minor quantitative differences.}. This mechanism enables the evolutionary exploration of the space of possible phenotypic strategies, which constitute the heritable traits subject to selection, and therefore play the role of the \emph{genotype}.
+Additionally, when an agent replicates, its offspring will generally inherit the parent's phenotypic strategy $s(\phi)$, but with probability $p_\text{mut}$ a mutation will occur, leading to a new random strategy \footnote{Thus, for simplicity, mutations in this model are assumed to be abrupt, even though this may not be the most common situation in biological systems. In \autoref{sec:incremental_mutations}, we extend the model by introducing an additional parameter to allow for incremental mutations, and show that this modification leads to qualitatively similar results, with only minor quantitative differences.}. This mechanism enables the evolutionary exploration of the space of possible phenotypic strategies, which constitute the heritable traits subject to selection, and therefore play the role of the \emph{genotype}.
 
 Finally, as we pointed out in the introduction we expect to see deviations from the already known principles of evolution when the population size does not grow indefinitely. Therefore, we will limit the population size to its initial value, $N_\text{ini}$: whenever replication would cause the population to exceed this value, a randomly chosen agent is simultaneously removed. This mechanism mimics continuous-culture evolution experiments \autocite{collectiveEconomicPrinciplesCell}, and can be interpreted as imposing an effective ecological carrying capacity.
 
@@ -130,7 +130,7 @@ Despite the minimalism of the model, it is definitely impossible to solve it ana
 
 \section{Behaviour of the model without evolution} \label{sec:no_evolution}
 
-We begin by solving the model without evolution, i.e. with $p_{\text{mut}}=0$ and assuming that all agents initially share the same strategy, $s_\text{ini}$. This kind of simulations (which we will call \texttt{fixed}) allow us to study the properties of individual strategies in isolation and, in turn, better understand the evolutionary outcomes that follow.
+We begin by solving the model without evolution, i.e. with $p_\text{mut}=0$ and assuming that all agents initially share the same strategy, $s_\text{ini}$. This kind of simulations (which we will call \texttt{fixed}) allow us to study the properties of individual strategies in isolation and, in turn, better understand the evolutionary outcomes that follow.
 
 \begin{table}
     \caption{Set of parameters used in the simulations, which we will refer to as the ``assymetric parameters''. They represent a common biological situation in which there is a ``resistant'' phenotype and a ``persistent'' one.} \label{tab:assymetric_parameters}
@@ -144,9 +144,9 @@ We begin by solving the model without evolution, i.e. with $p_{\text{mut}}=0$ an
         \addlinespace
         $\omega_d(e,\phi)$ & death rates              & $\begin{psmallmatrix}0.0&0.0\\1.0&0.1\end{psmallmatrix}$     \\
         \addlinespace
-        $p_{\text{mut}}$   & mutation probability     & $0.001$                                                      \\
+        $p_\text{mut}$     & mutation probability     & $0.001$                                                      \\
         \addlinespace
-        $N_{\text{ini}}$   & initial number of agents & $100$                                                        \\
+        $N_\text{ini}$     & initial number of agents & $100$                                                        \\
         \bottomrule
     \end{tabular}
 \end{table}
@@ -160,9 +160,9 @@ To proceed, we must first choose a specific set of model parameters. We start wi
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}
 \end{figure}
 
-\autoref{fig:main_observables} shows the mean growth rate $\langle\mu\rangle$ and the extinction rate $r_e$ measured in fixed-strategy simulations for this parameter set. The first important observation to make is that the maximum of $\langle\mu\rangle$ occurs neither at $s(A)=0$ nor at $s(A)=1$, indicating that in cases such as this one phenotypic diversity (that is, maintaining a mixture of both phenotypes) is the ``optimal'' strategy, a result already reported multiple times \autocite{xueBetHedgingDemographic2017}. As we will see, this is precisely the strategy reached by evolution at large $N_{\text{ini}}$. This behavior does not arise in all cases, but only when environmental fluctuations make each phenotype individually less favorable in the long term than their combination.
+\autoref{fig:main_observables} shows the mean growth rate $\langle\mu\rangle$ and the extinction rate $r_e$ measured in fixed-strategy simulations for this parameter set. The first important observation to make is that the maximum of $\langle\mu\rangle$ occurs neither at $s(A)=0$ nor at $s(A)=1$, indicating that in cases such as this one phenotypic diversity (that is, maintaining a mixture of both phenotypes) is the ``optimal'' strategy, a result already reported multiple times \autocite{xueBetHedgingDemographic2017}. As we will see, this is precisely the strategy reached by evolution at large $N_\text{ini}$. This behavior does not arise in all cases, but only when environmental fluctuations make each phenotype individually less favorable in the long term than their combination.
 
-Secondly, we observe that the growth-maximizing strategy differs from the extinction-minimizing one \footnote{Again, this occurs for other parameter sets, as discussed in \autoref{sec:symmetric_parameters}.}. In particular, $\langle\mu\rangle$ is maximized at $s(A)\sim0.8$, while $r_{\text{ext}}$ is minimized at $s(A)\sim0.0$. As we will show later, this trade-off (and more precisely the different scaling of these two quantities with the population limit) plays a key role in shaping the evolutionary outcome.
+Secondly, we observe that the growth-maximizing strategy differs from the extinction-minimizing one \footnote{Again, this occurs for other parameter sets, as discussed in \autoref{sec:symmetric_parameters}.}. In particular, $\langle\mu\rangle$ is maximized at $s(A)\sim0.8$, while $r_\text{ext}$ is minimized at $s(A)\sim0.0$. As we will show later, this trade-off (and more precisely the different scaling of these two quantities with the population limit) plays a key role in shaping the evolutionary outcome.
 
 We do not explore in detail how these results depend on the specific choice of parameters, as this has been extensively studied in previous work. Instead, we focus in the next section on the outcome of the evolutionary dynamics and on which strategies are ultimately selected under these conditions.
 
@@ -175,7 +175,7 @@ We do not explore in detail how these results depend on the specific choice of p
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
 \end{figure}
 
-We now enable evolution by allowing strategies to mutate and compete. We consider two types of simulations: in \texttt{evol} simulations, the population is initially composed of agents with the same strategy $s(A)_{\text{ini}}$, while in \texttt{evol(r)} simulations, the initial strategy of each agent is completely random.
+We now enable evolution by allowing strategies to mutate and compete. We consider two types of simulations: in \texttt{evol} simulations, the population is initially composed of agents with the same strategy $s(A)_\text{ini}$, while in \texttt{evol(r)} simulations, the initial strategy of each agent is completely random.
 
 To characterize the outcome of the evolutionary process, at each time we compute the population-averaged strategy $\overline{s}(A)$. In \autoref{fig:evol_results} we show the distribution of $\overline{s}(A)$ over time (top panel) and its time average (bottom panel). In both types of simulations, the system consistently converges toward a well-defined stationary distribution of $\overline{s}(A)$, with only a weak dependence on the initial condition.
 
@@ -189,14 +189,16 @@ More importantly, we observe that the average evolved strategy lies between the 
 
 \begin{figure}
     \centering
-    \caption{Dependence of the evolved strategy on population size $N_i$ (top panels) and mutation probability $p_{\mathrm{mut}}$ (bottom panels). Increasing $N_i$ drives the system toward growth maximization, while smaller populations favor safer strategies.} \label{fig:dependence_on_N_ini_and_p_mut}
+    \caption{Dependence of the average evolved strategy on population size $N_\text{ini}$ (top panels) and mutation probability $p_\text{mut}$ (bottom panels). Increasing $N_i$ drives the system toward growth maximization, while smaller populations favor safer strategies.} \label{fig:dependence_on_N_ini_and_p_mut}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/avg_avg_strat_phe_0.pdf}
 \end{figure}
 
-The evolutionary outcome depends systematically on both the population size $N_i$ and the mutation probability $p_{\mathrm{mut}}$ (Fig.~\ref{fig:dependence_on_N_ini_and_p_mut}). As $N_i$ increases, the evolved average strategy approaches the growth-maximizing value obtained from fixed simulations. This behavior is consistent with the rapid decrease of extinction risk with increasing population size.
+Next, in \autoref{fig:dependence_on_N_ini_and_p_mut} we explore how the evolutionary outcome depends on population size $N_i$ and the mutation probability $p_\text{mut}$.
 
-By contrast, smaller populations experience stronger extinction pressure and evolve toward safer strategies. The mutation probability primarily controls the exploration of strategy space: for very large values, the population behaves almost as a randomized ensemble, while for very small values the system spends long periods near quasi-fixed strategies. Importantly, for sufficiently large $N_i$, the dependence on $p_{\mathrm{mut}}$ becomes weak, indicating that the evolutionary attractor is robust in the large-population regime.
+The evolutionary outcome depends systematically on both the population size $N_i$ and the mutation probability $p_\text{mut}$ (Fig.~\ref{fig:dependence_on_N_ini_and_p_mut}). As $N_i$ increases, the evolved average strategy approaches the growth-maximizing value obtained from fixed simulations. This behavior is consistent with the rapid decrease of extinction risk with increasing population size.
+
+By contrast, smaller populations experience stronger extinction pressure and evolve toward safer strategies. The mutation probability primarily controls the exploration of strategy space: for very large values, the population behaves almost as a randomized ensemble, while for very small values the system spends long periods near quasi-fixed strategies. Importantly, for sufficiently large $N_i$, the dependence on $p_\text{mut}$ becomes weak, indicating that the evolutionary attractor is robust in the large-population regime.
 
 \begin{figure}
     \centering
@@ -211,11 +213,11 @@ This quasi-monomorphic behavior justifies interpreting the evolutionary process 
 
 \section{Explanation of the evolutionary outcome and a heuristic approximation} \label{sec:explanation_and_heuristic_approx}
 
-To understand the evolutionary outcome, we return to fixed-strategy simulations and examine how growth and extinction scale with population size. While the mean growth rate $\langle\mu\rangle$ depends only weakly on $N_i$, the extinction rate $r_{\mathrm{ext}}$ decreases approximately as a power law, $r_{\mathrm{ext}}\sim N_i^{-\alpha}$. This strong size dependence implies that extinction pressure is significant for small populations but rapidly weakens as $N_i$ increases.
+To understand the evolutionary outcome, we return to fixed-strategy simulations and examine how growth and extinction scale with population size. While the mean growth rate $\langle\mu\rangle$ depends only weakly on $N_i$, the extinction rate $r_\text{ext}$ decreases approximately as a power law, $r_\text{ext}\sim N_i^{-\alpha}$. This strong size dependence implies that extinction pressure is significant for small populations but rapidly weakens as $N_i$ increases.
 
 This observation suggests that the evolutionary attractor emerges from the competition between exponential growth amplification and algebraically suppressed extinction risk. Motivated by this idea, we propose the heuristic stationary distribution
 \begin{equation} \label{eq:heuristic_strategy_distribution}
-    p(\overline{s})\propto\frac{\exp(N_{\text{ini}}\cdot\langle\mu(\overline{s})\rangle)}{r_{\text{ext}}(N_{\text{ini}},\overline{s})+p_{\text{mut}}\cdot\langle\mu_b(\overline{s})\rangle},
+    p(\overline{s})\propto\frac{\exp(N_\text{ini}\cdot\langle\mu(\overline{s})\rangle)}{r_\text{ext}(N_\text{ini},\overline{s})+p_\text{mut}\cdot\langle\mu_b(\overline{s})\rangle},
 \end{equation}
 constructed solely from quantities measured in fixed-strategy simulations.
 

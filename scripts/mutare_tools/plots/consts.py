@@ -48,16 +48,16 @@ SIM_LABELS: dict[SimType, str] = {
 }
 
 COL_TEX_LABELS: dict[str, str] = {
-    "strat_phe_0_i": "$s(A)_{\\text{ini}}$",
-    "prob_mut": "$p_{\\text{mut}}$",
-    "n_agents_i": "$N_{\\text{ini}}$",
+    "strat_phe_0_i": "$s(A)_\\text{ini}$",
+    "prob_mut": "$p_\\text{mut}$",
+    "n_agents_i": "$N_\\text{ini}$",
     "time": "$t$",
     "n_agents": "$N$",
-    "n_extinct": "$n_{\\text{ext}}$",
-    "norm_n_agents": "$N/N_{\\text{ini}}$",
-    "dist_n_agents": "$p(N/N_{\\text{ini}})$",
+    "n_extinct": "$n_\\text{ext}$",
+    "norm_n_agents": "$N/N_\\text{ini}$",
+    "dist_n_agents": "$p(N/N_\\text{ini})$",
     "avg_growth_rate": "$\\langle\\mu\\rangle$",
-    "extinct_rate": "$r_{\\text{ext}}$",
+    "extinct_rate": "$r_\\text{ext}$",
     "avg_strat_phe_0": "$\\overline{s}(A)$",
     "avg_avg_strat_phe_0": "$\\langle\\overline{s}\\rangle(A)$",
     "exp_avg_avg_strat_phe_0": "$\\langle\\overline{s}\\rangle(A)^\\ast$",
@@ -65,7 +65,7 @@ COL_TEX_LABELS: dict[str, str] = {
     "exp_dist_avg_strat_phe_0": "$p(\\overline{s}(A))^\\ast$",
     "dist_phe_0": "$p(A)$",
     "avg_dist_phe_0": "$\\langle p(A)\\rangle$",
-    "std_dev_growth_rate": "$\\sigma_{\\mu}$",
+    "std_dev_growth_rate": "$\\sigma_\\mu$",
     "avg_birth_rate": "$\\langle\\mu_b\\rangle$",
 }
 
