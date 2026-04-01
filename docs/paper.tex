@@ -168,22 +168,22 @@ We do not explore in detail how these results depend on the specific choice of p
 
 \section{Outcome of the evolutionary dynamics} \label{sec:evol_outcome}
 
-\bigskip
-\textcolor{red}{FINISHED UP TO HERE}
-\bigskip
-
-We now enable evolution by allowing strategies to mutate and compete. Starting either from a monomorphic population or from a random distribution of strategies, the system consistently converges toward a well-defined stationary distribution in strategy space.
-
-A key observation is that the instantaneous dispersion of strategies remains small for sufficiently low mutation probabilities. At any given time, the population is therefore almost monomorphic, characterized by a single dominant strategy. Over long times, however, mutation-driven exploration causes the dominant strategy to drift through strategy space. In this sense, the evolutionary simulations can be viewed as a temporal concatenation of quasi-monomorphic fixed-strategy realizations.
-
-The average evolved strategy typically lies between the growth maximizing and extinction minimizing strategies identified in the fixed strategy simulations. This shows that evolution does not optimize instantaneous growth alone, but rather selects strategies reflecting a compromise between growth and extinction avoidance.
-
 \begin{figure}
     \centering
-    \caption{Evolutionary dynamics in the asymmetric parameter set. The distribution and average of the phenotypic strategy converge to a stationary value independent of initial conditions. The evolved strategy lies between the growth-optimal and extinction-minimizing strategies, reflecting a trade-off between growth and survival.} \label{fig:evol_results}
+    \caption{Evolutionary dynamics in the ``asymmetric'' parameter set. Top: stationary distribution of phenotypic strategies. Bottom: time-averaged strategy. Results are shown for both \texttt{evol} (single initial strategy) and \texttt{evol(r)} (random initial strategies) simulations, illustrating the weak dependence on initial conditions. The dashed line indicates the strategy that maximizes mean growth, while the dotted line marks the one that minimizes extinction. The evolved strategy lies between these two, reflecting a compromise between growth and survival.} \label{fig:evol_results}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
 \end{figure}
+
+We now enable evolution by allowing strategies to mutate and compete. We consider two types of simulations: in \texttt{evol} simulations, the population is initially composed of agents with the same strategy $s(A)_{\text{ini}}$, while in \texttt{evol(r)} simulations, the initial strategy of each agent is completely random. In both cases, the system consistently converges toward a well-defined stationary distribution in strategy space, with only a weak dependence on the initial condition, as can be seen in \autoref{fig:evol_results}.
+
+A key observation is that the instantaneous dispersion of strategies (defined as the spread of strategies present in the population at a given time) remains small. This dispersion is represented in the bottom panel of \autoref{fig:evol_results} as an error band, which is barely visible. At any given time, the population is therefore effectively characterized by a single dominant strategy. Over longer times, however, mutation-driven exploration causes this dominant strategy to drift through the space of possible strategies.
+
+More importantly, we observe that the average evolved strategy lies between the growth-maximizing and extinction-minimizing strategies identified in the fixed-strategy simulations. As we will see in later sections, this behavior is not specific to this parameter set. This shows that evolution in finite populations does not optimize instantaneous growth alone, but instead selects strategies that reflect a compromise between growth and extinction avoidance.
+
+\bigskip
+\textcolor{red}{FINISHED UP TO HERE}
+\bigskip
 
 \begin{figure}
     \centering
