@@ -196,11 +196,13 @@ We first observe a strong dependence on $N_\text{ini}$. As anticipated, when $N_
 
 In contrast, the dependence on the mutation probability is relatively weak, as $p_\text{mut}$ mainly controls the exploration of the strategy space \footnote{In \autoref{sec:incremental_mutations} we further examine the effect of changing the characteristics of mutations.}. For very large values of $p_\text{mut}$, $\sigma_s$ increases, indicating that the population no longer shares a common strategy at a given time. In fact, in the limit $p_\text{mut} \to 1$, the population behaves as if $s(A) = 0.5$, since strategies change randomly with every replication. Conversely, in the limit $p_\text{mut} \to 0$, mutations are absent, and the outcome is determined solely by selection among the strategies present in the initial condition.
 
-\section{Explanation of the evolutionary outcome and a heuristic approximation} \label{sec:explanation_and_heuristic_approx}
+\section{Heuristic interpretation of the evolutionary outcome} \label{sec:heuristic_interpretation}
 
 \bigskip
 \textcolor{red}{FINISHED UP TO HERE}
 \bigskip
+
+ADD PARETO front plot and a small paragraph explaning it.
 
 This quasi-monomorphic behavior justifies interpreting the evolutionary process as a stochastic trajectory in strategy space, driven by rare successful mutations and shaped by extinction events. The fact that extinction events typically occur while the population is near a single strategy further supports this coarse-grained description.
 
