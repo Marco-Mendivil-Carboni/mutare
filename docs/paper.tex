@@ -151,7 +151,7 @@ We begin by solving the model without evolution, i.e. with $p_{\text{mut}}=0$ an
     \end{tabular}
 \end{table}
 
-To proceed, we must first choose a specific set of model parameters. We start with the set shown in \autoref{tab:assymetric_parameters} \footnote{A completely different set of parameters is considered in \autoref{sec:symmetric_parameters}, which leads to the same main conclusions despite some differences.}. These parameters represent a common biological scenario in which there is a “resistant” phenotype and a “persistent” one \autocite{huftonPhenotypicSwitchingPopulations2018}. More precisely the meaning of this parameters is the following: both environments are equally likely and there is a transition rate between them of $1.0$; environment $1$ represents a ``favorable'' environment in which phenotype $A$ (the ``resistant'' one) replicates with a rate of $1.0$ while phenotype $B$ (the ``persistent'' one) does it with a rate of $0.2$, and neither of them die; environment $2$ instead represents ``harsh'' conditions in which phenotype $A$ dies with a rate of $1.0$ and phenotype $B$ with a rate of $0.2$, and neither of them are able to duplicate.
+To proceed, we must first choose a specific set of model parameters. We start with the set shown in \autoref{tab:assymetric_parameters} \footnote{A completely different set of parameters is considered in \autoref{sec:symmetric_parameters}, which leads to the same main conclusions despite some differences.}. These parameters represent a common biological scenario in which there is a “resistant” phenotype and a “persistent” one \autocite{huftonPhenotypicSwitchingPopulations2018}. More precisely the meaning of this parameters is the following: both environments are equally likely and there is a transition rate between them of $1.0$; environment $1$ represents a ``favorable'' environment in which phenotype $A$ (the ``resistant'' one) replicates with a rate of $1.0$ while phenotype $B$ (the ``persistent'' one) does it with a rate of $0.2$, and neither of them die; environment $2$ instead represents ``harsh'' conditions in which phenotype $A$ dies with a rate of $1.0$ and phenotype $B$ with a rate of $0.1$, and neither of them are able to duplicate.
 
 \begin{figure}
     \centering
@@ -164,7 +164,7 @@ To proceed, we must first choose a specific set of model parameters. We start wi
 
 Secondly, we observe that the growth-maximizing strategy differs from the extinction-minimizing one \footnote{Again, this occurs for other parameter sets, as discussed in \autoref{sec:symmetric_parameters}.}. In particular, $\langle\mu\rangle$ is maximized at $s(A)\sim0.8$, while $r_{\text{ext}}$ is minimized at $s(A)\sim0.0$. As we will show later, this trade-off (and more precisely the different scaling of these two quantities with the population limit) plays a key role in shaping the evolutionary outcome.
 
-We are not going to investigate further the dependence of this results on the parameters of the model since that's not the main objective of this work (since it has already been studied) and instead we are going to focus in the next section on what the evolutionary process selects in this setting.
+We do not explore in detail how these results depend on the specific choice of parameters, as this has been extensively studied in previous work. Instead, we focus in the next section on the outcome of the evolutionary dynamics and on which strategies are ultimately selected under these conditions.
 
 \section{Outcome of the evolutionary dynamics} \label{sec:evol_outcome}
 
