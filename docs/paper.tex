@@ -183,22 +183,22 @@ A key observation is that the instantaneous dispersion of strategies $\sigma_s$ 
 
 More importantly, we observe that the average evolved strategy lies between the growth-maximizing and extinction-minimizing strategies identified in the fixed-strategy simulations. As we will see in later sections, this behavior is not specific to this parameter set. This shows that evolution in finite populations does not optimize instantaneous growth alone, but instead selects strategies that represent a compromise between growth and extinction avoidance.
 
-\bigskip
-\textcolor{red}{FINISHED UP TO HERE}
-\bigskip
-
 \begin{figure}
     \centering
-    \caption{Dependence of the average evolved strategy on population size $N_\text{ini}$ (top panels) and mutation probability $p_\text{mut}$ (bottom panels). Increasing $N_i$ drives the system toward growth maximization, while smaller populations favor safer strategies.} \label{fig:dependence_on_N_ini_and_p_mut}
+    \caption{Dependence of the average evolved strategy on the population size $N_\text{ini}$ (top) and the mutation probability $p_\text{mut}$ (bottom). Increasing $N_\text{ini}$ drives the system toward the growth-maximizing strategy, while smaller populations favor safer strategies with lower extinction rates.} \label{fig:dependence_on_N_ini_and_p_mut}
     \includegraphics{../sims/asymmetric/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/avg_avg_strat_phe_0.pdf}
 \end{figure}
 
-Next, in \autoref{fig:dependence_on_N_ini_and_p_mut} we explore how the evolutionary outcome depends on population size $N_i$ and the mutation probability $p_\text{mut}$.
+Next, in \autoref{fig:dependence_on_N_ini_and_p_mut} we explore how the evolutionary outcome (namely, the average strategy $\langle\overline{s}\rangle(A)$) depends on the population size $N_\text{ini}$ and the mutation probability $p_\text{mut}$.
 
-The evolutionary outcome depends systematically on both the population size $N_i$ and the mutation probability $p_\text{mut}$ (Fig.~\ref{fig:dependence_on_N_ini_and_p_mut}). As $N_i$ increases, the evolved average strategy approaches the growth-maximizing value obtained from fixed simulations. This behavior is consistent with the rapid decrease of extinction risk with increasing population size.
+We first observe a strong dependence on $N_\text{ini}$. As anticipated, when $N_\text{ini}$ increases, $\langle \overline{s} \rangle(A)$ approaches the growth-maximizing value identified in \autoref{sec:no_evolution}. Only for small populations does the evolutionary outcome favor safer strategies with lower extinction rates.
 
-By contrast, smaller populations experience stronger extinction pressure and evolve toward safer strategies. The mutation probability primarily controls the exploration of strategy space: for very large values, the population behaves almost as a randomized ensemble, while for very small values the system spends long periods near quasi-fixed strategies. Importantly, for sufficiently large $N_i$, the dependence on $p_\text{mut}$ becomes weak, indicating that the evolutionary attractor is robust in the large-population regime.
+In contrast, the dependence on the mutation probability is relatively weak, as $p_\text{mut}$ mainly controls the exploration of the strategy space \footnote{In \autoref{sec:incremental_mutations} we further examine the effect of changing the characteristics of mutations.}. For very large values of $p_\text{mut}$, $\sigma_s$ increases, indicating that the population no longer shares a common strategy at a given time. In fact, in the limit $p_\text{mut} \to 1$, the population behaves as if $s(A) = 0.5$, since strategies change randomly with every replication. Conversely, in the limit $p_\text{mut} \to 0$, mutations are absent, and the outcome is determined solely by selection among the strategies present in the initial condition.
+
+\bigskip
+\textcolor{red}{FINISHED UP TO HERE}
+\bigskip
 
 \begin{figure}
     \centering
@@ -222,6 +222,8 @@ This observation suggests that the evolutionary attractor emerges from the compe
 constructed solely from quantities measured in fixed-strategy simulations.
 
 The numerator captures the amplification of early growth differences when multiple strategies compete after reinitialization, while the denominator approximates the rate at which a strategy disappears, either through population extinction or mutation-driven replacement. Despite its simplicity, this expression reproduces the qualitative location and sharpening of the evolved distribution as $N_i$ increases.
+
+Notice that, for large $N_\text{ini}$, there stops being any dependence on $p_\text{mut}$, indicating that the evolutionary attractor is robust in the large-population regime.
 
 \begin{figure*}
     \centering
