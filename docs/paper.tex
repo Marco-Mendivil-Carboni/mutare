@@ -208,27 +208,25 @@ To better understand the outcome of the evolutionary process, it is useful to ex
 
 In the same plot we also display the outcome obtained when evolution is enabled, allowing us to compare directly the resulting growth and extinction rates rather than the underlying strategy. We find that the system converges, with only a moderate dependence on the initial conditions, toward a point with a lower growth rate than the growth-maximizing strategy, but also with a reduced extinction rate.
 
-Importantly, this point does not lie exactly on the Pareto front defined by fixed strategies, indicating that the evolutionary outcome cannot be associated with any single fixed strategy. Instead, both the mean growth rate and the extinction rate are well approximated by averages over the distribution of strategies, namely
+Importantly, this point does not lie exactly on the Pareto front defined by fixed strategies, indicating that the evolutionary outcome cannot be associated with any single fixed strategy. Instead, both the mean growth rate and the extinction rate are well approximated by averages over the distribution of strategies:
 \begin{equation} \label{eq:evol_averages}
-    \langle\mu\rangle\approx\int\langle\mu\rangle(s)p(s)ds\ \text{and}\ r_\text{ext}\approx\int r_\text{ext}(s)p(s)ds.
+    \langle\mu\rangle\approx\int\langle\mu\rangle(\overline{s})p(\overline{s})d\overline{s}, \quad r_\text{ext}\approx\int r_\text{ext}(\overline{s})p(\overline{s})d\overline{s}.
 \end{equation}
 Additional evidence supporting this interpretation is provided in \autoref{sec:supplementary_results}.
 
-This behavior can be understood from the dynamical nature of the evolutionary process: at any given time, the population is effectively characterized by a single dominant strategy, but this strategy slowly changes due to mutations and reinitializations following extinction events. Over long times, the system can therefore be interpreted as a concatenation of fixed-strategy dynamics with different values of $s$.
+This behavior can be understood from the dynamical nature of the evolutionary process: at any given time, the population is effectively characterized by a single dominant strategy, but this strategy slowly changes due to mutations and reinitializations following extinction events. Over long times, the system can therefore be interpreted as a concatenation of fixed-strategy dynamics with different values of $\overline{s}$.
 
-This perspective naturally motivates the heuristic approximation for the distribution $p(s)$ that we introduce in the following.
+This perspective naturally motivates the heuristic approximation for the distribution $p(\overline{s})$ that we introduce in the following.
 
 \bigskip
 \textcolor{red}{FINISHED UP TO HERE}
 \bigskip
 
-This quasi-monomorphic behavior justifies interpreting the evolutionary process as a stochastic trajectory in strategy space, driven by rare successful mutations and shaped by extinction events. The fact that extinction events typically occur while the population is near a single strategy further supports this coarse-grained description.
-
 To understand the evolutionary outcome, we return to fixed-strategy simulations and examine how growth and extinction scale with population size. While the mean growth rate $\langle\mu\rangle$ depends only weakly on $N_i$, the extinction rate $r_\text{ext}$ decreases approximately as a power law, $r_\text{ext}\sim N_i^{-\alpha}$. This strong size dependence implies that extinction pressure is significant for small populations but rapidly weakens as $N_i$ increases.
 
 This observation suggests that the evolutionary attractor emerges from the competition between exponential growth amplification and algebraically suppressed extinction risk. Motivated by this idea, we propose the heuristic stationary distribution
 \begin{equation} \label{eq:heuristic_strategy_distribution}
-    p(\overline{s})\propto\frac{\exp(N_\text{ini}\cdot\langle\mu(\overline{s})\rangle)}{r_\text{ext}(N_\text{ini},\overline{s})+p_\text{mut}\cdot\langle\mu_b(\overline{s})\rangle},
+    p(\overline{s})\propto\frac{\exp(N_\text{ini}\cdot\langle\mu\rangle(\overline{s}))}{r_\text{ext}(N_\text{ini},\overline{s})+p_\text{mut}\cdot\langle\mu_b\rangle(\overline{s})},
 \end{equation}
 constructed solely from quantities measured in fixed-strategy simulations.
 
