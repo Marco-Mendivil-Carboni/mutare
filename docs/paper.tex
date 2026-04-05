@@ -216,10 +216,6 @@ Additional evidence supporting this interpretation is provided in \autoref{sec:s
 
 This behavior can be understood from the dynamical nature of the evolutionary process: at any given time, the population is effectively characterized by a single dominant strategy, but this strategy slowly changes due to mutations and reinitializations following extinction events. Over long times, the system can therefore be interpreted as a concatenation of fixed-strategy dynamics with different values of $\overline{s}$.
 
-\bigskip
-\textcolor{red}{FINISHED UP TO HERE}
-\bigskip
-
 \begin{figure*}
     \centering
     \caption{Top panels: fixed-strategy results used to construct the heuristic approximation. The mean growth rate depends only weakly on $N_\text{ini}$, whereas the extinction rate follows an approximate power-law scaling. Bottom panels: expected average strategy from the heuristic distribution $\langle\overline{s}\rangle(A)^\ast$ and observed average strategy from simulations for different values of $N_\text{ini}$ and $p_\text{mut}$. Dashed lines indicate spline interpolations of the simulation data. The heuristic approximation captures the qualitative dependence of the evolutionary outcome on $N_\text{ini}$ and $p_\text{mut}$, albeit with quantitative discrepancies.}
@@ -230,23 +226,27 @@ This behavior can be understood from the dynamical nature of the evolutionary pr
     \includegraphics{../sims/asymmetric/plots/fixed/avg_avg_strat_phe_0.pdf}
 \end{figure*}
 
-The observations above motivate the search for a heuristic approximation of the distribution $p(\overline{s})$, constructed solely from properties of fixed strategies, that can predict the evolutionary outcome $\langle\overline{s}\rangle(A)$ as a function of $N_\text{ini}$ and $p_\text{mut}$.
+The results above motivate the search for a heuristic approximation of the distribution $p(\overline{s})$, constructed solely from properties of fixed strategies, that can predict the evolutionary outcome $\langle\overline{s}\rangle(A)$ as a function of $N_\text{ini}$ and $p_\text{mut}$.
 
-To this end, it is useful to examine how $\langle\mu\rangle$ and $r_\text{ext}$ depend on the population size, as shown in the top panels of \autoref{fig:fixed_results_and_heuristic_approx}. We find that the mean growth rate depends only weakly on $N_\text{ini}$, except for very small populations. In contrast, the extinction rate exhibits a strong dependence, decreasing approximately as a power law, $r_\text{ext}\sim N_\text{ini}^{-\alpha}$. This scaling arises because extinctions are primarily driven by unfavorable environmental episodes: when the environment remains adverse for sufficiently long, the population decays from its typical size down to extinction. Since the duration of environmental states is exponentially distributed, this mechanism naturally leads to a power-law dependence of the extinction rate on $N_\text{ini}$.
+To this end, it is useful to examine how $\langle\mu\rangle$ and $r_\text{ext}$ depend on the population size, as shown in the top panels of \autoref{fig:fixed_results_and_heuristic_approx}. We find that the mean growth rate depends only weakly on $N_\text{ini}$, except for very small populations. In contrast, the extinction rate exhibits a strong dependence, decreasing approximately as a power law, $r_\text{ext}\sim N_\text{ini}^{-\alpha}$. This scaling arises because extinctions are primarily driven by unfavorable environmental episodes: when the environment remains adverse for sufficiently long, the population decays exponentially from its typical size to extinction. Since the duration of environmental states is also exponentially distributed, this mechanism naturally leads to a power-law dependence of the extinction rate on $N_\text{ini}$.
 
-We therefore find it natural to propose the following heuristic form for the distribution of strategies:
+We therefore propose the following heuristic form for the distribution of strategies:
 \begin{equation} \label{eq:heuristic_distribution}
     p(\overline{s})\propto\frac{\exp(N_\text{ini}\cdot\langle\mu\rangle(\overline{s}))}{r_\text{ext}(N_\text{ini},\overline{s})+p_\text{mut}\cdot\langle\mu_b\rangle(\overline{s})},
 \end{equation}
-where $\langle\mu_b\rangle$ denotes the average birth rate \footnote{That is, the contribution to the growth rate arising from replication events only, excluding deaths.} and all quantities are measured in fixed-strategy simulations \footnote{To evaluate $\langle\mu\rangle$, $\langle\mu_b\rangle$ and $r_\text{ext}$ for arbitrary values of $\overline{s}$ and $N_\text{ini}$, we use spline interpolations of the numerical data, shown as dashed lines in \autoref{fig:fixed_results_and_heuristic_approx}.}.
+where $\langle\mu_b\rangle$ denotes the average birth rate \footnote{That is, the contribution to the growth rate arising from replication events only, excluding deaths.} and all quantities are measured in fixed-strategy simulations \footnote{To evaluate $\langle\mu\rangle$, $\langle\mu_b\rangle$ and $r_\text{ext}$ for arbitrary values of $\overline{s}$ and $N_\text{ini}$ we use spline interpolations of the numerical data, shown as dashed lines in \autoref{fig:fixed_results_and_heuristic_approx}.}.
 
 The logic behind \autoref{eq:heuristic_distribution} is as follows. The numerator represents the probability that a given strategy is selected during the initial competitive phase following reinitialization, when $N_\text{ini}$ independently drawn strategies compete and small differences in growth are exponentially amplified. The denominator, in turn, accounts for the rate at which a strategy is lost or replaced. The term $r_\text{ext}^{-1}$ corresponds to the typical survival time of a population with that strategy, while the additional contribution proportional to $p_\text{mut}$ represents the rate at which the strategy is replaced by a new one due to mutation and subsequent fixation. Together, these contributions estimate the fraction of time the system spends in states effectively characterized by a single dominant strategy $\overline{s}$.
 
-A key feature of \autoref{eq:heuristic_distribution} is the competition between two terms with fundamentally different scaling behaviors. The growth contribution enters exponentially through $\exp(N_\text{ini}\cdot\langle\mu\rangle)$, while extinction enters algebraically through $r_\text{ext}$, which itself follows a power-law dependence on $N_\text{ini}$. This difference in scaling is crucial: it allows extinction risk to dominate at small population sizes, favoring safer strategies, while ensuring that growth maximization prevails in the large $N_\text{ini}$ limit.
+A key feature of \autoref{eq:heuristic_distribution} is the competition between two terms with fundamentally different scaling behaviors. The growth contribution enters exponentially through $\exp(N_\text{ini}\cdot\langle\mu\rangle(\overline{s}))$, while extinction enters algebraically through $r_\text{ext}$, which follows a power-law dependence on $N_\text{ini}$. This difference in scaling is crucial: it allows extinction risk to dominate at small population sizes, favoring safer strategies, while ensuring that growth maximization prevails in the large $N_\text{ini}$ limit.
 
-Despite its simplicity, this heuristic captures the transition from growth-maximizing to safer strategies as $N_\text{ini}$ decreases, as well as its dependence on $p_\text{mut}$. Additional results, including the full distributions, are provided in \autoref{sec:supplementary_results}. In particular, for large $N_\text{ini}$ the dependence on $p_\text{mut}$ disappears, further confirming that in this regime the evolutionary outcome is controlled primarily by growth and becomes insensitive to the details of mutation.
+Despite its simplicity, this heuristic captures the transition from the growth-maximizing strategy to safer ones as $N_\text{ini}$ decreases, as well as its dependence on $p_\text{mut}$ \footnote{Notably, for large $N_\text{ini}$ the dependence on $p_\text{mut}$ disappears, confirming that, especially in this regime, the evolutionary outcome is controlled primarily by growth rather than the details of mutation.}. Additional results, including the full distributions, are provided in \autoref{sec:supplementary_results}.
 
 \section{Discussion and outlook} \label{sec:discussion}
+
+\bigskip
+\textcolor{red}{FINISHED UP TO HERE}
+\bigskip
 
 Our results provide a minimal and explicit example of how evolutionary outcomes in finite populations cannot be inferred solely from average instantaneous growth. The long-term dominant strategy depends not only on mean behavior, but also on the magnitude and direction of fluctuations, particularly those leading to extinction. In fluctuating environments with bounded population size, extinction is unavoidable over long times and therefore acts as a genuine selective force.
 
