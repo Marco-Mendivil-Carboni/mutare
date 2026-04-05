@@ -202,7 +202,27 @@ In contrast, the dependence on the mutation probability is relatively weak, as $
 \textcolor{red}{FINISHED UP TO HERE}
 \bigskip
 
-ADD PARETO front plot and a small paragraph explaning it.
+\begin{figure}
+    \centering
+    \caption{\dots} \label{fig:pareto_front}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}
+\end{figure}
+
+To gain further insight into the evolutionary outcome, we begin by considering the relationship between the mean growth rate $\langle \mu \rangle$ and the extinction rate $r_\text{ext}$. In \autoref{fig:pareto_front} we plot these two quantities, the fixed-strategy simulations define a Pareto front: a set of strategies for which any improvement in growth necessarily comes at the cost of a higher extinction risk, and vice versa. This curve therefore makes explicit the trade-off between growth and survival already discussed in the previous section.
+
+When we superimpose the results of evolutionary simulations on this plot, we find that they do not lie exactly on the Pareto front. Instead, they cluster around a point located slightly below and to the left of the growth-maximizing strategy, corresponding to lower growth but also reduced extinction risk.
+
+This observation can be understood from the dynamical nature of the evolutionary process. Although at any given time the population is effectively characterized by a single dominant strategy, this strategy slowly changes over time due to mutations. As a result, the long-time behavior of the system can be viewed as a concatenation of fixed-strategy dynamics with different values of $s$.
+
+Consistently with this picture, we find that both the mean growth rate and the extinction rate are well approximated by averages over the distribution of strategies explored by the system, namely
+\begin{equation}
+    \langle \mu \rangle \approx \int \langle \mu \rangle(s)\, p(s)\, ds,
+    \qquad
+    r_\text{ext} \approx \int r_\text{ext}(s)\, p(s)\, ds.
+\end{equation}
+Additional evidence supporting this interpretation is provided in \autoref{sec:supplementary_results}.
+
+This perspective naturally motivates the heuristic approximation for the distribution $p(s)$ that we introduce in the following.
 
 This quasi-monomorphic behavior justifies interpreting the evolutionary process as a stochastic trajectory in strategy space, driven by rare successful mutations and shaped by extinction events. The fact that extinction events typically occur while the population is near a single strategy further supports this coarse-grained description.
 
