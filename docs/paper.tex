@@ -238,29 +238,29 @@ where $\langle\mu_b\rangle$ denotes the average birth rate \footnote{That is, th
 
 The logic behind \autoref{eq:heuristic_distribution} is as follows. The numerator represents the probability that a given strategy is selected during the initial competitive phase following reinitialization, when $N_\text{ini}$ independently drawn strategies compete and small differences in growth are exponentially amplified. The denominator, in turn, accounts for the rate at which a strategy is lost or replaced. The term $r_\text{ext}^{-1}$ corresponds to the typical survival time of a population with that strategy, while the additional contribution proportional to $p_\text{mut}$ represents the rate at which the strategy is replaced by a new one due to mutation and subsequent fixation. Together, these contributions estimate the fraction of time the system spends in states effectively characterized by a single dominant strategy $\overline{s}$.
 
-A key feature of \autoref{eq:heuristic_distribution} is the competition between two terms with fundamentally different scaling behaviors. The growth contribution enters exponentially through $\exp(N_\text{ini}\cdot\langle\mu\rangle(\overline{s}))$, while extinction enters algebraically through $r_\text{ext}$, which follows a power-law dependence on $N_\text{ini}$. This difference in scaling is crucial: it allows extinction risk to dominate at small population sizes, favoring safer strategies, while ensuring that growth maximization prevails in the large $N_\text{ini}$ limit.
+A key feature of \autoref{eq:heuristic_distribution} is the competition between two terms with fundamentally different scaling behaviors. The growth contribution enters exponentially through $\exp(N_\text{ini}\cdot\langle\mu\rangle(\overline{s}))$, while extinction enters algebraically through $r_\text{ext}$, which follows a power-law dependence on $N_\text{ini}$. This difference in scaling is crucial: it allows extinction risk to dominate at small population sizes, favoring safer strategies, while ensuring that growth maximization prevails in the large-$N_\text{ini}$ limit.
 
 Despite its simplicity, this heuristic captures the transition from the growth-maximizing strategy to safer ones as $N_\text{ini}$ decreases, as well as its dependence on $p_\text{mut}$ \footnote{Notably, for large $N_\text{ini}$ the dependence on $p_\text{mut}$ disappears, confirming that, especially in this regime, the evolutionary outcome is controlled primarily by growth rather than the details of mutation.}. Additional results, including the full distributions, are provided in \autoref{sec:supplementary_results}.
 
 \section{Discussion and outlook} \label{sec:discussion}
 
-\bigskip
-\textcolor{red}{FINISHED UP TO HERE}
-\bigskip
+Our results provide a clear and minimal illustration of how evolutionary outcomes in finite populations cannot be inferred solely from the average instantaneous growth rate. The long-term dominant strategy is shaped not only by the mean behavior of the population but also by fluctuations, particularly those that can lead to extinction. In fluctuating environments with a population size limit, extinction is inevitable over long times and thus acts as a genuine selective pressure.
 
-Our results provide a minimal and explicit example of how evolutionary outcomes in finite populations cannot be inferred solely from average instantaneous growth. The long-term dominant strategy depends not only on mean behavior, but also on the magnitude and direction of fluctuations, particularly those leading to extinction. In fluctuating environments with bounded population size, extinction is unavoidable over long times and therefore acts as a genuine selective force.
+In the large-$N_\text{ini}$ limit, extinction risk becomes negligible, and evolution correctly selects the strategy that maximizes $\langle\mu\rangle$. Importantly, this growth-maximizing strategy is neither $s(A)=0$ nor $s(A)=1$, highlighting that maintaining phenotypic diversity can be advantageous in fluctuating environments. For smaller populations, however, extinction risk reshapes the adaptive landscape, biasing evolution toward safer, lower-growth strategies. This crossover demonstrates how demographic constraints fundamentally alter evolutionary optimization.
 
-As population size increases, extinction risk becomes negligible and classical growth maximization is recovered. For smaller populations, however, extinction risk reshapes the adaptive landscape and biases evolution toward safer, lower-growth strategies. This crossover illustrates how demographic constraints fundamentally alter evolutionary optimization.
+The heuristic approximation introduced here captures the qualitative competition between growth and extinction, clarifying the scaling mechanisms underlying the transition between growth-maximizing and safe strategies. Quantitative discrepancies remain, emphasizing that evolutionary dynamics cannot be fully reduced to fixed-strategy observables. Extending this framework toward a more systematic coarse-grained theory, possibly linked to quasi-stationary distributions, represents an important avenue for future work.
 
-The heuristic approximation proposed here clarifies the competing scaling behaviors underlying this transition, even though it does not provide an exact quantitative description. The remaining discrepancies indicate that evolutionary dynamics cannot, in general, be reduced entirely to fixed-strategy observables. Developing a more systematic coarse-grained theory of strategy dynamics, possibly linked to quasi-stationary distributions, remains an important direction for future work.
-
-More broadly, this study highlights that the effective fitness governing evolution in realistic finite populations must incorporate extinction risk explicitly. Understanding how such survival-weighted fitness functions emerge from stochastic ecological dynamics is essential for building a predictive theory of adaptation in fluctuating environments.
+More broadly, this study provides a flexible framework to explore evolution in fluctuating environments. The model can be generalized to more than two environments or phenotypes, and to scenarios in which strategies respond adaptively to environmental cues (sensing). Such extensions would allow the systematic study of bet-hedging, adaptive plasticity, and the interplay between stochasticity and selection in complex ecological and evolutionary settings.
 
 \printbibliography
 
 \appendix
 
 \section{The Gillespie algorithm and time series analysis} \label{sec:gillespie_algorithm}
+
+\bigskip
+\textcolor{red}{FINISHED UP TO HERE}
+\bigskip
 
 \section{Different model parameters} \label{sec:symmetric_parameters}
 
