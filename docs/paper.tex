@@ -256,13 +256,27 @@ More broadly, this study provides a flexible framework to explore evolution in f
 
 \appendix
 
-\section{The Gillespie algorithm and time series analysis} \label{sec:gillespie_algorithm}
-
 \bigskip
 \textcolor{red}{FINISHED UP TO HERE}
 \bigskip
 
+\section{The Gillespie algorithm and time series analysis} \label{sec:gillespie_algorithm}
+
 \section{Different model parameters} \label{sec:symmetric_parameters}
+
+\begin{figure}
+    \centering
+    \caption{\dots} \label{fig:symmetric_parameters_strategy_and_front}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/rates.pdf}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \caption{\dots} \label{fig:symmetric_parameters_dependence}
+    \includegraphics{../sims/symmetric/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/prob_mut/avg_avg_strat_phe_0.pdf}
+\end{figure}
 
 \section{Supplementary Results} \label{sec:supplementary_results}
 
@@ -273,9 +287,14 @@ More broadly, this study provides a flexible framework to explore evolution in f
     \includegraphics{../sims/asymmetric/plots/prob_mut/avg_growth_rate.pdf}
 \end{figure}
 
-Time series data confirm that, in the low-mutation regime, the population is effectively characterized by a common strategy at each instant (\autoref{fig:evidence_of_common_strategy}). The apparent breadth of the long-term strategy distribution arises from averaging over time and across realizations, not from coexistence of widely different strategies at a single moment.
+\begin{figure}
+    \centering
+    \caption{\dots} \label{fig:strategy_distributions}
+    \includegraphics{../sims/asymmetric/plots/fixed/exp_dist_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/asymmetric/plots/fixed/dist_avg_strat_phe_0.pdf}
+\end{figure}
 
-ADD PLOTS OF DISTRIBUTIONS.
+Time series data confirm that, in the low-mutation regime, the population is effectively characterized by a common strategy at each instant (\autoref{fig:evidence_of_common_strategy}). The apparent breadth of the long-term strategy distribution arises from averaging over time and across realizations, not from coexistence of widely different strategies at a single moment.
 
 \section{Incremental mutations} \label{sec:incremental_mutations}
 
@@ -285,10 +304,5 @@ ADD PLOTS OF DISTRIBUTIONS.
     \includegraphics{../sims/incremental/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
     \includegraphics{../sims/incremental/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
 \end{figure}
-
-% Possible Journals:
-% 1. Proceedings of the National Academy of Sciences
-% 2. Physical Review E
-% 3. Journal of Theoretical Biology
 
 \end{document}
