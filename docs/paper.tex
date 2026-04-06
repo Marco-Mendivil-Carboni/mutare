@@ -260,9 +260,51 @@ More broadly, this study provides a flexible framework to explore evolution in f
 \textcolor{red}{FINISHED UP TO HERE}
 \bigskip
 
+ADD CAPTIONS TO ALL FIGURES.
+
 \section{The Gillespie algorithm and time series analysis} \label{sec:gillespie_algorithm}
 
+Explain the gillespie algorithm applied to this model, below are some equations which you may find useful (if you leave them label them).
+
+\begin{equation}
+    \Omega(\mathbf{X})=\sum_{j=1}^M\omega_j(\mathbf{X})
+\end{equation}
+\begin{equation}
+    \tau=\frac{1}{\Omega(\mathbf{X})}\ln\frac{1}{r_1},\ r_1\sim U(0,1)
+\end{equation}
+\begin{equation}
+    \sum_{j=1}^{\mu-1}\omega_j(\mathbf{X})<r_2\Omega(\mathbf{X})\le\sum_{j=1}^{\mu}\omega_j(\mathbf{X}),\ r_2\sim U(0,1)
+\end{equation}
+\begin{equation}
+    \mathbf{X}(t+\tau)=\mathbf{X}(t)+\boldsymbol{\nu}_\mu
+\end{equation}
+
+Explain that solving the model in this way makes it necessary to calculate averages of abservables waited by the gillespie algorithm waiting times (because those are the times between subsequent measurements), and then integrate the following paragraph explaining the particularities of sigma mu.
+
+In addition to the mean population growth rate $\mu$, we also measure fluctuations of growth along a stochastic trajectory. A naive definition based on the instantaneous rate $\Delta N/(N\,\Delta t)$ leads to extremely large and ill-behaved fluctuations due to the presence of arbitrarily small Gillespie waiting times. Instead, we define a variance associated with the \emph{integrated} growth process. Concretely, denoting by
+\begin{equation}
+    \mu_k=\frac{\Delta N_k}{N_k\,\Delta t_k}
+\end{equation}
+the growth rate measured over a Gillespie step $k$, we compute
+\begin{equation}
+    \sigma_\mu^2=\frac{1}{\sum_k \Delta t_k}\sum_k\left(\mu_k-\langle\mu\rangle\right)^2\Delta t_k^2.
+\end{equation}
+This definition corresponds to the variance growth rate of the cumulative per-capita growth,
+\begin{equation}
+    \log\frac{N(t)}{N(0)}=\sum_k \mu_k\,\Delta t_k,
+\end{equation}
+and is therefore a well-defined quantity in continuous-time jump processes. In this sense, $\sigma_\mu^2$ should be interpreted as the diffusion coefficient of log-population growth rather than as the variance of an instantaneous rate.
+
 \section{Different model parameters} \label{sec:symmetric_parameters}
+
+We also analyzed a different case, the one with the following birth and death rates:
+\begin{itemize}
+    \item $\omega_b(e,\phi)=\begin{pmatrix}1.2&0.0\\0.0&0.8\end{pmatrix}$
+    \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&1.0\\1.0&0.0\end{pmatrix}$
+\end{itemize}
+We find as can be seen in the following figures (add references to each one), that the main message is still true in this completely different case. This parameters represent the very different secenario in which one phenotype is adapted to one environment and the other phentoype to the other environment. This creates a very different pareto front (the distance between growth maximization and extinction minimization is much smaller, but they are still different). Yet we see again that the evolutive process leads to a strategy which doesn't depend too much on the initial conditions and that is somewhere in between those two values of the strategy. We also see how N in the same way as before controls if the strategy is closer to growth maximization (large N) or extinction minimization (low N), and instead there is a much smaller dependence on the mutation probability.
+
+Finally we also see that the heuristic approximation again correctly predicts where the transition between both strategies occurs but is somewhat worse quantitatively (in the large N limit the growth maximizing strategy is achieved much slower at much greater values of N than the heuristic predicts).
 
 \begin{figure}
     \centering
@@ -278,7 +320,36 @@ More broadly, this study provides a flexible framework to explore evolution in f
     \includegraphics{../sims/symmetric/plots/prob_mut/avg_avg_strat_phe_0.pdf}
 \end{figure}
 
+\begin{figure}
+    \centering
+    \caption{\dots} \label{fig:symmetric_parameters_heuristic}
+    \includegraphics{../sims/symmetric/plots/fixed/exp_avg_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/fixed/avg_avg_strat_phe_0.pdf}
+\end{figure}
+
 \section{Supplementary Results} \label{sec:supplementary_results}
+
+Many more observables have been measured and studied that complete the picture presented in the text but didn't fit well in the main text of the article. Here we show results for the symmetric parameters again. Some of this observables are: the birth rate that we mentioned in the text (which is monotonic unlike the growth rate, and increase as more of the resistant phenotype there is), the distribution of phenotypes actually present in the population (which doesn't conicide with the strategy exactly because that one indicates the probability that an offspring has that phenotype but then each pheontypes will live a different ammount of time on average, this curve can be seen to lie between two straight lines that we would obtain in the case of a constant environment (one line for each environment), see next paragraph for the explanation of this lines), the distribution of agents which is always bivariate and as the secondary peak approaches zero the extinction rate increases, and finally the standard deviation of the growth rate that we have explained before which is a more common proxy for risk in the literature than the extinction rate but that we have found less useful.
+
+It is also important to compare this observable to the theoretical equilibrium distributions for a fixed strategy $s(\phi)$ and a fixed environment $e$, obtained from the dominant eigenvector of the matrix
+\begin{equation} \label{eq:equilibrium_matrix}
+    \begin{pmatrix}s(0)\omega_b(e,0)-\omega_d(e,0)&s(0)\omega_b(e,1)\\s(1)\omega_b(e,0)&s(1)\omega_b(e,1)-\omega_d(e,1)\end{pmatrix}.
+\end{equation}
+This eigenvector gives the expected stable composition of phenotypes in a large population in the absence of stochasticity. As expected, the actual phenotype distribution observed in the fixed simulations always lies between the theoretical equilibrium lines corresponding to the two environments. These equilibrium curves appear nearly linear functions of the strategy (and may indeed be analytically linear for this class of models, the proof is left as an excercise for the reader).
+
+\begin{figure}
+    \centering
+    \caption{\dots} \label{fig:supplementary_observables_1}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_birth_rate.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_dist_phe_0.pdf}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \caption{\dots} \label{fig:supplementary_observables_2}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_n_agents.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/std_dev_growth_rate.pdf}
+\end{figure}
 
 \begin{figure}
     \centering
@@ -287,6 +358,10 @@ More broadly, this study provides a flexible framework to explore evolution in f
     \includegraphics{../sims/asymmetric/plots/prob_mut/avg_growth_rate.pdf}
 \end{figure}
 
+As we have seen in the main text time series data confirm that, in the low-mutation regime, the population is effectively characterized by a common strategy at each instant (\autoref{fig:evidence_of_common_strategy}). The apparent breadth of the long-term strategy distribution arises from averaging over time and across realizations, not from coexistence of widely different strategies at a single moment. The second plot shows iwth a dotted line how \autoref{eq:evol_averages} works very well for mu as a function of p mut (it works for everything it's just an example).
+
+Finally the distributions of strategies for different values of N and p mut equal to 0.001, we see qualitatively that they change in the same way the heuristic distributions and the ones observed in simulations but ultimately they do not coincide.
+
 \begin{figure}
     \centering
     \caption{\dots} \label{fig:strategy_distributions}
@@ -294,9 +369,9 @@ More broadly, this study provides a flexible framework to explore evolution in f
     \includegraphics{../sims/asymmetric/plots/fixed/dist_avg_strat_phe_0.pdf}
 \end{figure}
 
-Time series data confirm that, in the low-mutation regime, the population is effectively characterized by a common strategy at each instant (\autoref{fig:evidence_of_common_strategy}). The apparent breadth of the long-term strategy distribution arises from averaging over time and across realizations, not from coexistence of widely different strategies at a single moment.
-
 \section{Incremental mutations} \label{sec:incremental_mutations}
+
+In this last section we change the way we do mutations, we add the parameter $\sigma_\text{mut}$, and when a mutation ocurrs instead of changing the strategy for a completely new random one we add random numbers to the parent's one with a normal distribution centered at zero and $\sigma_\text{mut}$ standard deviation and then normalize. In particular with sigma mut 0.1 and p mut 0.01 we get the results of the next figures. We get the same results pretty much, with a little bit more of dependence on the initial conditions but the same dependence on N of the average strategy.
 
 \begin{figure}
     \centering
