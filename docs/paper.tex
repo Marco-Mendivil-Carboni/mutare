@@ -1,14 +1,7 @@
-\documentclass[a4paper,10pt,twocolumn]{article}
+\documentclass[aps,prx,reprint,10pt,superscriptaddress]{revtex4-2}
 
 \usepackage[T1]{fontenc}
-\usepackage[utf8]{inputenc}
-
-\usepackage[backend=biber]{biblatex}
-\addbibresource{mutare.bib}
-
 \usepackage{lmodern}
-
-\usepackage[margin=2cm]{geometry}
 
 \usepackage{mathtools,amssymb}
 
@@ -22,14 +15,13 @@
 
 \usepackage[hidelinks,pdfusetitle]{hyperref}
 
-\title{Evolutionary adaptation through bet-hedging in finite populations under fluctuating environments}
-\author{Marco Mendívil Carboni}
-
-\raggedbottom
-
 \begin{document}
 
-\maketitle
+\title{Evolutionary adaptation through bet-hedging in finite populations under fluctuating environments}
+\author{Marco Mendívil Carboni}
+\author{Luis Dinis}
+\author{Juan José Mazo}
+\affiliation{Grupo Interdisciplinar de Sistemas Complejos (GISC) and Departamento de Estructura de la Materia, Física Térmica y Electrónica, Universidad Complutense de Madrid, 28040 Madrid, Spain}
 
 \begin{abstract}
     Natural populations evolve under fluctuating environments and limited resources, yet the combined effects of these factors on adaptation remain unclear. Here, we introduce a minimal stochastic model of a population undergoing a birth--death process in a randomly switching environment, where individuals inherit phenotypic strategies that determine the distribution of phenotypes across generations.
@@ -41,11 +33,13 @@
     Overall, our results highlight how environmental fluctuations and demographic constraints jointly shape adaptation, emphasizing the key role of extinction in finite populations.
 \end{abstract}
 
+\maketitle
+
 \section{Introduction and objectives} \label{sec:introduction}
 
-Adaptation in fluctuating environments is a central problem in evolutionary biology \autocite{kingscollegeRiskUncertaintyEvolutionary1982}. Natural populations rarely experience constant conditions: rather, they face environments that change \emph{unpredictably} over time, often on ecological or evolutionary timescales. In such contexts, if sensing the changes in the environment is infeasible or too costly, it is well established in the ecology and population genetics literature that bet-hedging (i.e. investing only a fraction of the population to each possible phenotype) offers a good alternative to adapt to this fluctuating environment \autocite{kussellPhenotypicDiversityPopulation2005}.
+Adaptation in fluctuating environments is a central problem in evolutionary biology \cite{kingscollegeRiskUncertaintyEvolutionary1982}. Natural populations rarely experience constant conditions: rather, they face environments that change \emph{unpredictably} over time, often on ecological or evolutionary timescales. In such contexts, if sensing the changes in the environment is infeasible or too costly, it is well established in the ecology and population genetics literature that bet-hedging (i.e. investing only a fraction of the population to each possible phenotype) offers a good alternative to adapt to this fluctuating environment \cite{kussellPhenotypicDiversityPopulation2005}.
 
-In these circumstances our current understanding of evolutionary adaptation suggests that populations tend to evolve toward the strategy which maximizes their mean growth rate \autocite{gillespieNaturalSelectionVariances1977} \footnote{More precisely, \autocite{gillespieNaturalSelectionVariances1977} argues that what gets maximized is the geometric mean of the offspring number $\mu'$ (where $N(t+\Delta t)=\mu'\cdot N(t)$) but this is equivalent to maximizing the arithmetic mean of the growth rate $\langle\mu\rangle$ as we have defined it in \autoref{eq:avg_growth_rate}.}
+In these circumstances our current understanding of evolutionary adaptation suggests that populations tend to evolve toward the strategy which maximizes their mean growth rate \cite{gillespieNaturalSelectionVariances1977} \footnote{More precisely, \cite{gillespieNaturalSelectionVariances1977} argues that what gets maximized is the geometric mean of the offspring number $\mu'$ (where $N(t+\Delta t)=\mu'\cdot N(t)$) but this is equivalent to maximizing the arithmetic mean of the growth rate $\langle\mu\rangle$ as we have defined it in \autoref{eq:avg_growth_rate}.}
 \begin{equation} \label{eq:avg_growth_rate}
     \langle\mu\rangle=\left\langle\frac{1}{N(t)}\frac{dN}{dt}(t)\right\rangle.
 \end{equation}
@@ -124,9 +118,9 @@ In particular the population will follow a stochastic birth-death process in whi
 
 Additionally, when an agent replicates, its offspring will generally inherit the parent's phenotypic strategy $s(\phi)$, but with probability $p_\text{mut}$ a mutation will occur, leading to a new random strategy \footnote{Thus, for simplicity, mutations in this model are assumed to be abrupt, even though this may not be the most common situation in biological systems. In \autoref{sec:incremental_mutations}, we extend the model by introducing an additional parameter to allow for incremental mutations, and show that this modification leads to qualitatively similar results, with only minor quantitative differences.}. This mechanism enables the evolutionary exploration of the space of possible phenotypic strategies, which constitute the heritable traits subject to selection, and therefore play the role of the \emph{genotype}.
 
-Finally, as we pointed out in the introduction we expect to see deviations from the already known principles of evolution when the population size does not grow indefinitely. Therefore, we will limit the population size to its initial value, $N_\text{ini}$: whenever replication would cause the population to exceed this value, a randomly chosen agent is simultaneously removed. This mechanism mimics continuous-culture evolution experiments \autocite{collectiveEconomicPrinciplesCell}, and can be interpreted as imposing an effective ecological carrying capacity.
+Finally, as we pointed out in the introduction we expect to see deviations from the already known principles of evolution when the population size does not grow indefinitely. Therefore, we will limit the population size to its initial value, $N_\text{ini}$: whenever replication would cause the population to exceed this value, a randomly chosen agent is simultaneously removed. This mechanism mimics continuous-culture evolution experiments \cite{collectiveEconomicPrinciplesCell}, and can be interpreted as imposing an effective ecological carrying capacity.
 
-Despite the minimalism of the model, it is definitely impossible to solve it analytically. Therefore, we will perform simulations using the Gillespie algorithm \autocite{toralStochasticNumericalMethods} \footnote{More details about the simulations and the algorithm can be found in \autoref{sec:gillespie_algorithm}}. Still, as we will see in the next sections, the model is simple enough that its behavior can be readily analyzed, and at the same time it contains all the necessary elements to provide insight into the questions that motivate this work.
+Despite the minimalism of the model, it is definitely impossible to solve it analytically. Therefore, we will perform simulations using the Gillespie algorithm \cite{toralStochasticNumericalMethods} \footnote{More details about the simulations and the algorithm can be found in \autoref{sec:gillespie_algorithm}}. Still, as we will see in the next sections, the model is simple enough that its behavior can be readily analyzed, and at the same time it contains all the necessary elements to provide insight into the questions that motivate this work.
 
 \section{Behaviour of the model without evolution} \label{sec:no_evolution}
 
@@ -151,7 +145,7 @@ We begin by solving the model without evolution, i.e. with $p_\text{mut}=0$ and 
     \end{tabular}
 \end{table}
 
-To proceed, we must first choose a specific set of model parameters. We start with the set shown in \autoref{tab:assymetric_parameters} \footnote{A completely different set of parameters is considered in \autoref{sec:symmetric_parameters}, which leads to the same main conclusions despite some differences.}. These parameters represent a common biological scenario in which there is a “resistant” phenotype and a “persistent” one \autocite{huftonPhenotypicSwitchingPopulations2018}. More precisely the meaning of this parameters is the following: both environments are equally likely and there is a transition rate between them of $1.0$; environment $1$ represents a ``favorable'' environment in which phenotype $A$ (the ``resistant'' one) replicates with a rate of $1.0$ while phenotype $B$ (the ``persistent'' one) does it with a rate of $0.2$, and neither of them die; environment $2$ instead represents ``harsh'' conditions in which phenotype $A$ dies with a rate of $1.0$ and phenotype $B$ with a rate of $0.1$, and neither of them are able to duplicate.
+To proceed, we must first choose a specific set of model parameters. We start with the set shown in \autoref{tab:assymetric_parameters} \footnote{A completely different set of parameters is considered in \autoref{sec:symmetric_parameters}, which leads to the same main conclusions despite some differences.}. These parameters represent a common biological scenario in which there is a “resistant” phenotype and a “persistent” one \cite{huftonPhenotypicSwitchingPopulations2018}. More precisely the meaning of this parameters is the following: both environments are equally likely and there is a transition rate between them of $1.0$; environment $1$ represents a ``favorable'' environment in which phenotype $A$ (the ``resistant'' one) replicates with a rate of $1.0$ while phenotype $B$ (the ``persistent'' one) does it with a rate of $0.2$, and neither of them die; environment $2$ instead represents ``harsh'' conditions in which phenotype $A$ dies with a rate of $1.0$ and phenotype $B$ with a rate of $0.1$, and neither of them are able to duplicate.
 
 \begin{figure}
     \centering
@@ -160,9 +154,7 @@ To proceed, we must first choose a specific set of model parameters. We start wi
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}
 \end{figure}
 
-\autoref{fig:main_observables} shows the mean growth rate $\langle\mu\rangle$ and the extinction rate $r_e$ measured in fixed-strategy simulations for this parameter set. The first important observation to make is that the maximum of $\langle\mu\rangle$ occurs neither at $s(A)=0$ nor at $s(A)=1$, indicating that in cases such as this one phenotypic diversity (that is, maintaining a mixture of both phenotypes) is the ``optimal'' strategy, a result already reported multiple times \autocite{xueBetHedgingDemographic2017}. As we will see, this is precisely the strategy reached by evolution at large $N_\text{ini}$. This behavior does not arise in all cases, but only when environmental fluctuations make each phenotype individually less favorable in the long term than their combination.
-
-Secondly, we observe that the growth-maximizing strategy differs from the extinction-minimizing one \footnote{Again, this occurs for other parameter sets, as discussed in \autoref{sec:symmetric_parameters}.}. In particular, $\langle\mu\rangle$ is maximized at $s(A)\sim0.8$, while $r_\text{ext}$ is minimized at $s(A)\sim0.0$. As we will show later, this trade-off (and more precisely the different scaling of these two quantities with the population limit) plays a key role in shaping the evolutionary outcome.
+\autoref{fig:main_observables} shows the mean growth rate $\langle\mu\rangle$ and the extinction rate $r_e$ measured in fixed-strategy simulations for this parameter set. The first important observation to make is that the maximum of $\langle\mu\rangle$ occurs neither at $s(A)=0$ nor at $s(A)=1$, indicating that in cases such as this one phenotypic diversity (that is, maintaining a mixture of both phenotypes) is the ``optimal'' strategy, a result already reported multiple times \cite{xueBetHedgingDemographic2017}. As we will see, this is precisely the strategy reached by evolution at large $N_\text{ini}$. This behavior does not arise in all cases, but only when environmental fluctuations make each phenotype individually less favorable in the long term than their combination. Secondly, we observe that the growth-maximizing strategy differs from the extinction-minimizing one \footnote{Again, this occurs for other parameter sets, as discussed in \autoref{sec:symmetric_parameters}.}. In particular, $\langle\mu\rangle$ is maximized at $s(A)\sim0.8$, while $r_\text{ext}$ is minimized at $s(A)\sim0.0$. As we will show later, this trade-off (and more precisely the different scaling of these two quantities with the population limit) plays a key role in shaping the evolutionary outcome.
 
 We do not explore in detail how these results depend on the specific choice of parameters, as this has been extensively studied in previous work. Instead, we focus in the next section on the outcome of the evolutionary dynamics and on which strategies are ultimately selected under these conditions.
 
@@ -179,9 +171,7 @@ We now enable evolution by allowing strategies to mutate and compete. We conside
 
 To characterize the outcome of the evolutionary process, at each time we compute the population-averaged strategy $\overline{s}(A)$. In \autoref{fig:evol_results} we show the distribution of $\overline{s}(A)$ over time (top panel) and its time average (bottom panel). In both types of simulations, the system consistently converges toward a well-defined stationary distribution of $\overline{s}(A)$, with only a weak dependence on the initial condition.
 
-A key observation is that the instantaneous dispersion of strategies $\sigma_s$ (defined as the spread of strategies present in the population at a given time) remains small. This dispersion is represented in the bottom panel of \autoref{fig:evol_results} as an error band, which is barely visible. At any given time, the population is therefore effectively characterized by a single dominant strategy. Over longer times, however, mutation-driven exploration causes this dominant strategy to drift through the space of possible strategies.
-
-More importantly, we observe that the average evolved strategy lies between the growth-maximizing and extinction-minimizing strategies identified in the fixed-strategy simulations. As we will see in later sections, this behavior is not specific to this parameter set. This shows that evolution in finite populations does not optimize instantaneous growth alone, but instead selects strategies that represent a compromise between growth and extinction avoidance.
+A key observation is that the instantaneous dispersion of strategies $\sigma_s$ (defined as the spread of strategies present in the population at a given time) remains small. This dispersion is represented in the bottom panel of \autoref{fig:evol_results} as an error band, which is barely visible. At any given time, the population is therefore effectively characterized by a single dominant strategy. Over longer times, however, mutation-driven exploration causes this dominant strategy to drift through the space of possible strategies. More importantly, we observe that the average evolved strategy lies between the growth-maximizing and extinction-minimizing strategies identified in the fixed-strategy simulations. As we will see in later sections, this behavior is not specific to this parameter set. This shows that evolution in finite populations does not optimize instantaneous growth alone, but instead selects strategies that represent a compromise between growth and extinction avoidance.
 
 \begin{figure}
     \centering
@@ -204,7 +194,7 @@ In contrast, the dependence on the mutation probability is relatively weak, as $
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}
 \end{figure}
 
-To better understand the outcome of the evolutionary process, it is useful to examine in more detail the trade-off between the mean growth rate and the extinction rate. As discussed in previous sections, these two quantities cannot be optimized simultaneously. If we plot, as in \autoref{fig:pareto_front}, the values of $r_\text{ext}$ against $\langle \mu \rangle$ for \texttt{fixed} strategies across the full strategy space, we obtain a curve known as a Pareto front \autocite{dinisPhaseTransitionsOptimal2020}. This curve represents the set of optimal trade-offs: any increase in growth necessarily comes at the cost of a higher extinction risk, and vice versa. In more general settings with more than two phenotypes, strategies would span a higher-dimensional space, and the Pareto front would correspond to the boundary (also known as the efficient frontier) of the accessible region.
+To better understand the outcome of the evolutionary process, it is useful to examine in more detail the trade-off between the mean growth rate and the extinction rate. As discussed in previous sections, these two quantities cannot be optimized simultaneously. If we plot, as in \autoref{fig:pareto_front}, the values of $r_\text{ext}$ against $\langle \mu \rangle$ for \texttt{fixed} strategies across the full strategy space, we obtain a curve known as a Pareto front \cite{dinisPhaseTransitionsOptimal2020}. This curve represents the set of optimal trade-offs: any increase in growth necessarily comes at the cost of a higher extinction risk, and vice versa. In more general settings with more than two phenotypes, strategies would span a higher-dimensional space, and the Pareto front would correspond to the boundary (also known as the efficient frontier) of the accessible region.
 
 In the same plot we also display the outcome obtained when evolution is enabled, allowing us to compare directly the resulting growth and extinction rates rather than the underlying strategy. We find that the system converges, with only a moderate dependence on the initial conditions, toward a point with a lower growth rate than the growth-maximizing strategy, but also with a reduced extinction rate.
 
@@ -252,7 +242,8 @@ The heuristic approximation introduced here captures the qualitative competition
 
 More broadly, this study provides a flexible framework to explore evolution in fluctuating environments. The model can be generalized to more environments or phenotypes, and to strategies that respond to environmental cues (sensing), enabling the systematic study of bet-hedging, plasticity, and stochastic selection in complex settings.
 
-\printbibliography
+\bibliographystyle{apsrev4-2}
+\bibliography{mutare.bib}
 
 \appendix
 
@@ -299,26 +290,26 @@ and is therefore a well-defined quantity in continuous-time jump processes. In t
 
 \section{Different model parameters} \label{sec:symmetric_parameters}
 
-\begin{figure}
+\begin{figure*}
     \centering
-    \caption{Top: average evolved strategy as a function of the initial strategy. Bottom: Pareto front showing the trade-off between growth and extinction for fixed strategies in the symmetric parameter case.} \label{fig:symmetric_parameters_strategy_and_front}
+    \caption{Left: average evolved strategy as a function of the initial strategy. Right: Pareto front showing the trade-off between growth and extinction for fixed strategies in the symmetric parameter case.} \label{fig:symmetric_parameters_strategy_and_front}
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/strat_phe_0_i/rates.pdf}
-\end{figure}
+\end{figure*}
 
-\begin{figure}
+\begin{figure*}
     \centering
-    \caption{Dependence of the evolved strategy on population size (top) and mutation probability (bottom) for symmetric parameters. The same qualitative trends as in the asymmetric case are observed.} \label{fig:symmetric_parameters_dependence}
+    \caption{Dependence of the evolved strategy on population size (left) and mutation probability (right) for symmetric parameters. The same qualitative trends as in the asymmetric case are observed.} \label{fig:symmetric_parameters_dependence}
     \includegraphics{../sims/symmetric/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/prob_mut/avg_avg_strat_phe_0.pdf}
-\end{figure}
+\end{figure*}
 
-\begin{figure}
+\begin{figure*}
     \centering
-    \caption{Comparison between heuristic predictions (top) and simulation results (bottom) for the symmetric parameter set. The heuristic captures the qualitative behavior but shows larger quantitative deviations.} \label{fig:symmetric_parameters_heuristic}
+    \caption{Comparison between heuristic predictions (left) and simulation results (right) for the symmetric parameter set. The heuristic captures the qualitative behavior but shows larger quantitative deviations.} \label{fig:symmetric_parameters_heuristic}
     \includegraphics{../sims/symmetric/plots/fixed/exp_avg_avg_strat_phe_0.pdf}
     \includegraphics{../sims/symmetric/plots/fixed/avg_avg_strat_phe_0.pdf}
-\end{figure}
+\end{figure*}
 
 We also analyzed a qualitatively different parameter regime defined by:
 \begin{itemize}
@@ -336,33 +327,33 @@ Finally, \autoref{fig:symmetric_parameters_heuristic} shows that the heuristic a
 
 \section{Supplementary Results} \label{sec:supplementary_results}
 
-\begin{figure}
+\begin{figure*}
     \centering
-    \caption{Average birth rate (top) and phenotype distribution (bottom) as functions of the strategy. The observed phenotype composition lies between the theoretical equilibrium predictions for each environment.} \label{fig:supplementary_observables_1}
+    \caption{Average birth rate (left) and phenotype distribution (right) as functions of the strategy. The observed phenotype composition lies between the theoretical equilibrium predictions for each environment.} \label{fig:supplementary_observables_1}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_birth_rate.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_dist_phe_0.pdf}
-\end{figure}
+\end{figure*}
 
-\begin{figure}
+\begin{figure*}
     \centering
-    \caption{Distribution of population sizes (top) and standard deviation of growth rate (bottom) as functions of the strategy. Increased weight at low population sizes correlates with higher extinction risk.} \label{fig:supplementary_observables_2}
+    \caption{Distribution of population sizes (left) and standard deviation of growth rate (right) as functions of the strategy. Increased weight at low population sizes correlates with higher extinction risk.} \label{fig:supplementary_observables_2}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_n_agents.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/std_dev_growth_rate.pdf}
-\end{figure}
+\end{figure*}
 
-\begin{figure}
+\begin{figure*}
     \centering
-    \caption{Top: time series of the population-averaged strategy showing dominance of a single strategy at each time. Bottom: comparison illustrating the validity of Eq.~\eqref{eq:evol_averages}.} \label{fig:evidence_of_common_strategy}
+    \caption{Left: time series of the population-averaged strategy showing dominance of a single strategy at each time. Right: comparison illustrating the validity of Eq.~\eqref{eq:evol_averages}.} \label{fig:evidence_of_common_strategy}
     \includegraphics{../sims/asymmetric/plots/time_series/avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/prob_mut/avg_growth_rate.pdf}
-\end{figure}
+\end{figure*}
 
-\begin{figure}
+\begin{figure*}
     \centering
-    \caption{Comparison between heuristic (top) and simulated (bottom) distributions of strategies for different parameters. Qualitative agreement is observed, but differences remain.} \label{fig:strategy_distributions}
+    \caption{Comparison between heuristic (left) and simulated (right) distributions of strategies for different parameters. Qualitative agreement is observed, but differences remain.} \label{fig:strategy_distributions}
     \includegraphics{../sims/asymmetric/plots/fixed/exp_dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/fixed/dist_avg_strat_phe_0.pdf}
-\end{figure}
+\end{figure*}
 
 Here we present additional observables that complement the results shown in the main text.
 
@@ -382,12 +373,12 @@ Finally, in \autoref{fig:strategy_distributions}, we compare the full distributi
 
 \section{Incremental mutations} \label{sec:incremental_mutations}
 
-\begin{figure}
+\begin{figure*}
     \centering
-    \caption{Results for incremental mutations. Top: dependence of the evolved strategy on initial conditions. Bottom: dependence on population size. The qualitative behavior matches that of the main model.} \label{fig:incremental_mutations}
+    \caption{Results for incremental mutations. Left: dependence of the evolved strategy on initial conditions. Right: dependence on population size. The qualitative behavior matches that of the main model.} \label{fig:incremental_mutations}
     \includegraphics{../sims/incremental/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
     \includegraphics{../sims/incremental/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
-\end{figure}
+\end{figure*}
 
 We also consider a modified mutation mechanism in which changes to the strategy are incremental rather than completely random. Specifically, when a mutation occurs, the offspring strategy is obtained by adding Gaussian noise with standard deviation $\sigma_\text{mut}$ to the parent's strategy, followed by normalization.
 
