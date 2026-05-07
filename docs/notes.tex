@@ -26,7 +26,7 @@
 
 \section{Introduction and objectives} \label{sec:introduction}
 
-Adaptation in fluctuating environments is a central problem in evolutionary biology \cite{dinisPhaseTransitionsOptimal2020}. Natural populations rarely experience constant conditions: rather, they face environments that change unpredictably over time, often on ecological or evolutionary timescales. In such contexts, the success of a population depends not only on the intrinsic fitness of individual phenotypes but also on their ability to persist and grow across variable conditions.
+Adaptation in fluctuating environments is a central problem in evolutionary biology. Natural populations rarely experience constant conditions: rather, they face environments that change unpredictably over time, often on ecological or evolutionary timescales. In such contexts, the success of a population depends not only on the intrinsic fitness of individual phenotypes but also on their ability to persist and grow across variable conditions.
 
 A classical view of evolution suggests that populations tend to evolve toward the strategy that maximizes their mean growth rate $\langle\mu\rangle$ (also called fitness). However, when environmental fluctuations are strong and extinction risk is non-negligible, selection may favor strategies that sacrifice some fitness in exchange for a lower extinction rate $r_e$.
 
@@ -177,11 +177,11 @@ COMMENT THAT $N_{\text{ini}}^{-\langle\mu\rangle/\sigma_\mu^2}$ IS KIND OF SIMIL
 
 \section{Discussion and outlook} \label{sec:discussion}
 
-The numerical results presented here naturally raise the question of what quantity evolution is effectively optimizing in finite populations subject to demographic stochasticity and environmental fluctuations. While classical evolutionary theory predicts maximization of long-term growth rate in large populations, our results suggest that this principle breaks down once extinction becomes a relevant event (\cite{gillespieNaturalSelectionVariances1977} already pointed this out). In particular, the observed convergence toward safer, lower-growth strategies at small population sizes points to the existence of an alternative optimization principle that explicitly incorporates extinction risk. Identifying such a principle, and understanding how it interpolates between growth maximization and extinction avoidance as population size varies, remains an important open problem. Some possible expresions for the fitness are:
+The numerical results presented here naturally raise the question of what quantity evolution is effectively optimizing in finite populations subject to demographic stochasticity and environmental fluctuations. While classical evolutionary theory predicts maximization of long-term growth rate in large populations, our results suggest that this principle breaks down once extinction becomes a relevant event. In particular, the observed convergence toward safer, lower-growth strategies at small population sizes points to the existence of an alternative optimization principle that explicitly incorporates extinction risk. Identifying such a principle, and understanding how it interpolates between growth maximization and extinction avoidance as population size varies, remains an important open problem. Some possible expresions for the fitness are:
 \begin{equation} \label{eq:effective_fitness}
     \mu-\frac{1}{2}\sigma_\mu^2, \ \mu-\frac{1}{N_i}\sigma_\mu^2 \ \& \ \mu-N_i\cdot r_e.
 \end{equation}
-The last expression is the one suggest and the one I use in the figures although I do not know yet how to justify it, while the first two were proposed by \cite{gillespieNaturalSelectionVariances1977}.
+The last expression is the one suggest and the one I use in the figures although I do not know yet how to justify it, while the first two were proposed by Gillespie.
 
 Several extensions of the present work could help clarify these issues. A systematic study of the scaling of extinction rates with population size for fixed strategies would allow direct numerical estimation of the action $S(s)$. This would make it possible to test whether the evolved strategies indeed minimize extinction rate, and more broadly, connecting the observed evolutionary attractors to quasi-stationary distributions (as studied, for instance, by CHAZOTTES, COLLET \& MÉLEARD) could provide a rigorous theoretical foundation for understanding adaptation in fluctuating and risky environments.
 
@@ -213,8 +213,6 @@ To evaluate the distribution from \autoref{eq:heuristic_distribution} numericall
 The resulting expression was normalized in logarithmic form to avoid numerical overflow arising from the exponential dependence on $N_\text{ini}$. Despite the simplicity of this procedure, the resulting distributions are robust and display the correct qualitative dependence on population size and strategy.
 
 Incorporating the effect of small but nonzero values of $p_{\text{mut}}$ into \autoref{eq:heuristic_distribution} remains an open problem. In particular, extending the approximation to account for the increasing bias toward growth-maximizing strategies observed as $p_{\text{mut}}$ increases (while remaining $\ll 1$) is a natural direction for future work.
-
-\printbibliography
 
 \begin{figure*}[p]
     \centering
