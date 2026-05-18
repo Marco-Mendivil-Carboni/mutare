@@ -1,0 +1,49 @@
+\documentclass[a4paper]{article}
+\usepackage{fisesXXV}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% NO PONER MACROS NI DEFINICIONES POR ENCIMA DE \begin{document} %%%%%%%%
+%   CUALQUIER ANNADIDO POR ENCIMA SERA BORRADO EN EL PROCESO     %%%%%%%%
+%       AUTOMATICO DE ELABORACION DEL LIBRO DE RESUMENES         %%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\title{Evolutionary adaptation through bet-hedging in finite populations under fluctuating environments}
+
+\author{
+    \underline{Marco Mendívil Carboni}$^1$,	%Underline the presenting author.
+    \and
+    Luis Dinis$^1$
+    \and
+    Juan José Mazo$^1$
+    \\
+    $^1$Grupo Interdisciplinar de Sistemas Complejos (GISC) and \\Departamento de Estructura de la Materia, Física Térmica y Electrónica, \\Universidad Complutense de Madrid, 28040 Madrid, Spain
+}
+\maketitle
+
+% Uncomment next line for switch off column balancing (only if you have problems with column balancing).
+% \raggedcolsend\raggedend
+
+Natural populations evolve under fluctuating environments and limited resources \cite{kingscollegeRiskUncertaintyEvolutionary1982, kussellPhenotypicDiversityPopulation2005}, yet the combined effects of these factors on adaptation remain unclear. Here, we introduce a minimal agent-based stochastic model of a population undergoing a continuous-time birth--death process in a randomly switching two-state environment, where individuals inherit phenotypic strategies $s(\phi)$ that determine the distribution of phenotypes ($\phi \in \{A,B\}$) across generations. To study these dynamics exactly, we utilize the Gillespie simulation algorithm \cite{toralStochasticNumericalMethods} while restricting the total population size to its initial value $N_{\text{ini}}$ to impose an effective ecological carrying capacity that mimics continuous-culture conditions \cite{collectiveEconomicPrinciplesCell}.
+
+We first confirm that environmental variability can favor phenotypic diversity (bet-hedging) \cite{xueBetHedgingDemographic2017}, and that the strategy maximizing the average growth rate $\langle\mu\rangle$ generally differs from the one minimizing the extinction rate $r_{\text{ext}}$. We then show that when evolution is enabled by introducing strategy mutations with a low probability $p_{\text{mut}}$, selection drives populations to converge to intermediate strategies that balance these competing objectives.
+
+We further demonstrate that population size modulates the evolutionary outcome: large populations are immune to extinction and recover the classical growth-maximizing strategy \cite{gillespieNaturalSelectionVariances1977}, whereas smaller ones evolve toward more resilient, safer strategies. Finally, we show how a simple heuristic approximation captures these outcomes and clarifies the interplay between growth, extinction, and mutation. The stationary distribution of evolved strategies $p(\overline{s})$ is formulated as:
+\begin{equation} \label{eq:heuristic_distribution}
+    p(\overline{s})\propto\frac{\exp(N_\text{ini}\cdot\langle\mu\rangle(\overline{s}))}{r_\text{ext}(N_\text{ini},\overline{s})+p_\text{mut}\cdot\langle\mu_b\rangle(\overline{s})}
+\end{equation}
+where $\langle\mu\rangle$ represents the mean growth rate, $\langle\mu_b\rangle$ is the average birth rate, and the extinction rate decays algebraically as a power law ($r_{\text{ext}} \sim N_{\text{ini}}^{-\alpha}$) driven by adverse environmental episodes. This expression highlights the direct competition between the exponential amplification of growth differences at large populations and the dominance of the extinction risk in small populations.
+
+Overall, our results highlight how environmental fluctuations and demographic constraints jointly shape adaptation, emphasizing the key role of extinction in finite populations.
+
+% References %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\footnotesize
+\begin{thebibliography}{6}
+    \bibitem{kingscollegeRiskUncertaintyEvolutionary1982} King's College, \emph{Risk, Uncertainty and Evolutionary Strategies} (Cambridge University Press, Cambridge, 1982).
+    \bibitem{kussellPhenotypicDiversityPopulation2005} E.~Kussell and S.~Leibler, \emph{Phenotypic Diversity, Population Growth, and Information in Fluctuating Environments}, Science \textbf{309}, 2075 (2005).
+    \bibitem{gillespieNaturalSelectionVariances1977} J.~H.~Gillespie, \emph{Natural Selection for Variances in Offspring Numbers: A New Evolutionary Principle}, Am.\ Nat.\ \textbf{111}, 1010 (1977).
+    \bibitem{collectiveEconomicPrinciplesCell} The Economic Cell Collective, \emph{Economic Principles in Cell Biology} (Online open access book, 2025).
+    \bibitem{toralStochasticNumericalMethods} R.~Toral and P.~Colet, \emph{Stochastic Numerical Methods} (Wiley, 2014).
+    \bibitem{xueBetHedgingDemographic2017} B.~Xue and S.~Leibler, \emph{Bet Hedging against Demographic Fluctuations}, Phys.\ Rev.\ Lett.\ \textbf{119}, 108103 (2017).
+\end{thebibliography}
+
+\end{document}
