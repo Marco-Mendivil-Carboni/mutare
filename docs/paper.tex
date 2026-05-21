@@ -136,6 +136,12 @@ We begin by solving the model without evolution, i.e. with $p_\text{mut}=0$ and 
     \caption{Set of parameters used in the simulations, which we will refer to as the ``assymetric parameters''. They represent a common biological situation in which there is a ``resistant'' phenotype and a ``persistent'' one.} \label{tab:assymetric_parameters}
 \end{table}
 
+\begin{figure}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}
+    \caption{Mean growth rate (top) and extinction rate (bottom) as a function of the initial phenotypic strategy for \texttt{fixed} simulations with the parameter set in \autoref{tab:assymetric_parameters}. The strategy that maximizes mean growth (marked with a dashed line) differs from the one that minimizes extinction (marked with a dotted line), revealing a clear trade-off between these two possible objectives.} \label{fig:main_observables}
+\end{figure}
+
 To proceed, we must first choose a specific set of model parameters. We start with the set shown in \autoref{tab:assymetric_parameters} \footnote{A completely different set of parameters is considered in \autoref{sec:symmetric_parameters}, which leads to the same main conclusions despite some differences.}. These parameters represent a common biological scenario in which there is a “resistant” phenotype and a “persistent” one \cite{huftonPhenotypicSwitchingPopulations2018}. More precisely the meaning of this parameters is the following: both environments are equally likely and there is a transition rate between them of $1.0$; environment $1$ represents a ``favorable'' environment in which phenotype $A$ (the ``resistant'' one) replicates with a rate of $1.0$ while phenotype $B$ (the ``persistent'' one) does it with a rate of $0.2$, and neither of them die; environment $2$ instead represents ``harsh'' conditions in which phenotype $A$ dies with a rate of $1.0$ and phenotype $B$ with a rate of $0.1$, and neither of them are able to duplicate.
 
 \autoref{fig:main_observables} shows the mean growth rate $\langle\mu\rangle$ and the extinction rate $r_e$ measured in fixed-strategy simulations for this parameter set. The first important observation to make is that the maximum of $\langle\mu\rangle$ occurs neither at $s(A)=0$ nor at $s(A)=1$, indicating that in cases such as this one phenotypic diversity (that is, maintaining a mixture of both phenotypes) is the ``optimal'' strategy, a result already reported multiple times \cite{xueBetHedgingDemographic2017}. As we will see, this is precisely the strategy reached by evolution at large $N_\text{ini}$. This behavior does not arise in all cases, but only when environmental fluctuations make each phenotype individually less favorable in the long term than their combination. Secondly, we observe that the growth-maximizing strategy differs from the extinction-minimizing one \footnote{Again, this occurs for other parameter sets, as discussed in \autoref{sec:symmetric_parameters}.}. In particular, $\langle\mu\rangle$ is maximized at $s(A)\sim0.8$, while $r_\text{ext}$ is minimized at $s(A)\sim0.0$. As we will show later, this trade-off (and more precisely the different scaling of these two quantities with the population limit) plays a key role in shaping the evolutionary outcome.
@@ -143,12 +149,6 @@ To proceed, we must first choose a specific set of model parameters. We start wi
 We do not explore in detail how these results depend on the specific choice of parameters, as this has been extensively studied in previous work. Instead, we focus in the next section on the outcome of the evolutionary dynamics and on which strategies are ultimately selected under these conditions.
 
 \section{Outcome of the evolutionary dynamics} \label{sec:evol_outcome}
-
-\begin{figure}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}
-    \caption{Mean growth rate (top) and extinction rate (bottom) as a function of the initial phenotypic strategy for \texttt{fixed} simulations with the parameter set in \autoref{tab:assymetric_parameters}. The strategy that maximizes mean growth (marked with a dashed line) differs from the one that minimizes extinction (marked with a dotted line), revealing a clear trade-off between these two possible objectives.} \label{fig:main_observables}
-\end{figure}
 
 We now enable evolution by allowing strategies to mutate and compete. We consider two types of simulations: in \texttt{evol} simulations, the population is initially composed of agents with the same strategy $s(A)_\text{ini}$, while in \texttt{evol(r)} simulations, the initial strategy of each agent is completely random.
 
