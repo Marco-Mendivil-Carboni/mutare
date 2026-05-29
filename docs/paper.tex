@@ -57,7 +57,7 @@ The \emph{population} is made up of $N$ agents, each one of which will be charac
 
 In particular the population will follow a stochastic birth-death process in which the birth and death rates ($\omega_b(e,\phi)$ and $\omega_d(e,\phi)$ respectively) depend explicitly on both the current environment and the phenotype of each agent. Therefore, the behaviour of the population as a whole in a given environment will depend on its phenotypic composition.
 
-Additionally, when an agent replicates, its offspring will generally inherit the parent's phenotypic strategy $s(\phi)$, but with probability $p_\text{mut}$ a mutation will occur, leading to a new random strategy. Thus, for simplicity, mutations in this model are assumed to be abrupt, even though this may not be the most common situation in biological systems. In \autoref{sec:incremental_mutations}, we extend the model by introducing an additional parameter to allow for incremental mutations, and show that this modification leads to qualitatively similar results, with only minor quantitative differences. This mechanism enables the evolutionary exploration of the space of possible phenotypic strategies, which constitute the heritable traits subject to selection, and therefore play the role of the \emph{genotype}.
+Additionally, when an agent replicates, its offspring will generally inherit the parent's phenotypic strategy $s(\phi)$, but with probability $p_\text{mut}$ a mutation will occur, leading to a new random strategy $s_\text{mut}$. Thus, for simplicity, mutations in this model are assumed to be abrupt, even though this may not be the most common situation in biological systems. In \autoref{sec:incremental_mutations}, we extend the model by introducing an additional parameter to allow for incremental mutations, and show that this modification leads to qualitatively similar results, with only minor quantitative differences. This mechanism enables the evolutionary exploration of the space of possible phenotypic strategies, which constitute the heritable traits subject to selection, and therefore play the role of the \emph{genotype}.
 
 The mechanism we have chosen to introduce bet-hedging is different from many previous works \cite{kussellPhenotypicDiversityPopulation2005,huftonPhenotypicSwitchingPopulations2018,dinisParetooptimalTradeoffPhenotypic2022} which used stochastic phenotypic switching. However, this mechanism allows us to describe the strategy with a single variable, allowing for an easier understanding of what strategies are selected while being a very generic and biologically relevant way of modeling bet-hedging.
 
@@ -140,17 +140,20 @@ We begin by solving the model without evolution, i.e. with $p_\text{mut}=0$ and 
     \caption{Set of parameters used in the simulations, which we will refer to as the ``assymetric parameters''. They represent a common biological situation in which there is a ``resistant'' phenotype and a ``persistent'' one.} \label{tab:assymetric_parameters}
 \end{table}
 
+% CHANGE THE FIGURE BELOW FOR ONE WITHOUT EVOLUTION
+
 \begin{figure}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_growth_rate.pdf}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/extinct_rate.pdf}
-    \caption{Mean growth rate (top) and extinction rate (bottom) as a function of the initial phenotypic strategy for \texttt{fixed} simulations with the parameter set in \autoref{tab:assymetric_parameters}. The strategy that maximizes mean growth (marked with a dashed line) differs from the one that minimizes extinction (marked with a dotted line), revealing a clear trade-off between these two possible objectives.} \label{fig:main_observables}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}
+    \caption{Extinction rate $r_\text{ext}$ versus mean growth rate $\langle \mu \rangle$ for ``fixed'' strategies, defining a Pareto front that captures the trade-off between growth and survival.} \label{fig:pareto_front}
 \end{figure}
 
 To proceed, we must first choose a specific set of model parameters. We start with the set shown in \autoref{tab:assymetric_parameters} (a completely different set of parameters is considered in \autoref{sec:symmetric_parameters}, which leads to the same main conclusions despite some differences). These parameters represent a common biological scenario in which there is a “resistant” phenotype and a “persistent” one \cite{huftonPhenotypicSwitchingPopulations2018}. More precisely the meaning of this parameters is the following: both environments are equally likely and there is a transition rate between them of $1.0$; environment $1$ represents a ``favorable'' environment in which phenotype $A$ (the ``resistant'' one) replicates with a rate of $1.0$ while phenotype $B$ (the ``persistent'' one) does it with a rate of $0.2$, and neither of them die; environment $2$ instead represents ``harsh'' conditions in which phenotype $A$ dies with a rate of $1.0$ and phenotype $B$ with a rate of $0.1$, and neither of them are able to duplicate.
 
-\autoref{fig:main_observables} shows the mean growth rate $\langle\mu\rangle$ and the extinction rate $r_e$ measured in fixed-strategy simulations for this parameter set. The first important observation to make is that the maximum of $\langle\mu\rangle$ occurs neither at $s(A)=0$ nor at $s(A)=1$, indicating that in cases such as this one phenotypic diversity (that is, maintaining a mixture of both phenotypes) is the ``optimal'' strategy, a result already reported multiple times \cite{xueBetHedgingDemographic2017}. As we will see, this is precisely the strategy reached by evolution at large $N_\text{ini}$. This behavior does not arise in all cases, but only when environmental fluctuations make each phenotype individually less favorable in the long term than their combination. Secondly, we observe that the growth-maximizing strategy differs from the extinction-minimizing one (again, this occurs for other parameter sets, as discussed in \autoref{sec:symmetric_parameters}). In particular, $\langle\mu\rangle$ is maximized at $s(A)\sim0.8$, while $r_\text{ext}$ is minimized at $s(A)\sim0.0$. As we will show later, this trade-off (and more precisely the different scaling of these two quantities with the population limit) plays a key role in shaping the evolutionary outcome.
+\autoref{fig:pareto_front} shows the mean growth rate $\langle\mu\rangle$ and the extinction rate $r_e$ measured in fixed-strategy simulations for this parameter set. The first important observation to make is that the maximum of $\langle\mu\rangle$ occurs neither at $s(A)=0$ nor at $s(A)=1$, indicating that in cases such as this one phenotypic diversity (that is, maintaining a mixture of both phenotypes) is the ``optimal'' strategy, a result already reported multiple times \cite{xueBetHedgingDemographic2017}. As we will see, this is precisely the strategy reached by evolution at large $N_\text{ini}$. This behavior does not arise in all cases, but only when environmental fluctuations make each phenotype individually less favorable in the long term than their combination. Secondly, we observe that the growth-maximizing strategy differs from the extinction-minimizing one (again, this occurs for other parameter sets, as discussed in \autoref{sec:symmetric_parameters}). In particular, $\langle\mu\rangle$ is maximized at $s(A)\sim0.8$, while $r_\text{ext}$ is minimized at $s(A)\sim0.0$. As we will show later, this trade-off (and more precisely the different scaling of these two quantities with the population limit) plays a key role in shaping the evolutionary outcome.
 
 We do not explore in detail how these results depend on the specific choice of parameters, as this has been extensively studied in previous work. Instead, we focus in the next section on the outcome of the evolutionary dynamics and on which strategies are ultimately selected under these conditions.
+
+Note that all figures throughout this work include error bars and/or error bands; however, in many cases, they are smaller than the point symbols and are therefore barely visible.
 
 \section{Outcome of the evolutionary dynamics} \label{sec:evol_outcome}
 
@@ -158,12 +161,11 @@ We now enable evolution by allowing strategies to mutate and compete. We conside
 
 To characterize the outcome of the evolutionary process, at each time we compute the population-averaged strategy $\overline{s}(A)$. In \autoref{fig:evol_results} we show the distribution of $\overline{s}(A)$ over time (top panel) and its time average (bottom panel). In both types of simulations, the system consistently converges toward a well-defined stationary distribution of $\overline{s}(A)$, with only a weak dependence on the initial condition.
 
-A key observation is that the instantaneous dispersion of strategies $\sigma_s$ (defined as the spread of strategies present in the population at a given time) remains small. This dispersion is represented in the bottom panel of \autoref{fig:evol_results} as an error band, which is barely visible. At any given time, the population is therefore effectively characterized by a single dominant strategy. Over longer times, however, mutation-driven exploration causes this dominant strategy to drift through the space of possible strategies. More importantly, we observe that the average evolved strategy lies between the growth-maximizing and extinction-minimizing strategies identified in the fixed-strategy simulations. As we will see in later sections, this behavior is not specific to this parameter set. This shows that evolution in finite populations does not optimize instantaneous growth alone, but instead selects strategies that represent a compromise between growth and extinction avoidance.
+A key observation is that the instantaneous dispersion of strategies $\sigma_s$ (defined as the standard deviation of strategies present in the population at a given time) remains small. This dispersion is represented in the bottom panel of \autoref{fig:evol_results} as an error band, which is barely visible. At any given time, the population is therefore effectively characterized by a single dominant strategy. Over longer times, however, mutation-driven exploration causes this dominant strategy to drift through the space of possible strategies. More importantly, we observe that the average evolved strategy lies between the growth-maximizing and extinction-minimizing strategies identified in the fixed-strategy simulations. As we will see in later sections, this behavior is not specific to this parameter set. This shows that evolution in finite populations does not optimize instantaneous growth alone, but instead selects strategies that represent a compromise between growth and extinction avoidance.
 
 \begin{figure}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
-    \caption{Evolutionary dynamics in the ``asymmetric'' parameter set. At each time, we compute the population-averaged strategy $\overline{s}(A)$, that is, the average of $s(A)$ over all agents. Top: distribution of $\overline{s}(A)$ over time. Bottom: time average of $\overline{s}(A)$ (i.e., the mean of the distribution shown above). Results are shown for both \texttt{evol} (single initial strategy) and \texttt{evol(r)} (random initial strategies) simulations, illustrating the weak dependence on initial conditions. The dashed line indicates the strategy that maximizes mean growth, while the dotted line marks the one that minimizes extinction. The evolved strategy lies between these two, reflecting a compromise between growth and survival.} \label{fig:evol_results}
+    \caption{Evolutionary dynamics in the ``asymmetric'' parameter set. At each time, we compute the population-averaged strategy $\overline{s}(A)$, that is, the average of $s(A)$ over all agents. Time average of $\overline{s}(A)$ (i.e., the mean of the distribution shown above). Results are shown for both \texttt{evol} (single initial strategy) and \texttt{evol(r)} (random initial strategies) simulations, illustrating the weak dependence on initial conditions. The dashed line indicates the strategy that maximizes mean growth, while the dotted line marks the one that minimizes extinction. The evolved strategy lies between these two, reflecting a compromise between growth and survival.} \label{fig:evol_results}
 \end{figure}
 
 Next, in \autoref{fig:dependence_on_N_ini_and_p_mut} we explore how the evolutionary outcome (namely, the average strategy $\langle\overline{s}\rangle(A)$) depends on the population size $N_\text{ini}$ and the mutation probability $p_\text{mut}$.
@@ -181,11 +183,6 @@ In contrast, the dependence on the mutation probability is relatively weak, as $
 \section{Heuristic interpretation of the evolutionary outcome} \label{sec:heuristic_interpretation}
 
 To better understand the outcome of the evolutionary process, it is useful to examine in more detail the trade-off between the mean growth rate and the extinction rate. As discussed in previous sections, these two quantities cannot be optimized simultaneously. If we plot, as in \autoref{fig:pareto_front}, the values of $r_\text{ext}$ against $\langle \mu \rangle$ for \texttt{fixed} strategies across the full strategy space, we obtain a curve known as a Pareto front \cite{dinisPhaseTransitionsOptimal2020}. This curve represents the set of optimal trade-offs: any increase in growth necessarily comes at the cost of a higher extinction risk, and vice versa. In more general settings with more than two phenotypes, strategies would span a higher-dimensional space, and the Pareto front would correspond to the boundary (also known as the efficient frontier) of the accessible region.
-
-\begin{figure}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}
-    \caption{Extinction rate $r_\text{ext}$ versus mean growth rate $\langle \mu \rangle$ for ``fixed'' strategies, defining a Pareto front that captures the trade-off between growth and survival. When evolution is enabled, the system converges to a point with a lower growth rate than the growth-maximizing strategy, but also with a reduced extinction rate.} \label{fig:pareto_front}
-\end{figure}
 
 In the same plot we also display the outcome obtained when evolution is enabled, allowing us to compare directly the resulting growth and extinction rates rather than the underlying strategy. We find that the system converges, with only a moderate dependence on the initial conditions, toward a point with a lower growth rate than the growth-maximizing strategy, but also with a reduced extinction rate.
 
@@ -221,6 +218,42 @@ The logic behind \autoref{eq:heuristic_distribution} is as follows. The numerato
 A key feature of \autoref{eq:heuristic_distribution} is the competition between two terms with fundamentally different scaling behaviors. The growth contribution enters exponentially through $\exp(N_\text{ini}\cdot\langle\mu\rangle(\overline{s}))$, while extinction enters algebraically through $r_\text{ext}$, which follows a power-law dependence on $N_\text{ini}$. This difference in scaling is crucial: it allows extinction risk to dominate at small population sizes, favoring safer strategies, while ensuring that growth maximization prevails in the large-$N_\text{ini}$ limit.
 
 Despite its simplicity, this heuristic captures the transition from the growth-maximizing strategy to safer ones as $N_\text{ini}$ decreases, as well as its dependence on $p_\text{mut}$. Notably, for large $N_\text{ini}$ the dependence on $p_\text{mut}$ disappears, confirming that, especially in this regime, the evolutionary outcome is controlled primarily by growth rather than the details of mutation. Additional results, including the full distributions, are provided in \autoref{sec:supplementary_results}.
+
+\section{Different model parameters} \label{sec:symmetric_parameters}
+
+We also analyzed a qualitatively different parameter regime defined by:
+\begin{itemize}
+    \item $\omega_b(e,\phi)=\begin{pmatrix}1.2&0.0\\0.0&0.8\end{pmatrix}$
+    \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&1.0\\1.0&0.0\end{pmatrix}$
+\end{itemize}
+
+In this case, each phenotype is specialized for one environment, representing a scenario fundamentally different from the asymmetric case discussed in the main text.
+
+As shown in \autoref{fig:symmetric_parameters}, the trade-off between growth and extinction persists, although the Pareto front is much narrower: the strategies that maximize growth and minimize extinction are closer to each other.
+
+Despite these differences, the main conclusions remain unchanged. Evolution leads to a well-defined strategy largely independent of initial conditions, lying between the growth-maximizing and extinction-minimizing values. As seen in \autoref{fig:symmetric_parameters}, the population size $N_\text{ini}$ again controls the outcome: large populations favor growth-maximizing strategies, while small populations favor safer ones.
+
+Finally, our analysis confirmed that the heuristic approximation still captures the qualitative transition between regimes. However, quantitative discrepancies are more pronounced in this symmetric case: in particular, the convergence toward the growth-maximizing strategy occurs at significantly larger $N_\text{ini}$ than predicted.
+
+\begin{figure}
+    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
+    \caption{Average evolved strategy as a function of the initial strategy (left) and dependence of the evolved strategy on population size (right) in the symmetric parameter case. The dashed line indicates the strategy that maximizes mean growth, while the dotted line marks the one that minimizes extinction. The same qualitative trends as in the asymmetric case are observed.} \label{fig:symmetric_parameters}
+\end{figure}
+
+\section{Incremental mutations} \label{sec:incremental_mutations}
+
+\begin{figure}
+    \includegraphics{../sims/incremental/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/incremental/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
+    \caption{Results for incremental mutations. Left: dependence of the evolved strategy on initial conditions. Right: dependence on population size. The qualitative behavior matches that of the main model.} \label{fig:incremental_mutations}
+\end{figure}
+
+We also consider a modified mutation mechanism in which changes to the strategy are incremental rather than completely random. Specifically, when a mutation occurs, the offspring strategy is obtained by adding Gaussian noise with standard deviation $\sigma_\text{mut}$ to the parent's strategy, followed by normalization.
+
+For $\sigma_\text{mut}=0.1$ and $p_\text{mut}=0.01$, the results are shown in \autoref{fig:incremental_mutations}. The qualitative behavior remains unchanged: evolution still leads to intermediate strategies, and the dependence on population size is preserved.
+
+However, we observe a slightly stronger dependence on initial conditions, reflecting the slower exploration of strategy space induced by incremental mutations.
 
 \section{Discussion and outlook} \label{sec:discussion}
 
@@ -278,40 +311,6 @@ This corresponds to the variance growth rate of the cumulative per-capita growth
 \end{equation}
 and is therefore a well-defined quantity in continuous-time jump processes. In this sense, $\sigma_\mu^2$ should be interpreted as the diffusion coefficient of log-population growth rather than as the variance of an instantaneous rate.
 
-\section{Different model parameters} \label{sec:symmetric_parameters}
-
-\begin{figure*}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/rates.pdf}
-    \caption{Left: average evolved strategy as a function of the initial strategy. Right: Pareto front showing the trade-off between growth and extinction for fixed strategies in the symmetric parameter case.} \label{fig:symmetric_parameters_strategy_and_front}
-\end{figure*}
-
-\begin{figure*}
-    \includegraphics{../sims/symmetric/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/prob_mut/avg_avg_strat_phe_0.pdf}
-    \caption{Dependence of the evolved strategy on population size (left) and mutation probability (right) for symmetric parameters. The same qualitative trends as in the asymmetric case are observed.} \label{fig:symmetric_parameters_dependence}
-\end{figure*}
-
-\begin{figure*}
-    \includegraphics{../sims/symmetric/plots/fixed/exp_avg_avg_strat_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/fixed/avg_avg_strat_phe_0.pdf}
-    \caption{Comparison between heuristic predictions (left) and simulation results (right) for the symmetric parameter set. The heuristic captures the qualitative behavior but shows larger quantitative deviations.} \label{fig:symmetric_parameters_heuristic}
-\end{figure*}
-
-We also analyzed a qualitatively different parameter regime defined by:
-\begin{itemize}
-    \item $\omega_b(e,\phi)=\begin{pmatrix}1.2&0.0\\0.0&0.8\end{pmatrix}$
-    \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&1.0\\1.0&0.0\end{pmatrix}$
-\end{itemize}
-
-In this case, each phenotype is specialized for one environment, representing a scenario fundamentally different from the asymmetric case discussed in the main text.
-
-As shown in \autoref{fig:symmetric_parameters_strategy_and_front}, the trade-off between growth and extinction persists, although the Pareto front is much narrower: the strategies that maximize growth and minimize extinction are closer to each other.
-
-Despite these differences, the main conclusions remain unchanged. Evolution leads to a well-defined strategy largely independent of initial conditions, lying between the growth-maximizing and extinction-minimizing values. As seen in \autoref{fig:symmetric_parameters_dependence}, the population size $N_\text{ini}$ again controls the outcome: large populations favor growth-maximizing strategies, while small populations favor safer ones. The dependence on $p_\text{mut}$ remains weak.
-
-Finally, \autoref{fig:symmetric_parameters_heuristic} shows that the heuristic approximation still captures the qualitative transition between regimes. However, quantitative discrepancies are more pronounced: in particular, the convergence toward the growth-maximizing strategy occurs at significantly larger $N_\text{ini}$ than predicted.
-
 \section{Supplementary Results} \label{sec:supplementary_results}
 
 \begin{figure*}
@@ -353,19 +352,5 @@ We also examine the distribution of population sizes and the fluctuations of the
 Time series data (\autoref{fig:evidence_of_common_strategy}) confirm that, at low mutation rates, the population is effectively characterized by a single dominant strategy at each instant. The apparent spread of strategies arises from temporal averaging rather than coexistence.
 
 Finally, in \autoref{fig:strategy_distributions}, we compare the full distributions of strategies predicted by the heuristic and observed in simulations. While they share qualitative features, they do not coincide exactly.
-
-\section{Incremental mutations} \label{sec:incremental_mutations}
-
-\begin{figure*}
-    \includegraphics{../sims/incremental/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
-    \includegraphics{../sims/incremental/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
-    \caption{Results for incremental mutations. Left: dependence of the evolved strategy on initial conditions. Right: dependence on population size. The qualitative behavior matches that of the main model.} \label{fig:incremental_mutations}
-\end{figure*}
-
-We also consider a modified mutation mechanism in which changes to the strategy are incremental rather than completely random. Specifically, when a mutation occurs, the offspring strategy is obtained by adding Gaussian noise with standard deviation $\sigma_\text{mut}$ to the parent's strategy, followed by normalization.
-
-For $\sigma_\text{mut}=0.1$ and $p_\text{mut}=0.01$, the results are shown in \autoref{fig:incremental_mutations}. The qualitative behavior remains unchanged: evolution still leads to intermediate strategies, and the dependence on population size is preserved.
-
-However, we observe a slightly stronger dependence on initial conditions, reflecting the more local exploration of strategy space induced by incremental mutations.
 
 \end{document}
