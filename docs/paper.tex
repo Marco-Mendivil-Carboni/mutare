@@ -131,8 +131,6 @@ We begin by solving the model without evolution, i.e. with $p_\text{mut}=0$ and 
         \addlinespace
         $\omega_d(e,\phi)$ & death rates              & $\begin{psmallmatrix}0.0&0.0\\1.0&0.1\end{psmallmatrix}$     \\
         \addlinespace
-        $p_\text{mut}$     & mutation probability     & $0.001$                                                      \\
-        \addlinespace
         $N_\text{ini}$     & initial number of agents & $100$                                                        \\
         \bottomrule
     \end{tabular}
@@ -152,7 +150,7 @@ Rather than exploring in detail how these results depend on the specific choice 
 
 \section{Evolutionary dynamics} \label{sec:evol_outcome}
 
-We now enable evolution by allowing strategies to mutate and compete. We consider two types of simulations: in \texttt{evol} simulations, the population is initially composed of agents with the same strategy $s(A)_\text{ini}$, while in \texttt{evol(r)} simulations, the initial strategy of each agent is completely random.
+We now enable evolution by setting $p_\text{mut}=0.001$, allowing strategies to mutate and compete. We consider two types of simulations: in \texttt{evol} simulations, the population is initially composed of agents with the same strategy $s(A)_\text{ini}$, while in \texttt{evol(r)} simulations, the initial strategy of each agent is completely random.
 
 To characterize the outcome of the evolutionary process, at each time we compute the population-averaged strategy $\overline{s}(A)$. In \autoref{fig:evol_results} we show the distribution of $\overline{s}(A)$ over time (top panel) and its time average (bottom panel). In both types of simulations, the system consistently converges toward a well-defined stationary distribution of $\overline{s}(A)$, with only a weak dependence on the initial condition.
 
