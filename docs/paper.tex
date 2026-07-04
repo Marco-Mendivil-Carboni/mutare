@@ -18,6 +18,7 @@
 
 \usepackage[hidelinks,pdfusetitle]{hyperref}
 \usepackage[all]{hypcap}
+\usepackage{cleveref}
 
 \begin{document}
 
@@ -135,7 +136,7 @@ We begin by solving the model without evolution, i.e. with $p_\text{mut}=0$ and 
         $N_\text{ini}$     & initial number of agents & $100$                                                        \\
         \bottomrule
     \end{tabular}
-    \caption{Set of parameters used in the simulations, which we will refer to as the ``assymetric parameters''. They represent a common biological situation in which there is a ``resistant'' phenotype and a ``persistent'' one.} \label{tab:assymetric_parameters}
+    \caption{Set of parameters used in the simulations of \cref{sec:no_evolution,sec:evol_outcome,sec:heuristic_interpretation,sec:incremental_mutations}, which we will refer to as the \emph{Persister-Resistant} (PR) parameter set.} \label{tab:PR_parameters}
 \end{table}
 
 \begin{figure}
@@ -143,7 +144,7 @@ We begin by solving the model without evolution, i.e. with $p_\text{mut}=0$ and 
     \caption{Extinction rate $r_\text{ext}$ versus mean growth rate $\langle \mu \rangle$ for ``fixed'' strategies, defining a Pareto front that captures the trade-off between growth and survival.} \label{fig:pareto_front}
 \end{figure}
 
-To proceed, we must first choose a specific set of model parameters. We start with the set shown in \autoref{tab:assymetric_parameters} (a completely different set of parameters is considered in \autoref{sec:symmetric_parameters}, which leads to the same main conclusions despite some differences). These parameters represent a common biological scenario in which there is a “resistant” phenotype and a “persistent” one \cite{huftonPhenotypicSwitchingPopulations2018}. More precisely the meaning of this parameters is the following: both environments are equally likely and there is a transition rate between them of $1.0$; environment $1$ represents a ``favorable'' environment in which phenotype $A$ (the ``resistant'' one) replicates with a rate of $1.0$ while phenotype $B$ (the ``persistent'' one) does it with a rate of $0.2$, and neither of them die; environment $2$ instead represents ``harsh'' conditions in which phenotype $A$ dies with a rate of $1.0$ and phenotype $B$ with a rate of $0.1$, and neither of them are able to duplicate.
+To proceed, we must first choose a specific set of model parameters. We start with the set shown in \autoref{tab:PR_parameters} (a completely different set of parameters is considered in \autoref{sec:symmetric_parameters}, which leads to the same main conclusions despite some differences). These parameters represent a common biological scenario in which there is a “resistant” phenotype and a “persistent” one \cite{huftonPhenotypicSwitchingPopulations2018}. More precisely the meaning of this parameters is the following: both environments are equally likely and there is a transition rate between them of $1.0$; environment $1$ represents a ``favorable'' environment in which phenotype $A$ (the ``resistant'' one) replicates with a rate of $1.0$ while phenotype $B$ (the ``persistent'' one) does it with a rate of $0.2$, and neither of them die; environment $2$ instead represents ``harsh'' conditions in which phenotype $A$ dies with a rate of $1.0$ and phenotype $B$ with a rate of $0.1$, and neither of them are able to duplicate.
 
 \autoref{fig:pareto_front} shows the mean growth rate $\langle\mu\rangle$ and the extinction rate $r_e$ measured in fixed-strategy simulations for this parameter set. The first important observation to make is that the maximum of $\langle\mu\rangle$ occurs neither at $s(A)=0$ nor at $s(A)=1$, indicating that in cases such as this one phenotypic diversity (that is, maintaining a mixture of both phenotypes) is the ``optimal'' strategy, a result already reported multiple times \cite{xueBetHedgingDemographic2017}. As we will see, this is precisely the strategy reached by evolution at large $N_\text{ini}$. This behavior does not arise in all cases, but only when environmental fluctuations make each phenotype individually less favorable in the long term than their combination. Secondly, we observe that the growth-maximizing strategy differs from the extinction-minimizing one (again, this occurs for other parameter sets, as discussed in \autoref{sec:symmetric_parameters}). In particular, $\langle\mu\rangle$ is maximized at $s(A)\sim0.8$, while $r_\text{ext}$ is minimized at $s(A)\sim0.0$. As we will show later, this trade-off (and more precisely the different scaling of these two quantities with the population limit) plays a key role in shaping the evolutionary outcome.
 
@@ -215,12 +216,26 @@ A key feature of \autoref{eq:heuristic_distribution} is the competition between 
 
 Despite its simplicity, this heuristic captures the transition from the growth-maximizing strategy to safer ones as $N_\text{ini}$ decreases, as well as its dependence on $p_\text{mut}$. Notably, for large $N_\text{ini}$ the dependence on $p_\text{mut}$ disappears, confirming that, especially in this regime, the evolutionary outcome is controlled primarily by growth rather than the details of mutation. Additional results, including the full distributions, are provided in \autoref{sec:supplementary_results}.
 
+\section{Incremental mutations} \label{sec:incremental_mutations}
+
+We also consider a modified mutation mechanism in which changes to the strategy are incremental rather than completely random. Specifically, when a mutation occurs, the offspring strategy is obtained by adding Gaussian noise with standard deviation $\sigma_\text{mut}$ to the parent's strategy, followed by normalization.
+
+For $\sigma_\text{mut}=0.1$ and $p_\text{mut}=0.01$, the results are shown in \autoref{fig:incremental_mutations}. The qualitative behavior remains unchanged: evolution still leads to intermediate strategies, and the dependence on population size is preserved.
+
+However, we observe a slightly stronger dependence on initial conditions, reflecting the slower exploration of strategy space induced by incremental mutations.
+
+\begin{figure}
+    \includegraphics{../sims/incremental/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/incremental/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
+    \caption{Results for incremental mutations. Left: dependence of the evolved strategy on initial conditions. Right: dependence on population size. The qualitative behavior matches that of the main model.} \label{fig:incremental_mutations}
+\end{figure}
+
 \section{Different model parameters} \label{sec:symmetric_parameters}
 
 We also analyzed a qualitatively different parameter regime defined by:
 \begin{itemize}
-    \item $\omega_b(e,\phi)=\begin{pmatrix}1.2&0.0\\0.0&0.8\end{pmatrix}$
-    \item $\omega_d(e,\phi)=\begin{pmatrix}0.0&1.0\\1.0&0.0\end{pmatrix}$
+    \item $\omega_b(e,\phi)=\begin{psmallmatrix}1.2&0.0\\0.0&0.8\end{psmallmatrix}$
+    \item $\omega_d(e,\phi)=\begin{psmallmatrix}0.0&1.0\\1.0&0.0\end{psmallmatrix}$
 \end{itemize}
 
 In this case, each phenotype is specialized for one environment, representing a scenario fundamentally different from the asymmetric case discussed in the main text.
@@ -236,20 +251,6 @@ Finally, our analysis confirmed that the heuristic approximation still captures 
     \includegraphics{../sims/symmetric/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
     \caption{Average evolved strategy as a function of the initial strategy (left) and dependence of the evolved strategy on population size (right) in the symmetric parameter case. The dashed line indicates the strategy that maximizes mean growth, while the dotted line marks the one that minimizes extinction. The same qualitative trends as in the asymmetric case are observed.} \label{fig:symmetric_parameters}
 \end{figure}
-
-\section{Incremental mutations} \label{sec:incremental_mutations}
-
-\begin{figure}
-    \includegraphics{../sims/incremental/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
-    \includegraphics{../sims/incremental/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
-    \caption{Results for incremental mutations. Left: dependence of the evolved strategy on initial conditions. Right: dependence on population size. The qualitative behavior matches that of the main model.} \label{fig:incremental_mutations}
-\end{figure}
-
-We also consider a modified mutation mechanism in which changes to the strategy are incremental rather than completely random. Specifically, when a mutation occurs, the offspring strategy is obtained by adding Gaussian noise with standard deviation $\sigma_\text{mut}$ to the parent's strategy, followed by normalization.
-
-For $\sigma_\text{mut}=0.1$ and $p_\text{mut}=0.01$, the results are shown in \autoref{fig:incremental_mutations}. The qualitative behavior remains unchanged: evolution still leads to intermediate strategies, and the dependence on population size is preserved.
-
-However, we observe a slightly stronger dependence on initial conditions, reflecting the slower exploration of strategy space induced by incremental mutations.
 
 \section{Discussion and outlook} \label{sec:discussion}
 
