@@ -118,20 +118,16 @@ Despite the minimalism of the model, it is analytically intractable. Therefore, 
 
 \section{Behaviour of the model without evolution} \label{sec:no_evolution}
 
-We begin by solving the model without evolution, i.e. with $p_\text{mut}=0$ and assuming that all agents initially share the same strategy, $s_\text{ini}$. This kind of simulations (which we will call \texttt{fixed}) allow us to study the properties of individual strategies in isolation and, in turn, better understand the evolutionary outcomes that follow.
-
 \begin{table}
     \begin{tabular}{c c c}
         \toprule
-        symbol             & name                     & value                                                        \\
+        symbol             & name             & value                                                        \\
         \midrule
-        $\omega_t(e,e')$   & transition rates         & $\begin{psmallmatrix}-1.0&+1.0\\+1.0&-1.0\end{psmallmatrix}$ \\
+        $\omega_t(e,e')$   & transition rates & $\begin{psmallmatrix}-1.0&+1.0\\+1.0&-1.0\end{psmallmatrix}$ \\
         \addlinespace
-        $\omega_b(e,\phi)$ & birth rates              & $\begin{psmallmatrix}1.0&0.2\\0.0&0.0\end{psmallmatrix}$     \\
+        $\omega_b(e,\phi)$ & birth rates      & $\begin{psmallmatrix}1.0&0.2\\0.0&0.0\end{psmallmatrix}$     \\
         \addlinespace
-        $\omega_d(e,\phi)$ & death rates              & $\begin{psmallmatrix}0.0&0.0\\1.0&0.1\end{psmallmatrix}$     \\
-        \addlinespace
-        $N_\text{ini}$     & initial number of agents & $100$                                                        \\
+        $\omega_d(e,\phi)$ & death rates      & $\begin{psmallmatrix}0.0&0.0\\1.0&0.1\end{psmallmatrix}$     \\
         \bottomrule
     \end{tabular}
     \caption{Set of parameters used in the simulations of \cref{sec:no_evolution,sec:evol_outcome,sec:heuristic_interpretation,sec:incremental_mutations}, which we will refer to as the \emph{Persister-Resistant} (PR) parameter set.} \label{tab:PR_parameters}
@@ -141,6 +137,8 @@ We begin by solving the model without evolution, i.e. with $p_\text{mut}=0$ and 
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}
     \caption{Extinction rate $r_\text{ext}$ versus mean growth rate $\langle\mu\rangle$. Results are shown for \texttt{fixed}, \texttt{evol} and \texttt{evol(r)} simulations, across a range of initial strategies from $s(A)=0$ (lower end of the curve) to $s(A)=1$ (upper end). These values define a \emph{Pareto front} capturing the growth-survival trade-off.} \label{fig:pareto_front}
 \end{figure}
+
+We begin by solving the model without evolution, i.e. with $p_\text{mut}=0$, setting the initial population size to $N_\text{ini}=100$ and assuming that all agents initially share the same strategy, $s_\text{ini}$. This kind of simulations (which we will call \texttt{fixed}) allow us to study the properties of individual strategies in isolation and, in turn, better understand the evolutionary outcomes that follow.
 
 To proceed, we must first choose a specific set of model parameters. We start with the \emph{Persister-Resistant} (PR) parameter set shown in \autoref{tab:PR_parameters} (a completely different set of parameters is considered in \autoref{sec:symmetric_parameters}, which leads to similar results). These parameters represent a common biological scenario in which there is a ``persister'' phenotype and a ``resistant'' one \cite{huftonPhenotypicSwitchingPopulations2018}. More precisely the meaning of this parameters is the following: both environments are equally likely and there is a transition rate between them of $1.0$; environment $1$ represents a ``favorable'' environment in which phenotype $A$ (the ``resistant'' one) replicates with a rate of $1.0$ while phenotype $B$ (the ``persister'' one) does it with a rate of $0.2$, and neither of them die; environment $2$ instead represents ``harsh'' conditions in which phenotype $A$ dies with a rate of $1.0$ and phenotype $B$ with a rate of $0.1$, and neither of them are able to duplicate.
 
