@@ -133,7 +133,11 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         ax.set_yscale("log")
 
     for ax in [ax_0, ax_1, ax_2, ax_5, ax_6, ax_7, ax_8, ax_9]:
-        ax.legend()
+        handles, labels = ax.get_legend_handles_labels()
+        handles, labels = zip(
+            *sorted(zip(handles, labels), key=lambda t: t[1], reverse=True)
+        )
+        ax.legend(handles, labels)
 
     fig_dir = job.base_dir / "plots" / param
     fig_dir.mkdir(parents=True, exist_ok=True)
