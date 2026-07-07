@@ -212,16 +212,16 @@ Finally, \autoref{fig:heuristic_approx} compares the expected average strategy c
 
 \section{Incremental mutations} \label{sec:incremental_mutations}
 
-We also consider a modified mutation mechanism in which changes to the strategy are incremental rather than completely random. Specifically, when a mutation occurs, the offspring strategy is obtained by adding Gaussian noise with standard deviation $\sigma_\text{mut}$ to the parent's strategy, followed by normalization.
+As anticipated when introducing the model, biological mutation mechanisms can take various forms, and the most adequate one often depends on the specific system under study. To demonstrate that our core insights and conclusions are robust to these microscopic details, we extend the model by considering an incremental mutation mechanism rather than completely random, abrupt changes. Specifically, when a mutation occurs, a Gaussian random variable with standard deviation $\sigma_\text{mut}$ is added to each component of the parent's strategy, which is subsequently normalized.
 
-For $\sigma_\text{mut}=0.1$ and $p_\text{mut}=0.01$, the results are shown in \autoref{fig:incremental_mutations}. The qualitative behavior remains unchanged: evolution still leads to intermediate strategies, and the dependence on population size is preserved.
+To keep the effect of mutations roughly comparable to the main model, we choose $\sigma_\text{mut}=0.1$ and $p_\text{mut}=0.01$ so that their product matches the original mutation probability used in \autoref{fig:evol_results}. The results are presented in \autoref{fig:incremental_mutations}. The qualitative behavior remains unchanged: evolution still leads to intermediate strategies, preserving the transition from growth maximization at large $N_\text{ini}$ to safer strategies at lower population sizes. However, we observe a slightly stronger dependence on initial conditions than in \autoref{fig:evol_results}. This is likely because mutations are now continuous, making it harder to escape unfavorable regions of the strategy space.
 
-However, we observe a slightly stronger dependence on initial conditions, reflecting the slower exploration of strategy space induced by incremental mutations.
-
-\begin{figure}
-    \includegraphics{../sims/incremental/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
-    \includegraphics{../sims/incremental/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
-    \caption{Results for incremental mutations. Left: dependence of the evolved strategy on initial conditions. Right: dependence on population size. The qualitative behavior matches that of the main model.} \label{fig:incremental_mutations}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.48\textwidth]{../sims/incremental/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
+    \hfill
+    \includegraphics[width=0.48\textwidth]{../sims/incremental/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
+    \caption{Results for incremental mutations. Dependence of the evolved strategy on initial conditions (top) and on population size (bottom). The qualitative behavior matches that of the main model. As previously, the dashed and dotted lines indicate the strategies that maximize mean growth and minimize extinction, respectively.} \label{fig:incremental_mutations}
 \end{figure}
 
 \section{Different model parameters} \label{sec:symmetric_parameters}
