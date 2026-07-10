@@ -261,51 +261,38 @@ Ultimately, we believe that the model developed in this work could serve as a fo
 \section*{Data Availability}
 The source code developed for this study is openly available in the repository at \url{https://github.com/Marco-Mendivil-Carboni/mutare}.
 
-\bibliographystyle{apsrev4-2}
-\bibliography{mutare.bib}
-
 \appendix
 
 \section{The Gillespie algorithm and time series analysis} \label{sec:gillespie_algorithm}
 
-To simulate the stochastic dynamics of the model, we use the Gillespie algorithm, a standard method for generating statistically exact trajectories of continuous-time Markov processes.
-
-At any given time, the state of the system is denoted by $\mathbf{X}$ and all possible events (birth, death, environmental transitions) are indexed by $j=1,\dots,M$, each occurring with rate $\omega_j(\mathbf{X})$. The total rate is therefore
+To perform numerical simulations of the model developed in \autoref{sec:model}, we have employed the Gillespie algorithm \cite{toralStochasticNumericalMethods}, a standard method for generating statistically exact trajectories of continuous-time Markov processes such as ours. At any given time, the state of the system is denoted by $\mathbf{X}$ and all possible ``events'' (the birth or death of an individual, or an environmental transition) are indexed by $j=1,\dots,M$, each occurring with a rate $\omega_j(\mathbf{X})$. The ``total rate'' is therefore
 \begin{equation}
     \Omega(\mathbf{X})=\sum_{j=1}^M\omega_j(\mathbf{X}).
 \end{equation}
 
 The algorithm proceeds iteratively as follows. First, the time $\tau$ to the next event is drawn from an exponential distribution:
 \begin{equation}
-    \tau=\frac{1}{\Omega(\mathbf{X})}\ln\frac{1}{r_1},\quad r_1\sim U(0,1).
+    \tau=\frac{1}{\Omega(\mathbf{X})}\ln\frac{1}{r_1},\quad r_1\sim U(0,1),
 \end{equation}
-Then, the specific event $\mu$ that occurs is selected according to:
+where $U(0,1)$ denotes the uniform distribution on the interval $(0,1)$. Then, the specific event $k$ that occurs is selected according to:
 \begin{equation}
-    \sum_{j=1}^{\mu-1}\omega_j(\mathbf{X})<r_2\Omega(\mathbf{X})\le\sum_{j=1}^{\mu}\omega_j(\mathbf{X}),\quad r_2\sim U(0,1).
+    \sum_{j=1}^{k-1}\omega_j(\mathbf{X})<r_2\Omega(\mathbf{X})\le\sum_{j=1}^{k}\omega_j(\mathbf{X}),\quad r_2\sim U(0,1).
 \end{equation}
-Finally, the system is updated as
+Finally, the system state is updated as:
 \begin{equation}
-    \mathbf{X}(t+\tau)=\mathbf{X}(t)+\boldsymbol{\nu}_\mu,
+    \mathbf{X}(t+\tau)=\mathbf{X}(t)+\delta\mathbf{X}_k,
 \end{equation}
-where $\boldsymbol{\nu}_\mu$ is the state-change vector associated with event $\mu$.
+where $\delta\mathbf{X}_k$ is the state-change vector associated with event $k$, thereby advancing the simulation to the next time step.
 
-An important consequence of this algorithm is that observations are naturally sampled at irregular time intervals $\Delta t_k=\tau_k$. Therefore, averages of observables must be computed as time-weighted averages rather than simple arithmetic means.
-
-In addition to the mean population growth rate $\langle\mu\rangle$, we also measure fluctuations of growth along stochastic trajectories. A naive definition based on the instantaneous rate $\Delta N/(N\,\Delta t)$ leads to ill-defined fluctuations due to arbitrarily small waiting times. Instead, we define fluctuations through the integrated growth process.
-
-Denoting by
+An important consequence of using this algorithm is that the system is naturally sampled at irregular time intervals $\Delta t_k=\tau_k$. Therefore, time averages of any observable $\mathcal{O}(\mathbf{X})$ must be computed as time-weighted averages,
 \begin{equation}
-    \mu_k=\frac{\Delta N_k}{N_k\,\Delta t_k}
+    \langle\mathcal{O}\rangle=\frac{1}{\sum_k\tau_k}\sum_k\mathcal{O}(\mathbf{X}_k)\tau_k,
 \end{equation}
-the growth rate measured over a Gillespie step $k$, we compute
+rather than simple arithmetic means. All observables considered in this work are computed this way, with the sole exception of the population growth rate fluctuations, which we denote as $\sigma_\mu^2$ and analyze in \autoref{sec:supplementary_results}. The issue lies in the fact that a naive calculation of the variance based directly on the step-wise rates $\mu_k=\Delta N_k/(N_k\tau_k)$ yields ill-defined, diverging fluctuations due to the arbitrarily small waiting times between Gillespie steps. The most appropriate way to quantify these fluctuations is through:
 \begin{equation}
-    \sigma_\mu^2=\frac{1}{\sum_k \Delta t_k}\sum_k\left(\mu_k-\langle\mu\rangle\right)^2\Delta t_k^2.
+    \sigma_\mu^2=\frac{1}{\sum_k\tau_k}\sum_k\left(\mu_k-\langle\mu\rangle\right)^2\tau_k^2,
 \end{equation}
-This corresponds to the variance growth rate of the cumulative per-capita growth,
-\begin{equation}
-    \log\frac{N(t)}{N(0)}=\sum_k \mu_k\,\Delta t_k,
-\end{equation}
-and is therefore a well-defined quantity in continuous-time jump processes. In this sense, $\sigma_\mu^2$ should be interpreted as the diffusion coefficient of log-population growth rather than as the variance of an instantaneous rate.
+which represents the diffusion coefficient of the integrated log-population growth process ($\log N\sim\sum_k\mu_k\tau_k$) rather than the variance of an instantaneous rate.
 
 \section{Supplementary Results} \label{sec:supplementary_results}
 
@@ -350,5 +337,8 @@ Time series data (\autoref{fig:evidence_of_common_strategy}) confirm that, at lo
 Finally, in \autoref{fig:strategy_distributions}, we compare the full distributions of strategies predicted by the heuristic and observed in simulations. While they share qualitative features, they do not coincide exactly.
 
 ADD HEURISTIC RESULTS FOR THE EA PARAMETER SET.
+
+\bibliographystyle{apsrev4-2}
+\bibliography{mutare.bib}
 
 \end{document}
