@@ -296,33 +296,58 @@ which represents the diffusion coefficient of the integrated log-population grow
 
 \section{Supplementary Results} \label{sec:supplementary_results}
 
-\begin{figure*}
+\begin{figure}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_birth_rate.pdf}
+    \caption{Average birth rate as function of the strategy.} \label{fig:avg_birth_rate}
+\end{figure}
+
+\begin{figure}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_dist_phe_0.pdf}
-    \caption{Average birth rate (left) and phenotype distribution (right) as functions of the strategy. The observed phenotype composition lies between the theoretical equilibrium predictions for each environment.} \label{fig:supplementary_observables_1}
-\end{figure*}
+    \caption{Phenotype distribution as function of the strategy. The observed phenotype composition lies between the theoretical equilibrium predictions for each environment.} \label{fig:avg_dist_phe_0}
+\end{figure}
 
-\begin{figure*}
+\begin{figure}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_n_agents.pdf}
+    \caption{Distribution of population sizes as function of the strategy. Increased weight at low population sizes correlates with higher extinction risk.} \label{fig:dist_n_agents}
+\end{figure}
+
+\begin{figure}
     \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/std_dev_growth_rate.pdf}
-    \caption{Distribution of population sizes (left) and standard deviation of growth rate (right) as functions of the strategy. Increased weight at low population sizes correlates with higher extinction risk.} \label{fig:supplementary_observables_2}
-\end{figure*}
+    \caption{Fluctuations of the growth rate as function of the strategy.} \label{fig:std_dev_growth_rate}
+\end{figure}
 
-\begin{figure*}
-    \includegraphics{../sims/asymmetric/plots/time_series/avg_strat_phe_0.pdf}
+\begin{figure}
     \includegraphics{../sims/asymmetric/plots/prob_mut/avg_growth_rate.pdf}
-    \caption{Left: time series of the population-averaged strategy showing dominance of a single strategy at each time. Right: comparison illustrating the validity of Eq.~\eqref{eq:evol_averages}.} \label{fig:evidence_of_common_strategy}
-\end{figure*}
+    \caption{Comparison illustrating the validity of \autoref{eq:evol_averages}.} \label{fig:evol_averages}
+\end{figure}
 
-\begin{figure*}
+\begin{figure}
     \includegraphics{../sims/asymmetric/plots/fixed/exp_dist_avg_strat_phe_0.pdf}
     \includegraphics{../sims/asymmetric/plots/fixed/dist_avg_strat_phe_0.pdf}
-    \caption{Comparison between heuristic (left) and simulated (right) distributions of strategies for different parameters. Qualitative agreement is observed, but differences remain.} \label{fig:strategy_distributions}
-\end{figure*}
+    \caption{Comparison between heuristic (top) and simulated (bottom) distributions of strategies for the PR parameter set. Qualitative agreement is observed, but differences remain.} \label{fig:asymmetric_strategy_distributions}
+\end{figure}
+
+\begin{figure}
+    \includegraphics{../sims/symmetric/plots/fixed/exp_dist_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/fixed/dist_avg_strat_phe_0.pdf}
+    \caption{Comparison between heuristic (top) and simulated (bottom) distributions of strategies for the EA parameter set. Qualitative agreement is observed, but differences remain.} \label{fig:symmetric_strategy_distributions}
+\end{figure}
+
+\begin{figure}
+    \includegraphics{../sims/symmetric/plots/fixed/exp_avg_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/symmetric/plots/fixed/avg_avg_strat_phe_0.pdf}
+    \caption{Expected average strategy from the heuristic distribution $\langle\overline{s}(A)\rangle^\ast$ (top) and observed average strategy from \texttt{evol(r)} simulations (bottom) for different values of $N_\text{ini}$ and $p_\text{mut}$. The heuristic approximation captures the qualitative dependence of the evolutionary outcome on $N_\text{ini}$ and $p_\text{mut}$, albeit with some quantitative discrepancies.} \label{fig:heuristic_approx_PR}
+\end{figure}
+
+\begin{figure}
+    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}
+    \includegraphics{../sims/incremental/plots/strat_phe_0_i/dist_avg_strat_phe_0.pdf}
+    \caption{...} \label{fig:dependence_on_initial_conditions}
+\end{figure}
 
 Here we present additional observables that complement the results shown in the main text.
 
-Among them, we consider the average birth rate, which increases monotonically with the fraction of the resistant phenotype, unlike the total growth rate. We also analyze the distribution of phenotypes in the population, which differs from the strategy due to phenotype-dependent lifetimes. As shown in \autoref{fig:supplementary_observables_1}, this distribution lies between the equilibrium predictions corresponding to each environment.
+Among them, we consider the average birth rate, which increases monotonically with the fraction of the resistant phenotype, unlike the total growth rate. We also analyze the distribution of phenotypes in the population, which differs from the strategy due to phenotype-dependent lifetimes. As shown in \autoref{fig:avg_dist_phe_0}, this distribution lies between the equilibrium predictions corresponding to each environment.
 
 These equilibrium predictions can be obtained from the dominant eigenvector of
 \begin{equation}
@@ -330,13 +355,11 @@ These equilibrium predictions can be obtained from the dominant eigenvector of
 \end{equation}
 which describes the deterministic dynamics in a fixed environment.
 
-We also examine the distribution of population sizes and the fluctuations of the growth rate (see \autoref{fig:supplementary_observables_2}). The population size distribution is typically bimodal, and the prominence of the low-population peak correlates with extinction risk.
+We also examine the distribution of population sizes and the fluctuations of the growth rate (see \autoref{fig:std_dev_growth_rate}). The population size distribution is typically bimodal, and the prominence of the low-population peak correlates with extinction risk.
 
-Time series data (\autoref{fig:evidence_of_common_strategy}) confirm that, at low mutation rates, the population is effectively characterized by a single dominant strategy at each instant. The apparent spread of strategies arises from temporal averaging rather than coexistence.
+Time series data (\autoref{fig:evol_averages}) confirm that, at low mutation rates, the population is effectively characterized by a single dominant strategy at each instant. The apparent spread of strategies arises from temporal averaging rather than coexistence.
 
-Finally, in \autoref{fig:strategy_distributions}, we compare the full distributions of strategies predicted by the heuristic and observed in simulations. While they share qualitative features, they do not coincide exactly.
-
-ADD HEURISTIC RESULTS FOR THE EA PARAMETER SET.
+Finally, in \autoref{fig:symmetric_strategy_distributions}, we compare the full distributions of strategies predicted by the heuristic and observed in simulations. While they share qualitative features, they do not coincide exactly.
 
 \bibliographystyle{apsrev4-2}
 \bibliography{mutare.bib}
