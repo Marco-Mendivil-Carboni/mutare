@@ -174,7 +174,7 @@ def make_time_series_plots(df: pd.DataFrame, job: SimJob) -> None:
 
 def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     fixed_df = FILTERS["fixed"](df, job).sort_values("strat_phe_0_i")
-    if fixed_df["n_agents_i"].nunique() < 2:
+    if fixed_df["n_agents_i"].nunique() <= 4:
         return
 
     fig_0, axs_0 = create_colorbar_figure("strat_phe_0_i", "avg_growth_rate", False)
