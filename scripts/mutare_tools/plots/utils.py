@@ -188,9 +188,12 @@ def get_strat_eval() -> np.ndarray:
 def get_optimal_strat_phe_0(
     df: pd.DataFrame, job: SimJob, y_col: str, opt: Literal["max"] | Literal["min"]
 ) -> float:
-    fixed_i_df = FILTERS["fixed_i"](df, job).sort_values("strat_phe_0_i")
+    fixed_df = FILTERS["fixed"](df, job)
+    fixed_n_max_df = fixed_df[
+        fixed_df["n_agents_i"] == fixed_df["n_agents_i"].max()
+    ].sort_values("strat_phe_0_i")
 
-    spline = create_1D_spline(fixed_i_df, "strat_phe_0_i", y_col)
+    spline = create_1D_spline(fixed_n_max_df, "strat_phe_0_i", y_col)
 
     x = get_strat_eval()
     y = spline(x)

@@ -119,7 +119,7 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     max_avg_growth = get_optimal_strat_phe_0(df, job, "avg_growth_rate", "max")
     min_extinct = get_optimal_strat_phe_0(df, job, "extinct_rate", "min")
     if param == "strat_phe_0_i":
-        for ax in [ax_0, ax_1, ax_7]:
+        for ax in [ax_0, ax_1]:
             ax.axvline(max_avg_growth, ls="--", **LINE_STYLE)
             ax.axvline(min_extinct, ls=":", **LINE_STYLE)
     for ax in axs_4[:-1] + [ax_5]:
