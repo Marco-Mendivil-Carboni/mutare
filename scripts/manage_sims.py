@@ -299,9 +299,7 @@ class SimsManager(App):
                 if self._background_worker.result.n_missing_msgpacks == 0:
                     command.append("--plots-only")
 
-            if await self.push_screen_wait(
-                DialogScreen("Send Telegram notifications?")
-            ):
+            if await self.push_screen_wait(DialogScreen("Send notifications?")):
                 command.append("--notify")
 
             LOG_FILE.parent.mkdir(parents=True, exist_ok=True)

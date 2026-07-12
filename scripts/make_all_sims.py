@@ -18,32 +18,25 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--plots-only", action="store_true", help="only generate simulation plots"
     )
-    parser.add_argument(
-        "--notify", action="store_true", help="send Telegram notifications"
-    )
+    parser.add_argument("--notify", action="store_true", help="send notifications")
     return parser.parse_args()
 
 
 load_dotenv()
-TOKEN = os.getenv("TOKEN")
-CHAT_ID = os.getenv("CHAT_ID")
+TOPIC = os.getenv("TOPIC")
 
 
 def log(message: str, notify: bool) -> None:
     print(message, flush=True)
     if not notify:
         return
-    if TOKEN and CHAT_ID:
+    if TOPIC:
         try:
-            requests.post(
-                f"https://api.telegram.org/bot{TOKEN}/sendMessage",
-                params={"chat_id": CHAT_ID, "text": message},
-                timeout=16,
-            )
+            requests.post(f"https://ntfy.sh/{TOPIC}", data=message, timeout=16)
         except Exception as exception:
             print(f"failed to send notification: {exception}")
     else:
-        print("failed to find Telegram credentials")
+        print("failed to find notifications configuration")
 
 
 def make_sims(sims_config: SimsConfig, plots_only: bool, notify: bool) -> None:
