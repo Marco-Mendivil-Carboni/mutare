@@ -49,11 +49,7 @@ as first argued by \cite{gillespieNaturalSelectionVariances1977}. More precisely
 
 To date, many studies have explored the probability of fixation of single mutations in fluctuating environments \cite{ashcroftFixationFinitePopulations2014,saakianAlleleFixationProbability2019,kaushikTimeFixationChanging2021}, but not within the context of bet-hedging. In contrast, while other studies have extensively characterized the properties and trade-offs of different bet-hedging strategies \cite{kussellPhenotypicDiversityPopulation2005,huftonPhenotypicSwitchingPopulations2018,dinisParetooptimalTradeoffPhenotypic2022}, they have not looked into what the dynamical process of evolution would actually select.
 
-This gap in the literature is particularly relevant because, as previously reported in \cite{dinisPhaseTransitionsOptimal2020,dinisParetooptimalTradeoffPhenotypic2022} and as we will show in \cref{sec:no_evolution}, there exist strategies in this context that achieve a noticeable reduction in fluctuations with almost no cost to the average growth rate. The existence of these strategies suggests that the traditional focus on mean growth maximization may be insufficient to predict evolutionary outcomes in finite populations. Exactly which of these bet-hedging strategies is favored by the actual process of natural selection remains an open question, and it is the one we aim to address with this work.\footnote{\textcolor{red}{(i) Hay que leer, comentar y referir el artículo de Patra and Klumpp 2015 que está en el drive. (ii) También echamos en falta los que comentaron Pablo y Saúl en la reunión y revisar lo que han hecho para citar alguno pertinente. (iii) Este artículo esta citado en el paper de Hufton, Lin y Galla y merece la pena mirarlo [23] M. K. Belete and G. Balázsi, Phys. Rev. E 92, 062716 (2015). Nos parece relavante. (iv) De hecho HuttonLinGalla tienen cuatro artículos bastante seguidos y el más citado con diferencia es el primero, un PRE de 2016
-        % https://doi.org/10.1103/PhysRevE.93.052119
-        . Si uno sigue las citaciones hay varios artículos con título "interesante":
-        % https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.119.158301; https://journals.aps.org/pre/pdf/10.1103/vk4d-lq18; https://journals.aps.org/prresearch/pdf/10.1103/6w4h-8xvk; https://iopscience.iop.org/article/10.1088/1751-8121/aa5db4/pdf; https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1006529; https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.125.048105. 
-        (v) Al final de la introducción suele hacerse una presentación resumen del artículo, de lo que se estudia en cada sección. Es lo común.}}
+This gap in the literature is particularly relevant because, as previously reported in \cite{dinisPhaseTransitionsOptimal2020,dinisParetooptimalTradeoffPhenotypic2022} and as we will show in \cref{sec:no_evolution}, there exist strategies in this context that achieve a noticeable reduction in fluctuations with almost no cost to the average growth rate. The existence of these strategies suggests that the traditional focus on mean growth maximization may be insufficient to predict evolutionary outcomes in finite populations. Exactly which of these bet-hedging strategies is favored by the actual process of natural selection remains an open question, and it is the one we aim to address with this work.\footnote{\textcolor{red}{(i) Hay que leer, comentar y referir el artículo de Patra and Klumpp 2015 que está en el drive. (ii) También echamos en falta los que comentaron Pablo y Saúl en la reunión y revisar lo que han hecho para citar alguno pertinente. (iii) Este artículo esta citado en el paper de Hufton, Lin y Galla y merece la pena mirarlo \cite{beleteOptimalityAdaptationPhenotypically2015}. Nos parece relavante. (iv) De hecho HuttonLinGalla tienen cuatro artículos bastante seguidos y el más citado con diferencia es el primero, un PRE de 2016 \cite{huftonIntrinsicNoiseSystems2016}. Si uno sigue las citaciones hay varios artículos con título "interesante": \cite{wienandEvolutionFluctuatingPopulation2017,liuParrondolikeEvolutionaryAdvantage2026,askerFixationExtinctionTimefluctuating2025,bressloffStochasticSwitchingBiology2017,villamartinBethedgingStrategiesExpanding2019,taitelbaumPopulationDynamicsChanging2020}. (v) Al final de la introducción suele hacerse una presentación resumen del artículo, de lo que se estudia en cada sección. Es lo común.}}
 
 \section{The model: a Markov process} \label{sec:model}
 
@@ -131,13 +127,13 @@ Despite the minimalism of the model, it is analytically intractable. Therefore, 
 \begin{table}
     \begin{tabular}{c c c}
         \toprule
-        symbol             & name             & value                                                        \\
+        symbol             & name             & value                                            \\
         \midrule
-        $\omega_t(e,e')$   & transition rates & $\begin{psmallmatrix}-1.0&+1.0\\+1.0&-1.0\end{psmallmatrix}$ \\
+        $\omega_t(e,e')$   & transition rates & $\begin{pmatrix}-1.0&1.0\\1.0&-1.0\end{pmatrix}$ \\
         \addlinespace
-        $\omega_b(e,\phi)$ & birth rates      & $\begin{psmallmatrix}1.0&0.2\\0.0&0.0\end{psmallmatrix}$     \\
+        $\omega_b(e,\phi)$ & birth rates      & $\begin{pmatrix}1.0&0.2\\0.0&0.0\end{pmatrix}$   \\
         \addlinespace
-        $\omega_d(e,\phi)$ & death rates      & $\begin{psmallmatrix}0.0&0.0\\1.0&0.1\end{psmallmatrix}$     \\
+        $\omega_d(e,\phi)$ & death rates      & $\begin{pmatrix}0.0&0.0\\1.0&0.1\end{pmatrix}$   \\
         \bottomrule
     \end{tabular}
     \caption{Set of parameters used in the simulations of \cref{sec:no_evolution,sec:evol_outcome,sec:heuristic_interpretation,sec:incremental_mutations}, which we will refer to as the \emph{Persister--Resistant} (PR) parameter set.} \label{tab:PR_parameters}
