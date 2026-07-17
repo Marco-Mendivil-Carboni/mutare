@@ -1,0 +1,96 @@
+\documentclass[aps,pre,reprint,10pt,superscriptaddress]{revtex4-2}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage{mathtools,amssymb}
+
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc, positioning}
+
+\usepackage{appendix}
+\usepackage{booktabs}
+\usepackage[caption=false]{subfig}
+
+\usepackage{silence}
+\WarningFilter{nameref}{The definition of \label has changed!}
+
+\usepackage[hidelinks,pdfusetitle]{hyperref}
+\usepackage[all]{hypcap}
+\usepackage[capitalize]{cleveref}
+\crefname{section}{Sec.}{Secs.}
+\Crefname{section}{Section}{Sections}
+
+\usepackage{xr}
+\externaldocument[M-]{main}
+
+\begin{document}
+
+\title{Supplemental Material for ``\textit{Evolutionary adaptation through bet-hedging in finite populations under fluctuating environments}''}
+\author{Marco Mendívil Carboni}
+\author{Juan José Mazo}
+\author{Luis Dinis}
+\affiliation{Grupo Interdisciplinar de Sistemas Complejos (GISC) and Departamento de Estructura de la Materia, Física Térmica y Electrónica, Universidad Complutense de Madrid, 28040 Madrid, Spain}
+
+\maketitle
+
+This document provides supplementary results that complement some of the insights discussed throughout the main text.
+
+We begin by displaying in \cref{fig:supplementary_results_1} (left) the average birth rate $\langle\mu_b\rangle$ (which appears in the heuristic approximation in \cref{M-eq:heuristic_distribution}) for different initial conditions with the PR parameters. We observe that $\langle\mu_b\rangle$ for fixed strategies exhibits a different behavior than the total population growth rate, increasing monotonically with $s(A)$ and reaching its maximum at $s(A)=1$. Another observable of interest is the growth rate fluctuations $\sigma_\mu$, computed according to \cref{M-eq:std_dev_growth_rate}. Such fluctuations are commonly employed as a proxy for extinction risk, and indeed, the Pareto front generated between $\sigma_\mu$ and $\langle\mu\rangle$ has been more frequently studied in the literature \cite{dinisPhaseTransitionsOptimal2020,dinisParetooptimalTradeoffPhenotypic2022}. As shown in \cref{fig:supplementary_results_1} (right), where we plot $\sigma_\mu$ versus $\langle\mu\rangle$, their behavior qualitatively mirrors the extinction rate, although a simple, exact analytical mapping between the two quantities remains elusive.
+
+In addition, we also examine the actual phenotype distribution within the population. Although primarily dictated by the strategy, this distribution does not coincide with it due to phenotype-dependent lifetimes. In \cref{fig:supplementary_results_2} (left), we plot the actual probability of the resistant phenotype $A$, which increases monotonically with $s(A)$. This observable allows for a useful consistency check: the theoretical $p(A)$ can be analytically derived for static environments and fixed strategies from the dominant eigenvector of the matrix
+\begin{equation}
+    \begin{pmatrix}
+        s(A)\omega_b(e,A)-\omega_d(e,A) & s(A)\omega_b(e,B)               \\
+        s(B)\omega_b(e,A)               & s(B)\omega_b(e,B)-\omega_d(e,B)
+    \end{pmatrix},
+\end{equation}
+which governs the deterministic population dynamics in a fixed environment $e$. The two dashed lines in this figure represent the expected analytical values of $p(A)$ for different fixed strategies in each of the environments. We observe that under fluctuating environments $\langle p(A)\rangle$ systematically lies between these two limits.
+
+Additionally, we evaluate the distribution of the population size $N$, as shown in \cref{fig:supplementary_results_2} (right). All profiles reveal a sharp, pronounced peak at the maximum allowed population capacity, indicating that the system spends a significant fraction of time near its ceiling when environmental conditions are favorable. However, a second, much broader local maximum emerges at lower population sizes, which is a direct consequence of periods under the unfavorable environment. The position and weight of this second peak strongly correlate with the extinction risk: lower values of $N$ at this local maximum directly correspond to a higher extinction rate.
+
+Furthermore, \cref{fig:supplementary_results_3} illustrates how the mean growth rate $\langle\mu\rangle$ (left) and extinction rate $r_\text{ext}$ (right) obtained from evolutionary simulations satisfies the relation proposed in \cref{M-eq:evol_averages} (represented as dashed lines) for various mutation probabilities $p_\text{mut}$. The quantitative agreement with the simulation data confirms that, as argued in \cref{M-sec:heuristic_interpretation}, the long-term evolutionary dynamics can be accurately approximated as a sequential concatenation of fixed strategies.
+
+Finally, \cref{fig:strategy_distributions_PR} and \cref{fig:strategy_distributions_SA} display the expected (heuristic) and observed (simulated) full distributions of the population-averaged strategy $\bar{s}(A)$ across various initial population sizes $N_\text{ini}$ for the PR and SA parameter sets, respectively. For the PR parameters (\cref{fig:strategy_distributions_PR}), the agreement between the heuristic prediction and the simulations is remarkably robust, particularly at large values of $N_\text{ini}$, whereas the approximation expectedly degrades in the low-$N_\text{ini}$ regime where stochastic fluctuations dominate. Conversely, for the SA parameter set (\cref{fig:strategy_distributions_SA}), a more pronounced quantitative discrepancy emerges; nevertheless, the heuristic approach successfully captures the correct qualitative dependence on $N_\text{ini}$, most notably regarding the shifting position of the distribution mean. To further scrutinize the heuristic approximation, \cref{fig:heuristic_approx_SA} presents the average strategy for the SA parameter set over a wide range of $N_\text{ini}$ and $p_\text{mut}$ values. As previously discussed in \cref{M-sec:symmetric_parameters}, while the heuristic framework reproduces the qualitative trend of the evolutionary outcome, in this case the system requires significantly larger values of $N_\text{ini}$ than theoretically predicted to effectively approach the strategy that maximizes the population growth rate $\langle\mu\rangle$.
+
+\begin{figure*}[p]
+    \includegraphics{../../sims/asymmetric/plots/strat_phe_0_i/avg_birth_rate.pdf}
+    \includegraphics{../../sims/asymmetric/plots/strat_phe_0_i/growth_rates.pdf}
+    \caption{Average population birth rate $\langle\mu_b\rangle$ (left) and growth rate fluctuations $\sigma_\mu$ versus mean growth rate $\langle\mu\rangle$ (right) for different initial strategies $s(A)_\text{ini}$ and the different kinds of simulations with the PR parameters.} \label{fig:supplementary_results_1}
+\end{figure*}
+
+\begin{figure*}[p]
+    \includegraphics{../../sims/asymmetric/plots/strat_phe_0_i/avg_dist_phe_0.pdf}
+    \includegraphics{../../sims/asymmetric/plots/strat_phe_0_i/dist_n_agents.pdf}
+    \caption{Average phenotype distribution $\langle p(A)\rangle$ (left) and distribution of the relative population size $N/N_\text{ini}$ (right) as a function of the initial strategy $s(A)_\text{ini}$ for different kinds of simulations with the PR parameters. The dashed lines indicate the analytical equilibrium values of $\langle p(A)\rangle$ in each of the environments (the upper line corresponds to the favorable environment, and the lower line to the unfavorable one).} \label{fig:supplementary_results_2}
+\end{figure*}
+
+\begin{figure*}[p]
+    \includegraphics{../../sims/asymmetric/plots/prob_mut/avg_growth_rate.pdf}
+    \includegraphics{../../sims/asymmetric/plots/prob_mut/extinct_rate.pdf}
+    \caption{Mean population growth rate $\langle\mu\rangle$ (left) and extinction rate $r_\text{ext}$ (right) as a function of the mutation probability $p_\text{mut}$ for the PR parameters in \texttt{evol(r)} simulations. The dashed lines indicate the theoretical prediction from \cref{M-eq:evol_averages}.} \label{fig:supplementary_results_3}
+\end{figure*}
+
+\begin{figure*}[p]
+    \includegraphics{../../sims/asymmetric/plots/fixed/exp_dist_avg_strat_phe_0.pdf}
+    \includegraphics{../../sims/asymmetric/plots/fixed/dist_avg_strat_phe_0.pdf}
+    \caption{Distributions of the population-averaged strategy $\bar{s}(A)$ predicted by the heuristic approximation (left) and obtained from \texttt{evol(r)} simulations (right) with the PR parameters for different population sizes $N_\text{ini}$.} \label{fig:strategy_distributions_PR}
+\end{figure*}
+
+\begin{figure*}[p]
+    \includegraphics{../../sims/symmetric/plots/fixed/exp_dist_avg_strat_phe_0.pdf}
+    \includegraphics{../../sims/symmetric/plots/fixed/dist_avg_strat_phe_0.pdf}
+    \caption{Distributions of the population-averaged strategy $\bar{s}(A)$ predicted by the heuristic approximation (left) and obtained from \texttt{evol(r)} simulations (right) with the SA parameters for different population sizes $N_\text{ini}$.} \label{fig:strategy_distributions_SA}
+\end{figure*}
+
+\begin{figure*}[p]
+    \includegraphics{../../sims/symmetric/plots/fixed/exp_avg_avg_strat_phe_0.pdf}
+    \includegraphics{../../sims/symmetric/plots/fixed/avg_avg_strat_phe_0.pdf}
+    \caption{Expected average strategy from the heuristic distribution $\langle\bar{s}(A)\rangle^\ast$ (left) and observed average strategy from \texttt{evol(r)} simulations (right) for different values of $N_\text{ini}$ and $p_\text{mut}$ with the SA parameters.} \label{fig:heuristic_approx_SA}
+\end{figure*}
+
+\bibliography{refs}
+
+\end{document}
