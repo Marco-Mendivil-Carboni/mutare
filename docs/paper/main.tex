@@ -146,7 +146,7 @@ To proceed, we must first choose a specific set of model parameters. We start wi
 \end{table}
 
 \begin{figure}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}
+    \includegraphics{../../sims/asymmetric/plots/strat_phe_0_i/rates.pdf}
     \caption{Extinction rate $r_\text{ext}$ versus mean growth rate $\langle\mu\rangle$. Results are shown for \texttt{fixed}, \texttt{evol} and \texttt{evol(r)} simulations, across a range of initial strategies from $s(A)=0$ (lower end of the curve) to $s(A)=1$ (upper end). These values define a \emph{Pareto front} capturing the trade-off between growth and survival.} \label{fig:pareto_front}
 \end{figure}
 
@@ -167,18 +167,18 @@ First, to examine the global effect of this evolutionary process, in \cref{fig:p
 To better characterize the outcome of the evolutionary process, we compute as well the population-averaged strategy $\bar{s}(A)$ and analyze its time average, denoted as $\langle\bar{s}\rangle(A)$. In \cref{fig:evol_results} we show the averaged strategy $\langle\bar{s}\rangle(A)$ as a function of the initial strategy $s(A)_\text{ini}$. For the \texttt{fixed} simulations the initial strategy is preserved, producing a diagonal line. In contrast, for the evolutionary simulations, the system consistently converges toward a well-defined stationary value, exhibiting only a weak dependence on the initial condition. Moreover, we observe that the average evolved strategy lies between the growth-maximizing and extinction-minimizing strategies identified in the fixed-strategy simulations. As we will see in \cref{sec:symmetric_parameters}, this behavior is not specific to this parameter set. This shows that evolution in finite populations does not optimize instantaneous growth alone, but instead selects strategies that represent a compromise between growth and extinction avoidance.
 
 \begin{figure}
-    \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
+    \includegraphics{../../sims/asymmetric/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
     \caption{Time average of the population-averaged strategy, $\langle\bar{s}\rangle(A)$, as a function of the initial strategy $s(A)_\text{ini}$ for the PR parameter set. Results are shown for \texttt{fixed}, \texttt{evol} and \texttt{evol(r)} simulations (represented as a horizontal line, as they lack a single defined initial strategy). The dashed and dotted lines indicate the strategies that maximize mean growth and minimize extinction, respectively, with the evolved strategy lying between them.} \label{fig:evol_results}
 \end{figure}
 
 \begin{figure}
-    \includegraphics{../sims/asymmetric/plots/time_series/avg_strat_phe_0.pdf}
+    \includegraphics{../../sims/asymmetric/plots/time_series/avg_strat_phe_0.pdf}
     \caption{Time series of the population-averaged strategy over multiple concatenated simulations (extinction events are marked by vertical dotted lines). The error band displays the strategy standard deviation within the population at each instant, $\sigma_s$, which remains remarkably narrow. Notably, before extinction is reached, advantageous mutations frequently emerge and fix, abruptly shifting the average strategy and driving a broad exploration of the strategy space.} \label{fig:time_series}
 \end{figure}
 
 \begin{figure}
-    \includegraphics{../sims/asymmetric/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
-    \includegraphics{../sims/asymmetric/plots/prob_mut/avg_avg_strat_phe_0.pdf}
+    \includegraphics{../../sims/asymmetric/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
+    \includegraphics{../../sims/asymmetric/plots/prob_mut/avg_avg_strat_phe_0.pdf}
     \caption{Dependence of the average evolved strategy on the initial population size $N_\text{ini}$ (top) and the mutation probability $p_\text{mut}$ (bottom). Increasing $N_\text{ini}$ drives the system toward the growth-maximizing strategy, while smaller populations favor safer strategies with lower extinction rates. The dashed and dotted lines indicate the growth-maximizing and extinction-minimizing strategies, respectively, and the error band displays the dispersion of strategies $\sigma_s$.} \label{fig:dependence_on_N_ini_and_p_mut}
 \end{figure}
 
@@ -198,8 +198,8 @@ However, as previously discussed, along the evolutionary process the population 
 where $\langle\mu\rangle(\bar{s})$ and $r_\text{ext}(\bar{s})$ represent the mean growth rate and extinction rate of a strictly \emph{fixed} strategy with value $\bar{s}$ (the baseline blue curve in \cref{fig:pareto_front}), while $p(\bar{s})$ is the probability distribution of the population-averaged strategy $\bar{s}$ recorded over time during the active evolutionary simulations. In \cref{sec:supplementary_results}, we verify that this approximation holds with high accuracy across a wide range of parameters. This fact motivates the search for a heuristic approximation of the distribution $p(\bar{s})$, constructed solely from properties of fixed strategies, that could allow us to predict the evolutionary outcome $\langle\bar{s}\rangle(A)$ as a function of $N_\text{ini}$ and $p_\text{mut}$.
 
 \begin{figure}
-    \includegraphics{../sims/asymmetric/plots/fixed/avg_growth_rate.pdf}
-    \includegraphics{../sims/asymmetric/plots/fixed/extinct_rate_scaling.pdf}
+    \includegraphics{../../sims/asymmetric/plots/fixed/avg_growth_rate.pdf}
+    \includegraphics{../../sims/asymmetric/plots/fixed/extinct_rate_scaling.pdf}
     \caption{Fixed-strategy results used to construct the heuristic approximation. The mean growth rate (top) depends only weakly on $N_\text{ini}$, whereas the extinction rate (bottom) follows an approximate power-law scaling. Dashed lines indicate spline interpolations of the simulation data.} \label{fig:fixed_results}
 \end{figure}
 
@@ -210,8 +210,8 @@ To construct this approximation, we will begin by assuming that the probability 
 To evaluate $\langle\mu\rangle$, $\langle\mu_b\rangle$ and $r_\text{ext}$ for arbitrary values of $\bar{s}$ and $N_\text{ini}$ we use spline interpolations of the numerical data obtained from \texttt{fixed} simulations shown in \cref{fig:fixed_results}.
 
 \begin{figure}
-    \includegraphics{../sims/asymmetric/plots/fixed/exp_avg_avg_strat_phe_0.pdf}
-    \includegraphics{../sims/asymmetric/plots/fixed/avg_avg_strat_phe_0.pdf}
+    \includegraphics{../../sims/asymmetric/plots/fixed/exp_avg_avg_strat_phe_0.pdf}
+    \includegraphics{../../sims/asymmetric/plots/fixed/avg_avg_strat_phe_0.pdf}
     \caption{Expected average strategy from the heuristic distribution (top) and observed average strategy from \texttt{evol(r)} simulations (bottom) for different values of $N_\text{ini}$ and $p_\text{mut}$.} \label{fig:heuristic_approx}
 \end{figure}
 
@@ -223,9 +223,9 @@ To understand how this distribution will depend on the model parameters, it is u
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.48\textwidth]{../sims/incremental/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
+    \includegraphics[width=0.48\textwidth]{../../sims/incremental/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
     \hfill
-    \includegraphics[width=0.48\textwidth]{../sims/incremental/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
+    \includegraphics[width=0.48\textwidth]{../../sims/incremental/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
     \caption{Dependence of the evolved strategy on initial conditions with $N_\text{ini}=100$ (top) and on population size (bottom) for the PR parameter set with incremental mutations. The dashed and dotted lines indicate the strategies that maximize mean growth and minimize extinction, respectively, and the error band the dispersion of strategies $\sigma_s$.} \label{fig:incremental_mutations}
 \end{figure}
 
@@ -246,8 +246,8 @@ In \cref{fig:symmetric_parameters} we show the evolved strategy for different in
 Finally, the heuristic approximation still successfully captures this qualitative transition between regimes. However, in this case quantitative discrepancies are more pronounced (see details in \cref{sec:supplementary_results}). In particular, approaching the growth-maximizing strategy requires significantly larger $N_\text{ini}$ values than predicted by the heuristic approximation.
 
 \begin{figure}
-    \includegraphics{../sims/symmetric/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
-    \includegraphics{../sims/symmetric/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
+    \includegraphics{../../sims/symmetric/plots/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
+    \includegraphics{../../sims/symmetric/plots/n_agents_i/avg_avg_strat_phe_0.pdf}
     \caption{Dependence of the evolved strategy on initial conditions with $N_\text{ini}=100$ (top) and on population size (bottom) for the SA parameter set. The same qualitative trends as in the PR parameter set are observed. The dashed and dotted lines indicate the strategies that maximize mean growth and minimize extinction, respectively, and the error band the dispersion of strategies $\sigma_s$.} \label{fig:symmetric_parameters}
 \end{figure}
 
@@ -324,43 +324,43 @@ The source code developed for this study is openly available in the repository a
     Finally, \cref{fig:strategy_distributions_PR} and \cref{fig:strategy_distributions_SA} display the expected (heuristic) and observed (simulated) full distributions of the population-averaged strategy $\bar{s}(A)$ across various initial population sizes $N_\text{ini}$ for the PR and SA parameter sets, respectively. For the PR parameters (\cref{fig:strategy_distributions_PR}), the agreement between the heuristic prediction and the simulations is remarkably robust, particularly at large values of $N_\text{ini}$, whereas the approximation expectedly degrades in the low-$N_\text{ini}$ regime where stochastic fluctuations dominate. Conversely, for the SA parameter set (\cref{fig:strategy_distributions_SA}), a more pronounced quantitative discrepancy emerges; nevertheless, the heuristic approach successfully captures the correct qualitative dependence on $N_\text{ini}$, most notably regarding the shifting position of the distribution mean. To further scrutinize the heuristic approximation, \cref{fig:heuristic_approx_SA} presents the average strategy for the SA parameter set over a wide range of $N_\text{ini}$ and $p_\text{mut}$ values. As previously discussed in \cref{sec:symmetric_parameters}, while the heuristic framework reproduces the qualitative trend of the evolutionary outcome, in this case the system requires significantly larger values of $N_\text{ini}$ than theoretically predicted to effectively approach the strategy that maximizes the population growth rate $\langle\mu\rangle$.
 
     \begin{figure*}[p]
-        \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_birth_rate.pdf}
-        \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/growth_rates.pdf}
+        \includegraphics{../../sims/asymmetric/plots/strat_phe_0_i/avg_birth_rate.pdf}
+        \includegraphics{../../sims/asymmetric/plots/strat_phe_0_i/growth_rates.pdf}
         \caption{Average population birth rate $\langle\mu_b\rangle$ (left) and growth rate fluctuations $\sigma_\mu$ versus mean growth rate $\langle\mu\rangle$ (right) for different initial strategies $s(A)_\text{ini}$ and the different kinds of simulations with the PR parameters.} \label{fig:supplementary_results_1}
     \end{figure*}
 
     \begin{figure*}[p]
-        \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/avg_dist_phe_0.pdf}
-        \includegraphics{../sims/asymmetric/plots/strat_phe_0_i/dist_n_agents.pdf}
+        \includegraphics{../../sims/asymmetric/plots/strat_phe_0_i/avg_dist_phe_0.pdf}
+        \includegraphics{../../sims/asymmetric/plots/strat_phe_0_i/dist_n_agents.pdf}
         \caption{Average phenotype distribution $\langle p(A)\rangle$ (left) and distribution of the relative population size $N/N_\text{ini}$ (right) as a function of the initial strategy $s(A)_\text{ini}$ for different kinds of simulations with the PR parameters. The dashed lines indicate the analytical equilibrium values of $\langle p(A)\rangle$ in each of the environments (the upper line corresponds to the favorable environment, and the lower line to the unfavorable one).} \label{fig:supplementary_results_2}
     \end{figure*}
 
     \begin{figure*}[p]
-        \includegraphics{../sims/asymmetric/plots/prob_mut/avg_growth_rate.pdf}
-        \includegraphics{../sims/asymmetric/plots/prob_mut/extinct_rate.pdf}
+        \includegraphics{../../sims/asymmetric/plots/prob_mut/avg_growth_rate.pdf}
+        \includegraphics{../../sims/asymmetric/plots/prob_mut/extinct_rate.pdf}
         \caption{Mean population growth rate $\langle\mu\rangle$ (left) and extinction rate $r_\text{ext}$ (right) as a function of the mutation probability $p_\text{mut}$ for the PR parameters in \texttt{evol(r)} simulations. The dashed lines indicate the theoretical prediction from \cref{eq:evol_averages}.} \label{fig:supplementary_results_3}
     \end{figure*}
 
     \begin{figure*}[p]
-        \includegraphics{../sims/asymmetric/plots/fixed/exp_dist_avg_strat_phe_0.pdf}
-        \includegraphics{../sims/asymmetric/plots/fixed/dist_avg_strat_phe_0.pdf}
+        \includegraphics{../../sims/asymmetric/plots/fixed/exp_dist_avg_strat_phe_0.pdf}
+        \includegraphics{../../sims/asymmetric/plots/fixed/dist_avg_strat_phe_0.pdf}
         \caption{Distributions of the population-averaged strategy $\bar{s}(A)$ predicted by the heuristic approximation (left) and obtained from \texttt{evol(r)} simulations (right) with the PR parameters for different population sizes $N_\text{ini}$.} \label{fig:strategy_distributions_PR}
     \end{figure*}
 
     \begin{figure*}[p]
-        \includegraphics{../sims/symmetric/plots/fixed/exp_dist_avg_strat_phe_0.pdf}
-        \includegraphics{../sims/symmetric/plots/fixed/dist_avg_strat_phe_0.pdf}
+        \includegraphics{../../sims/symmetric/plots/fixed/exp_dist_avg_strat_phe_0.pdf}
+        \includegraphics{../../sims/symmetric/plots/fixed/dist_avg_strat_phe_0.pdf}
         \caption{Distributions of the population-averaged strategy $\bar{s}(A)$ predicted by the heuristic approximation (left) and obtained from \texttt{evol(r)} simulations (right) with the SA parameters for different population sizes $N_\text{ini}$.} \label{fig:strategy_distributions_SA}
     \end{figure*}
 
     \begin{figure*}[p]
-        \includegraphics{../sims/symmetric/plots/fixed/exp_avg_avg_strat_phe_0.pdf}
-        \includegraphics{../sims/symmetric/plots/fixed/avg_avg_strat_phe_0.pdf}
+        \includegraphics{../../sims/symmetric/plots/fixed/exp_avg_avg_strat_phe_0.pdf}
+        \includegraphics{../../sims/symmetric/plots/fixed/avg_avg_strat_phe_0.pdf}
         \caption{Expected average strategy from the heuristic distribution $\langle\bar{s}(A)\rangle^\ast$ (left) and observed average strategy from \texttt{evol(r)} simulations (right) for different values of $N_\text{ini}$ and $p_\text{mut}$ with the SA parameters.} \label{fig:heuristic_approx_SA}
     \end{figure*}
 
 \end{appendices}
 
-\bibliography{mutare.bib}
+\bibliography{refs}
 
 \end{document}
