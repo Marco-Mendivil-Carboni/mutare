@@ -81,3 +81,13 @@ pub struct Observables {
     /// Distribution of phenotypes.
     pub dist_phe: Vec<f64>,
 }
+
+/// Time-dependent statistic.
+#[derive(Serialize, Deserialize)]
+pub struct TimeStat {
+    /// Time elapsed since initialization.
+    pub tau: f64,
+
+    /// Value of the statistic.
+    pub val: f64,
+}

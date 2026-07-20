@@ -31,6 +31,7 @@ ANALYSIS = [
     "dist_avg_strat_phe",
     "avg_dist_phe",
     "avg_birth_rate",
+    "tau_avg_strat_phe",
 ]
 
 
@@ -107,6 +108,10 @@ def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
             analysis.pop("dist_avg_strat_phe")
             analysis["avg_dist_phe_0"] = analysis["avg_dist_phe"][0]
             analysis.pop("avg_dist_phe")
+            for idx, ele in enumerate(analysis["tau_avg_strat_phe"]):
+                print(ele)
+                # analysis[f"tau_avg_strat_phe_0_{idx}"] = ele[0]
+            analysis.pop("tau_avg_strat_phe")
             analysis = pd.DataFrame(analysis, index=[run_idx])
 
             analyses.append(analysis)

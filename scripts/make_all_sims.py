@@ -4,6 +4,7 @@ import argparse
 from dotenv import load_dotenv
 import os
 import requests
+import time
 
 from mutare_tools.exec import SimsConfig, create_sim_jobs, exec_sim_jobs
 from mutare_tools.plots.core import plot_sim_jobs
@@ -70,4 +71,5 @@ if __name__ == "__main__":
         log(f"'make_all_sims' failed: {exception}", notify)
         raise
     else:
+        time.sleep(1.0)
         log("'make_all_sims' finished", notify)

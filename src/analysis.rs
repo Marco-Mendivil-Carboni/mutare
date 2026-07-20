@@ -1,7 +1,7 @@
 //! Simulation analysis.
 
 use crate::config::Config;
-use crate::types::{Event, Observables, State};
+use crate::types::{Event, Observables, State, TimeStat};
 use anyhow::{Context, Result};
 use rmp_serde::{decode, encode};
 use serde::Serialize;
@@ -97,6 +97,9 @@ pub struct Analysis {
 
     /// Average population birth rate.
     pub avg_birth_rate: f64,
+
+    /// Time-dependent average phenotypic strategy.
+    pub tau_avg_strat_phe: Vec<Vec<TimeStat>>,
 }
 
 /// Simulation analyzer.
@@ -144,6 +147,11 @@ impl Analyzer {
         let file = File::create(file).with_context(|| format!("failed to create {file:?}"))?;
         let mut writer = BufWriter::new(file);
 
+        let first_observables = self
+            .all_observables
+            .first()
+            .context("failed to get first observables")?;
+
         let last_observables = self
             .all_observables
             .last()
@@ -163,6 +171,38 @@ impl Analyzer {
         };
 
         let avg_growth_rate = obs_weighted_average(&|obs| obs.growth_rate);
+
+        let extinct_rate = last_observables.n_extinct as f64 / last_observables.time;
+
+        let tau_max = if extinct_rate > 0.0 {
+            1.0 / extinct_rate
+        } else {
+            last_observables.time
+        };
+        let taus: Vec<f64> = std::iter::successors(Some(4.0), |&prev| {
+            let next = prev * 2.0;
+            (next < tau_max).then_some(next)
+        })
+        .collect();
+
+        let mut tau_avg_strat_phe_vals: Vec<Vec<Vec<f64>>> = vec![Vec::new(); taus.len()];
+
+        let mut avg_strat_phe = &first_observables.avg_strat_phe;
+        let mut n_extinct = first_observables.n_extinct;
+        let mut time_origin = first_observables.time;
+        let mut tau_idx = 0;
+        for obs in &self.all_observables {
+            if obs.n_extinct > n_extinct {
+                n_extinct = obs.n_extinct;
+                time_origin = obs.time;
+                tau_idx = 0;
+            }
+            while tau_idx < taus.len() && (obs.time - time_origin) > taus[tau_idx] {
+                tau_avg_strat_phe_vals[tau_idx].push(avg_strat_phe.clone());
+                tau_idx += 1;
+            }
+            avg_strat_phe = &obs.avg_strat_phe;
+        }
 
         let analysis = Analysis {
             dist_n_agents: (0..self.cfg.output.hist_bins)
@@ -184,7 +224,7 @@ impl Analyzer {
             })
             .sqrt(),
 
-            extinct_rate: last_observables.n_extinct as f64 / last_observables.time,
+            extinct_rate,
 
             avg_avg_strat_phe: (0..self.cfg.model.n_phe - 1)
                 .map(|phe| obs_weighted_average(&|obs| obs.avg_strat_phe[phe]))
@@ -213,6 +253,21 @@ impl Analyzer {
                 .collect(),
 
             avg_birth_rate: obs_weighted_average(&|obs| obs.growth_rate.max(0.0)),
+
+            tau_avg_strat_phe: (0..self.cfg.model.n_phe - 1)
+                .map(|phe| {
+                    taus.iter()
+                        .zip(&tau_avg_strat_phe_vals)
+                        .map(|(&tau, vals)| {
+                            let sum: f64 = vals.iter().map(|v| v[phe]).sum();
+                            TimeStat {
+                                tau,
+                                val: sum / vals.len() as f64,
+                            }
+                        })
+                        .collect()
+                })
+                .collect(),
         };
 
         encode::write(&mut writer, &analysis).context("failed to serialize analysis")?;
