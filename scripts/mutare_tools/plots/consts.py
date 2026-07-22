@@ -67,6 +67,8 @@ COL_TEX_LABELS: dict[str, str] = {
     "avg_dist_phe_0": "$\\langle p(A)\\rangle$",
     "std_dev_growth_rate": "$\\sigma_\\mu$",
     "avg_birth_rate": "$\\langle\\mu_b\\rangle$",
+    "tau": "$\\tau$",
+    "tau_avg_strat_phe_0": "$\\langle\\bar{s}\\rangle_\\tau(A)$",
 }
 
 N_EVALS = 64

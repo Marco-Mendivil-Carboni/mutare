@@ -16,8 +16,8 @@ from .utils import (
     plot_horizontal_bands,
     plot_errorbar,
     plot_errorband,
-    set_heatmap_colorbar,
-    get_heatmap_norm,
+    set_colorbar,
+    get_norm,
     plot_main_heatmap,
     plot_side_heatmap,
     get_strat_eval,
@@ -32,6 +32,7 @@ from .utils import (
     interpolate_values,
     interpolate_extinct_rates,
     plot_avg_avg_strat_phe_0,
+    plot_tau_avg_strat_phe_0,
 )
 
 
@@ -51,10 +52,17 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_7, ax_7 = create_standard_figure(param, "std_dev_growth_rate")
     fig_8, ax_8 = create_standard_figure(param, "avg_birth_rate")
     fig_9, ax_9 = create_standard_figure("avg_growth_rate", "std_dev_growth_rate")
+    fig_10, axs_10 = create_colorbar_figure("tau", "tau_avg_strat_phe_0", False)
 
     if param in ["prob_mut", "n_agents_i"]:
         for ax in [axs_3[0], axs_4[0]]:
             ax.set_xscale("log")
+
+    match param:
+        case "strat_phe_0_i":
+            norm = get_norm("linear", 0, 1)
+        case _:
+            norm = get_norm("log", param_df[param].min() / 2, param_df[param].max() * 2)
 
     for sim_type, group_df in param_df.groupby("sim_type"):
 
@@ -88,6 +96,9 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
                 plot_main_heatmap(
                     fig_4, axs_4[0], axs_4[2], group_df, param, "dist_avg_strat_phe_0"
                 )
+                plot_tau_avg_strat_phe_0(
+                    fig_10, axs_10[0], axs_10[1], group_df, param, norm
+                )
             elif sim_type == SimType.RANDOM:
                 plot_side_heatmap(axs_3[1], group_df, "dist_n_agents")
                 plot_side_heatmap(axs_4[1], group_df, "dist_avg_strat_phe_0")
@@ -97,6 +108,9 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
             )
             plot_main_heatmap(
                 fig_4, axs_4[0], axs_4[1], group_df, param, "dist_avg_strat_phe_0"
+            )
+            plot_tau_avg_strat_phe_0(
+                fig_10, axs_10[0], axs_10[1], group_df, param, norm
             )
 
         plot_mean_and_uncertainty(ax_5, "avg_avg_strat_phe_0", "avg_std_dev_strat_phe")
@@ -152,6 +166,7 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
     fig_7.savefig(fig_dir / "std_dev_growth_rate.pdf")
     fig_8.savefig(fig_dir / "avg_birth_rate.pdf")
     fig_9.savefig(fig_dir / "growth_rates.pdf")
+    fig_10.savefig(fig_dir / "tau_avg_strat_phe_0.pdf")
 
     print_process_msg(f"made '{param}' plots")
 
@@ -195,7 +210,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     fig_8, axs_8 = create_colorbar_figure("n_agents_i", "prob_mut", False)
     fig_9, axs_9 = create_colorbar_figure("n_agents_i", "prob_mut", False)
 
-    log_norm = get_heatmap_norm(
+    log_norm = get_norm(
         "log", fixed_df["n_agents_i"].min() / 2, fixed_df["n_agents_i"].max() * 2
     )
 
@@ -221,11 +236,11 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     for fig, axs in zip(
         [fig_0, fig_1, fig_2, fig_3, fig_4], [axs_0, axs_1, axs_2, axs_3, axs_4]
     ):
-        set_heatmap_colorbar(fig, axs[1], "n_agents_i", log_norm)
+        set_colorbar(fig, axs[1], "n_agents_i", log_norm)
 
     fixed_df = fixed_df.sort_values("n_agents_i")
 
-    linear_norm = get_heatmap_norm("linear", 0, 1)
+    linear_norm = get_norm("linear", 0, 1)
 
     for strat_phe_0_i, group_df in fixed_df.groupby("strat_phe_0_i"):
         value = cast(float, strat_phe_0_i)
@@ -233,7 +248,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
             axs_5[0], group_df, "n_agents_i", "extinct_rate", linear_norm, value
         )
 
-    set_heatmap_colorbar(fig_5, axs_5[1], "strat_phe_0_i", linear_norm)
+    set_colorbar(fig_5, axs_5[1], "strat_phe_0_i", linear_norm)
 
     for ax in [axs_5[0], axs_8[0], axs_9[0]]:
         ax.set_xscale("log")
@@ -251,7 +266,7 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     extinct_rates = interpolate_extinct_rates(axs_5[0], df, job)
     s_exp = get_strat_eval()
 
-    log_norm = get_heatmap_norm(
+    log_norm = get_norm(
         "log", random_df["n_agents_i"].min() / 2, random_df["n_agents_i"].max() * 2
     )
 
@@ -282,12 +297,12 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
         avg_s.append(avg_s_row)
 
     for fig, axs in zip([fig_6, fig_7], [axs_6, axs_7]):
-        set_heatmap_colorbar(fig, axs[1], "n_agents_i", log_norm)
+        set_colorbar(fig, axs[1], "n_agents_i", log_norm)
 
     image = plot_avg_avg_strat_phe_0(axs_8[0], random_df, np.array(avg_s_exp))
-    set_heatmap_colorbar(fig_8, axs_8[1], "exp_avg_avg_strat_phe_0", image)
+    set_colorbar(fig_8, axs_8[1], "exp_avg_avg_strat_phe_0", image)
     image = plot_avg_avg_strat_phe_0(axs_9[0], random_df, np.array(avg_s))
-    set_heatmap_colorbar(fig_9, axs_9[1], "avg_avg_strat_phe_0", image)
+    set_colorbar(fig_9, axs_9[1], "avg_avg_strat_phe_0", image)
 
     fig_dir = job.base_dir / "plots" / "fixed"
     fig_dir.mkdir(parents=True, exist_ok=True)

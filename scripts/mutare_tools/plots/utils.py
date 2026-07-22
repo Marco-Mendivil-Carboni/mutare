@@ -6,7 +6,7 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.colors import Normalize, PowerNorm, LogNorm
 from matplotlib.cm import ScalarMappable
 from scipy.interpolate import BSpline, make_splrep, LSQBivariateSpline
-from typing import Any, Literal
+from typing import cast, Any, Literal
 
 from ..exec import SimJob
 
@@ -121,7 +121,7 @@ def generate_heatmap_matrix(
     return hm_z
 
 
-def get_heatmap_norm(
+def get_norm(
     type: Literal["linear"] | Literal["power"] | Literal["log"],
     vmin: float,
     vmax: float,
@@ -134,7 +134,7 @@ def get_heatmap_norm(
         return Normalize(vmin, vmax)
 
 
-def set_heatmap_colorbar(
+def set_colorbar(
     fig: Figure, ax_bar: Axes, z_col: str, color_data: ScalarMappable | Normalize
 ) -> None:
     if isinstance(color_data, Normalize):
@@ -152,10 +152,10 @@ def plot_main_heatmap(
     hm_x = df[x_col].tolist()
     hm_y = [(i + 0.5) / hist_bins for i in range(hist_bins)]
     hm_z = generate_heatmap_matrix(df, z_col, hist_bins)
-    norm = get_heatmap_norm("power", 0, hist_bins)
+    norm = get_norm("power", 0, hist_bins)
     image = ax_main.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP)
     ax_main.set_xlim(hm_x[0], hm_x[-1])
-    set_heatmap_colorbar(fig, ax_bar, z_col, image)
+    set_colorbar(fig, ax_bar, z_col, image)
 
 
 def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, z_col: str) -> None:
@@ -165,7 +165,7 @@ def plot_side_heatmap(ax_side: Axes, df: pd.DataFrame, z_col: str) -> None:
     hm_x = [0.0, 1.0]
     hm_y = [i / hist_bins for i in range(hist_bins + 1)]
     hm_z = generate_heatmap_matrix(df, z_col, hist_bins)
-    norm = get_heatmap_norm("power", 0, hist_bins)
+    norm = get_norm("power", 0, hist_bins)
     ax_side.pcolormesh(hm_x, hm_y, hm_z, norm=norm, cmap=CMAP)
 
 
@@ -349,3 +349,45 @@ def plot_avg_avg_strat_phe_0(
     ax_main.set_xlim(n_agents_i[0], n_agents_i[-1])
     ax_main.set_ylim(prob_mut[0], prob_mut[-1])
     return image
+
+
+def plot_tau_avg_strat_phe_0(
+    fig: Figure,
+    ax_main: Axes,
+    ax_bar: Axes,
+    df: pd.DataFrame,
+    param: str,
+    norm: Normalize,
+) -> None:
+
+    for value, value_df in df.groupby(param):
+        if not value:
+            continue
+
+        value = cast(float, value)
+        color = CMAP(norm(value))
+
+        tau_idxs = 0
+        while (f"tau_avg_strat_phe_0_{tau_idxs}", "mean") in value_df.columns:
+            tau_idxs += 1
+
+        row = cast(pd.Series, value_df.squeeze("index"))
+
+        x = [row[(f"tau_{tau_idx}", "mean")] for tau_idx in range(tau_idxs)]
+        y = [
+            row[(f"tau_avg_strat_phe_0_{tau_idx}", "mean")]
+            for tau_idx in range(tau_idxs)
+        ]
+        yerr = [
+            row[(f"tau_avg_strat_phe_0_{tau_idx}", "sem")]
+            for tau_idx in range(tau_idxs)
+        ]
+
+        ax_main.errorbar(x, y, yerr, c=color, **PLOT_STYLE)
+
+    ax_main.set_xscale("log")
+
+    _, label = get_sim_color_and_label(df)
+    add_top_label(ax_main, label)
+
+    set_colorbar(fig, ax_bar, param, norm)

@@ -1,6 +1,7 @@
 import msgpack
 from pathlib import Path
 import pandas as pd
+import numpy as np
 from enum import IntEnum, auto
 from typing import Any
 
@@ -96,6 +97,7 @@ def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
     avg_analyses = []
     for sim_job in sim_jobs:
         analyses = []
+        tau_idx_max = np.inf
         for run_idx in range(sim_job.n_runs):
             analysis = read_analysis(sim_job.sim_dir, run_idx)
             for bin, ele in enumerate(analysis["dist_n_agents"]):
@@ -108,14 +110,24 @@ def collect_avg_analyses(sim_jobs: list[SimJob]) -> pd.DataFrame:
             analysis.pop("dist_avg_strat_phe")
             analysis["avg_dist_phe_0"] = analysis["avg_dist_phe"][0]
             analysis.pop("avg_dist_phe")
-            # for tau_idx, ele in enumerate(analysis["tau_avg_strat_phe"]):
-            #     analysis[f"tau_avg_strat_phe_0_{tau_idx}"] = ele[0]
+            tau_idx_max = min(tau_idx_max, len(analysis["tau_avg_strat_phe"][0]))
+            for tau_idx, ele in enumerate(analysis["tau_avg_strat_phe"][0]):
+                analysis[f"tau_{tau_idx}"] = ele[0]
+                analysis[f"tau_avg_strat_phe_0_{tau_idx}"] = ele[1]
             analysis.pop("tau_avg_strat_phe")
             analysis = pd.DataFrame(analysis, index=[run_idx])
 
             analyses.append(analysis)
 
-        analyses = pd.concat(analyses)
+        analyses = pd.DataFrame(pd.concat(analyses))
+        analyses = analyses.drop(
+            columns=[
+                column
+                for column in analyses.columns
+                if (column.startswith(("tau_", "tau_avg_strat_phe_0_")))
+                and int(column.rsplit("_", 1)[1]) >= tau_idx_max
+            ]
+        )
 
         avg_analysis = []
         for column in analyses.columns:
