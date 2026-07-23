@@ -5,7 +5,7 @@ __pycache__/
 
 /.env
 
-/sims/
+/sims*/
 
 .LaTeX/
 *.synctex.gz

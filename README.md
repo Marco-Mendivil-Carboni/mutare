@@ -17,7 +17,7 @@
 - At every simulation step, the population is capped at its initial size (`n_agents`) and reinitialized if extinction is reached.
 - Initially, if `strat_phe` is set, all agents will share that same strategy; otherwise, they will each have a random strategy.
 
-During the simulation, every `steps_per_save` steps, the following observables are computed and saved:
+During the simulation, every `save_steps_factor*n_agents` steps, the following observables are computed and saved:
 - Current simulation time
 - Time until the next event
 - Number of agents in the simulation
@@ -27,7 +27,7 @@ During the simulation, every `steps_per_save` steps, the following observables a
 - Standard deviation of the phenotypic strategy
 - Distribution of phenotypes
 
-Every `steps_per_file` steps, the simulation is stopped and a new output file is written to disk.
+Every `file_steps_factor*n_agents` steps, the simulation is stopped and a new output file is written to disk.
 
 ---
 
@@ -73,9 +73,9 @@ n_agents = 100
 strat_phe = [ 0.5, 0.5,]
 
 [output]
-steps_per_file = 65536
-steps_per_save = 256
-hist_bins = 16
+file_steps_factor = 1024
+save_steps_factor = 16
+hist_bins = 64
 
 ```
 

@@ -22,9 +22,9 @@ fn basic_workflow() {
         + "strat_phe = [ 0.5, 0.5,]\n"
         + "\n"
         + "[output]\n"
-        + "steps_per_file = 65536\n"
-        + "steps_per_save = 256\n"
-        + "hist_bins = 16\n";
+        + "file_steps_factor = 1024\n"
+        + "save_steps_factor = 16\n"
+        + "hist_bins = 64\n";
 
     fs::write(&config_path, config_contents).expect("failed to write config file");
 

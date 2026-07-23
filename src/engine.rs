@@ -98,7 +98,7 @@ impl Engine {
 
         let mut event_pool = EventPool::default();
 
-        for _ in 0..self.cfg.output.steps_per_file {
+        for _ in 0..self.cfg.steps_per_file() {
             let observables = self
                 .perform_step(&mut event_pool)
                 .context("failed to perform step")?;
@@ -172,7 +172,7 @@ impl Engine {
         let time_step = Exp::new(total_rate)?.sample(&mut self.rng);
 
         // Calculate simulation observables.
-        let observables = (self.step % self.cfg.output.steps_per_save == 0)
+        let observables = (self.step % self.cfg.steps_per_save() == 0)
             .then(|| calc_observables(&self.cfg, &self.state, event, time_step, self.n_extinct));
 
         // Update simulation state.

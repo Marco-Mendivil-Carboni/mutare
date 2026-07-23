@@ -15,6 +15,18 @@ pub struct Config {
     pub output: OutputParams,
 }
 
+impl Config {
+    /// Get number of steps per output file.
+    pub fn steps_per_file(&self) -> usize {
+        self.output.file_steps_factor * self.init.n_agents
+    }
+
+    /// Get number of steps per saved observables.
+    pub fn steps_per_save(&self) -> usize {
+        self.output.save_steps_factor * self.init.n_agents
+    }
+}
+
 /// Stochastic agent-based model parameters.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct ModelParams {
@@ -49,11 +61,11 @@ pub struct InitParams {
 /// Output format parameters.
 #[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct OutputParams {
-    /// Number of steps per output file.
-    pub steps_per_file: usize,
+    /// Number of steps per agent per output file.
+    pub file_steps_factor: usize,
 
-    /// Number of steps per saved observables.
-    pub steps_per_save: usize,
+    /// Number of steps per agent per saved observables.
+    pub save_steps_factor: usize,
 
     /// Number of histogram bins.
     pub hist_bins: usize,
@@ -100,11 +112,11 @@ impl Config {
             check_vec(strat_phe, model.n_phe).context("invalid phenotypic strategy")?;
         }
 
-        check_num(output.steps_per_file, 1_024..)
-            .context("invalid number of steps per output file")?;
+        check_num(output.file_steps_factor, 64..)
+            .context("invalid number of steps per agent per output file")?;
 
-        check_num(output.steps_per_save, 0..output.steps_per_file)
-            .context("invalid number of steps per saved observables")?;
+        check_num(output.save_steps_factor, 1..output.file_steps_factor)
+            .context("invalid number of steps per agent per saved observables")?;
 
         check_num(output.hist_bins, 1..).context("invalid number of histogram bins")?;
 

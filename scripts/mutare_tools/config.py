@@ -21,8 +21,8 @@ class InitParams(TypedDict):
 
 
 class OutputParams(TypedDict):
-    steps_per_file: int
-    steps_per_save: int
+    file_steps_factor: int
+    save_steps_factor: int
     hist_bins: int
 
 
