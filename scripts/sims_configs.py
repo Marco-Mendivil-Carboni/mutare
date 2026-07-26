@@ -45,7 +45,7 @@ def _generate_sims_configs() -> list[SimsConfig]:
             },
         },
         n_runs=16,
-        n_files=64,
+        n_files=96,
     )
 
     symmetric_sims_config = SimsConfig(
@@ -83,7 +83,7 @@ def _generate_sims_configs() -> list[SimsConfig]:
     incremental_sims_config = SimsConfig(
         init_sim_job=incremental_sim_job,
         strat_phe_0_i_values=strat_phe_0_i_values,
-        prob_mut_values=prob_mut_values,
+        prob_mut_values=[],
         n_agents_i_values=n_agents_i_values,
         fixed_n_agents_i_values=fixed_n_agents_i_values[-1:],
     )
