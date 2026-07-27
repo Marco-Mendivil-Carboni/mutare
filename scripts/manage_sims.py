@@ -1,6 +1,6 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
-import asyncio
+import subprocess
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -305,11 +305,11 @@ class SimsManager(App):
 
             LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
             with LOG_FILE.open("w") as log_file:
-                await asyncio.create_subprocess_exec(
-                    *command,
-                    stdin=asyncio.subprocess.DEVNULL,
+                subprocess.Popen(  # noqa: ASYNC220
+                    command,
+                    stdin=subprocess.DEVNULL,
                     stdout=log_file,
-                    stderr=asyncio.subprocess.STDOUT,
+                    stderr=subprocess.STDOUT,
                     start_new_session=True,
                 )
 
