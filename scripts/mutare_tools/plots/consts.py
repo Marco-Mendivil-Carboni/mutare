@@ -1,9 +1,10 @@
-import pandas as pd
-import matplotlib as mpl
 from typing import Any
 
-from ..exec import SimJob
+import matplotlib as mpl
+import pandas as pd
+
 from ..analysis import SimType
+from ..exec import SimJob
 
 mpl.use("pdf")
 
@@ -17,9 +18,9 @@ mpl.rcParams["figure.constrained_layout.use"] = True
 CM = 1 / 2.54
 FIGSIZE = (8.0 * CM, 4.94 * CM)
 
-PLOT_STYLE: dict[str, Any] = dict(ls="--", marker="o", markersize=2)
-FILL_STYLE: dict[str, Any] = dict(lw=0.0, alpha=0.5)
-LINE_STYLE: dict[str, Any] = dict(c="k", lw=1.0, alpha=0.5)
+PLOT_STYLE: dict[str, Any] = {"ls": "--", "marker": "o", "markersize": 2}
+FILL_STYLE: dict[str, Any] = {"lw": 0.0, "alpha": 0.5}
+LINE_STYLE: dict[str, Any] = {"c": "k", "lw": 1.0, "alpha": 0.5}
 
 COLORS = {
     "blue": "#4e79a7",

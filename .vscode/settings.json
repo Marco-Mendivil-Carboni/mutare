@@ -2,7 +2,6 @@
     "rust-analyzer.inlayHints.chainingHints.enable": false,
     "rust-analyzer.inlayHints.typeHints.enable": false,
     "python.analysis.typeCheckingMode": "standard",
-    "ruff.enable": false,
     "files.associations": {
         "*.tcss": "css",
     },

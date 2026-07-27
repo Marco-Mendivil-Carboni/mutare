@@ -1,22 +1,22 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
-from pathlib import Path
-import subprocess
-from shutil import rmtree
-import psutil
-from dataclasses import dataclass
-from signal import SIGUSR1
+import asyncio
 import time
-from textual import on, work
-from textual.worker import Worker, get_current_worker, WorkerCancelled
-from textual.app import App, ComposeResult
-from textual.screen import ModalScreen
-from textual.containers import Container, Grid, ItemGrid
-from textual.widgets import Label, Button, ProgressBar, Log, Footer
+from dataclasses import dataclass
+from pathlib import Path
+from shutil import rmtree
+from signal import SIGUSR1
+from typing import ClassVar
 
+import psutil
 from mutare_tools.exec import create_sim_jobs
-
-from sims_configs import SIMS_DIR, SIMS_CONFIGS
+from sims_configs import SIMS_CONFIGS, SIMS_DIR
+from textual import on, work
+from textual.app import App, ComposeResult
+from textual.containers import Container, Grid, ItemGrid
+from textual.screen import ModalScreen
+from textual.widgets import Button, Footer, Label, Log, ProgressBar
+from textual.worker import Worker, WorkerCancelled, get_current_worker
 
 MAKE_ALL_SIMS = Path(__file__).resolve().parent / "make_all_sims.py"
 LOG_FILE = SIMS_DIR / "output.log"
@@ -155,7 +155,7 @@ class DialogScreen(ModalScreen[bool]):
 class SimsManager(App):
     CSS_PATH = "manage_sims.tcss"
     ENABLE_COMMAND_PALETTE = False
-    BINDINGS = [
+    BINDINGS: ClassVar = [
         ("s", "start", "Start simulations"),
         ("p", "pause", "Pause simulations"),
         ("q", "quit", "Quit"),
@@ -270,16 +270,15 @@ class SimsManager(App):
     async def delete_extra_pressed(self) -> None:
         if self._background_worker.result:
             extra_entries = self._background_worker.result.extra_entries
-            if extra_entries:
-                if await self.push_screen_wait(
-                    DialogScreen(f"Delete {len(extra_entries)} extra entries?")
-                ):
-                    for entry in extra_entries:
-                        if entry.is_dir():
-                            rmtree(entry)
-                        else:
-                            entry.unlink()
-                    self.update_progress_info()
+            if extra_entries and await self.push_screen_wait(
+                DialogScreen(f"Delete {len(extra_entries)} extra entries?")
+            ):
+                for entry in extra_entries:
+                    if entry.is_dir():
+                        rmtree(entry)
+                    else:
+                        entry.unlink()
+                self.update_progress_info()
 
     @work
     async def action_start(self) -> None:
@@ -295,20 +294,22 @@ class SimsManager(App):
             ):
                 for file in SIMS_DIR.rglob("analysis.msgpack"):
                     file.unlink()
-            elif self._background_worker.result:
-                if self._background_worker.result.n_missing_msgpacks == 0:
-                    command.append("--plots-only")
+            elif (
+                self._background_worker.result
+                and self._background_worker.result.n_missing_msgpacks == 0
+            ):
+                command.append("--plots-only")
 
             if await self.push_screen_wait(DialogScreen("Send notifications?")):
                 command.append("--notify")
 
             LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
             with LOG_FILE.open("w") as log_file:
-                subprocess.Popen(
-                    command,
-                    stdin=subprocess.DEVNULL,
+                await asyncio.create_subprocess_exec(
+                    *command,
+                    stdin=asyncio.subprocess.DEVNULL,
                     stdout=log_file,
-                    stderr=subprocess.STDOUT,
+                    stderr=asyncio.subprocess.STDOUT,
                     start_new_session=True,
                 )
 

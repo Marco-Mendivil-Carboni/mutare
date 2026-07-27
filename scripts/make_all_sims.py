@@ -1,15 +1,14 @@
 #!/home/marcomc/Documents/Doctorado/mutare/.venv/bin/python3
 
 import argparse
-from dotenv import load_dotenv
 import os
-import requests
 import time
 
+import requests
+from dotenv import load_dotenv
 from mutare_tools.exec import SimsConfig, create_sim_jobs, exec_sim_jobs
 from mutare_tools.plots.core import plot_sim_jobs
-
-from sims_configs import SIMS_DIR, SIMS_CONFIGS
+from sims_configs import SIMS_CONFIGS, SIMS_DIR
 
 
 def parse_args() -> argparse.Namespace:
@@ -34,7 +33,7 @@ def log(message: str, notify: bool) -> None:
     if TOPIC:
         try:
             requests.post(f"https://ntfy.sh/{TOPIC}", data=message, timeout=16)
-        except Exception as exception:
+        except requests.RequestException as exception:
             print(f"failed to send notification: {exception}")
     else:
         print("failed to find notifications configuration")

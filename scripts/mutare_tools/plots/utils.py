@@ -1,26 +1,26 @@
-import pandas as pd
+from typing import Any, Literal, cast
+
 import numpy as np
-from matplotlib.figure import Figure
+import pandas as pd
 from matplotlib.axes import Axes
-from matplotlib.gridspec import GridSpec
-from matplotlib.colors import Normalize, PowerNorm, LogNorm
 from matplotlib.cm import ScalarMappable
-from scipy.interpolate import BSpline, make_splrep, LSQBivariateSpline
-from typing import cast, Any, Literal
+from matplotlib.colors import LogNorm, Normalize, PowerNorm
+from matplotlib.figure import Figure
+from matplotlib.gridspec import GridSpec
+from scipy.interpolate import BSpline, LSQBivariateSpline, make_splrep
 
 from ..exec import SimJob
-
 from .consts import (
-    FIGSIZE,
-    PLOT_STYLE,
-    FILL_STYLE,
-    LINE_STYLE,
     CMAP,
+    COL_TEX_LABELS,
+    FIGSIZE,
+    FILL_STYLE,
+    FILTERS,
+    LINE_STYLE,
+    N_EVALS,
+    PLOT_STYLE,
     SIM_COLORS,
     SIM_LABELS,
-    COL_TEX_LABELS,
-    N_EVALS,
-    FILTERS,
 )
 
 
@@ -122,9 +122,7 @@ def generate_heatmap_matrix(
 
 
 def get_norm(
-    type: Literal["linear"] | Literal["power"] | Literal["log"],
-    vmin: float,
-    vmax: float,
+    type: Literal["linear", "power", "log"], vmin: float, vmax: float
 ) -> Normalize:
     if type == "log":
         return LogNorm(vmin, vmax)
@@ -186,7 +184,7 @@ def get_strat_eval() -> np.ndarray:
 
 
 def get_optimal_strat_phe_0(
-    df: pd.DataFrame, job: SimJob, y_col: str, opt: Literal["max"] | Literal["min"]
+    df: pd.DataFrame, job: SimJob, y_col: str, opt: Literal["max", "min"]
 ) -> float:
     fixed_df = FILTERS["fixed"](df, job)
     fixed_n_max_df = fixed_df[

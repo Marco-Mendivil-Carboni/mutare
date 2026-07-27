@@ -1,9 +1,10 @@
-import msgpack
-from pathlib import Path
-import pandas as pd
-import numpy as np
 from enum import IntEnum, auto
+from pathlib import Path
 from typing import Any
+
+import msgpack
+import numpy as np
+import pandas as pd
 
 from .exec import SimJob, print_process_msg
 

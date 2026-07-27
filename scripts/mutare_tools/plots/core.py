@@ -1,38 +1,38 @@
-import pandas as pd
-import numpy as np
-from shutil import rmtree
-from matplotlib.axes import Axes
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from shutil import rmtree
 from typing import cast
 
-from ..exec import N_CORES, SimJob, print_process_msg
-from ..analysis import SimType, collect_avg_analyses, collect_run_time_series
+import numpy as np
+import pandas as pd
+from matplotlib.axes import Axes
 
+from ..analysis import SimType, collect_avg_analyses, collect_run_time_series
+from ..exec import N_CORES, SimJob, print_process_msg
 from .utils import (
-    LINE_STYLE,
     FILTERS,
-    create_standard_figure,
+    LINE_STYLE,
     create_colorbar_figure,
-    plot_horizontal_bands,
-    plot_errorbar,
-    plot_errorband,
-    set_colorbar,
-    get_norm,
-    plot_main_heatmap,
-    plot_side_heatmap,
-    get_strat_eval,
-    get_optimal_strat_phe_0,
-    plot_dist_phe_0_lims,
+    create_standard_figure,
     get_dist_avg_strat_phe_0,
+    get_norm,
+    get_optimal_strat_phe_0,
+    get_strat_eval,
+    interpolate_extinct_rates,
+    interpolate_values,
+    plot_avg_avg_strat_phe_0,
+    plot_colored_curve,
+    plot_colored_errorbar,
+    plot_dist_phe_0_lims,
+    plot_errorband,
+    plot_errorbar,
     plot_expected_values,
     plot_extinct_times,
-    plot_time_series,
-    plot_colored_errorbar,
-    plot_colored_curve,
-    interpolate_values,
-    interpolate_extinct_rates,
-    plot_avg_avg_strat_phe_0,
+    plot_horizontal_bands,
+    plot_main_heatmap,
+    plot_side_heatmap,
     plot_tau_avg_strat_phe_0,
+    plot_time_series,
+    set_colorbar,
 )
 
 
@@ -65,9 +65,14 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
             norm = get_norm("log", param_df[param].min() / 2, param_df[param].max() * 2)
 
     for sim_type, group_df in param_df.groupby("sim_type"):
+        sim_type = SimType(sim_type)
 
         def plot_mean_and_uncertainty(
-            ax: Axes, y_col: str, y_span_col: str | None
+            ax: Axes,
+            y_col: str,
+            y_span_col: str | None,
+            sim_type: SimType = sim_type,
+            group_df: pd.DataFrame = group_df,
         ) -> None:
             if param == "strat_phe_0_i" and sim_type == SimType.RANDOM:
                 if y_span_col is None:
@@ -215,9 +220,14 @@ def make_fixed_plots(df: pd.DataFrame, job: SimJob) -> None:
     )
 
     for n_agents_i, group_df in fixed_df.groupby("n_agents_i"):
+        value = cast(float, n_agents_i)
 
-        def plot_mean_and_uncertainty(ax: Axes, y_col: str) -> None:
-            value = cast(float, n_agents_i)
+        def plot_mean_and_uncertainty(
+            ax: Axes,
+            y_col: str,
+            group_df: pd.DataFrame = group_df,
+            value: float = value,
+        ) -> None:
             plot_colored_errorbar(ax, group_df, "strat_phe_0_i", y_col, log_norm, value)
 
         plot_mean_and_uncertainty(axs_0[0], "avg_growth_rate")

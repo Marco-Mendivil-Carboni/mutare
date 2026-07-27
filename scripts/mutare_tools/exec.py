@@ -1,16 +1,16 @@
-import subprocess
-import multiprocessing as mp
-from pathlib import Path
-from copy import deepcopy
-import psutil
-import os
-from datetime import datetime
-from signal import signal, SIGUSR1
 import fcntl
+import multiprocessing as mp
+import os
+import subprocess
+from copy import deepcopy
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum, auto
-from typing import Optional
+from pathlib import Path
+from signal import SIGUSR1, signal
 from types import FrameType
+
+import psutil
 
 from .config import Config, hash_sim_dir
 
@@ -18,7 +18,7 @@ N_CORES = psutil.cpu_count(logical=False)
 
 
 def print_process_msg(message: str) -> None:
-    timestamp = datetime.now().isoformat(timespec="seconds")
+    timestamp = datetime.now().astimezone().isoformat(timespec="seconds")
     print(f"[{timestamp} PID:{os.getpid()}] {message}", flush=True)
 
 
@@ -29,7 +29,7 @@ class PauseRequested(Exception):
 pause_requested = False
 
 
-def request_pause(signum: int, _: Optional[FrameType]) -> None:
+def request_pause(signum: int, _: FrameType | None) -> None:
     print_process_msg(f"received signal {signum}: requesting pause")
 
     global pause_requested
@@ -119,7 +119,7 @@ def exec_sim_run(sim_run: SimRun):
         print_process_msg(f"run {run_idx} paused")
         return RunResult.PAUSED
 
-    except Exception as exception:
+    except (subprocess.CalledProcessError, OSError) as exception:
         print_process_msg(f"run {run_idx} failed: {exception}")
         return RunResult.FAILED
 

@@ -1,7 +1,7 @@
-from pathlib import Path
-import numpy as np
 from copy import deepcopy
+from pathlib import Path
 
+import numpy as np
 from mutare_tools.exec import SimJob, SimsConfig
 
 SIMS_DIR = Path(__file__).resolve().parents[1] / "sims"
