@@ -8,13 +8,16 @@ SIMS_DIR = Path(__file__).resolve().parents[1] / "sims"
 
 
 def _generate_sims_configs() -> list[SimsConfig]:
-    strat_phe_0_i_values = np.linspace(start=1 / 16, stop=15 / 16, num=15).tolist()
-    prob_mut_values = np.logspace(start=-6, stop=-2, num=9).tolist()
+
+    strat_phe_0_i_values = (
+        np.linspace(start=1 / 16, stop=15 / 16, num=15).round(6).tolist()
+    )
+    prob_mut_values = np.logspace(start=-6, stop=-2, num=9).round(6).tolist()
     n_agents_i_values = (
-        np.logspace(start=1.25, stop=3, num=15).round().astype(int).tolist()
+        np.logspace(start=1.25, stop=3, num=15).round(0).astype(int).tolist()
     )
     fixed_n_agents_i_values = (
-        np.logspace(start=1.5, stop=2.5, num=5).round().astype(int).tolist()
+        np.logspace(start=1.5, stop=2.5, num=5).round(0).astype(int).tolist()
     )
 
     symmetric_sim_job = SimJob(
@@ -39,13 +42,13 @@ def _generate_sims_configs() -> list[SimsConfig]:
             },
             "init": {"n_agents": 100},
             "output": {
-                "file_steps_factor": 4_096,
+                "file_steps_factor": 16_384,
                 "save_steps_factor": 4,
                 "hist_bins": 64,
             },
         },
         n_runs=16,
-        n_files=96,
+        n_files=64,
     )
 
     symmetric_sims_config = SimsConfig(
