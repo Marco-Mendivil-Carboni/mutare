@@ -5,11 +5,11 @@ import sys
 from pathlib import Path
 
 if len(sys.argv) < 2:
-    sys.exit("Error: Please specify a version")
+    sys.exit("Please specify a destination directory")
 
-version = sys.argv[1]
+dest_dir = sys.argv[1]
 
 for sim_type in ["asymmetric", "incremental", "symmetric"]:
     src = Path(f"sims/{sim_type}/plots")
-    dest = Path(f"docs/paper/figures/{version}/{sim_type}")
+    dest = Path(f"{dest_dir}/{sim_type}")
     shutil.copytree(src, dest, dirs_exist_ok=True)
