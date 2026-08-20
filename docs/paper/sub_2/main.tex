@@ -16,6 +16,8 @@
 
 \usepackage{silence}
 \WarningFilter{nameref}{The definition of \label has changed!}
+\usepackage{etoolbox}
+\apptocmd{\sloppy}{\hbadness 10000\relax}{}{}
 
 \usepackage[hidelinks,pdfusetitle]{hyperref}
 \usepackage[all]{hypcap}
@@ -194,7 +196,7 @@ However, as previously discussed, along the evolutionary process the population 
 \begin{equation} \label{eq:evol_averages}
     \langle\mu\rangle\approx\int\langle\mu\rangle(\bar{s})p(\bar{s})d\bar{s}, \quad r_\text{ext}\approx\int r_\text{ext}(\bar{s})p(\bar{s})d\bar{s},
 \end{equation}
-where $\langle\mu\rangle(\bar{s})$ and $r_\text{ext}(\bar{s})$ represent the mean growth rate and extinction rate of a strictly \emph{fixed} strategy with value $\bar{s}$ (the blue curve in \cref{fig:pareto_front}), while $p(\bar{s})$ is the probability distribution of the population-averaged strategy $\bar{s}$ recorded over time during the active evolutionary simulations. We have verified that this approximation holds with high accuracy across a wide range of parameters \footnote{\label{SupplementalMaterial} See Supplemental Material at [URL to be inserted by publisher] for additional observables complementing the main findings, as well as a more detailed comparison between the proposed heuristic distribution and numerical simulations.}. This fact motivates the search for a heuristic approximation of the distribution $p(\bar{s})$, obtained solely from properties of fixed strategies, that could allow us to predict the evolutionary outcome $\langle\bar{s}\rangle(A)$ as a function of $N_\text{ini}$ and $p_\text{mut}$.
+where $\langle\mu\rangle(\bar{s})$ and $r_\text{ext}(\bar{s})$ represent the mean growth rate and extinction rate of a strictly \emph{fixed} strategy with value $\bar{s}$ (the blue curve in \cref{fig:pareto_front}), while $p(\bar{s})$ is the probability distribution of the population-averaged strategy $\bar{s}$ recorded over time during the active evolutionary simulations. We have verified that this approximation holds with high accuracy across a wide range of parameters (see \cref{sec:evol_average}). This fact motivates the search for a heuristic approximation of the distribution $p(\bar{s})$, obtained solely from properties of fixed strategies, that could allow us to predict the evolutionary outcome $\langle\bar{s}\rangle(A)$ as a function of $N_\text{ini}$ and $p_\text{mut}$.
 
 \begin{figure}
     \includegraphics{asymmetric/fixed/avg_growth_rate.pdf}
@@ -216,7 +218,7 @@ To evaluate $\langle\mu\rangle$, $\langle\mu_b\rangle$ and $r_\text{ext}$ for ar
 
 To understand how the distribution depends on the model parameters we examine how $\langle\mu\rangle$ and $r_\text{ext}$ depend on the population size; see \cref{fig:fixed_results}. We find that the mean growth rate depends only weakly on $N_\text{ini}$, except for very small populations, making it primarily a function of $s$. In contrast, the extinction rate exhibits a strong dependence, decreasing approximately as a power law, $r_\text{ext}\sim N_\text{ini}^{-\alpha}$. This scaling arises because extinctions are primarily driven by unfavorable environmental episodes. In an unfavorable environment we will have $N(t)\sim N_\text{ini}e^{-\lambda t}$ with some effective decay rate $\lambda$, meaning that extinction requires an adverse episode of duration $T\sim\ln(N_\text{ini})/\lambda$. Since environmental durations are exponentially distributed, the extinction rate scales as $e^{-T}$, which leads to the power-law dependence $r_\text{ext}\sim N_\text{ini}^{-1/\lambda}$. Consequently, in \cref{eq:heuristic_distribution}, the growth contribution enters exponentially through the numerator, whereas extinction risk enters algebraically in the denominator. This scaling mismatch is the main reason behind the transition: extinction risk dominates at small population sizes, favoring safer strategies, while growth maximization inevitably prevails in the large $N_\text{ini}$ limit.
 
-\Cref{fig:heuristic_approx} compares the expected average strategy calculated from the heuristic distribution (top) with the actual average observed in evolutionary simulations (bottom). While a detailed comparison of the full probability distributions is deferred to \cref{SupplementalMaterial}, focusing on their mean values reveals good qualitative agreement in a wide range of $N_\text{ini}$ and $p_\text{mut}$ values. Crucially, the heuristic successfully captures the transition from growth-maximizing to safer strategies as $N_\text{ini}$ decreases, as well as how this transition is modulated by $p_\text{mut}$.
+\Cref{fig:heuristic_approx} compares the expected average strategy calculated from the heuristic distribution (top) with the actual average observed in evolutionary simulations (bottom). While a detailed comparison of the full probability distributions is deferred to \cref{sec:heuristic_distributions}, focusing on their mean values reveals good qualitative agreement in a wide range of $N_\text{ini}$ and $p_\text{mut}$ values. Crucially, the heuristic successfully captures the transition from growth-maximizing to safer strategies as $N_\text{ini}$ decreases, as well as how this transition is modulated by $p_\text{mut}$.
 
 \section{Incremental mutations} \label{sec:incremental_mutations}
 
@@ -241,7 +243,7 @@ In this scenario, each phenotype is highly specialized for one specific environm
 
 In \cref{fig:symmetric_parameters} we show the evolved strategy for different initial conditions and population sizes. Again, the SA parameter set also exhibits a trade-off between growth and extinction, although the optimal strategies are much closer to each other than in the PR case. Specifically, the growth-maximizing strategy is located at $s(A)\sim0.8$, whereas the extinction-minimizing strategy is found at $s(A)\sim0.5$. Despite this proximity our main conclusions still hold: evolutionary trajectories converge to a well-defined strategy largely independent of initial conditions, lying strictly between both optima. The population size $N_\text{ini}$ again acts as the key control parameter: small populations favor safer strategies (getting remarkably close to the extinction-minimizing one) while larger populations favor growth maximization. Notably, with these parameters, substantially larger values of $N_\text{ini}$ are required to approach the growth-maximizing strategy compared to the PR parameter set.
 
-Finally, the heuristic approximation still successfully captures this qualitative transition between regimes. However, in this case quantitative discrepancies are more pronounced (see details in \cref{SupplementalMaterial}). In particular, approaching the growth-maximizing strategy requires significantly larger $N_\text{ini}$ values than predicted by the heuristic approximation.
+Finally, the heuristic approximation still successfully captures this qualitative transition between regimes. However, in this case quantitative discrepancies are more pronounced (see details in \cref{sec:heuristic_distributions}). In particular, approaching the growth-maximizing strategy requires significantly larger $N_\text{ini}$ values than predicted by the heuristic approximation.
 
 \begin{figure}
     \includegraphics{symmetric/strat_phe_0_i/avg_avg_strat_phe_0.pdf}
@@ -301,13 +303,13 @@ The source code developed for this study is openly available in the repository a
     \begin{equation}
         \langle\mathcal{O}\rangle=\frac{1}{\sum_k\tau_k}\sum_k\mathcal{O}(\mathbf{X}_k)\tau_k,
     \end{equation}
-    rather than simple arithmetic means. All observables considered in this work are computed this way, with the sole exception of the population growth rate fluctuations, which we denote as $\sigma_\mu$ and analyze in \cref{SupplementalMaterial}. The issue lies in the fact that a naive calculation of the standard deviation based directly on the step-wise rates $\mu_k=\Delta N_k/(N_k\tau_k)$ yields ill-defined, diverging fluctuations due to the arbitrarily small waiting times between Gillespie steps. The most appropriate way to quantify these fluctuations is through:
+    rather than simple arithmetic means. All observables considered in this work are computed this way, with the sole exception of the population growth rate fluctuations, which we denote as $\sigma_\mu$ and analyze in \cref{sec:birth_rate_and_fluctuations}. The issue lies in the fact that a naive calculation of the standard deviation based directly on the step-wise rates $\mu_k=\Delta N_k/(N_k\tau_k)$ yields ill-defined, diverging fluctuations due to the arbitrarily small waiting times between Gillespie steps. The most appropriate way to quantify these fluctuations is through:
     \begin{equation} \label{eq:std_dev_growth_rate}
         \sigma_\mu=\left(\frac{1}{\sum_k\tau_k}\sum_k\left(\mu_k-\langle\mu\rangle\right)^2\tau_k^2\right)^{1/2},
     \end{equation}
     which represents the diffusion coefficient of the integrated log-population growth process ($\log N\sim\sum_k\mu_k\tau_k$) rather than the variance of an instantaneous rate.
 
-    \section{Average population birth rate and growth rate fluctuations}
+    \section{Average population birth rate and growth rate fluctuations} \label{sec:birth_rate_and_fluctuations}
 
     We begin by displaying in \cref{fig:supplementary_results_1} (top) the average birth rate $\langle\mu_b\rangle$ (which appears in the heuristic approximation in \cref{eq:heuristic_distribution}) for different initial conditions with the PR parameters. We observe that $\langle\mu_b\rangle$ for fixed strategies exhibits a different behavior than the total population growth rate, increasing monotonically with $s(A)$ and reaching its maximum at $s(A)=1$. Another observable of interest are the growth rate fluctuations $\sigma_\mu$, computed according to \cref{eq:std_dev_growth_rate}. Such fluctuations are commonly used as a proxy for extinction risk, and, indeed, the Pareto front generated between $\sigma_\mu$ and $\langle\mu\rangle$ has been studied more frequently in the literature \cite{dinisPhaseTransitionsOptimal2020,dinisParetooptimalTradeoffPhenotypic2022}. As shown in \cref{fig:supplementary_results_1} (bottom), where we plot $\sigma_\mu$ versus $\langle\mu\rangle$, their behavior qualitatively mirrors the extinction rate, although a simple exact analytical mapping between the two quantities remains elusive.
 
@@ -317,7 +319,7 @@ The source code developed for this study is openly available in the repository a
         \caption{Average population birth rate $\langle\mu_b\rangle$ (top) and growth rate fluctuations $\sigma_\mu$ versus mean growth rate $\langle\mu\rangle$ (bottom) for different initial strategies $s(A)_\text{ini}$ and the different kinds of simulations with the PR parameters.} \label{fig:supplementary_results_1}
     \end{figure}
 
-    \section{Phenotype probability distribution}
+    \section{Average phenotype and population size distributions} \label{sec:other_distributions}
 
     \begin{figure}
         \includegraphics{asymmetric/strat_phe_0_i/avg_dist_phe_0.pdf}
@@ -336,7 +338,7 @@ The source code developed for this study is openly available in the repository a
 
     Additionally, we evaluate the distribution of the population size $N$, as shown in \cref{fig:supplementary_results_2} (bottom). All profiles reveal a pronounced peak at the maximum allowed population capacity, indicating that the system spends a significant fraction of time near its ceiling when environmental conditions are favorable. However, a second, much broader local maximum emerges at lower population sizes, which is a direct consequence of periods under the unfavorable environment. The position and weight of this second peak strongly correlate with the extinction risk: lower values of $N$ at this local maximum directly correspond to a higher extinction rate.
 
-    \section{Evolutionary average equation}
+    \section{Evolutionary average equation} \label{sec:evol_average}
 
     Furthermore, \cref{fig:supplementary_results_3} illustrates how the mean growth rate $\langle\mu\rangle$ (top) and the extinction rate $r_\text{ext}$ (bottom) obtained from evolutionary simulations satisfy the relation proposed in \cref{eq:evol_averages} (represented as dashed lines) for various mutation probabilities $p_\text{mut}$. Quantitative agreement with the simulation data confirms that, as argued in \cref{sec:heuristic_interpretation}, the long-term evolutionary dynamics can be accurately approximated as a sequential concatenation of fixed strategies.
 
@@ -346,7 +348,7 @@ The source code developed for this study is openly available in the repository a
         \caption{Mean population growth rate $\langle\mu\rangle$ (top) and extinction rate $r_\text{ext}$ (bottom) as a function of the mutation probability $p_\text{mut}$ for the PR parameters in \texttt{evol(r)} simulations. The dashed lines indicate the theoretical prediction from \cref{eq:evol_averages}.} \label{fig:supplementary_results_3}
     \end{figure}
 
-    \section{Heuristic strategy distributions}
+    \section{Heuristic strategy distributions} \label{sec:heuristic_distributions}
 
     \begin{figure}
         \includegraphics{asymmetric/fixed/exp_dist_avg_strat_phe_0.pdf}
@@ -368,7 +370,7 @@ The source code developed for this study is openly available in the repository a
         \caption{Expected average strategy from the heuristic distribution $\langle\bar{s}(A)\rangle^\ast$ (top) and observed average strategy from \texttt{evol(r)} simulations (bottom) for different values of $N_\text{ini}$ and $p_\text{mut}$ with the SA parameters.} \label{fig:heuristic_approx_SA}
     \end{figure}
 
-    \section{Time-dependent average strategy}
+    \section{Time-dependent average strategy} \label{sec:time_dependent_strategy}
 
     \begin{figure}
         \includegraphics{asymmetric/strat_phe_0_i/tau_avg_strat_phe_0.pdf}
