@@ -141,7 +141,7 @@ def make_param_plots(param: str, df: pd.DataFrame, job: SimJob) -> None:
         for ax in [ax_0, ax_1]:
             ax.axvline(max_avg_growth, ls="--", **LINE_STYLE)
             ax.axvline(min_extinct, ls=":", **LINE_STYLE)
-    for ax in axs_4[:-1] + [ax_5]:
+    for ax in axs_4[:-1] + [ax_5, axs_10[0]]:
         ax.axhline(max_avg_growth, ls="--", **LINE_STYLE)
         ax.axhline(min_extinct, ls=":", **LINE_STYLE)
 

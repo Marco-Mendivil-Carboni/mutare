@@ -316,7 +316,7 @@ def interpolate_extinct_rates(
     z = np.log(fixed_df[("extinct_rate", "mean")])
     w = fixed_df[("extinct_rate", "mean")] / fixed_df[("extinct_rate", "sem")]
 
-    tx, ty = [], np.linspace(1 / 8, 7 / 8, 7).tolist()
+    tx, ty = [], np.linspace(1 / 4, 3 / 4, 3).tolist()
 
     x_eval = np.log(random_df["n_agents_i"].unique())
     y_eval = get_strat_eval()
