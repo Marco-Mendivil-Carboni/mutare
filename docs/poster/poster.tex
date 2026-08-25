@@ -14,7 +14,7 @@
 
 \usepackage{titlesec}
 \usepackage{booktabs}
-\usepackage[caption=false]{subfig}
+\usepackage{caption}
 
 \usepackage[hidelinks,pdfusetitle]{hyperref}
 \usepackage[all]{hypcap}
@@ -24,7 +24,7 @@
 \usepackage[export]{adjustbox}
 \usepackage[framemethod=TikZ]{mdframed}
 
-\columnsep=24pt
+\columnsep=32pt
 
 \definecolor{custom_red}{HTML}{d81e2c}
 
@@ -70,245 +70,105 @@
         \normalsize $^1$Grupo Interdisciplinar de Sistemas Complejos (GISC) and Departamento de Estructura de la Materia, Física Térmica y Electrónica, Universidad Complutense de Madrid, 28040 Madrid, Spain\\
     \end{minipage}
 
-    \vspace{0.5cm}
+    \vspace{1.5cm}
 
+    \large % Elevates overall font scaling within the body
     \begin{multicols}{3}
 
-        \section{Introduction}
+        \section{Introduction \& Objectives}
+        \begin{itemize}
+            \item Natural populations face unpredictable, fluctuating environments under finite resource constraints.
+            \item While classic evolutionary theory suggests selection favors strategies maximizing mean growth rate $\langle \mu \rangle$, finite populations subject to demographic constraints face non-negligible extinction risks.
+            \item \textbf{Key Question:} Does natural selection favor growth-maximizing strategies or fluctuation-reducing resilience strategies when population capacity is limited?
+        \end{itemize}
 
-        % Nuclear \textbf{chromatin structure and dynamics} play an important role in processes such as \textbf{gene regulation} and cell fate decisions in developmental biology, as well as other processes such as epigenetic modifications \cite{Misteli2020}. This encourages us to study how they change when the nucleus deforms under \textbf{mechanical forces} and in particular to investigate \textbf{cell migration}, a fundamental physiological function that also plays a central role in pathological processes, particularly in \textbf{cancer metastasis} (in which cancer cells deform extensively through narrow constrictions to invade distant tissues). In this poster, we present and analyze a \textbf{polymeric model of chromatin} with the aim of understanding some of the changes in its structure and dynamics when the nucleus undergoes this kinds of deformations \cite{DeCorato2024}.
+        \section{Stochastic Model Framework}
+        \begin{itemize}
+            \item \textbf{Environment $e \in \{1,2\}$:} Continuous-time Markov process with transition rates $\omega_t(e,e')$.
+            \item \textbf{Population ($N \le N_\text{ini}$):} Birth-death process where individuals carry strategy $s(A) = 1 - s(B)$ regulating phenotypic diversity.
+            \item \textbf{Mutations:} Offspring inherit parent strategy or mutate with probability $p_\text{mut}$.
+        \end{itemize}
 
-        % \section{Polymeric model}
+        % \vspace{0.5em}
+        % \begin{table}[H]
+        %     \centering
+        %     \caption*{\textbf{Persister--Resistant (PR) Parameters}}
+        %     \small
+        %     \begin{tabular}{c c c}
+        %         \toprule
+        %         Rates                    & Env 1 (Favorable)  & Env 2 (Harsh)      \\
+        %         \midrule
+        %         Birth $\omega_b(e,\phi)$ & $A: 1.0,\; B: 0.2$ & $A: 0.0,\; B: 0.0$ \\
+        %         Death $\omega_d(e,\phi)$ & $A: 0.0,\; B: 0.0$ & $A: 1.0,\; B: 0.1$ \\
+        %         \bottomrule
+        %     \end{tabular}
+        % \end{table}
 
-        % In our coarse grained model, adapted from \cite{Bajpai2021}:
-        % \begin{itemize}
-        %     \item We describe chromatin as a \textbf{beads-and-springs copolymer} chain composed of $N=49883$ particles of two types, which represent respectively \textbf{heterochromatin and euchromatin}.
-        %     \item Heterochromatin and euchromatin \textbf{domains} are arranged along the chain following an \textbf{exponential length distribution}, with an average domain size of $48$ beads, maintaining for simplicity an overall 50/50 proportion of both chromatin types.
-        %     \item The chain is confined within a shell that models the nuclear envelope and \textbf{evolves with time}: from a cylinder to a peanut-shaped geometry of constant height and finally back to a cylinder \textbf{as the nucleus migrates} from one side of the constriction to the other.
-        %     \item The volume of the nucleus is such that the \textbf{volume density of chromatin} is $\rho=0.2$ (well within the physiological range \cite{Maeshima2020}).
-        %     \item The rest of the interactions are modeled by the \textbf{Wang-Frenkel potential} \cite{Wang2020} (qualitatively similar to the LJ potential)
-        %           \begin{equation*}
-        %               V_{\text{WF}}=\sum_{i=0}^{N-1}\sum_{j=i+1}^{N-1}\varepsilon\left(\frac{1}{d_{ij}^{2}}-1\right)\left(\frac{4}{d_{ij}^{2}}-1\right)^{2}
-        %           \end{equation*}
-        %     \item To model \textbf{steric repulsion} (between all pairs of beads as well as between beads and the confining shell) we make use of the \textbf{repulsive part} of this potential.
-        %     \item Additionally we will consider the cases in which \textbf{heterochromatic} particles also feel the \textbf{attractive} part of this potential in the interaction between \textbf{themselves} (\textbf{type I} interaction) and with the nuclear \textbf{envelope} (\textbf{type II} interaction).
-        % \end{itemize}
+        \section{Growth vs. Survival Trade-off}
+        \begin{center}
+            \includegraphics[scale=2.986]{figures/asymmetric/strat_phe_0_i/rates.pdf}
+            \captionof{figure}{\textbf{Pareto Front:} Extinction rate $r_\text{ext}$ vs. growth rate $\langle\mu\rangle$. Evolved strategies select a middle-ground compromise between growth and survival.}
+        \end{center}
 
-        % \vspace{1cm}
+        \columnbreak
 
-        %     \begin{minipage}{0.96\columnwidth}
-        %         \centering
-        %         \includegraphics[scale=1.5]{diagram.pdf}
-        %     \end{minipage}
+        % ==================== COLUMN 2 ====================
+        \section{Strategy Trajectories \& Fixation}
+        \begin{itemize}
+            \item \textbf{Rapid Fixation:} Advancing mutant lineages quickly dominate the population structure.
+            \item \textbf{Strategy Drift:} Narrow strategy variance $\sigma_s$ leads to coherent exploration of strategy space over long time scales.
+        \end{itemize}
 
-        %     \section{Simulation results}
+        \begin{center}
+            \includegraphics[scale=2.986]{figures/asymmetric/time_series/avg_strat_phe_0.pdf}
+            \captionof{figure}{\textbf{Time Series Dynamics:} Mean strategy trajectory over time. Dotted vertical lines mark stochastic extinction events.}
+        \end{center}
 
-        %     \begin{itemize}
-        %         \item We ran \textbf{Brownian dynamics} simulations of this model with $\geq2\cdot10^8$ timesteps which could represent $\sim1$ hour of real time, with the first and last 15 minutes for \textbf{equilibration} and a 30 minute \textbf{migration} (comparable to experimental timescales).
-        %         \item Simulations were conducted under three conditions:
-        %               \begin{enumerate}
-        %                   \item \textbf{No} attractive interactions (\textbf{left column})
-        %                   \item Only \textbf{type I} interactions (\textbf{center column})
-        %                   \item Both \textbf{type I and type II} interactions (\textbf{right column})
-        %               \end{enumerate}
-        %         \item In every case \textbf{multiple simulations} were performed with \textbf{similar results} but only \textbf{one is shown} for illustrative purposes.
-        %         \item We analyzed chromatin \textbf{spatial organization} by projecting the bead positions into the XY plane and binning them into a
-        %               \textbf{square grid} creating chromatin \textbf{density maps} (\textbf{top row}), and computing the chromatin \textbf{density distribution}, $p(\rho)$ (\textbf{middle and bottom rows}), from those.
-        %         \item In the \textbf{first case}:
-        %               \begin{itemize}
-        %                   \item Chromatin density maps are excessively \textbf{uniform} (in comparison with \textbf{experiments} \cite{Blazquez2025}).
-        %                   \item During the deformation $p(\rho)$ \textbf{broadens modestly} and its \textbf{peak decreases} only \textbf{slightly}.
-        %               \end{itemize}
-        %         \item In the \textbf{second case}:
-        %               \begin{itemize}
-        %                   \item The characteristic \textbf{phase separation} of chromatin appears in the density maps.
-        %                   \item There is a \textbf{bigger spread} of $p(\rho)$ throughout the simulation.
-        %                   \item During the deformation $p(\rho)$ \textbf{changes} much more \textbf{drastically}.
-        %                   \item \textbf{After} the deformation there appear to be \textbf{fewer and bigger} condensed chromatin \textbf{clusters}.
-        %               \end{itemize}
-        %         \item In the \textbf{third case}:
-        %               \begin{itemize}
-        %                   \item Heterochromatin accumulates at the \textbf{nuclear periphery}.
-        %                   \item Like in the first case $p(\rho)$ is \textbf{less disperse}.
-        %               \end{itemize}
-        %     \end{itemize}
+        \section{Population Constraint Modulation}
+        \begin{itemize}
+            \item \textbf{Compromise Strategy:} Evolution selects strategies strictly between growth maximization ($s(A) \sim 0.8$) and extinction minimization ($s(A) \sim 0.0$).
+            \item \textbf{Scaling Transition:} Large $N_\text{ini}$ converges to growth maximization, whereas small $N_\text{ini}$ favors resilient strategies to avoid extinction.
+        \end{itemize}
 
-        % \end{multicols}
+        \begin{center}
+            \includegraphics[scale=2.986]{figures/asymmetric/n_agents_i/avg_avg_strat_phe_0.pdf}
+            \captionof{figure}{\textbf{Transition:} Evolved strategy $\langle\bar{s}\rangle(A)$ vs. initial carrying capacity $N_\text{ini}$.}
+        \end{center}
 
-        % \begin{multicols}{3}
+        \section{Heuristic Interpretation}
+        \begin{itemize}
+            \item Long-term strategy probability distribution $p(\bar{s})$ balance:
+                  \begin{equation*}
+                      p(\bar{s}) \propto \frac{\exp(N_\text{ini} \cdot \langle\mu\rangle(\bar{s}))}{r_\text{ext}(N_\text{ini},\bar{s}) + p_\text{mut} \cdot \langle\mu_b\rangle(\bar{s})}
+                  \end{equation*}
+            \item \textbf{Scaling Mismatch:} Growth selection enters \textbf{exponentially} in the numerator, while extinction rate scales as a \textbf{power-law} $r_\text{ext} \sim N_\text{ini}^{-\alpha}$ in the denominator.
+            \item Extinction risk dominates at low $N_\text{ini}$; growth selection inevitably prevails as $N_\text{ini} \to \infty$.
+        \end{itemize}
 
-        %     \vspace{1cm}
+        \section{7. Robustness Analysis}
+        \begin{itemize}
+            \item \textbf{Incremental Mutations:} Continuous Gaussian mutations ($\sigma_\text{mut}=0.1$) yield qualitatively identical strategy transitions.
+            \item \textbf{Symmetric Adaptation Set:} Re-evaluated under symmetric environments, confirming population constraints generalizable across different fitness landscapes.
+        \end{itemize}
 
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Null-48-0/image-001-031.png} \\
-        %         $t=15$ min
-        %     \end{minipage}
-        %     \hfill
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Null-48-0/image-001-047.png} \\
-        %         $t=23$ min
-        %     \end{minipage}
-        %     \hfill
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Null-48-0/image-001-063.png} \\
-        %         $t=30$ min
-        %     \end{minipage}
-        %     \hfill
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Null-48-0/image-001-079.png} \\
-        %         $t=38$ min
-        %     \end{minipage}
-        %     \hfill
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Null-48-0/image-001-095.png} \\
-        %         $t=46$ min
-        %     \end{minipage}
+        \begin{center}
+            \includegraphics[scale=2.986]{figures/symmetric/n_agents_i/avg_avg_strat_phe_0.pdf}
+            \captionof{figure}{\textbf{Symmetric Adaptation:} Evolved strategy under the Symmetric-Adaptation (SA) parameter set.}
+        \end{center}
 
-        %     \vspace{1cm}
-
-        %     \begin{minipage}{0.96\columnwidth}
-        %         \centering
-        %         \includegraphics{Null-48-0/dists-hm-001.pdf}
-        %     \end{minipage}
-
-        %     \vspace{1cm}
-
-        %     \begin{minipage}{0.96\columnwidth}
-        %         \centering
-        %         \includegraphics{Null-48-0/dists-2d-001.pdf}
-        %     \end{minipage}
-
-        %     \vspace{1cm}
-
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-0/image-001-031.png} \\
-        %         $t=15$ min
-        %     \end{minipage}
-        %     \hfill
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-0/image-001-047.png} \\
-        %         $t=23$ min
-        %     \end{minipage}
-        %     \hfill
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-0/image-001-063.png} \\
-        %         $t=30$ min
-        %     \end{minipage}
-        %     \hfill
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-0/image-001-079.png} \\
-        %         $t=38$ min
-        %     \end{minipage}
-        %     \hfill
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-0/image-001-095.png} \\
-        %         $t=46$ min
-        %     \end{minipage}
-
-        %     \vspace{1cm}
-
-        %     \begin{minipage}{0.96\columnwidth}
-        %         \centering
-        %         \includegraphics{Dynamical-48-0/dists-hm-001.pdf}
-        %     \end{minipage}
-
-        %     \vspace{1cm}
-
-        %     \begin{minipage}{0.96\columnwidth}
-        %         \centering
-        %         \includegraphics{Dynamical-48-0/dists-2d-001.pdf}
-        %     \end{minipage}
-
-        %     \vspace{1cm}
-
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-2/image-001-031.png} \\
-        %         $t=15$ min
-        %     \end{minipage}
-        %     \hfill
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-2/image-001-047.png} \\
-        %         $t=23$ min
-        %     \end{minipage}
-        %     \hfill
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-2/image-001-063.png} \\
-        %         $t=30$ min
-        %     \end{minipage}
-        %     \hfill
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-2/image-001-079.png} \\
-        %         $t=38$ min
-        %     \end{minipage}
-        %     \hfill
-        %     \begin{minipage}{0.18\columnwidth}
-        %         \centering
-        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-2/image-001-095.png} \\
-        %         $t=46$ min
-        %     \end{minipage}
-
-        %     \vspace{1cm}
-
-        %     \begin{minipage}{0.96\columnwidth}
-        %         \centering
-        %         \includegraphics{Dynamical-48-2/dists-hm-001.pdf}
-        %     \end{minipage}
-
-        %     \vspace{1cm}
-
-        %     \begin{minipage}{0.96\columnwidth}
-        %         \centering
-        %         \includegraphics{Dynamical-48-2/dists-2d-001.pdf}
-        %     \end{minipage}
-
-        % \end{multicols}
-
-        % \begin{multicols}{3}
-
-        %     \section{Conclusions}
-
-        %     \begin{itemize}
-        %         \item The \textbf{evolution of the chromatin density distribution}, $p(\rho)$, during the deformation \textbf{depends strongly on} the presence and nature of the \textbf{attractive interactions}.
-        %         \item Without attractive interactions, changes in $p(\rho)$ are minor, suggesting that \textbf{passive diffusion and confinement} alone \textbf{cannot explain} the chromatin \textbf{reorganization} seen experimentally \cite{Blazquez2025}.
-        %         \item Introducing \textbf{type I interactions} (self-attraction of heterochromatic particles) leads to \textbf{cluster formation} and a more \textbf{significant redistribution} during migration, indicating that \textbf{phase separation} plays a major role in the response of chromatin to \textbf{mechanical stress}.
-        %         \item Adding \textbf{type II interactions} (attraction to the nuclear envelope) \textbf{limits chromatin mobility} and promotes \textbf{peripheral localization}, reducing the overall reorganization of chromatin.
-        %         \item This third case shows \textbf{less similarity} than the previous one to experimental results in migrating \textbf{cancer cells} \cite{Blazquez2025}, suggesting that this cells have \textbf{weakened interactions with the nuclear envelope}.
-        %         \item Overall, our results highlight how \textbf{chromatin-chromatin and chromatin-envelope interactions} modulate nuclear architecture under stress and may influence the ability of the nucleus to adapt structurally during migration.
-        %     \end{itemize}
-
-        %     \footnotesize
-
-        %     \section{Contact}
-        %     \begin{itemize}
-        %         \item Marco Mendívil-Carboni: mmendi05@ucm.es, +34 91 394 4448
-        %         \item Alejandro Sáinz-Agost: asainz@unizar.es
-        %         \item Fernando Falo: fff@unizar.es
-        %     \end{itemize}
-
-        %     \bibliographystyle{unsrt}
-
-        %     \bibliography{refs}
+        \section{8. Conclusions}
+        \begin{itemize}
+            \item Mean growth rate alone is insufficient to predict evolutionary outcomes in finite populations.
+            \item Demographic constraints shift selection from growth maximization to fluctuation avoidance/resilience.
+            \item The $N_\text{ini}$ transition is dictated by the scaling mismatch between exponential growth selection and power-law extinction risks.
+        \end{itemize}
 
     \end{multicols}
 
-    \vspace{0.5cm}
+    \vspace{1cm}
 
     \begin{center}
-        \color{custom_red}{3rd Biology for Physics \ -- \ Barcelona \ -- \ September 6 - 10, 2026}
+        \color{custom_red}{\large 3rd Biology for Physics \ -- \ Barcelona \ -- \ September 6 - 10, 2026}
     \end{center}
 
 \end{mdframed}
