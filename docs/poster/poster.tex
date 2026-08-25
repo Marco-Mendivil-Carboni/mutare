@@ -1,0 +1,316 @@
+\documentclass[a0,portrait]{a0poster}
+
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+
+\usepackage[margin=4cm]{geometry}
+
+\usepackage{mathtools,amssymb}
+
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{calc, positioning}
+
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage[caption=false]{subfig}
+
+\usepackage[hidelinks,pdfusetitle]{hyperref}
+\usepackage[all]{hypcap}
+\usepackage[capitalize]{cleveref}
+
+\usepackage{multicol}
+\usepackage[export]{adjustbox}
+\usepackage[framemethod=TikZ]{mdframed}
+
+\columnsep=24pt
+
+\definecolor{custom_red}{HTML}{d81e2c}
+
+\titleformat{\section}{\color{custom_red}\Large\bfseries}{}{24pt}{}
+
+\mdfdefinestyle{MyFrame}{
+    linecolor=custom_red,
+    outerlinewidth=2pt,
+    roundcorner=48pt,
+    innertopmargin=\baselineskip,
+    innerbottommargin=\baselineskip,
+    innerrightmargin=24pt,
+    innerleftmargin=24pt,
+    backgroundcolor=white!50!white,
+}
+
+\begin{document}
+
+\begin{mdframed}[style=MyFrame]
+
+    \vspace{0.5cm}
+
+    \hspace{0.5cm}
+    \begin{minipage}[b]{0.4\linewidth}
+        \includegraphics[height=4cm,valign=t]{images/logo-EPS.png}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[b]{0.4\linewidth}
+        \raggedleft
+        \includegraphics[height=4cm,valign=t]{images/logo-UCM.png}
+    \end{minipage}
+    \hspace{1cm}
+
+    \vspace{2cm}
+
+    \begin{minipage}[h]{0.98\linewidth}
+        \centering \huge \textcolor{custom_red}{
+            \textbf{Evolutionary adaptation through bet-hedging in finite populations under fluctuating environments}
+        }\\
+        \smallskip
+        \Large \underline{Marco Mendívil-Carboni}$^1$, Juan J. Mazo$^1$ and Luis Dinis$^1$\\
+        \smallskip
+        \normalsize $^1$Grupo Interdisciplinar de Sistemas Complejos (GISC) and Departamento de Estructura de la Materia, Física Térmica y Electrónica, Universidad Complutense de Madrid, 28040 Madrid, Spain\\
+    \end{minipage}
+
+    \vspace{0.5cm}
+
+    \begin{multicols}{3}
+
+        \section{Introduction}
+
+        % Nuclear \textbf{chromatin structure and dynamics} play an important role in processes such as \textbf{gene regulation} and cell fate decisions in developmental biology, as well as other processes such as epigenetic modifications \cite{Misteli2020}. This encourages us to study how they change when the nucleus deforms under \textbf{mechanical forces} and in particular to investigate \textbf{cell migration}, a fundamental physiological function that also plays a central role in pathological processes, particularly in \textbf{cancer metastasis} (in which cancer cells deform extensively through narrow constrictions to invade distant tissues). In this poster, we present and analyze a \textbf{polymeric model of chromatin} with the aim of understanding some of the changes in its structure and dynamics when the nucleus undergoes this kinds of deformations \cite{DeCorato2024}.
+
+        % \section{Polymeric model}
+
+        % In our coarse grained model, adapted from \cite{Bajpai2021}:
+        % \begin{itemize}
+        %     \item We describe chromatin as a \textbf{beads-and-springs copolymer} chain composed of $N=49883$ particles of two types, which represent respectively \textbf{heterochromatin and euchromatin}.
+        %     \item Heterochromatin and euchromatin \textbf{domains} are arranged along the chain following an \textbf{exponential length distribution}, with an average domain size of $48$ beads, maintaining for simplicity an overall 50/50 proportion of both chromatin types.
+        %     \item The chain is confined within a shell that models the nuclear envelope and \textbf{evolves with time}: from a cylinder to a peanut-shaped geometry of constant height and finally back to a cylinder \textbf{as the nucleus migrates} from one side of the constriction to the other.
+        %     \item The volume of the nucleus is such that the \textbf{volume density of chromatin} is $\rho=0.2$ (well within the physiological range \cite{Maeshima2020}).
+        %     \item The rest of the interactions are modeled by the \textbf{Wang-Frenkel potential} \cite{Wang2020} (qualitatively similar to the LJ potential)
+        %           \begin{equation*}
+        %               V_{\text{WF}}=\sum_{i=0}^{N-1}\sum_{j=i+1}^{N-1}\varepsilon\left(\frac{1}{d_{ij}^{2}}-1\right)\left(\frac{4}{d_{ij}^{2}}-1\right)^{2}
+        %           \end{equation*}
+        %     \item To model \textbf{steric repulsion} (between all pairs of beads as well as between beads and the confining shell) we make use of the \textbf{repulsive part} of this potential.
+        %     \item Additionally we will consider the cases in which \textbf{heterochromatic} particles also feel the \textbf{attractive} part of this potential in the interaction between \textbf{themselves} (\textbf{type I} interaction) and with the nuclear \textbf{envelope} (\textbf{type II} interaction).
+        % \end{itemize}
+
+        % \vspace{1cm}
+
+        %     \begin{minipage}{0.96\columnwidth}
+        %         \centering
+        %         \includegraphics[scale=1.5]{diagram.pdf}
+        %     \end{minipage}
+
+        %     \section{Simulation results}
+
+        %     \begin{itemize}
+        %         \item We ran \textbf{Brownian dynamics} simulations of this model with $\geq2\cdot10^8$ timesteps which could represent $\sim1$ hour of real time, with the first and last 15 minutes for \textbf{equilibration} and a 30 minute \textbf{migration} (comparable to experimental timescales).
+        %         \item Simulations were conducted under three conditions:
+        %               \begin{enumerate}
+        %                   \item \textbf{No} attractive interactions (\textbf{left column})
+        %                   \item Only \textbf{type I} interactions (\textbf{center column})
+        %                   \item Both \textbf{type I and type II} interactions (\textbf{right column})
+        %               \end{enumerate}
+        %         \item In every case \textbf{multiple simulations} were performed with \textbf{similar results} but only \textbf{one is shown} for illustrative purposes.
+        %         \item We analyzed chromatin \textbf{spatial organization} by projecting the bead positions into the XY plane and binning them into a
+        %               \textbf{square grid} creating chromatin \textbf{density maps} (\textbf{top row}), and computing the chromatin \textbf{density distribution}, $p(\rho)$ (\textbf{middle and bottom rows}), from those.
+        %         \item In the \textbf{first case}:
+        %               \begin{itemize}
+        %                   \item Chromatin density maps are excessively \textbf{uniform} (in comparison with \textbf{experiments} \cite{Blazquez2025}).
+        %                   \item During the deformation $p(\rho)$ \textbf{broadens modestly} and its \textbf{peak decreases} only \textbf{slightly}.
+        %               \end{itemize}
+        %         \item In the \textbf{second case}:
+        %               \begin{itemize}
+        %                   \item The characteristic \textbf{phase separation} of chromatin appears in the density maps.
+        %                   \item There is a \textbf{bigger spread} of $p(\rho)$ throughout the simulation.
+        %                   \item During the deformation $p(\rho)$ \textbf{changes} much more \textbf{drastically}.
+        %                   \item \textbf{After} the deformation there appear to be \textbf{fewer and bigger} condensed chromatin \textbf{clusters}.
+        %               \end{itemize}
+        %         \item In the \textbf{third case}:
+        %               \begin{itemize}
+        %                   \item Heterochromatin accumulates at the \textbf{nuclear periphery}.
+        %                   \item Like in the first case $p(\rho)$ is \textbf{less disperse}.
+        %               \end{itemize}
+        %     \end{itemize}
+
+        % \end{multicols}
+
+        % \begin{multicols}{3}
+
+        %     \vspace{1cm}
+
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Null-48-0/image-001-031.png} \\
+        %         $t=15$ min
+        %     \end{minipage}
+        %     \hfill
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Null-48-0/image-001-047.png} \\
+        %         $t=23$ min
+        %     \end{minipage}
+        %     \hfill
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Null-48-0/image-001-063.png} \\
+        %         $t=30$ min
+        %     \end{minipage}
+        %     \hfill
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Null-48-0/image-001-079.png} \\
+        %         $t=38$ min
+        %     \end{minipage}
+        %     \hfill
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Null-48-0/image-001-095.png} \\
+        %         $t=46$ min
+        %     \end{minipage}
+
+        %     \vspace{1cm}
+
+        %     \begin{minipage}{0.96\columnwidth}
+        %         \centering
+        %         \includegraphics{Null-48-0/dists-hm-001.pdf}
+        %     \end{minipage}
+
+        %     \vspace{1cm}
+
+        %     \begin{minipage}{0.96\columnwidth}
+        %         \centering
+        %         \includegraphics{Null-48-0/dists-2d-001.pdf}
+        %     \end{minipage}
+
+        %     \vspace{1cm}
+
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-0/image-001-031.png} \\
+        %         $t=15$ min
+        %     \end{minipage}
+        %     \hfill
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-0/image-001-047.png} \\
+        %         $t=23$ min
+        %     \end{minipage}
+        %     \hfill
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-0/image-001-063.png} \\
+        %         $t=30$ min
+        %     \end{minipage}
+        %     \hfill
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-0/image-001-079.png} \\
+        %         $t=38$ min
+        %     \end{minipage}
+        %     \hfill
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-0/image-001-095.png} \\
+        %         $t=46$ min
+        %     \end{minipage}
+
+        %     \vspace{1cm}
+
+        %     \begin{minipage}{0.96\columnwidth}
+        %         \centering
+        %         \includegraphics{Dynamical-48-0/dists-hm-001.pdf}
+        %     \end{minipage}
+
+        %     \vspace{1cm}
+
+        %     \begin{minipage}{0.96\columnwidth}
+        %         \centering
+        %         \includegraphics{Dynamical-48-0/dists-2d-001.pdf}
+        %     \end{minipage}
+
+        %     \vspace{1cm}
+
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-2/image-001-031.png} \\
+        %         $t=15$ min
+        %     \end{minipage}
+        %     \hfill
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-2/image-001-047.png} \\
+        %         $t=23$ min
+        %     \end{minipage}
+        %     \hfill
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-2/image-001-063.png} \\
+        %         $t=30$ min
+        %     \end{minipage}
+        %     \hfill
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-2/image-001-079.png} \\
+        %         $t=38$ min
+        %     \end{minipage}
+        %     \hfill
+        %     \begin{minipage}{0.18\columnwidth}
+        %         \centering
+        %         \includegraphics[trim={0 24in 0 24in},clip,width=1.75\textwidth,angle=90]{Dynamical-48-2/image-001-095.png} \\
+        %         $t=46$ min
+        %     \end{minipage}
+
+        %     \vspace{1cm}
+
+        %     \begin{minipage}{0.96\columnwidth}
+        %         \centering
+        %         \includegraphics{Dynamical-48-2/dists-hm-001.pdf}
+        %     \end{minipage}
+
+        %     \vspace{1cm}
+
+        %     \begin{minipage}{0.96\columnwidth}
+        %         \centering
+        %         \includegraphics{Dynamical-48-2/dists-2d-001.pdf}
+        %     \end{minipage}
+
+        % \end{multicols}
+
+        % \begin{multicols}{3}
+
+        %     \section{Conclusions}
+
+        %     \begin{itemize}
+        %         \item The \textbf{evolution of the chromatin density distribution}, $p(\rho)$, during the deformation \textbf{depends strongly on} the presence and nature of the \textbf{attractive interactions}.
+        %         \item Without attractive interactions, changes in $p(\rho)$ are minor, suggesting that \textbf{passive diffusion and confinement} alone \textbf{cannot explain} the chromatin \textbf{reorganization} seen experimentally \cite{Blazquez2025}.
+        %         \item Introducing \textbf{type I interactions} (self-attraction of heterochromatic particles) leads to \textbf{cluster formation} and a more \textbf{significant redistribution} during migration, indicating that \textbf{phase separation} plays a major role in the response of chromatin to \textbf{mechanical stress}.
+        %         \item Adding \textbf{type II interactions} (attraction to the nuclear envelope) \textbf{limits chromatin mobility} and promotes \textbf{peripheral localization}, reducing the overall reorganization of chromatin.
+        %         \item This third case shows \textbf{less similarity} than the previous one to experimental results in migrating \textbf{cancer cells} \cite{Blazquez2025}, suggesting that this cells have \textbf{weakened interactions with the nuclear envelope}.
+        %         \item Overall, our results highlight how \textbf{chromatin-chromatin and chromatin-envelope interactions} modulate nuclear architecture under stress and may influence the ability of the nucleus to adapt structurally during migration.
+        %     \end{itemize}
+
+        %     \footnotesize
+
+        %     \section{Contact}
+        %     \begin{itemize}
+        %         \item Marco Mendívil-Carboni: mmendi05@ucm.es, +34 91 394 4448
+        %         \item Alejandro Sáinz-Agost: asainz@unizar.es
+        %         \item Fernando Falo: fff@unizar.es
+        %     \end{itemize}
+
+        %     \bibliographystyle{unsrt}
+
+        %     \bibliography{refs}
+
+    \end{multicols}
+
+    \vspace{0.5cm}
+
+    \begin{center}
+        \color{custom_red}{3rd Biology for Physics \ -- \ Barcelona \ -- \ September 6 - 10, 2026}
+    \end{center}
+
+\end{mdframed}
+
+\end{document}
