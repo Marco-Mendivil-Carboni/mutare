@@ -46,7 +46,6 @@
 % =========================================================
 %  BLOCK STYLES
 % =========================================================
-% Plain section block: colored bold title, no border/box (matches original design)
 \defineblockstyle{PlainBlock}{
     titlewidthscale=1, bodywidthscale=1, titleleft, roundedcorners=16, linewidth=0pt,
     titleinnersep=16pt, bodyinnersep=16pt
@@ -56,7 +55,6 @@
         (blockbody.south west) rectangle (blockbody.north east);
 }
 
-% Takeaway box: rounded red border, light red fill, no title
 \defineblockstyle{TakeawayBlock}{
     titlewidthscale=1, bodywidthscale=1, titlecenter,
     titleoffsetx=0pt, titleoffsety=0pt, bodyoffsetx=0pt, bodyoffsety=0pt,
@@ -68,10 +66,8 @@
         (blockbody.south west) rectangle (blockbody.north east);
 }
 
-% \useblockstyle{PlainBlock}
-
 % =========================================================
-%  TITLE CONTENT (logos left/right, title, authors, affiliation)
+%  TITLE CONTENT
 % =========================================================
 \titlegraphic{
     \begin{minipage}{0.96\linewidth}
@@ -101,7 +97,7 @@
 \makeatother
 
 % =========================================================
-%  Reusable model-schematic diagram (same visual style as the paper's Fig. 1)
+%  Reusable model-schematic diagram
 % =========================================================
 \newcommand{\modelschematic}{%
     \begin{center}
@@ -150,7 +146,7 @@
                 \node at (16.3,-1.8) {(c) Inheritance};
             \end{tikzpicture}%
         }
-        \captionof{figure}{\textbf{Model Schematic:} (a) The environment switches stochastically between two states. (b) Individuals reproduce and die at phenotype- and environment-dependent rates. (c) Offspring usually inherit the parent's strategy $s$, but mutate to a new strategy $s_\text{mut}$ with probability $p_\text{mut}$.}
+        \captionof{figure}{\textbf{Model Schematic:} (a) Stochastic environment. (b) Birth-death process. (c) Strategy inheritance and mutation.}
     \end{center}
 }
 
@@ -159,7 +155,7 @@
 \maketitle
 
 % =========================================================
-%  KEY TAKEAWAY (full width, above the three columns)
+%  KEY TAKEAWAY
 % =========================================================
 \begin{columns}
     \column{1}
@@ -233,30 +229,42 @@
         \end{center}
     }
 
-    \block{Heuristic Interpretation}{
+    % ----------------------------- COLUMN 3 -----------------------------
+    \column{0.3333}
+
+    \block{Heuristic Derivation \& Validation}{
         \vspace{0.6em}
         \begin{itemize}
-            \item Long-term strategy probability distribution $p(\bar{s})$ balance:
+            \item \textbf{Selection vs. Survival:} Strategy distribution $p(\bar{s})$ balances growth selection $\exp(N_\text{ini}\cdot\langle\mu\rangle)$ against lifetime survival before extinction or mutant replacement:
                   \begin{equation*}
                       p(\bar{s}) \propto \frac{\exp(N_\text{ini} \cdot \langle\mu\rangle(\bar{s}))}{r_\text{ext}(N_\text{ini},\bar{s}) + p_\text{mut} \cdot \langle\mu_b\rangle(\bar{s})}
                   \end{equation*}
-            \item \textbf{Scaling Mismatch:} Growth selection enters \textbf{exponentially} in the numerator, while extinction rate scales as a \textbf{power-law} $r_\text{ext} \sim N_\text{ini}^{-\alpha}$ in the denominator.
-            \item Extinction risk dominates at low $N_\text{ini}$; growth selection inevitably prevails as $N_\text{ini} \to \infty$.
+            \item \textbf{Scaling Mismatch:} Extinction requires adverse episodes of duration $T \sim \ln(N_\text{ini})/\lambda$, yielding power-law decay $r_\text{ext} \sim N_\text{ini}^{-\alpha}$. Exponential growth dominates as $N_\text{ini} \to \infty$; power-law extinction dictates low $N_\text{ini}$.
         \end{itemize}
+        \vspace{0.4em}
+        \begin{center}
+            \begin{minipage}{0.48\linewidth}
+                \centering
+                \includegraphics[width=\linewidth]{figures/asymmetric/fixed/exp_avg_avg_strat_phe_0.pdf}
+            \end{minipage}
+            \hfill
+            \begin{minipage}{0.48\linewidth}
+                \centering
+                \includegraphics[width=\linewidth]{figures/asymmetric/fixed/avg_avg_strat_phe_0.pdf}
+            \end{minipage}
+            \captionof{figure}{\textbf{Validation:} Expected average strategy from heuristic model (left) vs. observed evolutionary simulations (right).}
+        \end{center}
     }
-
-    % ----------------------------- COLUMN 3 -----------------------------
-    \column{0.3333}
 
     \block{Robustness Analysis}{
         \vspace{0.6em}
         \begin{itemize}
             \item \textbf{Incremental Mutations:} Continuous Gaussian mutations ($\sigma_\text{mut}=0.1$) yield qualitatively identical strategy transitions.
-            \item \textbf{Symmetric Adaptation Set:} Re-evaluated under symmetric environments, confirming population constraints generalizable across different fitness landscapes.
+            \item \textbf{Symmetric Adaptation:} Re-evaluated under symmetric environments, confirming generalizability across fitness landscapes.
         \end{itemize}
         \begin{center}
-            \includegraphics[width=0.95\linewidth]{figures/symmetric/n_agents_i/avg_avg_strat_phe_0.pdf}
-            \captionof{figure}{\textbf{Symmetric Adaptation:} Evolved strategy under the Symmetric-Adaptation (SA) parameter set.}
+            \includegraphics[width=0.85\linewidth]{figures/symmetric/n_agents_i/avg_avg_strat_phe_0.pdf}
+            \captionof{figure}{\textbf{Symmetric Adaptation:} Evolved strategy under the SA parameter set.}
         \end{center}
     }
 
@@ -267,10 +275,10 @@
             \item Demographic constraints shift selection from growth maximization to fluctuation avoidance/resilience.
             \item The $N_\text{ini}$ transition is dictated by the scaling mismatch between exponential growth selection and power-law extinction risks.
         \end{itemize}
-        \vspace{0.5em}
+        \vspace{0.4em}
         \begin{center}
-            \qrcode[height=6cm]{https://github.com/Marco-Mendivil-Carboni/mutare}
-            \captionof{figure}{\textbf{Code \& Data:} Scan for the simulation source code (Gillespie algorithm implementation) used in this study.}
+            \qrcode[height=5.2cm]{https://github.com/Marco-Mendivil-Carboni/mutare}
+            \captionof{figure}{\textbf{Code \& Data:} Scan for the simulation source code (Gillespie algorithm implementation).}
         \end{center}
     }
 
