@@ -1,141 +1,240 @@
-\documentclass[a0,portrait]{a0poster}
+\documentclass[a0paper,portrait]{tikzposter}
 
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
-
-\usepackage[margin=4cm]{geometry}
 
 \usepackage{mathtools,amssymb}
 
 \usepackage{graphicx}
 \usepackage{xcolor}
-\usepackage{tikz}
-\usetikzlibrary{calc, positioning}
+\usetikzlibrary{calc,positioning}
 
-\usepackage{titlesec}
 \usepackage{booktabs}
 \usepackage{caption}
 
 \usepackage[hidelinks,pdfusetitle]{hyperref}
-\usepackage[all]{hypcap}
 \usepackage[capitalize]{cleveref}
 
-\usepackage{multicol}
-\usepackage[export]{adjustbox}
-\usepackage[framemethod=TikZ]{mdframed}
+\usepackage{qrcode}
 
-\columnsep=32pt
+\captionsetup{hypcap=false}
 
-\definecolor{custom_red}{HTML}{d81e2c}
+\tikzposterlatexaffectionproofoff
 
-\titleformat{\section}{\color{custom_red}\Large\bfseries}{}{24pt}{}
+\makeatletter
+\define@key{title}{titletextscale}{\def\TP@titletextscale{#1}}
+\makeatletter
 
-\mdfdefinestyle{MyFrame}{
-    linecolor=custom_red,
-    outerlinewidth=2pt,
-    roundcorner=48pt,
-    innertopmargin=\baselineskip,
-    innerbottommargin=\baselineskip,
-    innerrightmargin=24pt,
-    innerleftmargin=24pt,
-    backgroundcolor=white!50!white,
+\definecolor{red_UCM}{HTML}{b01131}
+
+\colorlet{backgroundcolor}{white}
+\colorlet{framecolor}{red_UCM}
+\colorlet{titlefgcolor}{red_UCM}
+\colorlet{titlebgcolor}{white}
+\colorlet{blocktitlebgcolor}{white}
+\colorlet{blocktitlefgcolor}{red_UCM}
+\colorlet{blockbodybgcolor}{red}
+\colorlet{blockbodyfgcolor}{black}
+
+\definetitlestyle{ourtitle}{
+    width=\linewidth, roundedcorners=0, linewidth=0pt,
+    titletotopverticalspace=15mm, titletoblockverticalspace=15mm,
+    innersep=10mm
+}{}
+\usetitlestyle{ourtitle}
+
+% =========================================================
+%  BLOCK STYLES
+% =========================================================
+% Plain section block: colored bold title, no border/box (matches original design)
+\defineblockstyle{PlainBlock}{
+    titlewidthscale=1, bodywidthscale=1, titleleft, roundedcorners=16, linewidth=0pt,
+    titleinnersep=16pt, bodyinnersep=16pt
+}{
+    \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth,
+        color=red_UCM]
+        (blockbody.south west) rectangle (blockbody.north east);
+}
+
+% Takeaway box: rounded red border, light red fill, no title
+\defineblockstyle{TakeawayBlock}{
+    titlewidthscale=1, bodywidthscale=1, titlecenter,
+    titleoffsetx=0pt, titleoffsety=0pt, bodyoffsetx=0pt, bodyoffsety=0pt,
+    bodyverticalshift=0pt, roundedcorners=20, linewidth=3pt,
+    titleinnersep=0pt, bodyinnersep=12mm
+}{
+    \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth,
+        color=red_UCM, fill=red_UCM!8]
+        (blockbody.south west) rectangle (blockbody.north east);
+}
+
+% \useblockstyle{PlainBlock}
+
+% =========================================================
+%  TITLE CONTENT (logos left/right, title, authors, affiliation)
+% =========================================================
+\titlegraphic{
+    \begin{minipage}{0.96\linewidth}
+        \begin{minipage}[c]{0.35\linewidth}
+            \raggedright\includegraphics[height=4cm]{images/logo-EPS.png}
+        \end{minipage}
+        \hfill
+        \begin{minipage}[c]{0.35\linewidth}
+            \raggedleft\includegraphics[height=4cm]{images/logo-UCM.png}
+        \end{minipage}
+        \vspace{1em}
+    \end{minipage}
+}
+
+\makeatletter
+\renewcommand{\TP@maketitle}{
+    \centering
+    \@titlegraphic \\[1cm]
+    \centering
+    {\color{red_UCM}\bfseries\Huge
+        Evolutionary adaptation through bet-hedging in finite populations under fluctuating environments\par}
+    \vspace{0.8em}
+    {\Large \underline{Marco Mendívil-Carboni}$^1$, Juan J. Mazo$^1$ and Luis Dinis$^1$\par}
+    \vspace{0.5em}
+    {\normalsize $^1$Grupo Interdisciplinar de Sistemas Complejos (GISC) and Departamento de Estructura de la Materia, Física Térmica y Electrónica, Universidad Complutense de Madrid, 28040 Madrid, Spain\par}
+}
+\makeatother
+
+% =========================================================
+%  Reusable model-schematic diagram (same visual style as the paper's Fig. 1)
+% =========================================================
+\newcommand{\modelschematic}{%
+    \begin{center}
+        \resizebox{0.98\linewidth}{!}{%
+            \begin{tikzpicture}
+                % ---- Panel (a): environment ----
+                \tikzset{
+                    environment/.style={draw, rounded corners, minimum size=0.9cm, fill=lightgray!25},
+                    rate/.style={->, >=stealth, thick},
+                }
+                \node[environment] (e1) at (0,0) {$1$};
+                \node[environment, right=2.5cm of e1] (e2) {$2$};
+                \draw[rate, bend left=20] (e1) to node[above] {$\omega_t(1,2)$} (e2);
+                \draw[rate, bend left=20] (e2) to node[below] {$\omega_t(2,1)$} (e1);
+                \node at ($(e1)!0.5!(e2)$) [yshift=-1.8cm] {(a) Environment};
+
+                % ---- Panel (b): birth-death ----
+                \tikzset{
+                    agent/.style={draw, rounded corners, minimum height=0.9cm, minimum width=1.5cm, fill=lightgray!25},
+                    rate/.style={->, >=stealth, thick},
+                }
+                \node[agent] (agent) at (0,6) {$\phi, s$};
+                \node[agent, right=2.5cm of agent, yshift=+0.9cm] (death) {$\varnothing$};
+                \node[agent, right=2.5cm of agent, yshift=-0.9cm] (agent_copy) {$\phi, s$};
+                \node[right=0.15cm of agent_copy, draw=none] (plus) {$+$};
+                \node[agent, right=0.15cm of plus] (offspring) {$\phi_o, s_o$};
+                \draw[rate, bend left=10] (agent) to node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
+                \draw[rate, bend right=10] (agent) to node[sloped, midway, below] {$\omega_b(e,\phi)$} (agent_copy);
+                \node at (8.8,-1.8) {(b) Birth-death};
+
+                % ---- Panel (c): strategy inheritance ----
+                \tikzset{
+                    trait/.style={},
+                    prob/.style={->},
+                }
+                \node[trait] (phi_o) at (0,12) {$\phi_o=$};
+                \node[trait, right=1.1cm of phi_o, yshift=+0.7cm] (A) {$A$};
+                \node[trait, right=1.1cm of phi_o, yshift=-0.7cm] (B) {$B$};
+                \draw[prob] (phi_o) -- node[sloped, midway, above] {$s(A)$} (A);
+                \draw[prob] (phi_o) -- node[sloped, midway, below] {$s(B)$} (B);
+                \node[trait, right=1.7cm of phi_o] (s_o) {$s_o=$};
+                \node[trait, right=1.1cm of s_o, yshift=+0.7cm] (s) {$s$};
+                \node[trait, right=1.1cm of s_o, yshift=-0.7cm] (s_mut) {$s_\text{mut}$};
+                \draw[prob] (s_o) -- node[sloped, midway, above] {$1-p_\text{mut}$} (s);
+                \draw[prob] (s_o) -- node[sloped, midway, below] {$p_\text{mut}$} (s_mut);
+                \node at (16.3,-1.8) {(c) Inheritance};
+            \end{tikzpicture}%
+        }
+        \captionof{figure}{\textbf{Model Schematic:} (a) The environment switches stochastically between two states. (b) Individuals reproduce and die at phenotype- and environment-dependent rates. (c) Offspring usually inherit the parent's strategy $s$, but mutate to a new strategy $s_\text{mut}$ with probability $p_\text{mut}$.}
+    \end{center}
 }
 
 \begin{document}
 
-\begin{mdframed}[style=MyFrame]
+\maketitle
 
-    \vspace{0.5cm}
+% =========================================================
+%  KEY TAKEAWAY (full width, above the three columns)
+% =========================================================
+\begin{columns}
+    \column{1}
+    \useblockstyle{TakeawayBlock}
+    \block{}{
+        \centering \Large
+        \textbf{\textcolor{red_UCM}{Key takeaway:}} Evolution in a finite population does not simply chase the highest average growth rate --- it balances growth against extinction risk. Small populations evolve towards safer, more resilient bet-hedging strategies, while only large populations converge on the growth-maximizing one.
+    }
+\end{columns}
 
-    \hspace{0.5cm}
-    \begin{minipage}[b]{0.4\linewidth}
-        \includegraphics[height=4cm,valign=t]{images/logo-EPS.png}
-    \end{minipage}
-    \hfill
-    \begin{minipage}[b]{0.4\linewidth}
-        \raggedleft
-        \includegraphics[height=4cm,valign=t]{images/logo-UCM.png}
-    \end{minipage}
-    \hspace{1cm}
+\useblockstyle{PlainBlock}
 
-    \vspace{2cm}
+% =========================================================
+%  MAIN BODY: three columns
+% =========================================================
+\begin{columns}
 
-    \begin{minipage}[h]{0.98\linewidth}
-        \centering \huge \textcolor{custom_red}{
-            \textbf{Evolutionary adaptation through bet-hedging in finite populations under fluctuating environments}
-        }\\
-        \smallskip
-        \Large \underline{Marco Mendívil-Carboni}$^1$, Juan J. Mazo$^1$ and Luis Dinis$^1$\\
-        \smallskip
-        \normalsize $^1$Grupo Interdisciplinar de Sistemas Complejos (GISC) and Departamento de Estructura de la Materia, Física Térmica y Electrónica, Universidad Complutense de Madrid, 28040 Madrid, Spain\\
-    \end{minipage}
+    % ----------------------------- COLUMN 1 -----------------------------
+    \column{0.33}
 
-    \vspace{1.5cm}
-
-    \large % Elevates overall font scaling within the body
-    \begin{multicols}{3}
-
-        \section{Introduction \& Objectives}
+    \block{Introduction \& Objectives}{
+        \vspace{0.6em}
         \begin{itemize}
             \item Natural populations face unpredictable, fluctuating environments under finite resource constraints.
             \item While classic evolutionary theory suggests selection favors strategies maximizing mean growth rate $\langle \mu \rangle$, finite populations subject to demographic constraints face non-negligible extinction risks.
             \item \textbf{Key Question:} Does natural selection favor growth-maximizing strategies or fluctuation-reducing resilience strategies when population capacity is limited?
         \end{itemize}
+    }
 
-        \section{Stochastic Model Framework}
+    \block{Stochastic Model Framework}{
+        \vspace{0.6em}
         \begin{itemize}
             \item \textbf{Environment $e \in \{1,2\}$:} Continuous-time Markov process with transition rates $\omega_t(e,e')$.
             \item \textbf{Population ($N \le N_\text{ini}$):} Birth-death process where individuals carry strategy $s(A) = 1 - s(B)$ regulating phenotypic diversity.
             \item \textbf{Mutations:} Offspring inherit parent strategy or mutate with probability $p_\text{mut}$.
         \end{itemize}
+        \modelschematic
+    }
 
-        % \vspace{0.5em}
-        % \begin{table}[H]
-        %     \centering
-        %     \caption*{\textbf{Persister--Resistant (PR) Parameters}}
-        %     \small
-        %     \begin{tabular}{c c c}
-        %         \toprule
-        %         Rates                    & Env 1 (Favorable)  & Env 2 (Harsh)      \\
-        %         \midrule
-        %         Birth $\omega_b(e,\phi)$ & $A: 1.0,\; B: 0.2$ & $A: 0.0,\; B: 0.0$ \\
-        %         Death $\omega_d(e,\phi)$ & $A: 0.0,\; B: 0.0$ & $A: 1.0,\; B: 0.1$ \\
-        %         \bottomrule
-        %     \end{tabular}
-        % \end{table}
+    \block{Growth vs. Survival Trade-off}{
+        \vspace{0.6em}
+        \begin{tikzfigure}[\textbf{Pareto Front:} Extinction rate $r_\text{ext}$ vs. growth rate $\langle\mu\rangle$. Evolved strategies select a middle-ground compromise between growth and survival.]
+            \includegraphics[width=0.95\linewidth]{figures/asymmetric/strat_phe_0_i/rates.pdf}
+        \end{tikzfigure}
+    }
 
-        \section{Growth vs. Survival Trade-off}
-        \begin{center}
-            \includegraphics[scale=2.986]{figures/asymmetric/strat_phe_0_i/rates.pdf}
-            \captionof{figure}{\textbf{Pareto Front:} Extinction rate $r_\text{ext}$ vs. growth rate $\langle\mu\rangle$. Evolved strategies select a middle-ground compromise between growth and survival.}
-        \end{center}
+    % ----------------------------- COLUMN 2 -----------------------------
+    \column{0.33}
 
-        \columnbreak
-
-        % ==================== COLUMN 2 ====================
-        \section{Strategy Trajectories \& Fixation}
+    \block{Strategy Trajectories \& Fixation}{
+        \vspace{0.6em}
         \begin{itemize}
             \item \textbf{Rapid Fixation:} Advancing mutant lineages quickly dominate the population structure.
             \item \textbf{Strategy Drift:} Narrow strategy variance $\sigma_s$ leads to coherent exploration of strategy space over long time scales.
         \end{itemize}
-
         \begin{center}
-            \includegraphics[scale=2.986]{figures/asymmetric/time_series/avg_strat_phe_0.pdf}
+            \includegraphics[width=0.95\linewidth]{figures/asymmetric/time_series/avg_strat_phe_0.pdf}
             \captionof{figure}{\textbf{Time Series Dynamics:} Mean strategy trajectory over time. Dotted vertical lines mark stochastic extinction events.}
         \end{center}
+    }
 
-        \section{Population Constraint Modulation}
+    \block{Population Constraint Modulation}{
+        \vspace{0.6em}
         \begin{itemize}
             \item \textbf{Compromise Strategy:} Evolution selects strategies strictly between growth maximization ($s(A) \sim 0.8$) and extinction minimization ($s(A) \sim 0.0$).
             \item \textbf{Scaling Transition:} Large $N_\text{ini}$ converges to growth maximization, whereas small $N_\text{ini}$ favors resilient strategies to avoid extinction.
         \end{itemize}
-
         \begin{center}
-            \includegraphics[scale=2.986]{figures/asymmetric/n_agents_i/avg_avg_strat_phe_0.pdf}
+            \includegraphics[width=0.95\linewidth]{figures/asymmetric/n_agents_i/avg_avg_strat_phe_0.pdf}
             \captionof{figure}{\textbf{Transition:} Evolved strategy $\langle\bar{s}\rangle(A)$ vs. initial carrying capacity $N_\text{ini}$.}
         \end{center}
+    }
 
-        \section{Heuristic Interpretation}
+    \block{Heuristic Interpretation}{
+        \vspace{0.6em}
         \begin{itemize}
             \item Long-term strategy probability distribution $p(\bar{s})$ balance:
                   \begin{equation*}
@@ -144,33 +243,44 @@
             \item \textbf{Scaling Mismatch:} Growth selection enters \textbf{exponentially} in the numerator, while extinction rate scales as a \textbf{power-law} $r_\text{ext} \sim N_\text{ini}^{-\alpha}$ in the denominator.
             \item Extinction risk dominates at low $N_\text{ini}$; growth selection inevitably prevails as $N_\text{ini} \to \infty$.
         \end{itemize}
+    }
 
-        \section{7. Robustness Analysis}
+    % ----------------------------- COLUMN 3 -----------------------------
+    \column{0.33}
+
+    \block{Robustness Analysis}{
+        \vspace{0.6em}
         \begin{itemize}
             \item \textbf{Incremental Mutations:} Continuous Gaussian mutations ($\sigma_\text{mut}=0.1$) yield qualitatively identical strategy transitions.
             \item \textbf{Symmetric Adaptation Set:} Re-evaluated under symmetric environments, confirming population constraints generalizable across different fitness landscapes.
         \end{itemize}
-
         \begin{center}
-            \includegraphics[scale=2.986]{figures/symmetric/n_agents_i/avg_avg_strat_phe_0.pdf}
+            \includegraphics[width=0.95\linewidth]{figures/symmetric/n_agents_i/avg_avg_strat_phe_0.pdf}
             \captionof{figure}{\textbf{Symmetric Adaptation:} Evolved strategy under the Symmetric-Adaptation (SA) parameter set.}
         \end{center}
+    }
 
-        \section{8. Conclusions}
+    \block{Conclusions}{
+        \vspace{0.6em}
         \begin{itemize}
             \item Mean growth rate alone is insufficient to predict evolutionary outcomes in finite populations.
             \item Demographic constraints shift selection from growth maximization to fluctuation avoidance/resilience.
             \item The $N_\text{ini}$ transition is dictated by the scaling mismatch between exponential growth selection and power-law extinction risks.
         \end{itemize}
+        \vspace{0.5em}
+        \begin{center}
+            \qrcode[height=6cm]{https://github.com/Marco-Mendivil-Carboni/mutare}
+            \captionof{figure}{\textbf{Code \& Data:} Scan for the simulation source code (Gillespie algorithm implementation) used in this study.}
+        \end{center}
+    }
 
-    \end{multicols}
+\end{columns}
 
-    \vspace{1cm}
-
-    \begin{center}
-        \color{custom_red}{\large 3rd Biology for Physics \ -- \ Barcelona \ -- \ September 6 - 10, 2026}
-    \end{center}
-
-\end{mdframed}
+\begin{columns}
+    \column{1}
+    \block{}{
+        \centering {\color{red_UCM}\large 3rd Biology for Physics \ -- \ Barcelona \ -- \ September 6 - 10, 2026\par}
+    }
+\end{columns}
 
 \end{document}
