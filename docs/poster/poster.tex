@@ -89,58 +89,70 @@
     }
 
     \block{Stochastic Model Framework}{
-        \vspace{0.6em}
-        \begin{itemize}
-            \item \textbf{Environment $e \in \{1,2\}$:} Continuous-time Markov process with transition rates $\omega_t(e,e')$.
-            \item \textbf{Population ($N \le N_\text{ini}$):} Birth-death process where individuals carry strategy $s(A) = 1 - s(B)$ regulating phenotypic diversity.
-            \item \textbf{Mutations:} Offspring inherit parent strategy or mutate with probability $p_\text{mut}$.
-        \end{itemize}
+        % \vspace{0.6em}
+        % \begin{itemize}
+        %     \item \textbf{Environment $e \in \{1,2\}$:} Continuous-time Markov process with transition rates $\omega_t(e,e')$.
+        %     \item \textbf{Population ($N \le N_\text{ini}$):} Birth-death process where individuals carry strategy $s(A) = 1 - s(B)$ regulating phenotypic diversity.
+        %     \item \textbf{Mutations:} Offspring inherit parent strategy or mutate with probability $p_\text{mut}$.
+        % \end{itemize}
         \begin{center}
-            \begin{tikzpicture}[line width=0.4mm]
-                \tikzset{
+            \begin{minipage}{\linewidth}
+                \centering
+                \begin{tikzpicture}[line width=0.4mm]
+                    \tikzset{
                     environment/.style={draw, rounded corners, minimum size=1.875cm, fill=lightgray!25},
                     rate/.style={->, >={Stealth[scale=2]}},
                     node distance=6.875cm
-                }
-                \node[environment] (e1) {$1$};
-                \node[environment, right of=e1] (e2) {$2$};
-                \draw[rate, bend left=20] (e1) to node[above] {$\omega_t(1,2)$} (e2);
-                \draw[rate, bend left=20] (e2) to node[below] {$\omega_t(2,1)$} (e1);
-            \end{tikzpicture}
-            \begin{tikzpicture}[line width=0.4mm]
-                \tikzset{
+                    }
+                    \node[environment] (e1) {$1$};
+                    \node[environment, right of=e1] (e2) {$2$};
+                    \draw[rate, bend left=20] (e1) to node[above] {$\omega_t(1,2)$} (e2);
+                    \draw[rate, bend left=20] (e2) to node[below] {$\omega_t(2,1)$} (e1);
+                \end{tikzpicture}\\[0.5em]
+                {\small\textbf{(a)} Environment}
+            \end{minipage}\\
+            \begin{minipage}{\linewidth}
+                \centering
+                \begin{tikzpicture}[line width=0.4mm]
+                    \tikzset{
                     agent/.style={draw, rounded corners, minimum height=1.875cm, minimum width=3.125cm, fill=lightgray!25},
                     rate/.style={->, >={Stealth[scale=2]}},
                     node distance=6.875cm
-                }
-                \node[agent] (agent) {$\phi$, $s$};
-                \node[agent, right of=agent, yshift=+1.25cm] (death) {$\varnothing$};
-                \node[agent, right of=agent, yshift=-1.25cm] (agent_copy) {$\phi$, $s$};
-                \node[right=0cm of agent_copy, draw=none] (plus) {$+$};
-                \node[agent, right=0cm of plus] (offspring) {$\phi_o$, $s_o$};
-                \draw[rate, bend left=10] (agent) to node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
-                \draw[rate, bend right=10] (agent) to node[sloped, midway, below] {$\omega_b(e,\phi)$} (agent_copy);
-            \end{tikzpicture}
-            \begin{tikzpicture}[line width=0.3mm]
-                \tikzset{
+                    }
+                    \node[agent] (agent) {$\phi$, $s$};
+                    \node[agent, right of=agent, yshift=+1.25cm] (death) {$\varnothing$};
+                    \node[agent, right of=agent, yshift=-1.25cm] (agent_copy) {$\phi$, $s$};
+                    \node[right=0cm of agent_copy, draw=none] (plus) {$+$};
+                    \node[agent, right=0cm of plus] (offspring) {$\phi_o$, $s_o$};
+                    \draw[rate, bend left=10] (agent) to node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
+                    \draw[rate, bend right=10] (agent) to node[sloped, midway, below] {$\omega_b(e,\phi)$} (agent_copy);
+                \end{tikzpicture}\\[0.5em]
+                {\small\textbf{(b)} Birth-death}
+            \end{minipage}\\
+            \begin{minipage}{\linewidth}
+                \centering
+                \begin{tikzpicture}[line width=0.3mm]
+                    \tikzset{
                     trait/.style={},
                     prob/.style={->, >={Classical TikZ Rightarrow[scale=2.5]}},
                     node distance=5.625cm
-                }
-                \node[trait] (phi_o) {$\phi_o=$};
-                \node[trait, right of=phi_o, yshift=+1.25cm] (A) {$A$};
-                \node[trait, right of=phi_o, yshift=-1.25cm] (B) {$B$};
-                \draw[prob] (phi_o) -- node[sloped, midway, above] {$s(A)$} (A);
-                \draw[prob] (phi_o) -- node[sloped, midway, below] {$s(B)$} (B);
-                \node[trait, right of=phi_o, xshift=3.75cm] (s_o) {$s_o=$};
-                \node[trait, right of=s_o, yshift=+1.25cm] (s) {$s$};
-                \node[trait, right of=s_o, yshift=-1.25cm] (s_mut) {$s_\text{mut}$};
-                \draw[prob] (s_o) -- node[sloped, midway, above] {$1-p_\text{mut}$} (s);
-                \draw[prob] (s_o) -- node[sloped, midway, below] {$p_\text{mut}$} (s_mut);
-            \end{tikzpicture}
-            \captionof{figure}{Schematic diagram of our model.}
+                    }
+                    \node[trait] (phi_o) {$\phi_o=$};
+                    \node[trait, right of=phi_o, yshift=+1.25cm] (A) {$A$};
+                    \node[trait, right of=phi_o, yshift=-1.25cm] (B) {$B$};
+                    \draw[prob] (phi_o) -- node[sloped, midway, above] {$s(A)$} (A);
+                    \draw[prob] (phi_o) -- node[sloped, midway, below] {$s(B)$} (B);
+                    \node[trait, right of=phi_o, xshift=3.75cm] (s_o) {$s_o=$};
+                    \node[trait, right of=s_o, yshift=+1.25cm] (s) {$s$};
+                    \node[trait, right of=s_o, yshift=-1.25cm] (s_mut) {$s_\text{mut}$};
+                    \draw[prob] (s_o) -- node[sloped, midway, above] {$1-p_\text{mut}$} (s);
+                    \draw[prob] (s_o) -- node[sloped, midway, below] {$p_\text{mut}$} (s_mut);
+                \end{tikzpicture}\\[0.5em]
+                {\small\textbf{(c)} Inheritance}
+            \end{minipage}
+            \vspace{0.8em}
+            \captionof{figure}{\textbf{Model Schematic:} (a) Stochastic environment switching, (b) population birth-death dynamics, and (c) strategy inheritance and mutation.}
         \end{center}
-        % \modelschematic
     }
 
     \block{Growth vs. Survival Trade-off}{
