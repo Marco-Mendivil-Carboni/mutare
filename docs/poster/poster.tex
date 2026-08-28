@@ -1,4 +1,4 @@
-\documentclass[25pt,a0paper,portrait]{tikzposter}
+\documentclass[25pt,a0paper,portrait,colspace=0pt]{tikzposter}
 
 \geometry{margin=1cm}
 
@@ -9,13 +9,16 @@
 
 \usepackage{graphicx}
 \usepackage{xcolor}
-\usetikzlibrary{calc,positioning}
+\usetikzlibrary{calc,positioning,arrows.meta}
 
 \usepackage{booktabs}
 \usepackage{caption}
 \captionsetup{hypcap=false}
 
 \usepackage{qrcode}
+
+\usepackage{silence}
+\WarningFilter{latex}{Unused global option(s)}
 
 \tikzposterlatexaffectionproofoff
 
@@ -92,14 +95,60 @@
             \item \textbf{Population ($N \le N_\text{ini}$):} Birth-death process where individuals carry strategy $s(A) = 1 - s(B)$ regulating phenotypic diversity.
             \item \textbf{Mutations:} Offspring inherit parent strategy or mutate with probability $p_\text{mut}$.
         \end{itemize}
+        \begin{center}
+            \begin{tikzpicture}[line width=0.4mm]
+                \tikzset{
+                    environment/.style={draw, rounded corners, minimum size=1.875cm, fill=lightgray!25},
+                    rate/.style={->, >={Stealth[scale=2]}},
+                    node distance=6.875cm
+                }
+                \node[environment] (e1) {$1$};
+                \node[environment, right of=e1] (e2) {$2$};
+                \draw[rate, bend left=20] (e1) to node[above] {$\omega_t(1,2)$} (e2);
+                \draw[rate, bend left=20] (e2) to node[below] {$\omega_t(2,1)$} (e1);
+            \end{tikzpicture}
+            \begin{tikzpicture}[line width=0.4mm]
+                \tikzset{
+                    agent/.style={draw, rounded corners, minimum height=1.875cm, minimum width=3.125cm, fill=lightgray!25},
+                    rate/.style={->, >={Stealth[scale=2]}},
+                    node distance=6.875cm
+                }
+                \node[agent] (agent) {$\phi$, $s$};
+                \node[agent, right of=agent, yshift=+1.25cm] (death) {$\varnothing$};
+                \node[agent, right of=agent, yshift=-1.25cm] (agent_copy) {$\phi$, $s$};
+                \node[right=0cm of agent_copy, draw=none] (plus) {$+$};
+                \node[agent, right=0cm of plus] (offspring) {$\phi_o$, $s_o$};
+                \draw[rate, bend left=10] (agent) to node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
+                \draw[rate, bend right=10] (agent) to node[sloped, midway, below] {$\omega_b(e,\phi)$} (agent_copy);
+            \end{tikzpicture}
+            \begin{tikzpicture}[line width=0.3mm]
+                \tikzset{
+                    trait/.style={},
+                    prob/.style={->, >={Classical TikZ Rightarrow[scale=2.5]}},
+                    node distance=5.625cm
+                }
+                \node[trait] (phi_o) {$\phi_o=$};
+                \node[trait, right of=phi_o, yshift=+1.25cm] (A) {$A$};
+                \node[trait, right of=phi_o, yshift=-1.25cm] (B) {$B$};
+                \draw[prob] (phi_o) -- node[sloped, midway, above] {$s(A)$} (A);
+                \draw[prob] (phi_o) -- node[sloped, midway, below] {$s(B)$} (B);
+                \node[trait, right of=phi_o, xshift=3.75cm] (s_o) {$s_o=$};
+                \node[trait, right of=s_o, yshift=+1.25cm] (s) {$s$};
+                \node[trait, right of=s_o, yshift=-1.25cm] (s_mut) {$s_\text{mut}$};
+                \draw[prob] (s_o) -- node[sloped, midway, above] {$1-p_\text{mut}$} (s);
+                \draw[prob] (s_o) -- node[sloped, midway, below] {$p_\text{mut}$} (s_mut);
+            \end{tikzpicture}
+            \captionof{figure}{Schematic diagram of our model.}
+        \end{center}
         % \modelschematic
     }
 
     \block{Growth vs. Survival Trade-off}{
         \vspace{0.6em}
-        \begin{tikzfigure}[\textbf{Pareto Front:} Extinction rate $r_\text{ext}$ vs. growth rate $\langle\mu\rangle$. Evolved strategies select a middle-ground compromise between growth and survival.]
-            \includegraphics[width=0.95\linewidth]{figures/asymmetric/strat_phe_0_i/rates.pdf}
-        \end{tikzfigure}
+        \begin{center}
+            \includegraphics[scale=2.5]{figures/asymmetric/strat_phe_0_i/rates.pdf}
+            \captionof{figure}{\textbf{Pareto Front:} Extinction rate $r_\text{ext}$ vs. growth rate $\langle\mu\rangle$. Evolved strategies select a middle-ground compromise between growth and survival.}
+        \end{center}
     }
 
     \column{0.3333}
@@ -141,28 +190,9 @@
         \end{itemize}
         \vspace{0.4em}
         \begin{center}
-            \begin{minipage}{0.48\linewidth}
-                \centering
-                \includegraphics[width=\linewidth]{figures/asymmetric/fixed/exp_avg_avg_strat_phe_0.pdf}
-            \end{minipage}
-            \hfill
-            \begin{minipage}{0.48\linewidth}
-                \centering
-                \includegraphics[width=\linewidth]{figures/asymmetric/fixed/avg_avg_strat_phe_0.pdf}
-            \end{minipage}
+            \includegraphics[scale=2.5]{figures/asymmetric/fixed/exp_avg_avg_strat_phe_0.pdf}
+            \includegraphics[scale=2.5]{figures/asymmetric/fixed/avg_avg_strat_phe_0.pdf}
             \captionof{figure}{\textbf{Validation:} Expected average strategy from heuristic model (left) vs. observed evolutionary simulations (right).}
-        \end{center}
-    }
-
-    \block{Robustness Analysis}{
-        \vspace{0.6em}
-        \begin{itemize}
-            \item \textbf{Incremental Mutations:} Continuous Gaussian mutations ($\sigma_\text{mut}=0.1$) yield qualitatively identical strategy transitions.
-            \item \textbf{Symmetric Adaptation:} Re-evaluated under symmetric environments, confirming generalizability across fitness landscapes.
-        \end{itemize}
-        \begin{center}
-            \includegraphics[width=0.85\linewidth]{figures/symmetric/n_agents_i/avg_avg_strat_phe_0.pdf}
-            \captionof{figure}{\textbf{Symmetric Adaptation:} Evolved strategy under the SA parameter set.}
         \end{center}
     }
 
@@ -173,10 +203,10 @@
             \item Demographic constraints shift selection from growth maximization to fluctuation avoidance/resilience.
             \item The $N_\text{ini}$ transition is dictated by the scaling mismatch between exponential growth selection and power-law extinction risks.
         \end{itemize}
-        \vspace{0.4em}
+        \vspace{0.5em}
         \begin{center}
-            \qrcode[height=5.2cm]{https://github.com/Marco-Mendivil-Carboni/mutare}
-            \captionof{figure}{\textbf{Code \& Data:} Scan for the simulation source code (Gillespie algorithm implementation).}
+            \qrcode[height=4cm]{https://arxiv.org/pdf/2607.27983}
+            \captionof{figure}{Scan for the complete article pre-print.}
         \end{center}
     }
 
