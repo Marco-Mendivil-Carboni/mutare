@@ -1,4 +1,4 @@
-\documentclass[25pt,a0paper,portrait,colspace=0pt]{tikzposter}
+\documentclass[25pt,a0paper,portrait,colspace=16pt]{tikzposter}
 
 \geometry{margin=1cm}
 
@@ -45,6 +45,8 @@
 \defineblockstyle{TakeawayBlock}{bodywidthscale=0.9,roundedcorners=16,linewidth=4pt}{
     \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth, color=red_UCM, fill=red_UCM!12] (blockbody.south west) rectangle (blockbody.north east);
 }
+
+\defineblockstyle{FooterBlock}{bodywidthscale=0.9}{}
 
 \titlegraphic{
     \begin{minipage}{\linewidth}
