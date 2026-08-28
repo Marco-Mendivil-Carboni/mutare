@@ -1,4 +1,6 @@
-\documentclass[a0paper,portrait]{tikzposter}
+\documentclass[25pt,a0paper,portrait]{tikzposter}
+
+\geometry{margin=1cm}
 
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
@@ -11,13 +13,9 @@
 
 \usepackage{booktabs}
 \usepackage{caption}
-
-\usepackage[hidelinks,pdfusetitle]{hyperref}
-\usepackage[capitalize]{cleveref}
+\captionsetup{hypcap=false}
 
 \usepackage{qrcode}
-
-\captionsetup{hypcap=false}
 
 \tikzposterlatexaffectionproofoff
 
@@ -27,153 +25,55 @@
 
 \definecolor{red_UCM}{HTML}{b01131}
 
-\colorlet{backgroundcolor}{white}
+\colorlet{backgroundcolor}{red_UCM!6}
 \colorlet{framecolor}{red_UCM}
 \colorlet{titlefgcolor}{red_UCM}
-\colorlet{titlebgcolor}{white}
-\colorlet{blocktitlebgcolor}{white}
 \colorlet{blocktitlefgcolor}{red_UCM}
-\colorlet{blockbodybgcolor}{red}
-\colorlet{blockbodyfgcolor}{black}
 
-\definetitlestyle{ourtitle}{
-    width=\linewidth, roundedcorners=0, linewidth=0pt,
-    titletotopverticalspace=15mm, titletoblockverticalspace=15mm,
-    innersep=10mm
-}{}
-\usetitlestyle{ourtitle}
+\definetitlestyle{Title}{roundedcorners=24,linewidth=6pt}{
+    \draw[rounded corners=\titleroundedcorners, line width=\titlelinewidth, color=red_UCM, fill=white] (\titleposleft,\titleposbottom) rectangle (\titleposright,\titlepostop);
+}
+\usetitlestyle{Title}
 
-% =========================================================
-%  BLOCK STYLES
-% =========================================================
-\defineblockstyle{PlainBlock}{
-    titlewidthscale=1, bodywidthscale=1, titleleft, roundedcorners=16, linewidth=0pt,
-    titleinnersep=16pt, bodyinnersep=16pt
-}{
-    \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth,
-        color=red_UCM]
-        (blockbody.south west) rectangle (blockbody.north east);
+\defineblockstyle{Block}{titleleft,roundedcorners=16,linewidth=4pt}{
+    \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth, color=red_UCM, fill=white] (blockbody.south west) rectangle (blockbody.north east);
 }
 
-\defineblockstyle{TakeawayBlock}{
-    titlewidthscale=1, bodywidthscale=1, titlecenter,
-    titleoffsetx=0pt, titleoffsety=0pt, bodyoffsetx=0pt, bodyoffsety=0pt,
-    bodyverticalshift=0pt, roundedcorners=20, linewidth=3pt,
-    titleinnersep=0pt, bodyinnersep=12mm
-}{
-    \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth,
-        color=red_UCM, fill=red_UCM!8]
-        (blockbody.south west) rectangle (blockbody.north east);
+\defineblockstyle{TakeawayBlock}{bodywidthscale=0.9,roundedcorners=16,linewidth=4pt}{
+    \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth, color=red_UCM, fill=red_UCM!12] (blockbody.south west) rectangle (blockbody.north east);
 }
 
-% =========================================================
-%  TITLE CONTENT
-% =========================================================
 \titlegraphic{
-    \begin{minipage}{0.96\linewidth}
-        \begin{minipage}[c]{0.35\linewidth}
+    \begin{minipage}{\linewidth}
+        \vspace{0.25em}
+        \hfill
+        \begin{minipage}[c]{0.48\linewidth}
             \raggedright\includegraphics[height=4cm]{images/logo-EPS.png}
         \end{minipage}
         \hfill
-        \begin{minipage}[c]{0.35\linewidth}
+        \begin{minipage}[c]{0.48\linewidth}
             \raggedleft\includegraphics[height=4cm]{images/logo-UCM.png}
         \end{minipage}
-        \vspace{1em}
+        \hfill
+        \vspace{2em}
     \end{minipage}
 }
 
-\makeatletter
-\renewcommand{\TP@maketitle}{
-    \centering
-    \@titlegraphic \\[1cm]
-    \centering
-    {\color{red_UCM}\bfseries\Huge
-        Evolutionary adaptation through bet-hedging in finite populations under fluctuating environments\par}
-    \vspace{0.8em}
-    {\Large \underline{Marco Mendívil-Carboni}$^1$, Juan J. Mazo$^1$ and Luis Dinis$^1$\par}
-    \vspace{0.5em}
-    {\normalsize $^1$Grupo Interdisciplinar de Sistemas Complejos (GISC) and Departamento de Estructura de la Materia, Física Térmica y Electrónica, Universidad Complutense de Madrid, 28040 Madrid, Spain\par}
-}
-\makeatother
-
-% =========================================================
-%  Reusable model-schematic diagram
-% =========================================================
-\newcommand{\modelschematic}{%
-    \begin{center}
-        \resizebox{0.98\linewidth}{!}{%
-            \begin{tikzpicture}
-                % ---- Panel (a): environment ----
-                \tikzset{
-                    environment/.style={draw, rounded corners, minimum size=0.9cm, fill=lightgray!25},
-                    rate/.style={->, >=stealth, thick},
-                }
-                \node[environment] (e1) at (0,0) {$1$};
-                \node[environment, right=2.5cm of e1] (e2) {$2$};
-                \draw[rate, bend left=20] (e1) to node[above] {$\omega_t(1,2)$} (e2);
-                \draw[rate, bend left=20] (e2) to node[below] {$\omega_t(2,1)$} (e1);
-                \node at ($(e1)!0.5!(e2)$) [yshift=-1.8cm] {(a) Environment};
-
-                % ---- Panel (b): birth-death ----
-                \tikzset{
-                    agent/.style={draw, rounded corners, minimum height=0.9cm, minimum width=1.5cm, fill=lightgray!25},
-                    rate/.style={->, >=stealth, thick},
-                }
-                \node[agent] (agent) at (0,6) {$\phi, s$};
-                \node[agent, right=2.5cm of agent, yshift=+0.9cm] (death) {$\varnothing$};
-                \node[agent, right=2.5cm of agent, yshift=-0.9cm] (agent_copy) {$\phi, s$};
-                \node[right=0.15cm of agent_copy, draw=none] (plus) {$+$};
-                \node[agent, right=0.15cm of plus] (offspring) {$\phi_o, s_o$};
-                \draw[rate, bend left=10] (agent) to node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
-                \draw[rate, bend right=10] (agent) to node[sloped, midway, below] {$\omega_b(e,\phi)$} (agent_copy);
-                \node at (8.8,-1.8) {(b) Birth-death};
-
-                % ---- Panel (c): strategy inheritance ----
-                \tikzset{
-                    trait/.style={},
-                    prob/.style={->},
-                }
-                \node[trait] (phi_o) at (0,12) {$\phi_o=$};
-                \node[trait, right=1.1cm of phi_o, yshift=+0.7cm] (A) {$A$};
-                \node[trait, right=1.1cm of phi_o, yshift=-0.7cm] (B) {$B$};
-                \draw[prob] (phi_o) -- node[sloped, midway, above] {$s(A)$} (A);
-                \draw[prob] (phi_o) -- node[sloped, midway, below] {$s(B)$} (B);
-                \node[trait, right=1.7cm of phi_o] (s_o) {$s_o=$};
-                \node[trait, right=1.1cm of s_o, yshift=+0.7cm] (s) {$s$};
-                \node[trait, right=1.1cm of s_o, yshift=-0.7cm] (s_mut) {$s_\text{mut}$};
-                \draw[prob] (s_o) -- node[sloped, midway, above] {$1-p_\text{mut}$} (s);
-                \draw[prob] (s_o) -- node[sloped, midway, below] {$p_\text{mut}$} (s_mut);
-                \node at (16.3,-1.8) {(c) Inheritance};
-            \end{tikzpicture}%
-        }
-        \captionof{figure}{\textbf{Model Schematic:} (a) Stochastic environment. (b) Birth-death process. (c) Strategy inheritance and mutation.}
-    \end{center}
-}
+\title{\parbox{0.9\linewidth}{\centering Evolutionary adaptation through bet-hedging in finite populations under fluctuating environments\vspace{0.5em}}}
+\author{Marco Mendívil-Carboni$^1$, Juan J. Mazo$^1$ and Luis Dinis$^1$}
+\institute{\parbox{0.9\linewidth}{\centering $^1$ Grupo Interdisciplinar de Sistemas Complejos (GISC) and Departamento de Estructura de la Materia, Física Térmica y Electrónica, Universidad Complutense de Madrid, 28040 Madrid, Spain}}
 
 \begin{document}
 
-\maketitle
+\maketitle[width=0.9\textwidth]
 
-% =========================================================
-%  KEY TAKEAWAY
-% =========================================================
-\begin{columns}
-    \column{1}
-    \useblockstyle{TakeawayBlock}
-    \block{}{
-        \centering \Large
-        \textbf{\textcolor{red_UCM}{Key takeaway:}} Evolution in a finite population does not simply chase the highest average growth rate --- it balances growth against extinction risk. Small populations evolve towards safer, more resilient bet-hedging strategies, while only large populations converge on the growth-maximizing one.
-    }
-\end{columns}
+\useblockstyle{TakeawayBlock}
+\block{}{\centering\Large\textbf{\textcolor{red_UCM}{Key takeaway:}} Evolution in a finite population does not simply chase the highest average growth rate --- it balances growth against extinction risk. Small populations evolve towards safer, more resilient bet-hedging strategies, while only large populations converge on the growth-maximizing one.}
 
-\useblockstyle{PlainBlock}
+\useblockstyle{Block}
 
-% =========================================================
-%  MAIN BODY: three columns
-% =========================================================
 \begin{columns}
 
-    % ----------------------------- COLUMN 1 -----------------------------
     \column{0.3333}
 
     \block{Introduction \& Objectives}{
@@ -192,7 +92,7 @@
             \item \textbf{Population ($N \le N_\text{ini}$):} Birth-death process where individuals carry strategy $s(A) = 1 - s(B)$ regulating phenotypic diversity.
             \item \textbf{Mutations:} Offspring inherit parent strategy or mutate with probability $p_\text{mut}$.
         \end{itemize}
-        \modelschematic
+        % \modelschematic
     }
 
     \block{Growth vs. Survival Trade-off}{
@@ -202,7 +102,6 @@
         \end{tikzfigure}
     }
 
-    % ----------------------------- COLUMN 2 -----------------------------
     \column{0.3333}
 
     \block{Strategy Trajectories \& Fixation}{
@@ -229,7 +128,6 @@
         \end{center}
     }
 
-    % ----------------------------- COLUMN 3 -----------------------------
     \column{0.3333}
 
     \block{Heuristic Derivation \& Validation}{
@@ -286,9 +184,7 @@
 
 \begin{columns}
     \column{1}
-    \block{}{
-        \centering {\color{red_UCM}\large 3rd Biology for Physics \ -- \ Barcelona \ -- \ September 6 - 10, 2026\par}
-    }
+    \block{}{\centering{\color{red_UCM}\large 3rd Biology for Physics \ -- \ Barcelona \ -- \ September 6 - 10, 2026}}
 \end{columns}
 
 \end{document}
