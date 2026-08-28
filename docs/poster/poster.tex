@@ -1,4 +1,4 @@
-\documentclass[25pt,a0paper,portrait,colspace=16pt]{tikzposter}
+\documentclass[25pt,a0paper,portrait,colspace=24pt]{tikzposter}
 
 \geometry{margin=1cm}
 
@@ -38,15 +38,16 @@
 }
 \usetitlestyle{Title}
 
-\defineblockstyle{Block}{titleleft,roundedcorners=16,linewidth=4pt}{
-    \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth, color=red_UCM, fill=white] (blockbody.south west) rectangle (blockbody.north east);
+\defineblockstyle{Block}{bodywidthscale=1,titleleft,roundedcorners=24,linewidth=4pt}{
+    \draw[line width=\blocklinewidth, color=red_UCM] (blocktitle.south west) -- (blocktitle.north west);
+    \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth, color=red_UCM, fill=white] (blockbody.north west) -- (blockbody.south west) -- (blockbody.south east) -- (blockbody.north east) [sharp corners] -- cycle;
 }
 
-\defineblockstyle{TakeawayBlock}{bodywidthscale=0.9,roundedcorners=16,linewidth=4pt}{
+\defineblockstyle{TakeawayBlock}{bodywidthscale=0.99,roundedcorners=24,linewidth=4pt}{
     \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth, color=red_UCM, fill=red_UCM!12] (blockbody.south west) rectangle (blockbody.north east);
 }
 
-\defineblockstyle{FooterBlock}{bodywidthscale=0.9}{}
+\defineblockstyle{FooterBlock}{bodywidthscale=0.99}{}
 
 \titlegraphic{
     \begin{minipage}{\linewidth}
@@ -79,24 +80,18 @@
 
 \begin{columns}
 
-    \column{0.3333}
+    \column{0.005}
+
+    \column{0.33}
 
     \block{Introduction \& Objectives}{
-        \vspace{0.6em}
         \begin{itemize}
             \item Natural populations face unpredictable, fluctuating environments under finite resource constraints.
             \item While classic evolutionary theory suggests selection favors strategies maximizing mean growth rate $\langle \mu \rangle$, finite populations subject to demographic constraints face non-negligible extinction risks.
-            \item \textbf{Key Question:} Does natural selection favor growth-maximizing strategies or fluctuation-reducing resilience strategies when population capacity is limited?
         \end{itemize}
     }
 
     \block{Stochastic Model Framework}{
-        % \vspace{0.6em}
-        % \begin{itemize}
-        %     \item \textbf{Environment $e \in \{1,2\}$:} Continuous-time Markov process with transition rates $\omega_t(e,e')$.
-        %     \item \textbf{Population ($N \le N_\text{ini}$):} Birth-death process where individuals carry strategy $s(A) = 1 - s(B)$ regulating phenotypic diversity.
-        %     \item \textbf{Mutations:} Offspring inherit parent strategy or mutate with probability $p_\text{mut}$.
-        % \end{itemize}
         \begin{center}
             \begin{minipage}{\linewidth}
                 \centering
@@ -158,14 +153,13 @@
     }
 
     \block{Growth vs. Survival Trade-off}{
-        \vspace{0.6em}
         \begin{center}
             \includegraphics[scale=2.5]{figures/asymmetric/strat_phe_0_i/rates.pdf}
             \captionof{figure}{\textbf{Pareto Front:} Extinction rate $r_\text{ext}$ vs. growth rate $\langle\mu\rangle$. Evolved strategies select a middle-ground compromise between growth and survival.}
         \end{center}
     }
 
-    \column{0.3333}
+    \column{0.33}
 
     \block{Strategy Trajectories \& Fixation}{
         \begin{center}
@@ -182,9 +176,7 @@
     }
 
     \block{Time-dependent Strategy}{
-        \vspace{0.6em}
         \begin{itemize}
-            \item Evolutionary trajectories converge toward a common strategy, largely independently of their initial condition.
             \item Population size shapes this convergence at every timescale: large populations approach growth maximization, whereas small populations evolve toward safer strategies.
         \end{itemize}
         \begin{center}
@@ -193,7 +185,7 @@
         \end{center}
     }
 
-    \column{0.3333}
+    \column{0.33}
 
     \block{Heuristic Derivation \& Validation}{
         \vspace{0.6em}
@@ -213,7 +205,6 @@
     }
 
     \block{Conclusions}{
-        \vspace{0.6em}
         \begin{itemize}
             \item Mean growth rate alone is insufficient to predict evolutionary outcomes in finite populations.
             \item Demographic constraints shift selection from growth maximization to fluctuation avoidance/resilience.
@@ -226,11 +217,11 @@
         \end{center}
     }
 
+    \column{0.005}
+
 \end{columns}
 
-\begin{columns}
-    \column{1}
-    \block{}{\centering{\color{red_UCM}\large 3rd Biology for Physics \ -- \ Barcelona \ -- \ September 6 - 10, 2026}}
-\end{columns}
+\useblockstyle{FooterBlock}
+\block{}{\centering{\color{red_UCM}\large 3rd Biology for Physics \ -- \ Barcelona \ -- \ September 6 - 10, 2026}}
 
 \end{document}
