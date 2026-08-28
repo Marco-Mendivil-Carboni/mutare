@@ -166,11 +166,6 @@
     \column{0.3333}
 
     \block{Strategy Trajectories \& Fixation}{
-        \vspace{0.6em}
-        \begin{itemize}
-            \item \textbf{Rapid Fixation:} Advancing mutant lineages quickly dominate the population structure.
-            \item \textbf{Strategy Drift:} Narrow strategy variance $\sigma_s$ leads to coherent exploration of strategy space over long time scales.
-        \end{itemize}
         \begin{center}
             \includegraphics[width=0.95\linewidth]{figures/asymmetric/time_series/avg_strat_phe_0.pdf}
             \captionof{figure}{\textbf{Time Series Dynamics:} Mean strategy trajectory over time. Dotted vertical lines mark stochastic extinction events.}
@@ -178,14 +173,21 @@
     }
 
     \block{Population Constraint Modulation}{
-        \vspace{0.6em}
-        \begin{itemize}
-            \item \textbf{Compromise Strategy:} Evolution selects strategies strictly between growth maximization ($s(A) \sim 0.8$) and extinction minimization ($s(A) \sim 0.0$).
-            \item \textbf{Scaling Transition:} Large $N_\text{ini}$ converges to growth maximization, whereas small $N_\text{ini}$ favors resilient strategies to avoid extinction.
-        \end{itemize}
         \begin{center}
             \includegraphics[width=0.95\linewidth]{figures/asymmetric/n_agents_i/avg_avg_strat_phe_0.pdf}
             \captionof{figure}{\textbf{Transition:} Evolved strategy $\langle\bar{s}\rangle(A)$ vs. initial carrying capacity $N_\text{ini}$.}
+        \end{center}
+    }
+
+    \block{Time-dependent Strategy}{
+        \vspace{0.6em}
+        \begin{itemize}
+            \item Evolutionary trajectories converge toward a common strategy, largely independently of their initial condition.
+            \item Population size shapes this convergence at every timescale: large populations approach growth maximization, whereas small populations evolve toward safer strategies.
+        \end{itemize}
+        \begin{center}
+            \includegraphics[width=0.95\linewidth]{figures/asymmetric/n_agents_i/tau_avg_strat_phe_0.pdf}
+            \captionof{figure}{\textbf{Time-dependent strategy:} Population size shapes evolutionary trajectories at every timescale.}
         \end{center}
     }
 
