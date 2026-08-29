@@ -44,8 +44,6 @@
     \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth, color=red_UCM, fill=red_UCM!12] (blockbody.south west) rectangle (blockbody.north east);
 }
 
-\defineblockstyle{FooterBlock}{bodywidthscale=0.96}{}
-
 \titlegraphic{
     \begin{minipage}{\linewidth}
         \vspace{0.25em}
@@ -68,7 +66,7 @@
 
 \begin{document}
 
-\maketitle[width=0.9\textwidth]
+\maketitle[width=0.9\linewidth]
 
 \useblockstyle{TakeawayBlock}
 \block{}{\centering\Large\textbf{\textcolor{red_UCM}{Key takeaway:}} Evolution in a finite population does not simply chase the highest average growth rate --- it balances growth against extinction risk. Small populations evolve towards safer, more resilient bet-hedging strategies, while only large populations converge on the growth-maximizing one.}
@@ -218,7 +216,6 @@
 
 \end{columns}
 
-\useblockstyle{FooterBlock}
-\block{}{\centering{\color{red_UCM}\large 3rd Biology for Physics \ -- \ Barcelona \ -- \ September 6 - 10, 2026}}
+\node [above right, minimum width=\linewidth, inner sep=24pt] at (bottomleft) {\textcolor{red_UCM}{\large 3rd Biology for Physics \ -- \ Barcelona \ -- \ September 6 - 10, 2026}};
 
 \end{document}
