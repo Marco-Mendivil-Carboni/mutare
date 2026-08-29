@@ -1,4 +1,4 @@
-\documentclass[25pt,a0paper,portrait,colspace=24pt]{tikzposter}
+\documentclass[25pt,a0paper,portrait]{tikzposter}
 
 \geometry{margin=1cm}
 
@@ -16,9 +16,6 @@
 \captionsetup{hypcap=false}
 
 \usepackage{qrcode}
-
-\usepackage{silence}
-\WarningFilter{latex}{Unused global option(s)}
 
 \tikzposterlatexaffectionproofoff
 
@@ -43,11 +40,11 @@
     \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth, color=red_UCM, fill=white] (blockbody.north west) -- (blockbody.south west) -- (blockbody.south east) -- (blockbody.north east) [sharp corners] -- cycle;
 }
 
-\defineblockstyle{TakeawayBlock}{bodywidthscale=0.99,roundedcorners=24,linewidth=4pt}{
+\defineblockstyle{TakeawayBlock}{bodywidthscale=0.96,roundedcorners=24,linewidth=4pt}{
     \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth, color=red_UCM, fill=red_UCM!12] (blockbody.south west) rectangle (blockbody.north east);
 }
 
-\defineblockstyle{FooterBlock}{bodywidthscale=0.99}{}
+\defineblockstyle{FooterBlock}{bodywidthscale=0.96}{}
 
 \titlegraphic{
     \begin{minipage}{\linewidth}
@@ -80,9 +77,9 @@
 
 \begin{columns}
 
-    \column{0.005}
+    \column{0.02}
 
-    \column{0.33}
+    \column{0.32}
 
     \block{Introduction \& Objectives}{
         \begin{itemize}
@@ -159,44 +156,44 @@
         \end{center}
     }
 
-    \column{0.33}
+    \column{0.32}
 
     \block{Strategy Trajectories \& Fixation}{
         \begin{center}
-            \includegraphics[width=0.95\linewidth]{figures/asymmetric/time_series/avg_strat_phe_0.pdf}
+            \includegraphics[scale=2.5]{figures/asymmetric/time_series/avg_strat_phe_0.pdf}
             \captionof{figure}{\textbf{Time Series Dynamics:} Mean strategy trajectory over time. Dotted vertical lines mark stochastic extinction events.}
         \end{center}
     }
 
     \block{Population Constraint Modulation}{
         \begin{center}
-            \includegraphics[width=0.95\linewidth]{figures/asymmetric/n_agents_i/avg_avg_strat_phe_0.pdf}
+            \includegraphics[scale=2.5]{figures/asymmetric/n_agents_i/avg_avg_strat_phe_0.pdf}
             \captionof{figure}{\textbf{Transition:} Evolved strategy $\langle\bar{s}\rangle(A)$ vs. initial carrying capacity $N_\text{ini}$.}
         \end{center}
     }
 
     \block{Time-dependent Strategy}{
-        \begin{itemize}
-            \item Population size shapes this convergence at every timescale: large populations approach growth maximization, whereas small populations evolve toward safer strategies.
-        \end{itemize}
+        % \begin{itemize}
+        %     \item Population size shapes this convergence at every timescale: large populations approach growth maximization, whereas small populations evolve toward safer strategies.
+        % \end{itemize}
         \begin{center}
-            \includegraphics[width=0.95\linewidth]{figures/asymmetric/n_agents_i/tau_avg_strat_phe_0.pdf}
+            \includegraphics[scale=2.5]{figures/asymmetric/n_agents_i/tau_avg_strat_phe_0.pdf}
             \captionof{figure}{\textbf{Time-dependent strategy:} Population size shapes evolutionary trajectories at every timescale.}
         \end{center}
     }
 
-    \column{0.33}
+    \column{0.32}
 
     \block{Heuristic Derivation \& Validation}{
         \vspace{0.6em}
-        \begin{itemize}
-            \item \textbf{Selection vs. Survival:} Strategy distribution $p(\bar{s})$ balances growth selection $\exp(N_\text{ini}\cdot\langle\mu\rangle)$ against lifetime survival before extinction or mutant replacement:
-                  \begin{equation*}
-                      p(\bar{s}) \propto \frac{\exp(N_\text{ini} \cdot \langle\mu\rangle(\bar{s}))}{r_\text{ext}(N_\text{ini},\bar{s}) + p_\text{mut} \cdot \langle\mu_b\rangle(\bar{s})}
-                  \end{equation*}
-            \item \textbf{Scaling Mismatch:} Extinction requires adverse episodes of duration $T \sim \ln(N_\text{ini})/\lambda$, yielding power-law decay $r_\text{ext} \sim N_\text{ini}^{-\alpha}$. Exponential growth dominates as $N_\text{ini} \to \infty$; power-law extinction dictates low $N_\text{ini}$.
-        \end{itemize}
-        \vspace{0.4em}
+        % \begin{itemize}
+        %     \item \textbf{Selection vs. Survival:} Strategy distribution $p(\bar{s})$ balances growth selection $\exp(N_\text{ini}\cdot\langle\mu\rangle)$ against lifetime survival before extinction or mutant replacement:
+        %           \begin{equation*}
+        %               p(\bar{s}) \propto \frac{\exp(N_\text{ini} \cdot \langle\mu\rangle(\bar{s}))}{r_\text{ext}(N_\text{ini},\bar{s}) + p_\text{mut} \cdot \langle\mu_b\rangle(\bar{s})}
+        %           \end{equation*}
+        %     \item \textbf{Scaling Mismatch:} Extinction requires adverse episodes of duration $T \sim \ln(N_\text{ini})/\lambda$, yielding power-law decay $r_\text{ext} \sim N_\text{ini}^{-\alpha}$. Exponential growth dominates as $N_\text{ini} \to \infty$; power-law extinction dictates low $N_\text{ini}$.
+        % \end{itemize}
+        % \vspace{0.4em}
         \begin{center}
             \includegraphics[scale=2.5]{figures/asymmetric/fixed/exp_avg_avg_strat_phe_0.pdf}
             \includegraphics[scale=2.5]{figures/asymmetric/fixed/avg_avg_strat_phe_0.pdf}
@@ -217,7 +214,7 @@
         \end{center}
     }
 
-    \column{0.005}
+    \column{0.02}
 
 \end{columns}
 
