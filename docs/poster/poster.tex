@@ -25,6 +25,8 @@
 
 \definecolor{red_UCM}{HTML}{b01131}
 
+\renewcommand{\emph}[1]{\textbf{\textcolor{red_UCM}{#1}}}
+
 \colorlet{backgroundcolor}{red_UCM!6}
 \colorlet{framecolor}{red_UCM}
 \colorlet{titlefgcolor}{red_UCM}
@@ -36,8 +38,8 @@
 \usetitlestyle{Title}
 
 \defineblockstyle{Block}{bodywidthscale=1,titleleft,roundedcorners=24,linewidth=4pt}{
-    \draw[line width=\blocklinewidth, color=red_UCM] (blocktitle.south west) -- (blocktitle.north west);
-    \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth, color=red_UCM, fill=white] (blockbody.north west) -- (blockbody.south west) -- (blockbody.south east) -- (blockbody.north east) [sharp corners] -- cycle;
+    \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth, color=red_UCM, fill=red_UCM!12] (blocktitle.south west) -- (blocktitle.north west) -- (blocktitle.north east) -- (blocktitle.south east);
+    \draw[rounded corners=\blockroundedcorners, line width=\blocklinewidth, color=red_UCM, fill=white] (blockbody.north west) -- (blockbody.south west) -- (blockbody.south east) [sharp corners] -- (blockbody.north east) -- cycle;
 }
 
 \defineblockstyle{TakeawayBlock}{bodywidthscale=0.96,roundedcorners=24,linewidth=4pt}{
@@ -69,7 +71,7 @@
 \maketitle[width=0.9\linewidth]
 
 \useblockstyle{TakeawayBlock}
-\block{}{\centering\Large\textbf{\textcolor{red_UCM}{Key takeaway:}} Evolution in a finite population does not simply chase the highest average growth rate --- it balances growth against extinction risk. Small populations evolve towards safer, more resilient bet-hedging strategies, while only large populations converge on the growth-maximizing one.}
+\block{}{\emph{Takeaway:} The result of evolution in finite populations cannot be inferred solely from the average instantaneous growth rate $\langle\mu\rangle$: extinction also acts as a genuine selective pressure. In the large population limit, evolution selects the strategy that maximizes $\langle\mu\rangle$, whereas for smaller populations extinction risk biases evolution toward safer bet-hedging strategies.}
 
 \useblockstyle{Block}
 
@@ -81,12 +83,13 @@
 
     \block{Introduction \& Objectives}{
         \begin{itemize}
-            \item Natural populations face unpredictable, fluctuating environments under finite resource constraints.
-            \item While classic evolutionary theory suggests selection favors strategies maximizing mean growth rate $\langle \mu \rangle$, finite populations subject to demographic constraints face non-negligible extinction risks.
+            \item Natural populations face environments that change \emph{unpredictably} over time; when sensing is infeasible, bet-hedging offers a good alternative to adapt.
+            \item Current understanding suggests populations evolve toward the strategy maximizing $\langle\mu\rangle$, but this is not an exact result for finite populations.
+            \item \emph{Objective:} determine which bet-hedging strategy is actually favored by the process of natural selection.
         \end{itemize}
     }
 
-    \block{Stochastic Model Framework}{
+    \block{The Model: a Markov Process}{
         \begin{center}
             \begin{minipage}{\linewidth}
                 \centering
@@ -100,9 +103,9 @@
                     \node[environment, right of=e1] (e2) {$2$};
                     \draw[rate, bend left=20] (e1) to node[above] {$\omega_t(1,2)$} (e2);
                     \draw[rate, bend left=20] (e2) to node[below] {$\omega_t(2,1)$} (e1);
-                \end{tikzpicture}\\[0.5em]
-                {\small\textbf{(a)} Environment}
-            \end{minipage}\\
+                \end{tikzpicture}\\
+                {\small\textbf{(a)} Environment dynamics}
+            \end{minipage}\\\vspace{0.5em}
             \begin{minipage}{\linewidth}
                 \centering
                 \begin{tikzpicture}[line width=0.4mm]
@@ -118,9 +121,9 @@
                     \node[agent, right=0cm of plus] (offspring) {$\phi_o$, $s_o$};
                     \draw[rate, bend left=10] (agent) to node[sloped, midway, above] {$\omega_d(e,\phi)$} (death);
                     \draw[rate, bend right=10] (agent) to node[sloped, midway, below] {$\omega_b(e,\phi)$} (agent_copy);
-                \end{tikzpicture}\\[0.5em]
-                {\small\textbf{(b)} Birth-death}
-            \end{minipage}\\
+                \end{tikzpicture}\\
+                {\small\textbf{(b)} Birth-death process}
+            \end{minipage}\\\vspace{0.5em}
             \begin{minipage}{\linewidth}
                 \centering
                 \begin{tikzpicture}[line width=0.3mm]
@@ -139,75 +142,74 @@
                     \node[trait, right of=s_o, yshift=-1.25cm] (s_mut) {$s_\text{mut}$};
                     \draw[prob] (s_o) -- node[sloped, midway, above] {$1-p_\text{mut}$} (s);
                     \draw[prob] (s_o) -- node[sloped, midway, below] {$p_\text{mut}$} (s_mut);
-                \end{tikzpicture}\\[0.5em]
-                {\small\textbf{(c)} Inheritance}
+                \end{tikzpicture}\\
+                {\small\textbf{(c)} Phenotype and strategy of the offspring}
             \end{minipage}
-            \vspace{0.8em}
-            \captionof{figure}{\textbf{Model Schematic:} (a) Stochastic environment switching, (b) population birth-death dynamics, and (c) strategy inheritance and mutation.}
+            \vspace{0.5em}
+            \captionof{figure}{\emph{Model diagram:} (a) the environment follows a simple Markov process between two states; (b) the population follows a birth-death process with rates depending on the environment and the phenotype; (c) the phenotype of the offspring is determined by the strategy of the parent, and the offspring inherits that same strategy unless a mutation occurs. The population size is limited to its initial value $N_\text{ini}$: whenever replication would exceed this value, a randomly chosen agent is simultaneously removed.}
         \end{center}
     }
 
-    \block{Growth vs. Survival Trade-off}{
+    \block{Growth vs. Extinction Trade-off}{
         \begin{center}
             \includegraphics[scale=2.5]{figures/asymmetric/strat_phe_0_i/rates.pdf}
-            \captionof{figure}{\textbf{Pareto Front:} Extinction rate $r_\text{ext}$ vs. growth rate $\langle\mu\rangle$. Evolved strategies select a middle-ground compromise between growth and survival.}
+            \captionof{figure}{\emph{Pareto front:} extinction rate $r_\text{ext}$ vs. mean growth rate $\langle\mu\rangle$ for different kinds of simulations and \emph{initial strategies} $s(A)_\text{ini}$, capturing the trade-off between growth and survival. The mean growth rate is maximized at an \emph{intermediate} (bet-hedging) strategy ($s(A)\sim0.8$) rather than at $s(A)=0$ or $1$, and $r_\text{ext}$ is minimized at a different strategy ($s(A)\sim0.0$).}
         \end{center}
     }
 
     \column{0.32}
 
-    \block{Strategy Trajectories \& Fixation}{
+    \block{Evolutionary Dynamics}{
+        \begin{itemize}
+            \item At any given time the population is effectively characterized by a single dominant strategy, with a narrow dispersion $\sigma_s$.
+            \item Over longer times, advantageous mutations repeatedly arise and fix, abruptly shifting $\bar{s}(A)$ and driving a broad exploration of the strategy space.
+        \end{itemize}
         \begin{center}
             \includegraphics[scale=2.5]{figures/asymmetric/time_series/avg_strat_phe_0.pdf}
-            \captionof{figure}{\textbf{Time Series Dynamics:} Mean strategy trajectory over time. Dotted vertical lines mark stochastic extinction events.}
+            \captionof{figure}{\emph{Time series} of the population-averaged strategy over multiple concatenated simulations (extinction events marked by vertical dotted lines).}
         \end{center}
     }
 
-    \block{Population Constraint Modulation}{
+    \block{Population Size Modulation}{
         \begin{center}
             \includegraphics[scale=2.5]{figures/asymmetric/n_agents_i/avg_avg_strat_phe_0.pdf}
-            \captionof{figure}{\textbf{Transition:} Evolved strategy $\langle\bar{s}\rangle(A)$ vs. initial carrying capacity $N_\text{ini}$.}
+            \captionof{figure}{\emph{Transition:} dependence of the evolved strategy $\langle\bar{s}\rangle(A)$ on the population size $N_\text{ini}$. Increasing $N_\text{ini}$ drives the evolved strategy toward the growth-maximizing value; only small populations favor safer strategies with lower extinction rates. Dashed and dotted lines mark the growth-maximizing and extinction-minimizing strategies, respectively.}
         \end{center}
     }
 
-    \block{Time-dependent Strategy}{
-        % \begin{itemize}
-        %     \item Population size shapes this convergence at every timescale: large populations approach growth maximization, whereas small populations evolve toward safer strategies.
-        % \end{itemize}
+    \block{Time-dependent Average Strategy}{
         \begin{center}
             \includegraphics[scale=2.5]{figures/asymmetric/n_agents_i/tau_avg_strat_phe_0.pdf}
-            \captionof{figure}{\textbf{Time-dependent strategy:} Population size shapes evolutionary trajectories at every timescale.}
+            \captionof{figure}{\emph{Time-dependent average strategy} $\langle\bar s\rangle_\tau$ for different population sizes. The dependence on $N_\text{ini}$ persists at all elapsed times $\tau$, showing that the population limit directly modulates the time evolution of the strategy.}
         \end{center}
     }
 
     \column{0.32}
 
-    \block{Heuristic Derivation \& Validation}{
-        \vspace{0.6em}
-        % \begin{itemize}
-        %     \item \textbf{Selection vs. Survival:} Strategy distribution $p(\bar{s})$ balances growth selection $\exp(N_\text{ini}\cdot\langle\mu\rangle)$ against lifetime survival before extinction or mutant replacement:
-        %           \begin{equation*}
-        %               p(\bar{s}) \propto \frac{\exp(N_\text{ini} \cdot \langle\mu\rangle(\bar{s}))}{r_\text{ext}(N_\text{ini},\bar{s}) + p_\text{mut} \cdot \langle\mu_b\rangle(\bar{s})}
-        %           \end{equation*}
-        %     \item \textbf{Scaling Mismatch:} Extinction requires adverse episodes of duration $T \sim \ln(N_\text{ini})/\lambda$, yielding power-law decay $r_\text{ext} \sim N_\text{ini}^{-\alpha}$. Exponential growth dominates as $N_\text{ini} \to \infty$; power-law extinction dictates low $N_\text{ini}$.
-        % \end{itemize}
-        % \vspace{0.4em}
+    \block{Heuristic Interpretation}{
+        \begin{itemize}
+            \item The evolutionary dynamics can be modeled as a temporal concatenation of fixed-strategy regimes, weighted by the probability distribution of strategies $p(\bar{s})$ explored during evolution, which we approximate heuristically as:
+                  \begin{equation*}
+                      p(\bar{s})\propto\frac{\exp(N_\text{ini}\cdot\langle\mu\rangle(\bar{s}))}{r_\text{ext}(N_\text{ini},\bar{s})+p_\text{mut}\cdot\langle\mu_b\rangle(\bar{s})}
+                  \end{equation*}
+            \item The numerator reflects growth-driven selection, exponentially amplified over time, while the denominator accounts for the expected survival time before extinction or replacement by a fitter mutant.
+            \item A fundamental scaling mismatch arises: growth enters \emph{exponentially} in $N_\text{ini}$, while extinction risk decays only \emph{algebraically} ($r_\text{ext}\sim N_\text{ini}^{-\alpha}$). This asymmetry determines the transition between growth-maximizing and safer strategies as the population size decreases.
+        \end{itemize}
         \begin{center}
             \includegraphics[scale=2.5]{figures/asymmetric/fixed/exp_avg_avg_strat_phe_0.pdf}
             \includegraphics[scale=2.5]{figures/asymmetric/fixed/avg_avg_strat_phe_0.pdf}
-            \captionof{figure}{\textbf{Validation:} Expected average strategy from heuristic model (left) vs. observed evolutionary simulations (right).}
+            \captionof{figure}{\emph{Validation:} expected average strategy from the heuristic distribution (top) vs. observed average strategy from evolutive simulations (bottom), for different $N_\text{ini}$ and $p_\text{mut}$ values.}
         \end{center}
     }
 
-    \block{Conclusions}{
+    \block{Discussion \& Conclusions}{
         \begin{itemize}
-            \item Mean growth rate alone is insufficient to predict evolutionary outcomes in finite populations.
-            \item Demographic constraints shift selection from growth maximization to fluctuation avoidance/resilience.
-            \item The $N_\text{ini}$ transition is dictated by the scaling mismatch between exponential growth selection and power-law extinction risks.
+            \item We have verified that this transition is robust to the mutation mechanism and to the choice of model parameters, confirming that it is a fundamental feature of finite-population dynamics in fluctuating environments.
+            \item Beyond theoretical modeling, designing experiments with bacterial populations to empirically test these predictions represents a promising next step.
         \end{itemize}
-        \vspace{0.5em}
+        \vspace{0.25em}
         \begin{center}
-            \qrcode[height=4cm]{https://arxiv.org/pdf/2607.27983}
+            \qrcode[height=6cm]{https://arxiv.org/pdf/2607.27983}
             \captionof{figure}{Scan for the complete article pre-print.}
         \end{center}
     }
