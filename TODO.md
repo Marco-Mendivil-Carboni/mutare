@@ -1,3 +1,1 @@
 # TODO
-
-- Make poster.
